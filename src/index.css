@@ -4,3 +4,12 @@
 * {
     font-family: "Gothic A1", sans-serif;
 }
+
+@font-face {
+    font-family: "Digitag";
+    src: url("./game/assets/digitag.regular.woff2") format("woff2");
+}
+
+#title {
+    font-family: "Digitag", "Gothic A1", sans-serif;
+}

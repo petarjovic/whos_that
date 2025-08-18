@@ -1,5 +1,5 @@
 import { Link } from "react-router";
-import Hero from "./Hero.jsx";
+import Hero from "./game/Hero.jsx";
 
 const App = () => {
     return (

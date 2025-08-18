@@ -6,7 +6,8 @@ const Hero = () => {
             <Link to={"/"}>
                 <h1
                     id="title"
-                    className="text-6xl font-bold mt-8 text-center text-red-800 cursor-pointer"
+                    className="text-8xl font-bold mt-8 text-center text-amber-500 cursor-pointer drop-shadow-[0_5px_5px_rgba(0,0,0,0.8)]
+"
                 >
                     Guess the Guy
                 </h1>
