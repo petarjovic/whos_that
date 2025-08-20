@@ -1,14 +1,12 @@
 import { useState } from "react";
-import Hero from "./Hero";
 import black from "./assets/black.jpg";
 import ReactModal from "react-modal";
+import { useEffect } from "react";
+import { Link } from "react-router";
 
 ReactModal.setAppElement("#root");
 
-const Game = () => {
-    const [openGameEndModal, setOpenGameEndModal] = useState(false);
-    const [gameWin, setGameWin] = useState(null);
-
+const Game = ({ emitPlayAgain, emitGuess, gameState, restartGame }) => {
     const images = Object.values(
         import.meta.glob("./assets/presidents/*.{jpg,jpeg,png}", {
             eager: true,
@@ -16,12 +14,16 @@ const Game = () => {
             import: "default",
         })
     ).sort();
-    const [winningKey, setWinningKey] = useState(Math.floor(Math.random() * images.length));
-    console.log(winningKey);
 
-    const handleCheckWinner = (winner) => {
-        setGameWin(winner);
+    const [openGameEndModal, setOpenGameEndModal] = useState(false);
+    const [winningKey, setWinningKey] = useState(Math.floor(Math.random() * images.length));
+
+    const handleCheckWinner = async (win) => {
+        await emitGuess(win);
         setOpenGameEndModal(true);
+    };
+    const handlePlayAgain = async () => {
+        await emitPlayAgain();
     };
 
     const cards = images.map((img, i) => (
@@ -33,27 +35,26 @@ const Game = () => {
         />
     ));
 
-    const handlePlayAgain = () => {
-        setGameWin(null);
-        setOpenGameEndModal(false);
-        setWinningKey(Math.floor(Math.random() * images.length));
-    };
+    useEffect(() => {
+        if (restartGame) {
+            setOpenGameEndModal(false);
+            setWinningKey(Math.floor(Math.random() * images.length));
+        }
+    }, [images.length, restartGame]);
+
+    useEffect(() => {
+        if (gameState.winner !== null) setOpenGameEndModal(true);
+    }, [gameState]);
 
     return (
         <>
-            <div className="flex flex-col items-center justify-start bg-gradient-to-br to-blue-500 from-cyan-200 min-h-screen w-full ">
-                <Hero />
-                <div
-                    id="gameboard"
-                    className="flex flex-wrap items-center justify-evenly mx-10 mt-10"
-                >
-                    {cards}
-                    <EndTurnButton />
-                </div>
+            <div id="gameboard" className="flex flex-wrap items-center justify-evenly mx-10 mt-10">
+                {cards}
+                <EndTurnButton />
             </div>
             <GameEndModal
                 isOpen={openGameEndModal}
-                win={gameWin}
+                win={gameState.winner}
                 handlePlayAgain={handlePlayAgain}
             />
         </>
@@ -130,7 +131,6 @@ const EndTurnButton = () => {
 };
 
 const GameEndModal = ({ win, isOpen, handlePlayAgain }) => {
-    console.log(win);
     let modalText = "";
 
     if (win) modalText = "Correct! You win congratulations!";
@@ -142,13 +142,18 @@ const GameEndModal = ({ win, isOpen, handlePlayAgain }) => {
             className="border-zinc-900 border-4 rounded-2xl bg-radial from-white to-zinc-300  fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 h-fit w-fit inline-block text-center p-10"
         >
             <p className="m-auto my-12 text-5xl font-bold">{modalText}</p>
-            <div className="flex flex-row justify-between">
+            <div className="flex flex-row justify-evenly">
                 <button
                     className="w-50 h-20 m-auto text-2xl text-neutral-100 font-bold border-3 border-black bg-green-600 hover:bg-green-900 px-1 rounded-[2%] cursor-pointer"
                     onClick={handlePlayAgain}
                 >
                     Play again!
                 </button>
+                <Link to="/" reloadDocument={true}>
+                    <button className="w-50 h-20 m-auto text-2xl text-neutral-100 font-bold border-3 border-black bg-red-600 hover:bg-red-900 px-1 rounded-[2%] cursor-pointer">
+                        Exit
+                    </button>
+                </Link>
             </div>
         </ReactModal>
     );
