@@ -6,17 +6,22 @@ import { Link } from "react-router";
 
 ReactModal.setAppElement("#root");
 
-const Game = ({ emitPlayAgain, emitGuess, gameState, restartGame }) => {
-    const images = Object.values(
-        import.meta.glob("./assets/presidents/*.{jpg,jpeg,png}", {
-            eager: true,
-            query: "?url",
-            import: "default",
-        })
-    ).sort();
+const Game = ({ emitPlayAgain, emitGuess, gameState, restartGame, winningKey, oppWinningKey }) => {
+    const imageModules = import.meta.glob("./assets/presidents/*.{jpg,jpeg,png}", {
+        eager: true,
+        query: "?url",
+        import: "default",
+    });
+
+    const imagesAndNames = Object.entries(imageModules).map(([path, url]) => {
+        const name = path
+            .split("/")
+            .pop()
+            .replace(/\.(jpg|jpeg|png)$/i, "");
+        return [name, url];
+    });
 
     const [openGameEndModal, setOpenGameEndModal] = useState(false);
-    const [winningKey, setWinningKey] = useState(Math.floor(Math.random() * images.length));
 
     const handleCheckWinner = async (win) => {
         await emitGuess(win);
@@ -26,8 +31,12 @@ const Game = ({ emitPlayAgain, emitGuess, gameState, restartGame }) => {
         await emitPlayAgain();
     };
 
-    const cards = images.map((img, i) => (
+    console.log(winningKey, imagesAndNames[winningKey]);
+    console.log(oppWinningKey, imagesAndNames[oppWinningKey]);
+
+    const cards = imagesAndNames.map(([name, img], i) => (
         <Card
+            name={name}
             imgSrc={img}
             key={i}
             winner={winningKey === i}
@@ -35,12 +44,21 @@ const Game = ({ emitPlayAgain, emitGuess, gameState, restartGame }) => {
         />
     ));
 
+    cards.push(
+        <Card
+            name={imagesAndNames[oppWinningKey][0]}
+            imgSrc={imagesAndNames[oppWinningKey][1]}
+            key={cards.length}
+            winner={false}
+            handleCheckWinner={() => {}}
+        />
+    );
+
     useEffect(() => {
         if (restartGame) {
             setOpenGameEndModal(false);
-            setWinningKey(Math.floor(Math.random() * images.length));
         }
-    }, [images.length, restartGame]);
+    }, [restartGame]);
 
     useEffect(() => {
         if (gameState.winner !== null) setOpenGameEndModal(true);
@@ -61,9 +79,10 @@ const Game = ({ emitPlayAgain, emitGuess, gameState, restartGame }) => {
     );
 };
 
-const Card = ({ imgSrc, winner, handleCheckWinner }) => {
+const Card = ({ name, imgSrc, winner, handleCheckWinner }) => {
     const [flipped, setflipped] = useState(false);
     const [openModal, setOpenModal] = useState(false);
+    const cleanName = name.replace(/_/g, " ");
 
     const handleCloseModalAndCheckWinner = () => {
         setOpenModal(false);
@@ -72,28 +91,31 @@ const Card = ({ imgSrc, winner, handleCheckWinner }) => {
 
     return (
         <>
-            <div className="border-5 bg-radial from-40% from-white to-zinc-900 h-85 w-55 rounded-[5%] overflow-hidden mx-1 my-2.5">
+            <figure className="flex flex-col justify-between border-5 bg-radial from-40% from-white to-zinc-900 h-120 w-80 rounded-[5%] overflow-hidden mx-1 my-2.5">
                 <img
-                    className="object-cover h-[90%] max-h-[90%] max-w-full"
+                    className="object-fill h-[86%]"
                     src={flipped ? black : imgSrc}
-                    alt=""
+                    alt={cleanName}
                 />
-                <div className="flex justify-between h-[10%] border-t-2">
+                <figcaption className="flex justify-center-safe items-center-safe text-xl font-bold m-auto h-[4.5%] bg-blue-200 w-full">
+                    {cleanName}
+                </figcaption>
+                <div className="flex justify-between h-[9%] border-t-3">
                     <button
-                        className="text-neutral-100 font-bold border-r-2 border-black bg-green-600 hover:bg-green-900 px-1 h-full w-fit rounded-r-[5%] cursor-pointer"
+                        className="text-xl text-neutral-100 font-bold border-r-2 border-black bg-green-600 hover:bg-green-900 px-1 h-full w-[30%]  rounded-r-[5%] cursor-pointer"
                         onClick={() => setOpenModal(true)}
                     >
                         The Guy
                     </button>
-                    <div className="text-2xl m-auto text-center">❓</div>
+                    <div className="text-3xl font-bold m-auto text-center">❓</div>
                     <button
-                        className="text-neutral-100 font-bold border-l-2 border-black bg-red-600 hover:bg-red-900 px-1 h-full w-fit rounded-l-[5%] cursor-pointer"
+                        className="text-xl text-neutral-100 font-bold border-l-2 border-black bg-red-600 hover:bg-red-900 px-1 h-full w-[30%] rounded-l-[5%] cursor-pointer"
                         onClick={() => setflipped(!flipped)}
                     >
                         Not Guy
                     </button>
                 </div>
-            </div>
+            </figure>
             <ReactModal
                 isOpen={openModal}
                 className="border-zinc-900 border-4 rounded-2xl bg-radial from-white to-zinc-300  fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 h-fit w-fit inline-block text-center p-10"

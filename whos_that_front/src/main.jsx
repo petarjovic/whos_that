@@ -6,11 +6,13 @@ import "./index.css";
 import App from "./App.jsx";
 import NotFoundPage from "./NotFoundPage.jsx";
 import Layout from "./Layout.jsx";
+import ErrorPage from "./ErrorPage.jsx";
 
 const router = createBrowserRouter([
     {
         path: "/",
         element: <Layout />,
+        errorElement: <ErrorPage />,
         children: [
             {
                 path: "/",

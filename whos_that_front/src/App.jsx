@@ -20,17 +20,17 @@ const App = () => {
                 </button>
             </Link>
             <p
-                className="font-[Digitag, Gothic A1, sans-serif] mt-30 text-2xl
-            xl font-bold text-neutral-100 text-shadow-xl"
+                className="font-digitag mt-30 text-5xl
+            xl font-bold text-neutral-200 text-shadow-xl"
             >
                 OR
             </p>
-            <form className="mt-30" onSubmit={handleJoinExistingGame}>
+            <form className="mt-30 items-center" onSubmit={handleJoinExistingGame}>
                 <input
                     id="gameIdInput"
                     name="gameIdInput"
                     type="text"
-                    className="bg-white placeholder:text-gray-400 text-slate-700 text-2xl border border-slate-200 rounded-md px-3 py-2 transition duration-300 ease focus:outline-none focus:border-slate-400 hover:border-slate-300 shadow-sm hover:shadow-md focus:shadow-lg mx-10"
+                    className="bg-white placeholder:text-gray-400 text-slate-700 text-2xl border border-slate-200 rounded-md px-3 py-2 transition duration-300 ease focus:outline-none focus:border-slate-400 hover:border-slate-300 shadow-sm hover:shadow-md focus:shadow-lg  "
                     required
                     minLength="6"
                     maxLength="6"

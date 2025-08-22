@@ -1,8 +1,10 @@
 @import url("https://fonts.googleapis.com/css2?family=Gothic+A1&display=swap");
 @import "tailwindcss";
 
-* {
-    font-family: "Gothic A1", sans-serif;
+@layer base {
+    * {
+        font-family: "Gothic A1", Arial, sans-serif;
+    }
 }
 
 @font-face {
@@ -10,6 +12,6 @@
     src: url("./game/assets/digitag.regular.woff2") format("woff2");
 }
 
-#title {
-    font-family: "Digitag", "Gothic A1", sans-serif;
+@theme {
+    --font-digitag: "Digitag", "Gothic A1", Arial, sans-serif;
 }

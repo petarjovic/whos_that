@@ -12,7 +12,8 @@ const GameStateManager = ({ newGame }) => {
     const [restartGame, setRestartGame] = useState(false);
     const [gameState, setGameState] = useState({ winner: null });
     const [players, setPlayers] = useState([]);
-    const [error, setError] = useState(false);
+    const [error, setError] = useState("");
+    const [winningKeys, setWinningKeys] = useState([]);
 
     useEffect(() => {
         if (newGame) {
@@ -28,6 +29,7 @@ const GameStateManager = ({ newGame }) => {
 
     useEffect(() => {
         socket.on("recieveGameData", (gameData) => {
+            console.log("TEST");
             console.log(gameData);
             setGameState({ winner: !gameData.guessCorrectly });
         });
@@ -38,9 +40,10 @@ const GameStateManager = ({ newGame }) => {
             navigate(`/play-game/${gameId}`);
         });
 
-        socket.on("playerJoined", ({ gameId, serverPlayers }) => {
+        socket.on("playerJoined", ({ gameId, serverPlayers, winningKeys }) => {
             console.log(`${gameId} contains players: ${serverPlayers}`);
             setPlayers(serverPlayers);
+            setWinningKeys(winningKeys);
         });
 
         socket.on("playerCannotJoinGame", ({ gameId, serverPlayers }) => {
@@ -59,11 +62,12 @@ const GameStateManager = ({ newGame }) => {
             setPlayers([socket.id]);
             setRestartGame(true);
             setGameState({ winner: null });
+            setWinningKeys([]);
         });
 
+        //do this correctly later
         socket.on("errorMessage", ({ message }) => {
-            console.log(message);
-            setError(true);
+            setError(message);
         });
 
         return () => {
@@ -95,7 +99,7 @@ const GameStateManager = ({ newGame }) => {
         }
     }, [restartGame]);
 
-    if (error) return <ErrorPage />;
+    if (error) return <ErrorPage error={error} />;
     else if (players.length != 2) return <WaitingRoom gameId={gameId} />;
     else
         return (
@@ -104,6 +108,8 @@ const GameStateManager = ({ newGame }) => {
                 emitGuess={emitGuess}
                 gameState={gameState}
                 restartGame={restartGame}
+                oppWinningKey={winningKeys[1 - players.indexOf(socket.id)]}
+                winningKey={winningKeys[players.indexOf(socket.id)]}
             />
         );
 };

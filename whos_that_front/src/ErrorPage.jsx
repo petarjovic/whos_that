@@ -1,4 +1,9 @@
-const ErrorPage = () => {
+import { Link } from "react-router";
+
+const ErrorPage = ({ error }) => {
+    //let error = useRouteError();
+    console.error(error);
+
     return (
         <>
             <h1 className="my-20 font-bold text-2xl">

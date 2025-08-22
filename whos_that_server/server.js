@@ -26,7 +26,14 @@ io.on("connection", (socket) => {
         const gameId = nanoid(6);
         while (gameId in games) gameId = nanoid(6); //setTimeout??
 
-        games[gameId] = { players: [], playAgainRequests: new Set() };
+        const winningKeyOne = Math.floor(Math.random() * 22);
+        const winningKeyTwo = Math.floor(Math.random() * 22);
+
+        games[gameId] = {
+            players: [],
+            playAgainRequests: new Set(),
+            winningKeys: [winningKeyOne, winningKeyTwo],
+        };
 
         //socket.join(gameId);
         socket.emit("gameCreated", { gameId });
@@ -45,6 +52,7 @@ io.on("connection", (socket) => {
             io.to(gameId).emit("playerJoined", {
                 gameId: gameId,
                 serverPlayers: games[gameId].players,
+                winningKeys: games[gameId].winningKeys,
             });
             console.log(`Player ${socket.id} joined game ${gameId}`);
         } else if (gameId in games) {
@@ -54,7 +62,7 @@ io.on("connection", (socket) => {
             });
             console.log(`Player ${socket.id} cannot join ${gameId}`);
         } else {
-            socket.emit("errorMessage", { message: `Game ${gameId} not found` });
+            io.to(gameId).emit("errorMessage", { message: `Game ${gameId} not found` });
         }
     });
 

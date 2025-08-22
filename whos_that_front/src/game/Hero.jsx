@@ -8,7 +8,7 @@ const Hero = () => {
                     to={"/"}
                     reloadDocument={true}
                     id="title"
-                    className="text-8xl font-bold text-amber-500 hover:text-amber-600 cursor-pointer drop-shadow-[0_5px_5px_rgba(0,0,0,0.8)]"
+                    className="font-digitag text-8xl font-bold text-amber-500 hover:text-amber-600 cursor-pointer drop-shadow-[0_5px_5px_rgba(0,0,0,0.8)]"
                 >
                     Guess the Guy
                 </Link>
