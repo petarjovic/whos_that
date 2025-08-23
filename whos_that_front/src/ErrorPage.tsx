@@ -1,6 +1,6 @@
 import { Link } from "react-router";
 
-const ErrorPage = ({ error }) => {
+const ErrorPage = ({ error }: { error: unknown }) => {
     //let error = useRouteError();
     console.error(error);
 

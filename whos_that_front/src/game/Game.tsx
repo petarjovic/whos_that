@@ -5,30 +5,39 @@ import { useEffect } from "react";
 import { Link } from "react-router";
 
 ReactModal.setAppElement("#root");
+import type { winLoseFlagType } from "./GameStateManger";
 
-const Game = ({ emitPlayAgain, emitGuess, gameState, restartGame, winningKey, oppWinningKey }) => {
+interface GameProps {
+    emitPlayAgain: () => void;
+    emitGuess: (guessCorrectness: boolean) => void;
+    winLoseFlag: winLoseFlagType;
+    winningKey: number;
+    oppWinningKey: number;
+}
+
+const Game = ({ emitPlayAgain, emitGuess, winLoseFlag, winningKey, oppWinningKey }: GameProps) => {
     const imageModules = import.meta.glob("./assets/presidents/*.{jpg,jpeg,png}", {
         eager: true,
         query: "?url",
         import: "default",
     });
 
-    const imagesAndNames = Object.entries(imageModules).map(([path, url]) => {
-        const name = path
-            .split("/")
-            .pop()
-            .replace(/\.(jpg|jpeg|png)$/i, "");
-        return [name, url];
+    const imagesAndNames = Object.entries(imageModules).map(([path, url]): [string, string] => {
+        const name =
+            path.split("/").pop() ??
+            path //see if theres a better way to handle fallback
+                .replace(/\.(jpg|jpeg|png)$/i, "");
+        return [name, url as string]; //also see about this
     });
 
     const [openGameEndModal, setOpenGameEndModal] = useState(false);
 
-    const handleCheckWinner = async (win) => {
-        await emitGuess(win);
+    const handleCheckWinner = (win: boolean) => {
+        emitGuess(win);
         setOpenGameEndModal(true);
     };
-    const handlePlayAgain = async () => {
-        await emitPlayAgain();
+    const handlePlayAgain = () => {
+        emitPlayAgain();
     };
 
     console.log(winningKey, imagesAndNames[winningKey]);
@@ -50,19 +59,17 @@ const Game = ({ emitPlayAgain, emitGuess, gameState, restartGame, winningKey, op
             imgSrc={imagesAndNames[oppWinningKey][1]}
             key={cards.length}
             winner={false}
-            handleCheckWinner={() => {}}
+            handleCheckWinner={() => null}
         />
     );
 
     useEffect(() => {
-        if (restartGame) {
+        if (winLoseFlag !== null) {
+            setOpenGameEndModal(true);
+        } else {
             setOpenGameEndModal(false);
         }
-    }, [restartGame]);
-
-    useEffect(() => {
-        if (gameState.winner !== null) setOpenGameEndModal(true);
-    }, [gameState]);
+    }, [winLoseFlag]);
 
     return (
         <>
@@ -72,14 +79,21 @@ const Game = ({ emitPlayAgain, emitGuess, gameState, restartGame, winningKey, op
             </div>
             <GameEndModal
                 isOpen={openGameEndModal}
-                win={gameState.winner}
+                win={Boolean(winLoseFlag)}
                 handlePlayAgain={handlePlayAgain}
             />
         </>
     );
 };
 
-const Card = ({ name, imgSrc, winner, handleCheckWinner }) => {
+interface CardProps {
+    name: string;
+    imgSrc: string;
+    winner: boolean;
+    handleCheckWinner: (win: boolean) => void;
+}
+
+const Card = ({ name, imgSrc, winner, handleCheckWinner }: CardProps) => {
     const [flipped, setflipped] = useState(false);
     const [openModal, setOpenModal] = useState(false);
     const cleanName = name.replace(/_/g, " ");
@@ -103,14 +117,18 @@ const Card = ({ name, imgSrc, winner, handleCheckWinner }) => {
                 <div className="flex justify-between h-[9%] border-t-3">
                     <button
                         className="text-xl text-neutral-100 font-bold border-r-2 border-black bg-green-600 hover:bg-green-900 px-1 h-full w-[30%]  rounded-r-[5%] cursor-pointer"
-                        onClick={() => setOpenModal(true)}
+                        onClick={() => {
+                            setOpenModal(true);
+                        }}
                     >
                         The Guy
                     </button>
                     <div className="text-3xl font-bold m-auto text-center">❓</div>
                     <button
                         className="text-xl text-neutral-100 font-bold border-l-2 border-black bg-red-600 hover:bg-red-900 px-1 h-full w-[30%] rounded-l-[5%] cursor-pointer"
-                        onClick={() => setflipped(!flipped)}
+                        onClick={() => {
+                            setflipped(!flipped);
+                        }}
                     >
                         Not Guy
                     </button>
@@ -128,11 +146,13 @@ const Card = ({ name, imgSrc, winner, handleCheckWinner }) => {
                         className="w-50 h-20 mr-20 text-2xl text-neutral-100 font-bold border-3 border-black bg-green-600 hover:bg-green-900 px-1 rounded-[2%] cursor-pointer"
                         onClick={handleCloseModalAndCheckWinner}
                     >
-                        It's Him.
+                        It&#39;s Him.
                     </button>
                     <button
                         className="w-50 h-20 text-2xl text-neutral-100 font-bold border-3 border-black bg-amber-500 hover:bg-amber-600 px-1 rounded-[2%] cursor-pointer"
-                        onClick={() => setOpenModal(false)}
+                        onClick={() => {
+                            setOpenModal(false);
+                        }}
                     >
                         ...On Second Thought
                     </button>
@@ -152,7 +172,13 @@ const EndTurnButton = () => {
     );
 };
 
-const GameEndModal = ({ win, isOpen, handlePlayAgain }) => {
+interface GameEndModalProps {
+    win: boolean;
+    isOpen: boolean;
+    handlePlayAgain: () => void;
+}
+
+const GameEndModal = ({ win, isOpen, handlePlayAgain }: GameEndModalProps) => {
     let modalText = "";
 
     if (win) modalText = "Correct! You win congratulations!";

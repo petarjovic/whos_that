@@ -5,10 +5,10 @@ const App = () => {
     const [gameIdToJoin, setGameIdToJoin] = useState("");
     const navigate = useNavigate();
 
-    const handleJoinExistingGame = (e) => {
+    const handleJoinExistingGame = (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
         if (gameIdToJoin.length === 6) {
-            navigate(`/play-game/${gameIdToJoin}`);
+            void navigate(`/play-game/${gameIdToJoin}`);
         }
     };
 
@@ -32,11 +32,13 @@ const App = () => {
                     type="text"
                     className="bg-white placeholder:text-gray-400 text-slate-700 text-2xl border border-slate-200 rounded-md px-3 py-2 transition duration-300 ease focus:outline-none focus:border-slate-400 hover:border-slate-300 shadow-sm hover:shadow-md focus:shadow-lg  "
                     required
-                    minLength="6"
-                    maxLength="6"
+                    minLength={6}
+                    maxLength={6}
                     placeholder="Enter 6 Digit Game Code"
                     value={gameIdToJoin}
-                    onChange={(e) => setGameIdToJoin(e.target.value)}
+                    onChange={(e) => {
+                        setGameIdToJoin(e.target.value);
+                    }}
                 />
                 <button
                     className="bg-blue-600 hover:bg-blue-800 text-2xl  font-bold rounded-md text-neutral-100 py-3 px-5 cursor-pointer shadow-xs hover:shadow-lg"

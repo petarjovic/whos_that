@@ -1,6 +1,6 @@
 import loadingSpinner from "./assets/BeanEaterLoadingSpinner.svg";
 
-const WaitingRoom = ({ gameId }) => {
+const WaitingRoom = ({ gameId }: { gameId: string }) => {
     return (
         <>
             <img className="mt-25" src={loadingSpinner} alt="Your SVG" />
