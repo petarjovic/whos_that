@@ -1,15 +1,7 @@
-import { useEffect } from "react";
 import { Outlet } from "react-router";
 import Hero from "./game/Hero.js";
-import { socket } from "./socket.js";
 
 const Layout = () => {
-    useEffect(() => {
-        socket.connect();
-        return () => {
-            socket.disconnect();
-        };
-    }, []);
     return (
         <>
             <div

@@ -12,16 +12,21 @@ const router = createBrowserRouter([
     {
         path: "/",
         element: <Layout />,
-        errorElement: <ErrorPage error={undefined} />, //fix this before prod
         children: [
             {
                 path: "/",
                 element: <App />,
+                errorElement: <ErrorPage error={undefined} />, //improve before prod
             },
-            { path: "/play-game", element: <GameStateManager newGame={true} /> },
+            {
+                path: "/play-game",
+                element: <GameStateManager newGame={true} />,
+                errorElement: <ErrorPage error={undefined} />, //improve before prod
+            },
             {
                 path: "/play-game/:joinGameId",
                 element: <GameStateManager newGame={false} />,
+                errorElement: <ErrorPage error={undefined} />, //improve before prod
             },
             { path: "*", element: <NotFoundPage /> },
         ],

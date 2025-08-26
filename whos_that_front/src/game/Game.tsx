@@ -1,21 +1,20 @@
 import { useState } from "react";
 import black from "./assets/black.jpg";
 import ReactModal from "react-modal";
-import { useEffect } from "react";
-import { Link } from "react-router";
+import { useNavigate } from "react-router";
 
 ReactModal.setAppElement("#root");
-import type { winLoseFlagType } from "./GameStateManger";
+import type { EndStateType } from "./GameStateManger";
 
 interface GameProps {
     emitPlayAgain: () => void;
     emitGuess: (guessCorrectness: boolean) => void;
-    winLoseFlag: winLoseFlagType;
+    endState: EndStateType;
     winningKey: number;
     oppWinningKey: number;
 }
 
-const Game = ({ emitPlayAgain, emitGuess, winLoseFlag, winningKey, oppWinningKey }: GameProps) => {
+const Game = ({ emitPlayAgain, emitGuess, endState, winningKey, oppWinningKey }: GameProps) => {
     const imageModules = import.meta.glob("./assets/presidents/*.{jpg,jpeg,png}", {
         eager: true,
         query: "?url",
@@ -23,25 +22,21 @@ const Game = ({ emitPlayAgain, emitGuess, winLoseFlag, winningKey, oppWinningKey
     });
 
     const imagesAndNames = Object.entries(imageModules).map(([path, url]): [string, string] => {
-        const name =
-            path.split("/").pop() ??
-            path //see if theres a better way to handle fallback
-                .replace(/\.(jpg|jpeg|png)$/i, "");
+        const name = (path.split("/").pop() ?? path) //see if theres a better way to handle fallback
+            .replace(/\.(jpg|jpeg|png)$/i, "")
+            .replace(/_/g, " ");
         return [name, url as string]; //also see about this
     });
 
-    const [openGameEndModal, setOpenGameEndModal] = useState(false);
-
     const handleCheckWinner = (win: boolean) => {
         emitGuess(win);
-        setOpenGameEndModal(true);
     };
     const handlePlayAgain = () => {
         emitPlayAgain();
     };
 
-    console.log(winningKey, imagesAndNames[winningKey]);
-    console.log(oppWinningKey, imagesAndNames[oppWinningKey]);
+    // console.log(winningKey, imagesAndNames[winningKey]);
+    // console.log(oppWinningKey, imagesAndNames[oppWinningKey]);
 
     const cards = imagesAndNames.map(([name, img], i) => (
         <Card
@@ -53,50 +48,54 @@ const Game = ({ emitPlayAgain, emitGuess, winLoseFlag, winningKey, oppWinningKey
         />
     ));
 
-    cards.push(
-        <Card
-            name={imagesAndNames[oppWinningKey][0]}
-            imgSrc={imagesAndNames[oppWinningKey][1]}
-            key={cards.length}
-            winner={false}
-            handleCheckWinner={() => null}
-        />
-    );
-
-    useEffect(() => {
-        if (winLoseFlag !== null) {
-            setOpenGameEndModal(true);
-        } else {
-            setOpenGameEndModal(false);
-        }
-    }, [winLoseFlag]);
-
     return (
         <>
             <div id="gameboard" className="flex flex-wrap items-center justify-evenly mx-10 mt-10">
                 {cards}
                 <EndTurnButton />
+                <OpponentTargetCard
+                    name={imagesAndNames[oppWinningKey][0]}
+                    imgSrc={imagesAndNames[oppWinningKey][1]}
+                />
+                ;
             </div>
-            <GameEndModal
-                isOpen={openGameEndModal}
-                win={Boolean(winLoseFlag)}
-                handlePlayAgain={handlePlayAgain}
-            />
+            <GameEndModal endState={endState} handlePlayAgain={handlePlayAgain} />
         </>
     );
 };
 
-interface CardProps {
+interface CardLayoutPropsType {
+    children: React.ReactNode;
+    name: string;
+    imgSrc: string;
+    flipped: boolean;
+}
+
+const CardLayout = ({ children, name, imgSrc, flipped }: CardLayoutPropsType) => {
+    return (
+        <figure className="border-3 border-neutral-300 flex flex-col justify-between bg-neutral-300 h-100 w-66 rounded-lg overflow-hidden mx-1 my-2.5 shadow-/15 hover:shadow-lg/80 transition-shadow">
+            <img
+                className="object-fill h-[84.5%] max-h-[85%]  "
+                src={flipped ? black : imgSrc}
+                alt={name}
+            />
+            <figcaption className=" text-zinc-900 relative bottom-0.75 text-center text-xl font-bold m-auto h-[4.5%] w-full">
+                {name}
+            </figcaption>
+            {children}
+        </figure>
+    );
+};
+
+interface CardPropsType {
     name: string;
     imgSrc: string;
     winner: boolean;
     handleCheckWinner: (win: boolean) => void;
 }
-
-const Card = ({ name, imgSrc, winner, handleCheckWinner }: CardProps) => {
+const Card = ({ name, imgSrc, winner, handleCheckWinner }: CardPropsType) => {
     const [flipped, setflipped] = useState(false);
     const [openModal, setOpenModal] = useState(false);
-    const cleanName = name.replace(/_/g, " ");
 
     const handleCloseModalAndCheckWinner = () => {
         setOpenModal(false);
@@ -105,27 +104,21 @@ const Card = ({ name, imgSrc, winner, handleCheckWinner }: CardProps) => {
 
     return (
         <>
-            <figure className="flex flex-col justify-between border-5 bg-radial from-40% from-white to-zinc-900 h-120 w-80 rounded-[5%] overflow-hidden mx-1 my-2.5">
-                <img
-                    className="object-fill h-[86%]"
-                    src={flipped ? black : imgSrc}
-                    alt={cleanName}
-                />
-                <figcaption className="flex justify-center-safe items-center-safe text-xl font-bold m-auto h-[4.5%] bg-blue-200 w-full">
-                    {cleanName}
-                </figcaption>
-                <div className="flex justify-between h-[9%] border-t-3">
+            <CardLayout name={name} imgSrc={imgSrc} flipped={flipped}>
+                <div className="box-content flex justify-between h-[9.5%] border-t-3 border-neutral-300">
                     <button
-                        className="text-xl text-neutral-100 font-bold border-r-2 border-black bg-green-600 hover:bg-green-900 px-1 h-full w-[30%]  rounded-r-[5%] cursor-pointer"
+                        className="text-lg text-neutral-200 font-bold  bg-green-600 hover:bg-green-800 border-neutral-300 px-1 h-full w-[35%] border-r-3 cursor-pointer rounded-sm text-shadow-xs"
                         onClick={() => {
                             setOpenModal(true);
                         }}
                     >
                         The Guy
                     </button>
-                    <div className="text-3xl font-bold m-auto text-center">❓</div>
+                    <div className="relative top-0.5 text-2xl font-bold m-auto text-center align-sub">
+                        ❓
+                    </div>
                     <button
-                        className="text-xl text-neutral-100 font-bold border-l-2 border-black bg-red-600 hover:bg-red-900 px-1 h-full w-[30%] rounded-l-[5%] cursor-pointer"
+                        className="text-lg text-neutral-100 font-bold  bg-red-600 hover:bg-red-800 border-neutral-300 px-1 h-full w-[35%] border-l-3 cursor-pointer rounded-md"
                         onClick={() => {
                             setflipped(!flipped);
                         }}
@@ -133,23 +126,23 @@ const Card = ({ name, imgSrc, winner, handleCheckWinner }: CardProps) => {
                         Not Guy
                     </button>
                 </div>
-            </figure>
+            </CardLayout>
             <ReactModal
                 isOpen={openModal}
-                className="border-zinc-900 border-4 rounded-2xl bg-radial from-white to-zinc-300  fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 h-fit w-fit inline-block text-center p-10"
+                className="border-slate-300 border-3 shadow-2xl rounded-2xl bg-radial from-slate-100 to-slate-200  fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 h-fit w-fit inline-block text-center p-10"
             >
                 <p className="m-auto my-12 text-5xl font-bold">
                     Are you sure this <br /> is the guy!?
                 </p>
                 <div className="flex flex-row justify-between">
                     <button
-                        className="w-50 h-20 mr-20 text-2xl text-neutral-100 font-bold border-3 border-black bg-green-600 hover:bg-green-900 px-1 rounded-[2%] cursor-pointer"
+                        className="mr-10 w-50 h-20 m-auto text-2xl text-neutral-100 font-bold border-b-9 border-green-700 bg-green-600 hover:bg-green-700 hover:border-green-800 px-1 rounded-md cursor-pointer shadow-md text-shadow-xs active:border-none active:translate-y-[1px] active:shadow-2xs active:inset-shadow-md"
                         onClick={handleCloseModalAndCheckWinner}
                     >
                         It&#39;s Him.
                     </button>
                     <button
-                        className="w-50 h-20 text-2xl text-neutral-100 font-bold border-3 border-black bg-amber-500 hover:bg-amber-600 px-1 rounded-[2%] cursor-pointer"
+                        className="ml-20 w-50 h-20 m-auto text-2xl text-neutral-100 font-bold border-b-9 border-amber-600 bg-amber-500 hover:bg-amber-600 hover:border-amber-700 px-1 rounded-md cursor-pointer shadow-md text-shadow-xs active:border-none active:translate-y-[1px] active:shadow-2xs active:inset-shadow-md"
                         onClick={() => {
                             setOpenModal(false);
                         }}
@@ -172,36 +165,61 @@ const EndTurnButton = () => {
     );
 };
 
+const OpponentTargetCard = ({ name, imgSrc }: { name: string; imgSrc: string }) => {
+    return (
+        <CardLayout name={name} imgSrc={imgSrc} flipped={false}>
+            <p className="text-center text-lg font-bold m-auto h-full bg-blue-200 w-full">
+                Your Opponent has to Guess
+            </p>
+        </CardLayout>
+    );
+};
+
 interface GameEndModalProps {
-    win: boolean;
-    isOpen: boolean;
+    endState: EndStateType;
     handlePlayAgain: () => void;
 }
 
-const GameEndModal = ({ win, isOpen, handlePlayAgain }: GameEndModalProps) => {
+const GameEndModal = ({ endState, handlePlayAgain }: GameEndModalProps) => {
     let modalText = "";
+    const navigate = useNavigate();
 
-    if (win) modalText = "Correct! You win congratulations!";
-    else modalText = "Wrong guess, you lose, sorry!";
+    switch (endState) {
+        case "correctGuess":
+            modalText = "You've guessed correctly! Congratulations you win!";
+            break;
+        case "wrongGuess":
+            modalText = "Wrong guess! Sorry you've lost, better luck next time!";
+            break;
+        case "oppCorrectGuess":
+            modalText = "Dang, you opponent guessed correctly! You've lost :(";
+            break;
+        case "oppWrongGuess":
+            modalText = "Your opponent guessed wrong! A lucky break, you win!";
+            break;
+    }
 
     return (
         <ReactModal
-            isOpen={isOpen}
-            className="border-zinc-900 border-4 rounded-2xl bg-radial from-white to-zinc-300  fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 h-fit w-fit inline-block text-center p-10"
+            isOpen={Boolean(endState)}
+            className="border-slate-300 border-3 shadow-2xl rounded-2xl bg-radial from-slate-100 to-slate-200  fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 h-fit w-fit inline-block text-center p-10"
         >
             <p className="m-auto my-12 text-5xl font-bold">{modalText}</p>
-            <div className="flex flex-row justify-evenly">
+            <div className="m-auto flex flex-row justify-evenly">
                 <button
-                    className="w-50 h-20 m-auto text-2xl text-neutral-100 font-bold border-3 border-black bg-green-600 hover:bg-green-900 px-1 rounded-[2%] cursor-pointer"
+                    className="w-50 h-20 m-auto text-2xl text-neutral-100 font-bold border-b-9 border-x-1 border-green-700 bg-green-600 hover:bg-green-700 hover:border-green-800 px-1 rounded-md cursor-pointer shadow-md text-shadow-xs active:border-none active:translate-y-[1px] active:shadow-2xs active:inset-shadow-md"
                     onClick={handlePlayAgain}
                 >
                     Play again!
                 </button>
-                <Link to="/" reloadDocument={true}>
-                    <button className="w-50 h-20 m-auto text-2xl text-neutral-100 font-bold border-3 border-black bg-red-600 hover:bg-red-900 px-1 rounded-[2%] cursor-pointer">
-                        Exit
-                    </button>
-                </Link>
+                <button
+                    onClick={() => {
+                        void navigate("/");
+                    }}
+                    className="w-50 h-20 m-auto text-2xl text-neutral-100 font-bold border-b-9 border-x-1 border-red-700 bg-red-600 hover:bg-red-700 hover:border-red-800 px-1 rounded-md cursor-pointer shadow-md text-shadow-xs active:border-none active:translate-y-[1px] active:shadow-2xs active:inset-shadow-md"
+                >
+                    Exit
+                </button>
             </div>
         </ReactModal>
     );

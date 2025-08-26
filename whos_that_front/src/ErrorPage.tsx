@@ -1,8 +1,18 @@
-import { Link } from "react-router";
+import { Link, useRouteError } from "react-router";
 
-const ErrorPage = ({ error }: { error: unknown }) => {
-    //let error = useRouteError();
-    console.error(error);
+const ErrorPage = ({ error = null }: { error: unknown }) => {
+    const routeError = useRouteError();
+    if (error === null && routeError) {
+        console.error(routeError);
+    } else if (error !== null) {
+        console.error(error);
+    } else {
+        console.error(
+            "I have no idea how this state could be reached. Panic. All possible errors: ",
+            routeError,
+            error
+        );
+    }
 
     return (
         <>
@@ -11,7 +21,7 @@ const ErrorPage = ({ error }: { error: unknown }) => {
                 code might be acting up. Click below to maybe restart. ❌
             </h1>
             <Link to={"/"}>
-                <button className="mt-[2vh] border-2 border-zinc-950 text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-bold  text-sm px-4 py-2 me-2 mb-2 dark:bg-blue-600 dark:hover:bg-blue-700 focus:outline-none dark:focus:ring-blue-800">
+                <button className="mt-[2vh] px-4 py-1 w-fill h-18 text-2xl text-neutral-100 font-bold border-b-9 border-x-1 border-blue-600 bg-blue-500 hover:bg-blue-600 hover:border-blue-700 rounded-md cursor-pointer shadow-md text-shadow-xs active:border-none active:translate-y-[1px] active:shadow-2xs  active:inset-shadow-md ">
                     Home Page
                 </button>
             </Link>
