@@ -9,7 +9,7 @@
 
 @font-face {
     font-family: "Digitag";
-    src: url("./game/assets/digitag.regular.woff2") format("woff2");
+    src: url("./assets/digitag.regular.woff2") format("woff2");
 }
 
 @theme {

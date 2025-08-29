@@ -1,6 +1,9 @@
 import { io, Socket } from "socket.io-client";
 //see if theres better way of doing this
-import type { ServerToClientEvents, ClientToServerEvents } from "../../whos_that_server/server.ts";
+import type {
+    ServerToClientEvents,
+    ClientToServerEvents,
+} from "../../../whos_that_server/server.ts";
 
 const ServerURL = "http://localhost:3001";
 

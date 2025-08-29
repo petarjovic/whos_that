@@ -1,10 +1,10 @@
 import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router";
-import { socket } from "../socket.js";
-import Game from "./Game.js";
-import WaitingRoom from "./WaitingRoom.js";
-import ErrorPage from "../ErrorPage.js";
-import type { GameStateType } from "../../../whos_that_server/server.js";
+import { socket } from "./socket.tsx";
+import Game from "../game/Game.tsx";
+import WaitingRoom from "../pages/WaitingRoomPage.tsx";
+import ErrorPage from "../pages/ErrorPage.tsx";
+import type { GameStateType } from "../../../whos_that_server/server.ts";
 
 export type winLoseFlagType = boolean | null;
 export type EndStateType = "" | "correctGuess" | "wrongGuess" | "oppCorrectGuess" | "oppWrongGuess";

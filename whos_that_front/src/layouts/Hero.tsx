@@ -2,7 +2,7 @@ import { Link } from "react-router";
 
 const Hero = () => {
     return (
-        <header className="rounded-b-[50%] bg-radial from-blue-400 to-blue-600 w-full border-b-5 border-blue-900">
+        <header className="rounded-b-[50%] bg-radial from-blue-400 to-blue-600 w-full border-b-5 border-blue-900 ">
             <h1 className="mt-8 text-center h-fit w-fit m-auto">
                 <Link
                     to={"/"}

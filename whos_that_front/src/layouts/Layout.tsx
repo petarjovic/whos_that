@@ -1,5 +1,5 @@
 import { Outlet } from "react-router";
-import Hero from "./game/Hero.js";
+import Hero from "./Hero";
 
 const Layout = () => {
     return (

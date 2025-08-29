@@ -1,12 +1,18 @@
 import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
-import GameStateManager from "./game/GameStateManger.js";
+import GameStateManager from "./logic/GameStateManger.tsx";
 import { createBrowserRouter, RouterProvider } from "react-router";
+import ReactModal from "react-modal";
 import "./index.css";
-import App from "./App.js";
-import NotFoundPage from "./NotFoundPage.js";
-import Layout from "./Layout.js";
-import ErrorPage from "./ErrorPage.js";
+import HomePage from "./pages/HomePage.tsx";
+import NotFoundPage from "./pages/NotFoundPage.tsx";
+import Layout from "./layouts/Layout.tsx";
+import ErrorPage from "./pages/ErrorPage.tsx";
+import GameTypePage from "./pages/GameTypePage.tsx";
+import CreateCustomGamePage from "./pages/CustomGamePage.tsx";
+import { uploadImageAction } from "./logic/Actions.tsx";
+
+ReactModal.setAppElement("#root");
 
 const router = createBrowserRouter([
     {
@@ -15,8 +21,24 @@ const router = createBrowserRouter([
         children: [
             {
                 path: "/",
-                element: <App />,
+                element: <HomePage />,
                 errorElement: <ErrorPage error={undefined} />, //improve before prod
+            },
+            {
+                path: "/create-game",
+                element: <GameTypePage />,
+                errorElement: <ErrorPage error={undefined} />, //improve before prod
+            },
+            {
+                path: "/create-game/new",
+                element: <CreateCustomGamePage />,
+                errorElement: <ErrorPage error={undefined} />, //improve before prod
+                children: [
+                    {
+                        path: "/create-game/new/uploadImageAction",
+                        action: uploadImageAction,
+                    },
+                ],
             },
             {
                 path: "/play-game",

@@ -1,13 +1,28 @@
 import express from "express";
 import http from "http";
 import cors from "cors";
+import multer from "multer";
 import { Server } from "socket.io";
 import { nanoid } from "nanoid";
+import { S3Client } from "@aws-sdk/client-s3";
+
+const storage = multer.diskStorage({
+    destination: "uploads/",
+    filename: function (req, file, cb) {
+        const uniqueSuffix = Date.now().toString() + ".jpg";
+        cb(null, file.originalname + "-" + uniqueSuffix);
+    },
+});
+const upload = multer({ storage });
 
 const app = express();
-app.use(cors());
+app.use(
+    cors({
+        origin: "*",
+    })
+);
 
-const PORT = 3001;
+const PORT = process.env.PORT ?? 3001;
 
 type ResponseType = {
     success: boolean;
@@ -50,6 +65,11 @@ const io = new Server<ClientToServerEvents, ServerToClientEvents>(server, {
         origin: "http://localhost:5173",
         methods: ["GET", "POST"],
     },
+});
+
+app.post("/api/uploadImage", upload.single("image-upload"), (req, res) => {
+    console.log(req);
+    res.send({ sucess: true, fileId: 1, url: "whatevertf" });
 });
 
 //redo with server logic redo
