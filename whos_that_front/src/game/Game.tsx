@@ -10,21 +10,18 @@ interface GameProps {
     endState: EndStateType;
     winningKey: number;
     oppWinningKey: number;
+    images: object;
 }
 
-const Game = ({ emitPlayAgain, emitGuess, endState, winningKey, oppWinningKey }: GameProps) => {
-    const imageModules = import.meta.glob("../assets/presidents/*.{jpg,jpeg,png}", {
-        eager: true,
-        query: "?url",
-        import: "default",
-    });
-
-    const imagesAndNames = Object.entries(imageModules).map(([path, url]): [string, string] => {
-        const name = (path.split("/").pop() ?? path) //see if theres a better way to handle fallback
-            .replace(/\.(jpg|jpeg|png)$/i, "")
-            .replace(/_/g, " ");
-        return [name, url as string]; //also see about this
-    });
+const Game = ({
+    emitPlayAgain,
+    emitGuess,
+    endState,
+    winningKey,
+    oppWinningKey,
+    images,
+}: GameProps) => {
+    const imagesAndNames = Object.entries(images) as [string, string][];
 
     const handleCheckWinner = (win: boolean) => {
         emitGuess(win);

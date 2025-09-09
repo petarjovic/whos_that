@@ -10,7 +10,7 @@ import Layout from "./layouts/Layout.tsx";
 import ErrorPage from "./pages/ErrorPage.tsx";
 import GameTypePage from "./pages/GameTypePage.tsx";
 import CreateCustomGamePage from "./pages/CustomGamePage.tsx";
-import { uploadImageAction } from "./logic/Actions.tsx";
+import * as Actions from "./logic/Actions.tsx";
 
 ReactModal.setAppElement("#root");
 
@@ -36,7 +36,7 @@ const router = createBrowserRouter([
                 children: [
                     {
                         path: "/create-game/new/uploadImageAction",
-                        action: uploadImageAction,
+                        action: Actions.uploadImageAction,
                     },
                 ],
             },

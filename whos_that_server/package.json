@@ -5,21 +5,33 @@
     "main": "server.js",
     "scripts": {
         "test": "echo \"Error: no test specified\" && exit 1",
-        "start": "node --watch --env-file=.env server.ts"
+        "start": "node --watch --env-file=.env ./src/server.ts"
     },
     "type": "module",
     "author": "Petar Jovic",
     "license": "ISC",
     "dependencies": {
         "@aws-sdk/client-s3": "^3.878.0",
+        "@aws-sdk/credential-providers": "^3.883.0",
+        "@aws-sdk/s3-request-presigner": "^3.883.0",
         "cors": "^2.8.5",
+        "drizzle-orm": "^0.44.5",
         "express": "^5.1.0",
         "multer": "^2.0.2",
         "nanoid": "^5.1.5",
+        "pg": "^8.16.3",
         "socket.io": "^4.8.1"
     },
     "devDependencies": {
         "@types/express": "^5.0.3",
-        "@types/multer": "^2.0.0"
-    }
+        "@types/multer": "^2.0.0",
+        "@types/node": "^24.3.1",
+        "@types/pg": "^8.15.5",
+        "drizzle-kit": "^0.31.4"
+    },
+    "overrides": {
+        "esbuild": "^0.25.9",
+        "esm-loader": "tsx@^4.20.4"
+    },
+    "//": "The overrides setting is for handling drizzle-kit outdated dependacy, when drizzle updates it can be removed."
 }

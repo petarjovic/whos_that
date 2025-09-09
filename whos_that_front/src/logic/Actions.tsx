@@ -1,11 +1,11 @@
 import type { ActionFunctionArgs } from "react-router";
 
-interface ServerUploadResponse {
+export interface ServerUploadResponse {
     success: boolean;
     fileId: string;
     url: string;
 }
-interface ServerErrorResponse {
+export interface ServerErrorResponse {
     message: string;
 }
 
@@ -44,6 +44,25 @@ export async function uploadImageAction({ request }: ActionFunctionArgs) {
         const response: Response = await fetch("http://localhost:3001/api/uploadImage", {
             method: "POST",
             body: formData,
+        });
+
+        if (!response.ok) {
+            const errorData = (await response.json()) as ServerErrorResponse;
+            return { error: errorData.message || "Upload failed" };
+        }
+
+        const result = (await response.json()) as ServerUploadResponse;
+        console.log(result);
+        return result;
+    } catch (error) {
+        console.error("Upload error:", error);
+        return error;
+    }
+}
+export async function getGameImagesAction({ request }: ActionFunctionArgs) {
+    try {
+        const response: Response = await fetch("http://localhost:3001/api/preMadeGame", {
+            method: "GET",
         });
 
         if (!response.ok) {
