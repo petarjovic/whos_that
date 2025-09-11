@@ -1,13 +1,5 @@
 import type { ActionFunctionArgs } from "react-router";
-
-export interface ServerUploadResponse {
-    success: boolean;
-    fileId: string;
-    url: string;
-}
-export interface ServerErrorResponse {
-    message: string;
-}
+import type { ServerErrorResponse, ServerUploadResponse } from "../lib/types.ts"; //FIX this maybe seems like a weird way to handle types
 
 export async function uploadImageAction({ request }: ActionFunctionArgs) {
     const formData = await request.formData();
@@ -59,22 +51,22 @@ export async function uploadImageAction({ request }: ActionFunctionArgs) {
         return error;
     }
 }
-export async function getGameImagesAction({ request }: ActionFunctionArgs) {
-    try {
-        const response: Response = await fetch("http://localhost:3001/api/preMadeGame", {
-            method: "GET",
-        });
+// export async function getGameImagesAction({ request }: ActionFunctionArgs) {
+//     try {
+//         const response: Response = await fetch("http://localhost:3001/api/preMadeGame", {
+//             method: "GET",
+//         });
 
-        if (!response.ok) {
-            const errorData = (await response.json()) as ServerErrorResponse;
-            return { error: errorData.message || "Upload failed" };
-        }
+//         if (!response.ok) {
+//             const errorData = (await response.json()) as ServerErrorResponse;
+//             return { error: errorData.message || "Upload failed" };
+//         }
 
-        const result = (await response.json()) as ServerUploadResponse;
-        console.log(result);
-        return result;
-    } catch (error) {
-        console.error("Upload error:", error);
-        return error;
-    }
-}
+//         const result = (await response.json()) as ServerUploadResponse;
+//         console.log(result);
+//         return result;
+//     } catch (error) {
+//         console.error("Upload error:", error);
+//         return error;
+//     }
+// }

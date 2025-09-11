@@ -1,14 +1,39 @@
-import { pgTable, integer, varchar, jsonb } from "drizzle-orm/pg-core";
+import { pgTable, text, timestamp, boolean, integer } from "drizzle-orm/pg-core";
+import { user } from "./auth-schema";
 
 export const games = pgTable("games", {
-    gameId: integer("game_id").primaryKey().generatedAlwaysAsIdentity({
-        name: "games_game_id_seq",
-        startWith: 1,
-        increment: 1,
-        minValue: 1,
-        maxValue: 2147483647,
-        cache: 1,
-    }),
-    gameName: varchar("game_name", { length: 20 }).notNull(),
-    assets: jsonb(),
+    id: text("id").primaryKey(),
+    title: text("title").notNull(),
+    description: text("description"),
+    isPublic: boolean("is_public").default(false).notNull(),
+    userId: text("user_id")
+        .notNull()
+        .references(() => user.id, { onDelete: "cascade" }),
+    createdAt: timestamp("created_at").defaultNow().notNull(),
+    updatedAt: timestamp("updated_at")
+        .defaultNow()
+        .$onUpdate(() => new Date())
+        .notNull(),
+});
+
+export const gameItems = pgTable("game_items", {
+    id: text("id").primaryKey(),
+    gameId: text("game_id")
+        .notNull()
+        .references(() => games.id, { onDelete: "cascade" }),
+    imageUrl: text("image_url").notNull(),
+    name: text("name").notNull(),
+    orderIndex: integer("order_index").notNull(),
+    createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
+export const gameLikes = pgTable("game_likes", {
+    id: text("id").primaryKey(),
+    gameId: text("game_id")
+        .notNull()
+        .references(() => games.id, { onDelete: "cascade" }),
+    userId: text("user_id")
+        .notNull()
+        .references(() => user.id, { onDelete: "cascade" }),
+    createdAt: timestamp("created_at").defaultNow().notNull(),
 });

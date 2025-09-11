@@ -11,12 +11,11 @@ export type GameStateType = {
     players: [string, string];
     cardIdsToGuess: [number, number];
     playAgainReqs: [boolean, boolean];
+    preset: string;
 };
 
 export interface ServerToClientEvents {
-    //gameCreated: (data: [string, GameStateType]) => void;
     playerJoined: (gameState: GameStateType) => void;
-    // playerCannotJoinGame: (data: { gameId: string; serverPlayers: [string, string] }) => void;
     recieveOppGuess: (winLose: boolean) => void;
     opponentDisconnted: (gameState: GameStateType) => void;
     playAgainConfirmed: (gameState: GameStateType) => void;
@@ -24,7 +23,7 @@ export interface ServerToClientEvents {
 }
 
 export interface ClientToServerEvents {
-    createGame: (ack: (gameId: string, response: ResponseType) => void) => void;
+    createGame: (preset: string, ack: (gameId: string, response: ResponseType) => void) => void;
     joinGame: (
         gameId: string,
         ack: (gameData: GameStateType, response: ResponseType) => void

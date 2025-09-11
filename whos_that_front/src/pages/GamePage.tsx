@@ -2,7 +2,7 @@ import ReactModal from "react-modal";
 import { useNavigate } from "react-router";
 import { Card, OpponentTargetCard } from "../layouts/Cards";
 
-import type { EndStateType } from "../logic/GameStateManger";
+import type { EndStateType } from "../lib/types.ts";
 
 interface GameProps {
     emitPlayAgain: () => void;

@@ -2,7 +2,7 @@ import { drizzle } from "drizzle-orm/node-postgres";
 import { Pool } from "pg";
 import { S3Client } from "@aws-sdk/client-s3";
 import { fromEnv } from "@aws-sdk/credential-providers";
-import * as schema from "./db/schema";
+import * as schema from "./db/schema.ts";
 
 const pool = new Pool({
     connectionString: process.env.AWS_RDS_URL!,

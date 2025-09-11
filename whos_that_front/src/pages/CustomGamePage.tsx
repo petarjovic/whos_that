@@ -11,8 +11,20 @@ const CreateCustomGamePage = () => {
             action="/create-game/new/uploadImageAction"
             encType="multipart/form-data"
         >
-            <label htmlFor="custom-game" className="block text-2xl font-bold text-gray-900 ">
-                Step 1: Upload your custom photos!
+            <label htmlFor="custom-game-name" className="block text-2xl font-bold text-gray-900">
+                Step 1: What is the theme of your game?
+            </label>
+            <input
+                type="text"
+                name="custom-game-name"
+                placeholder="Game Theme"
+                className="bg-white placeholder:text-gray-400 text-slate-700 text-2xl border border-slate-200 rounded-md px-3 py-2 transition duration-300 ease focus:outline-none focus:border-slate-400 hover:border-slate-300 shadow-sm hover:shadow-md focus:shadow-lg mx-2 mt-2 mb-10"
+                required
+                minLength={5}
+                maxLength={30}
+            ></input>
+            <label htmlFor="custom-game" className="block text-2xl font-bold text-gray-900">
+                Step 2: Upload your custom images!
             </label>
             <input id="file-upload" type="file" name="image-upload" accept="image/*" required />
             {/* <div className="mt-2 flex h-100 bg-neutral-100 justify-center rounded-lg border border-dashed border-gray-900/25 px-6 py-10">
@@ -49,6 +61,11 @@ const CreateCustomGamePage = () => {
                     <p className="text-xs/5 text-gray-600">PNG, JPG, GIF up to 10MB</p>
                 </div>
             </div> */}
+            <p>
+                Note: The image file&apos;s name will be used in the game, removing any extensions.
+                <br></br>
+                E.g. &quot;John_Doe.jpg&quot; will have the name &quot;John Doe&quot; in game.
+            </p>
             <button
                 className="float-right mx-4 mt-2 px-3 w-fill h-12 text-xl text-neutral-100 font-bold border-b-9 border-x-1 border-blue-600 bg-blue-500 hover:bg-blue-600 hover:border-blue-700 rounded-md cursor-pointer shadow-md text-shadow-xs active:border-none active:translate-y-[1px] active:shadow-2xs  active:inset-shadow-md"
                 type="submit"

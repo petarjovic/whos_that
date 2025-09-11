@@ -3,7 +3,7 @@ import { io, Socket } from "socket.io-client";
 import type {
     ServerToClientEvents,
     ClientToServerEvents,
-} from "../../../whos_that_server/src/server.ts";
+} from "../../../whos_that_server/src/config/types.ts";
 
 const ServerURL = "http://localhost:3001";
 

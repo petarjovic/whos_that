@@ -10,7 +10,7 @@ import eslintConfigPrettier from "eslint-config-prettier/flat";
 export default tseslint.config([
     globalIgnores(["dist"]),
     {
-        files: ["**/*.{js,jsx,ts,tsx}"],
+        files: ["**/*.{js,jsx,ts,tsx}", "../whos_that_server/**/*.{js,jsx,ts,tsx}"],
         extends: [
             js.configs.recommended,
             pluginReact.configs.flat.recommended,

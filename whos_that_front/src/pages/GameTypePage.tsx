@@ -6,13 +6,13 @@ import { Link } from "react-router";
 const GameTypePage = () => {
     return (
         <div className="flex justify-between mt-26 w-[45%] h-full">
-            <Link to="/play-game">
-                <CardLayout name="Play a Premade Game" imgSrc={obama} flipped={false}>
+            <Link to="/premade-games">
+                <CardLayout name="Play a Premade Game" imgSrc={obama}>
                     <></>
                 </CardLayout>
             </Link>
             <Link to="/create-game/new">
-                <CardLayout name="Create a Custom Game" imgSrc={CustomGameImage} flipped={false}>
+                <CardLayout name="Create a Custom Game" imgSrc={CustomGameImage}>
                     <></>
                 </CardLayout>
             </Link>

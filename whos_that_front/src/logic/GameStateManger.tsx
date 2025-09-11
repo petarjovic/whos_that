@@ -1,24 +1,23 @@
 import { useState, useEffect } from "react";
-import { useParams, useNavigate } from "react-router";
+import { useParams, useNavigate, useSearchParams } from "react-router";
 import { socket } from "./socket.tsx";
-import Game from "../game/Game.tsx";
+import Game from "../pages/GamePage.tsx";
 import WaitingRoom from "../pages/WaitingRoomPage.tsx";
 import ErrorPage from "../pages/ErrorPage.tsx";
 import type { GameStateType } from "../../../whos_that_server/src/config/types.ts";
-import type { ServerErrorResponse } from "./Actions.tsx";
-
-export type winLoseFlagType = boolean | null;
-export type EndStateType = "" | "correctGuess" | "wrongGuess" | "oppCorrectGuess" | "oppWrongGuess";
+import type { ServerErrorResponse, EndStateType } from "../lib/types.ts";
 
 const GameStateManager = ({ newGame }: { newGame: boolean }) => {
     const navigate = useNavigate();
     let { joinGameId = "" } = useParams();
     if (joinGameId === "getImageAction") joinGameId = "";
     const [gameId, setGameId] = useState(joinGameId);
+    const [searchParams] = useSearchParams();
     const [gameState, setGameState] = useState<GameStateType>({
         players: ["", ""],
         playAgainReqs: [false, false],
         cardIdsToGuess: [-1, -1],
+        preset: searchParams.get("preset") ?? "",
     });
     const [endState, setEndState] = useState<EndStateType>("");
     const [error, setError] = useState("");
@@ -26,25 +25,31 @@ const GameStateManager = ({ newGame }: { newGame: boolean }) => {
 
     useEffect(() => {
         const getImages = async () => {
-            try {
-                const response: Response = await fetch("http://localhost:3001/api/preMadeGame", {
-                    method: "GET",
-                });
+            if (gameState.preset) {
+                try {
+                    const response: Response = await fetch(
+                        `http://localhost:3001/api/preMadeGame?preset=${gameState.preset}`,
+                        {
+                            //ERROR PRONE PERHAPS
+                            method: "GET",
+                        }
+                    );
 
-                if (!response.ok) {
-                    const errorData = (await response.json()) as ServerErrorResponse;
-                    return { error: errorData.message || "Upload failed" };
+                    if (!response.ok) {
+                        const errorData = (await response.json()) as ServerErrorResponse;
+                        return { error: errorData.message || "Upload failed" }; //fix this error
+                    }
+
+                    const result = (await response.json()) as object;
+                    setImages(result);
+                } catch (error) {
+                    console.error("Upload error:", error);
+                    return error; //fix error handling
                 }
-
-                const result = (await response.json()) as object;
-                setImages(result);
-            } catch (error) {
-                console.error("Upload error:", error);
-                return error;
             }
         };
         void getImages();
-    }, []);
+    }, [gameState.preset]);
 
     useEffect(() => {
         socket.connect();
@@ -58,18 +63,18 @@ const GameStateManager = ({ newGame }: { newGame: boolean }) => {
             else setEndState("oppWrongGuess");
         });
 
-        socket.on("playerJoined", (gameData: GameStateType) => {
+        socket.on("playerJoined", (gameData) => {
             console.log(`Player joined: `, gameData.players);
             setGameState(gameData);
             setEndState("");
         });
 
-        socket.on("playAgainConfirmed", (gameData: GameStateType) => {
+        socket.on("playAgainConfirmed", (gameData) => {
             setGameState(gameData);
             setEndState("");
         });
 
-        socket.on("opponentDisconnted", (gameData: GameStateType) => {
+        socket.on("opponentDisconnted", (gameData) => {
             console.log("Opponent Disconnected");
             setGameState(gameData);
             setEndState("");
@@ -95,7 +100,7 @@ const GameStateManager = ({ newGame }: { newGame: boolean }) => {
     //Handle creating a new game
     useEffect(() => {
         if (newGame) {
-            socket.emit("createGame", (newGameId, response) => {
+            socket.emit("createGame", gameState.preset, (newGameId, response) => {
                 if (response.success) {
                     console.log(response.msg);
                     setGameId(newGameId);
@@ -144,6 +149,7 @@ const GameStateManager = ({ newGame }: { newGame: boolean }) => {
 
     if (error) return <ErrorPage error={error} />;
     else if (gameState.players.includes("") || !Object.keys(images).length)
+        //diff way to handle perchance
         return <WaitingRoom gameId={gameId} />;
     else
         return (
