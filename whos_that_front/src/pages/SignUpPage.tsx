@@ -1,15 +1,32 @@
-import { useState } from "react";
+import { useState, type FormEvent } from "react";
 import { Link } from "react-router";
+import { signUp } from "../logic/AuthActions";
+
 const SignUpPage = () => {
     const [username, setUsername] = useState("");
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
     const [passwordConfirmation, setPasswordConfirmation] = useState("");
 
+    const handleSignUp = async (e: FormEvent) => {
+        e.preventDefault();
+        if (password !== passwordConfirmation) throw new Error("Passwords don't match.");
+        const signUpResult = await signUp(username, email, password);
+        console.log(signUpResult.data);
+        if (signUpResult.error) {
+            console.error(signUpResult.error.message); //HANDLE BETTER
+        }
+    };
+
     return (
         <div className="bg-white rounded-lg shadow-2xl p-8 max-w-md w-full mt-20 tracking-wide">
             <h2 className="text-2xl font-bold text-center text-zinc-900 mb-6">Create an Account</h2>
-            <form id="registrationForm">
+            <form
+                id="registrationForm"
+                onSubmit={(e) => {
+                    void handleSignUp(e);
+                }}
+            >
                 <div className="mb-4">
                     <label htmlFor="username" className="block text-zinc-800 font-semibold mb-2">
                         Username
@@ -102,7 +119,7 @@ const SignUpPage = () => {
             </form>
             <p className="text-center text-gray-600 mt-4">
                 Already have an account?{" "}
-                <Link to="/login" className="text-blue-500 font-semibold">
+                <Link to="/login" className="text-blue-500 font-semibold hover:underline">
                     Log In
                 </Link>
             </p>

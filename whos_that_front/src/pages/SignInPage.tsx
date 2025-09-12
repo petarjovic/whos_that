@@ -1,13 +1,27 @@
-import { useState } from "react";
+import { useState, type FormEvent } from "react";
 import { Link } from "react-router";
+import { logIn } from "../logic/AuthActions";
 
 const SignInPage = () => {
-    const [usernameOrEmail, setUsernameOrEmail] = useState("");
+    const [username, setUsername] = useState("");
     const [password, setPassword] = useState("");
+
+    const handleLogIn = async (e: FormEvent) => {
+        e.preventDefault();
+        const logInResult = await logIn(username, password);
+        if (logInResult.error) {
+            console.error(logInResult.error.message); //HANDLE BETTER
+        }
+    };
     return (
         <div className="bg-white rounded-lg shadow-2xl p-8 max-w-md w-full mt-20 tracking-wide">
             <h2 className="text-2xl font-bold text-center text-zinc-900 mb-6">Sign In</h2>
-            <form id="signInForm">
+            <form
+                id="signInForm"
+                onSubmit={(e) => {
+                    void handleLogIn(e);
+                }}
+            >
                 <div className="mb-4">
                     <label htmlFor="username" className="block text-zinc-800 font-semibold mb-2">
                         Username or Email
@@ -19,9 +33,9 @@ const SignInPage = () => {
                         placeholder="Enter your username or email"
                         autoComplete="email"
                         onChange={(e) => {
-                            setUsernameOrEmail(e.target.value);
+                            setUsername(e.target.value);
                         }}
-                        value={usernameOrEmail}
+                        value={username}
                         required
                     />
                     {/* <p className="text-red-500 text-sm mt-2 hidden" id="usernameError">
@@ -58,7 +72,7 @@ const SignInPage = () => {
             </form>
             <p className="text-center text-gray-600 mt-4">
                 Don&apos;t have an account yet?{" "}
-                <Link to="/sign-up" className="text-blue-500 font-semibold">
+                <Link to="/sign-up" className="text-blue-500 font-semibold hover:underline">
                     Sign Up
                 </Link>
             </p>

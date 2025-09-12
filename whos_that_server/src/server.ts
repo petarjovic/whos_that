@@ -10,14 +10,13 @@ import { setupApiRoutes } from "./api.ts";
 const PORT = process.env.PORT ?? 3001;
 
 const app = express();
-
-app.all("/api/auth/{*any}", toNodeHandler(auth));
-
 app.use(
     cors({
-        origin: "*",
+        origin: "http://localhost:5173",
+        credentials: true,
     })
 );
+app.all("/api/auth/{*any}", toNodeHandler(auth));
 
 const server = http.createServer(app);
 
