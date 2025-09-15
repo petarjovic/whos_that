@@ -27,8 +27,8 @@ const io = new Server<ClientToServerEvents, ServerToClientEvents>(server, {
     },
 });
 
-setupSocketEventHandlers(io);
 setupApiRoutes(app);
+setupSocketEventHandlers(io);
 
 server.listen(PORT, () => {
     console.log(`LISTENING ON PORT: ${PORT}`);

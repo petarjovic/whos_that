@@ -4,7 +4,7 @@ import { socket } from "./socket.tsx";
 import Game from "../pages/GamePage.tsx";
 import WaitingRoom from "../pages/WaitingRoomPage.tsx";
 import ErrorPage from "../pages/ErrorPage.tsx";
-import type { GameStateType } from "../../../whos_that_server/src/config/types.ts";
+import type { GameStateType, CardDataType } from "../../../whos_that_server/src/config/types.ts";
 import type { ServerErrorResponse, EndStateType } from "../lib/types.ts";
 
 const GameStateManager = ({ newGame }: { newGame: boolean }) => {
@@ -18,13 +18,14 @@ const GameStateManager = ({ newGame }: { newGame: boolean }) => {
         playAgainReqs: [false, false],
         cardIdsToGuess: [-1, -1],
         preset: searchParams.get("preset") ?? "",
+        numOfChars: 0,
     });
     const [endState, setEndState] = useState<EndStateType>("");
     const [error, setError] = useState("");
-    const [images, setImages] = useState({});
-
+    //const [images, setImages] = useState({});
+    const [cardData, setCardData] = useState<CardDataType[]>([]);
     useEffect(() => {
-        const getImages = async () => {
+        const fetchImages = async () => {
             if (gameState.preset) {
                 try {
                     const response: Response = await fetch(
@@ -36,19 +37,21 @@ const GameStateManager = ({ newGame }: { newGame: boolean }) => {
                     );
 
                     if (!response.ok) {
+                        //fix this error handling
                         const errorData = (await response.json()) as ServerErrorResponse;
-                        return { error: errorData.message || "Upload failed" }; //fix this error
+                        setError(errorData.message || "Getting images failed.");
+                        throw new Error(errorData.message || "Getting images failed.");
                     }
 
-                    const result = (await response.json()) as object;
-                    setImages(result);
+                    const result = (await response.json()) as CardDataType[];
+                    setCardData(result);
                 } catch (error) {
-                    console.error("Upload error:", error);
+                    console.error("Error:", error);
                     return error; //fix error handling
                 }
             }
         };
-        void getImages();
+        void fetchImages();
     }, [gameState.preset]);
 
     useEffect(() => {
@@ -64,6 +67,7 @@ const GameStateManager = ({ newGame }: { newGame: boolean }) => {
         });
 
         socket.on("playerJoined", (gameData) => {
+            //MAKE SURE GAME INFORMATION IS UP TO DATE? AVOID RACE CONDITION
             console.log(`Player joined: `, gameData.players);
             setGameState(gameData);
             setEndState("");
@@ -99,8 +103,8 @@ const GameStateManager = ({ newGame }: { newGame: boolean }) => {
 
     //Handle creating a new game
     useEffect(() => {
-        if (newGame) {
-            socket.emit("createGame", gameState.preset, (newGameId, response) => {
+        if (newGame && cardData.length) {
+            socket.emit("createGame", gameState.preset, cardData.length, (newGameId, response) => {
                 if (response.success) {
                     console.log(response.msg);
                     setGameId(newGameId);
@@ -111,7 +115,7 @@ const GameStateManager = ({ newGame }: { newGame: boolean }) => {
             });
         }
         // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [newGame]);
+    }, [newGame, cardData.length]);
 
     //Handle joining an existing game
     useEffect(() => {
@@ -145,10 +149,8 @@ const GameStateManager = ({ newGame }: { newGame: boolean }) => {
         console.log(`Player %s requested to play again in room ${gameId}`, socket.id);
     };
 
-    console.log(images);
-
     if (error) return <ErrorPage error={error} />;
-    else if (gameState.players.includes("") || !Object.keys(images).length)
+    else if (gameState.players.includes("") || !Object.keys(cardData).length)
         //diff way to handle perchance
         return <WaitingRoom gameId={gameId} />;
     else
@@ -161,7 +163,7 @@ const GameStateManager = ({ newGame }: { newGame: boolean }) => {
                 winningKey={
                     gameState.cardIdsToGuess[1 - gameState.players.indexOf(socket.id ?? "")] //handle this fallback different
                 }
-                images={images}
+                cardData={cardData}
             />
         );
 };

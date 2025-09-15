@@ -1,8 +1,20 @@
 import { useFetcher } from "react-router";
+import { authClient } from "../lib/auth-client";
+import { useNavigate } from "react-router";
 
 const CreateCustomGamePage = () => {
     const fetcher = useFetcher();
     const busy = fetcher.state !== "idle";
+    const navigate = useNavigate();
+
+    const {
+        data: session,
+        isPending, //loading state
+        error, //error object
+    } = authClient.useSession(); //ERROR HANDLING
+
+    if (isPending) return <></>;
+    else if (!session) void navigate("/");
 
     return (
         <fetcher.Form

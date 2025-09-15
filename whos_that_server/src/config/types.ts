@@ -12,6 +12,13 @@ export type GameStateType = {
     cardIdsToGuess: [number, number];
     playAgainReqs: [boolean, boolean];
     preset: string;
+    numOfChars: number;
+};
+
+export type CardDataType = {
+    imageUrl: string;
+    name: string;
+    orderIndex: number;
 };
 
 export interface ServerToClientEvents {
@@ -23,7 +30,11 @@ export interface ServerToClientEvents {
 }
 
 export interface ClientToServerEvents {
-    createGame: (preset: string, ack: (gameId: string, response: ResponseType) => void) => void;
+    createGame: (
+        preset: string,
+        numOfChars: number,
+        ack: (gameId: string, response: ResponseType) => void
+    ) => void;
     joinGame: (
         gameId: string,
         ack: (gameData: GameStateType, response: ResponseType) => void

@@ -4,8 +4,13 @@ import { Link } from "react-router";
 import { CardLayout } from "../layouts/Cards.tsx";
 import type { ServerErrorResponse } from "../lib/types.ts";
 
+type preMadeGamesListType = {
+    title: string;
+    id: string;
+}[];
+
 const ShowPremadeGamesPage = () => {
-    const [premadeGamesList, setPremadeGamesList] = useState<string[]>([]);
+    const [premadeGamesList, setPremadeGamesList] = useState<preMadeGamesListType>([]);
 
     useEffect(() => {
         const getPremadeGames = async () => {
@@ -22,19 +27,19 @@ const ShowPremadeGamesPage = () => {
                     return { error: errorData.message || "Upload failed" }; //fix this error
                 }
 
-                const result = (await response.json()) as string[];
+                const result = (await response.json()) as preMadeGamesListType;
                 setPremadeGamesList(result);
             } catch (error) {
-                console.error("Upload error:", error);
+                console.error("Error:", error);
                 return error; //fix error handling
             }
         };
         void getPremadeGames();
     }, []);
 
-    const premadeGames = premadeGamesList.map((game_name, i) => (
-        <Link key={i} to={`/play-game?preset=${game_name}`}>
-            <CardLayout name={game_name} imgSrc={obama} key={i}>
+    const premadeGames = premadeGamesList.map(({ id, title }, i) => (
+        <Link key={i} to={`/play-game?preset=${id}`}>
+            <CardLayout name={title} imgSrc={obama} key={i}>
                 <></>
             </CardLayout>
         </Link>

@@ -1,20 +1,34 @@
 import { useState, type FormEvent } from "react";
 import { Link } from "react-router";
 import { signUp } from "../logic/AuthActions";
+import { useNavigate } from "react-router";
+import { authClient } from "../lib/auth-client";
 
 const SignUpPage = () => {
+    const navigate = useNavigate();
     const [username, setUsername] = useState("");
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
     const [passwordConfirmation, setPasswordConfirmation] = useState("");
 
+    const {
+        data: session,
+        isPending, //loading state
+        error, //error object
+    } = authClient.useSession(); //ERROR HANDLING
+
+    if (session) void navigate("/");
+
     const handleSignUp = async (e: FormEvent) => {
+        //ERROR HANDLING
         e.preventDefault();
         if (password !== passwordConfirmation) throw new Error("Passwords don't match.");
         const signUpResult = await signUp(username, email, password);
         console.log(signUpResult.data);
         if (signUpResult.error) {
             console.error(signUpResult.error.message); //HANDLE BETTER
+        } else {
+            void navigate("/");
         }
     };
 

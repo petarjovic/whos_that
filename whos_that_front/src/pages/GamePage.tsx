@@ -1,7 +1,7 @@
 import ReactModal from "react-modal";
 import { useNavigate } from "react-router";
 import { Card, OpponentTargetCard } from "../layouts/Cards";
-
+import type { CardDataType } from "../../../whos_that_server/src/config/types.ts";
 import type { EndStateType } from "../lib/types.ts";
 
 interface GameProps {
@@ -10,7 +10,7 @@ interface GameProps {
     endState: EndStateType;
     winningKey: number;
     oppWinningKey: number;
-    images: object;
+    cardData: CardDataType[];
 }
 
 const Game = ({
@@ -19,10 +19,8 @@ const Game = ({
     endState,
     winningKey,
     oppWinningKey,
-    images,
+    cardData,
 }: GameProps) => {
-    const imagesAndNames = Object.entries(images) as [string, string][];
-
     const handleCheckWinner = (win: boolean) => {
         emitGuess(win);
     };
@@ -30,18 +28,17 @@ const Game = ({
         emitPlayAgain();
     };
 
-    // console.log(winningKey, imagesAndNames[winningKey]);
-    // console.log(oppWinningKey, imagesAndNames[oppWinningKey]);
-
-    const cards = imagesAndNames.map(([name, img], i) => (
+    const cards = cardData.map(({ imageUrl, name, orderIndex }) => (
         <Card
             name={name}
-            imgSrc={img}
-            key={i}
-            winner={winningKey === i}
+            imgSrc={imageUrl}
+            key={orderIndex}
+            winner={winningKey === orderIndex}
             handleCheckWinner={handleCheckWinner}
         />
     ));
+
+    const oppTargetCardData = cardData.find((card) => card.orderIndex === oppWinningKey);
 
     return (
         <>
@@ -49,8 +46,8 @@ const Game = ({
                 {cards}
                 <EndTurnButton />
                 <OpponentTargetCard
-                    name={imagesAndNames[oppWinningKey][0]}
-                    imgSrc={imagesAndNames[oppWinningKey][1]}
+                    name={oppTargetCardData?.name ?? ""} //FIX THIS
+                    imgSrc={oppTargetCardData?.imageUrl ?? ""}
                 />
                 ;
             </div>

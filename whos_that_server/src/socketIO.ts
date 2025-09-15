@@ -3,9 +3,9 @@ import type { GameIdMapType, ClientToServerEvents, ServerToClientEvents } from "
 import type { Server } from "socket.io";
 
 //redo with server logic redo
-function winningKeyGenerator(): [number, number] {
-    const winningKeyOne = Math.floor(Math.random() * 22);
-    const winningKeyTwo = Math.floor(Math.random() * 22);
+function winningKeyGenerator(max: number): [number, number] {
+    const winningKeyOne = Math.floor(Math.random() * max);
+    const winningKeyTwo = Math.floor(Math.random() * max);
     return [winningKeyOne, winningKeyTwo];
 }
 
@@ -16,14 +16,15 @@ export function setupSocketEventHandlers(io: Server<ClientToServerEvents, Server
         console.log("User connected:", socket.id);
 
         // Create a new game
-        socket.on("createGame", (preset, ack) => {
+        socket.on("createGame", (preset, numOfChars, ack) => {
             let gameId = nanoid(6);
             while (gameId in gamesIdMap) gameId = nanoid(6); //setTimeout??
             gamesIdMap[gameId] = {
                 players: ["", ""],
                 playAgainReqs: [false, false],
-                cardIdsToGuess: winningKeyGenerator(),
+                cardIdsToGuess: winningKeyGenerator(numOfChars),
                 preset: preset,
+                numOfChars: numOfChars,
             };
 
             //socket.emit("gameCreated", [gameId, games[gameId]]);
@@ -63,6 +64,7 @@ export function setupSocketEventHandlers(io: Server<ClientToServerEvents, Server
                         playAgainReqs: [false, false],
                         cardIdsToGuess: [-1, -1],
                         preset: "",
+                        numOfChars: 0,
                     },
                     { success: false, msg: `Game ${gameId} not found!` }
                 );
@@ -83,7 +85,9 @@ export function setupSocketEventHandlers(io: Server<ClientToServerEvents, Server
                     const players = gamesIdMap[room].players;
                     players[players.indexOf(socket.id)] = "";
                     gamesIdMap[room].playAgainReqs = [false, false];
-                    gamesIdMap[room].cardIdsToGuess = winningKeyGenerator();
+                    gamesIdMap[room].cardIdsToGuess = winningKeyGenerator(
+                        gamesIdMap[room].numOfChars
+                    );
 
                     if (!players.every((p) => p === "")) {
                         console.log(
@@ -101,19 +105,21 @@ export function setupSocketEventHandlers(io: Server<ClientToServerEvents, Server
             console.log("User disconnected: ", socket.id);
         });
 
-        socket.on("playAgain", (gameId) => {
-            const index = gamesIdMap[gameId].players.indexOf(socket.id);
+        socket.on("playAgain", (room) => {
+            const index = gamesIdMap[room].players.indexOf(socket.id);
 
             if (index !== -1) {
-                gamesIdMap[gameId].playAgainReqs[index] = true;
-                if (gamesIdMap[gameId].playAgainReqs.every((bool) => bool)) {
-                    gamesIdMap[gameId].cardIdsToGuess = winningKeyGenerator();
-                    gamesIdMap[gameId].playAgainReqs = [false, false];
-                    io.to(gameId).emit("playAgainConfirmed", gamesIdMap[gameId]);
+                gamesIdMap[room].playAgainReqs[index] = true;
+                if (gamesIdMap[room].playAgainReqs.every((bool) => bool)) {
+                    gamesIdMap[room].cardIdsToGuess = winningKeyGenerator(
+                        gamesIdMap[room].numOfChars
+                    );
+                    gamesIdMap[room].playAgainReqs = [false, false];
+                    io.to(room).emit("playAgainConfirmed", gamesIdMap[room]);
                 }
             } else {
-                io.to(gameId).emit("errorMessage", {
-                    message: `Player ${socket.id} requesting to play again was not found in game ${gameId} .`,
+                io.to(room).emit("errorMessage", {
+                    message: `Player ${socket.id} requesting to play again was not found in game ${room} .`,
                 });
             }
         });

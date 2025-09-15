@@ -1,11 +1,13 @@
-import { authClient } from "../lib/auth-cleint.ts";
-import { redirect } from "react-router";
+import { authClient } from "../lib/auth-client.ts";
+
 export const signUp = async (username: string, email: string, password: string) => {
+    //ERROR HANDLING
     const signUpResult = await authClient.signUp.email({
         email: email,
         password: password,
         username: username,
         name: "",
+        callbackURL: "http://localhost:5173/",
         // }, {
         //     onRequest: (ctx) => {
         //         //show loading
@@ -23,17 +25,19 @@ export const signUp = async (username: string, email: string, password: string) 
 };
 
 export const logIn = async (username: string, password: string) => {
+    //ERROR HANDLING
     const logInResult = await authClient.signIn.username({
         username: username,
         password: password,
         callbackURL: "http://localhost:5173/",
     });
     console.log(logInResult);
-    redirect("/");
     return logInResult;
 };
 
 export const logOut = async () => {
+    //ERROR HANDLING
     const logOutResult = await authClient.signOut();
+    console.log(logOutResult);
     return logOutResult;
 };

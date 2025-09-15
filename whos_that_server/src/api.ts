@@ -6,6 +6,7 @@ import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 import sharp from "sharp";
 import * as schema from "./config/db/schema.ts";
 import { eq } from "drizzle-orm";
+import type { CardDataType } from "./config/types.ts";
 
 const upload = multer({ storage: multer.memoryStorage() });
 
@@ -41,41 +42,38 @@ export function setupApiRoutes(app: Express) {
         } = req;
         if (!preset) return res.send("ERROR"); //EROROR DO IT RIGFHT ADF:KJDSFLKJSFHLKJFSDK:LFS
 
-        const imageAndName = await db
-            .select({ assets: schema.games.assets })
-            .from(schema.games)
-            .where(eq(schema.games.gameName, preset as string)); //not safe too prolly lol
+        const cardDataList: CardDataType[] = await db
+            .select({
+                imageUrl: schema.gameItems.imageUrl,
+                name: schema.gameItems.name,
+                orderIndex: schema.gameItems.orderIndex,
+            })
+            .from(schema.gameItems)
+            .where(eq(schema.gameItems.gameId, preset as string));
 
-        const nameAndImage = imageAndName[0]["assets"] as object; //NOT SAFE I THINK
-        const nameAndUrl: object = {};
-
-        for await (const [caption, fileName] of Object.entries(nameAndImage)) {
-            //REDO TO BE CONCURRENT!!SDFSDJHGLK:!!!!
-            const getObjectParams = {
-                Bucket: process.env.AWS_BUCKET_NAME,
-                Key: `premadeGames/${preset}/` + fileName,
-            };
-            const command = new GetObjectCommand(getObjectParams);
-            const url = await getSignedUrl(s3, command, { expiresIn: 120 });
-            nameAndUrl[caption] = url;
-        }
-
-        res.send(nameAndUrl);
+        res.send(cardDataList);
     });
 
     app.get("/api/getAllPremadeGames", async (req, res) => {
-        var params = {
-            Bucket: process.env.AWS_BUCKET_NAME,
-            Prefix: "premadeGames/",
-            Delimiter: "/",
-        };
-        const command = new ListObjectsV2Command(params);
-        const data = await s3.send(command);
+        const gameTitlesAndIds = await db
+            .select({ id: schema.games.id, title: schema.games.title })
+            .from(schema.games)
+            .where(eq(schema.games.isPublic, true));
 
-        const directoryNames =
-            data.CommonPrefixes?.map((prefix) =>
-                prefix.Prefix?.substring("premadeGames/".length).replace("/", "")
-            ) ?? [];
-        res.send(directoryNames);
+        res.send(gameTitlesAndIds);
+
+        // PROLLY NOT NEEDED
+        // var params = {
+        //     Bucket: process.env.AWS_BUCKET_NAME,
+        //     Prefix: "premadeGames/",
+        //     Delimiter: "/",
+        // };
+        // const command = new ListObjectsV2Command(params);
+        // const data = await s3.send(command);
+
+        // const directoryNames =
+        //     data.CommonPrefixes?.map((prefix) =>
+        //         prefix.Prefix?.substring("premadeGames/".length).replace("/", "")
+        //     ) ?? [];
     });
 }

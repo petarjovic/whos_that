@@ -1,16 +1,29 @@
 import { useState, type FormEvent } from "react";
 import { Link } from "react-router";
 import { logIn } from "../logic/AuthActions";
+import { useNavigate } from "react-router";
+import { authClient } from "../lib/auth-client";
 
 const SignInPage = () => {
+    const navigate = useNavigate();
     const [username, setUsername] = useState("");
     const [password, setPassword] = useState("");
+
+    const {
+        data: session,
+        isPending, //loading state
+        error, //error object
+    } = authClient.useSession(); //ERROR HANDLING
+
+    if (session) void navigate("/");
 
     const handleLogIn = async (e: FormEvent) => {
         e.preventDefault();
         const logInResult = await logIn(username, password);
         if (logInResult.error) {
             console.error(logInResult.error.message); //HANDLE BETTER
+        } else {
+            void navigate("/");
         }
     };
     return (

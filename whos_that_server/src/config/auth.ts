@@ -22,6 +22,12 @@ export const auth = betterAuth({
         maxPasswordLength: 128,
         passwordStrengthCheck: true,
     },
+    session: {
+        cookieCache: {
+            enabled: true,
+            maxAge: 5 * 60, // Cache duration in seconds
+        },
+    },
     trustedOrigins: ["http://localhost:5173"],
     discord: {
         clientId: process.env.DISCORD_CLIENT_ID as string,

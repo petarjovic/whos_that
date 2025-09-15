@@ -5,7 +5,7 @@ const NotFoundPage = () => {
         <>
             <h1 className="my-20 font-bold text-2xl">Page Not Found ❌</h1>
             <Link to={"/"}>
-                <button className="mt-[2vh] border-2 border-zinc-950 text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-bold  text-sm px-4 py-2 me-2 mb-2 dark:bg-blue-600 dark:hover:bg-blue-700 focus:outline-none dark:focus:ring-blue-800">
+                <button className="mx-4 px-4 w-fill h-15 text-2xl text-neutral-100 font-bold border-b-9 border-x-1 border-blue-600 bg-blue-500 hover:bg-blue-600 hover:border-blue-700 rounded-md cursor-pointer shadow-md text-shadow-xs active:border-none active:translate-y-[1px] active:shadow-2xs  active:inset-shadow-md">
                     Home Page
                 </button>
             </Link>
