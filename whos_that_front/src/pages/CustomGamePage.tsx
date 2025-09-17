@@ -1,11 +1,14 @@
-import { useFetcher } from "react-router";
+import { useFetcher, useNavigate } from "react-router";
 import { authClient } from "../lib/auth-client";
-import { useNavigate } from "react-router";
+import { useState } from "react";
 
 const CreateCustomGamePage = () => {
     const fetcher = useFetcher();
     const busy = fetcher.state !== "idle";
     const navigate = useNavigate();
+    const acceptedImageTypes = ["image/jpeg", "image/png", "image/webp"];
+    const maxSizeBytes = 5 * 1024 * 1024;
+    const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
 
     const {
         data: session,
@@ -13,16 +16,62 @@ const CreateCustomGamePage = () => {
         error, //error object
     } = authClient.useSession(); //ERROR HANDLING
 
-    if (isPending) return <></>;
+    const handleFileInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        if (e.target.files) handleFiles(e.target.files);
+        // Reset input value to allow selecting same files again if needed
+        e.target.value = "";
+    };
+
+    const handleFileDrop = (e: React.DragEvent<HTMLDivElement>) => {
+        e.preventDefault();
+        handleFiles(e.dataTransfer.files);
+    };
+
+    const handleFiles = (files: FileList) => {
+        if (files.length === 0) return;
+        const fileArray = Array.from(files);
+        try {
+            for (const file of fileArray) {
+                if (!acceptedImageTypes.includes(file.type)) {
+                    throw new Error("Invalid file type.");
+                } else if (file.size > maxSizeBytes) {
+                    throw new Error("One or more files are too large.");
+                }
+            }
+            setSelectedFiles(fileArray);
+        } catch (error) {
+            console.log(String(error)); //HANDLE ERRORS BETTER LATER
+        }
+    };
+
+    const nullifyDragEvents = (e: React.DragEvent<HTMLDivElement>) => {
+        e.preventDefault();
+        e.stopPropagation();
+    };
+
+    const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+        e.preventDefault();
+        e.stopPropagation();
+
+        const formData = new FormData(e.currentTarget);
+
+        selectedFiles.forEach((file) => {
+            formData.append(`images`, file);
+        });
+
+        // void fetcher.submit(formData, {
+        //     method: "post",
+        //     action: "/create-game/new/uploadImageAction",
+        //     encType: "multipart/form-data",
+        // });
+        console.log(selectedFiles);
+    };
+
+    if (isPending) return <div>Loading...</div>;
     else if (!session) void navigate("/");
 
     return (
-        <fetcher.Form
-            className="mt-20 w-2/5"
-            method="post"
-            action="/create-game/new/uploadImageAction"
-            encType="multipart/form-data"
-        >
+        <form className="mt-20 w-2/5" encType="multipart/form-data" onSubmit={handleSubmit}>
             <label htmlFor="custom-game-name" className="block text-2xl font-bold text-gray-900">
                 Step 1: What is the theme of your game?
             </label>
@@ -30,49 +79,67 @@ const CreateCustomGamePage = () => {
                 type="text"
                 name="custom-game-name"
                 placeholder="Game Theme"
-                className="bg-white placeholder:text-gray-400 text-slate-700 text-2xl border border-slate-200 rounded-md px-3 py-2 transition duration-300 ease focus:outline-none focus:border-slate-400 hover:border-slate-300 shadow-sm hover:shadow-md focus:shadow-lg mx-2 mt-2 mb-10"
+                className="bg-white placeholder:text-gray-400 text-slate-700 text-2xl border border-slate-200 rounded-md px-3 py-2 transition duration-300 ease focus:outline-none focus:border-slate-400 hover:border-slate-300 shadow-sm hover:shadow-md focus:shadow-lg mx-2 mt-2 mb-10 hover:bg-slate-100"
                 required
                 minLength={5}
                 maxLength={30}
             ></input>
-            <label htmlFor="custom-game" className="block text-2xl font-bold text-gray-900">
+            <p className="block text-2xl font-bold text-gray-900">
                 Step 2: Upload your custom images!
-            </label>
-            <input id="file-upload" type="file" name="image-upload" accept="image/*" required />
-            {/* <div className="mt-2 flex h-100 bg-neutral-100 justify-center rounded-lg border border-dashed border-gray-900/25 px-6 py-10">
-                <div className="text-center">
-                    <svg
-                        viewBox="0 0 24 24"
-                        fill="currentColor"
-                        data-slot="icon"
-                        aria-hidden="true"
-                        className="mx-auto mt-15 size-12 text-gray-300"
-                    >
-                        <path
-                            d="M1.5 6a2.25 2.25 0 0 1 2.25-2.25h16.5A2.25 2.25 0 0 1 22.5 6v12a2.25 2.25 0 0 1-2.25 2.25H3.75A2.25 2.25 0 0 1 1.5 18V6ZM3 16.06V18c0 .414.336.75.75.75h16.5A.75.75 0 0 0 21 18v-1.94l-2.69-2.689a1.5 1.5 0 0 0-2.12 0l-.88.879.97.97a.75.75 0 1 1-1.06 1.06l-5.16-5.159a1.5 1.5 0 0 0-2.12 0L3 16.061Zm10.125-7.81a1.125 1.125 0 1 1 2.25 0 1.125 1.125 0 0 1-2.25 0Z"
-                            clipRule="evenodd"
-                            fillRule="evenodd"
-                        />
-                    </svg>
-                    <div className="mt-4 flex text-sm/6 text-gray-600">
-                        <label
-                            htmlFor="file-upload"
-                            className="relative cursor-pointer rounded-md bg-transparent font-semibold text-indigo-600 focus-within:outline-2 focus-within:outline-offset-2 focus-within:outline-indigo-600 hover:text-indigo-500"
+            </p>
+            <div
+                className="flex items-center justify-center w-full"
+                onDrop={(e) => {
+                    handleFileDrop(e);
+                }}
+                onDragOver={(e) => {
+                    nullifyDragEvents(e);
+                }}
+                onDragEnter={(e) => {
+                    nullifyDragEvents(e);
+                }}
+                onDragLeave={(e) => {
+                    nullifyDragEvents(e);
+                }}
+            >
+                <label
+                    htmlFor="file-upload"
+                    className="flex flex-col items-center justify-center w-full h-64 border shadow-sm border-slate-200 rounded-lg cursor-pointer bg-white dark:hover:bg-slate-800 dark:bg-slate-700 hover:bg-slate-100 dark:border-slate-600 dark:hover:border-slate-500 my-2"
+                >
+                    <div className="flex flex-col items-center justify-center pt-5 pb-6">
+                        <svg
+                            className="w-8 h-8 mb-4 text-gray-500 dark:text-gray-400"
+                            aria-hidden="true"
+                            xmlns="http://www.w3.org/2000/svg"
+                            fill="none"
+                            viewBox="0 0 20 16"
                         >
-                            <span>Upload a file</span>
-                            <input
-                                id="file-upload"
-                                type="file"
-                                name="file-upload"
-                                accept="image/*"
-                                className="sr-only"
+                            <path
+                                stroke="currentColor"
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                strokeWidth="2"
+                                d="M13 13h3a3 3 0 0 0 0-6h-.025A5.56 5.56 0 0 0 16 6.5 5.5 5.5 0 0 0 5.207 5.021C5.137 5.017 5.071 5 5 5a4 4 0 0 0 0 8h2.167M10 15V6m0 0L8 8m2-2 2 2"
                             />
-                        </label>
-                        <p className="pl-1">or drag and drop</p>
+                        </svg>
+                        <p className="mb-2 text-sm text-gray-500 dark:text-gray-400">
+                            <span className="font-semibold text-blue-500 hover:underline">
+                                Click to upload
+                            </span>{" "}
+                            or drag and drop
+                        </p>
+                        <p className="text-xs text-gray-500 dark:text-gray-400">PNG or JPG</p>
                     </div>
-                    <p className="text-xs/5 text-gray-600">PNG, JPG, GIF up to 10MB</p>
-                </div>
-            </div> */}
+                    <input
+                        multiple
+                        id="file-upload"
+                        type="file"
+                        className="hidden"
+                        accept={acceptedImageTypes.join(",")}
+                        onChange={handleFileInputChange}
+                    />
+                </label>
+            </div>
             <p>
                 Note: The image file&apos;s name will be used in the game, removing any extensions.
                 <br></br>
@@ -85,7 +152,7 @@ const CreateCustomGamePage = () => {
             >
                 {busy ? "Submitting..." : "Submit"}
             </button>
-        </fetcher.Form>
+        </form>
     );
 };
 export default CreateCustomGamePage;

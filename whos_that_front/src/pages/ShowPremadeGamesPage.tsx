@@ -1,5 +1,4 @@
 import { useEffect, useState } from "react";
-import obama from "../assets/presidents/Barack_Obama.jpg";
 import { Link } from "react-router";
 import { CardLayout } from "../layouts/Cards.tsx";
 import type { ServerErrorResponse } from "../lib/types.ts";
@@ -7,6 +6,7 @@ import type { ServerErrorResponse } from "../lib/types.ts";
 type preMadeGamesListType = {
     title: string;
     id: string;
+    imageUrl: string;
 }[];
 
 const ShowPremadeGamesPage = () => {
@@ -24,7 +24,7 @@ const ShowPremadeGamesPage = () => {
 
                 if (!response.ok) {
                     const errorData = (await response.json()) as ServerErrorResponse;
-                    return { error: errorData.message || "Upload failed" }; //fix this error
+                    throw new Error(errorData.message || "Failed to get premadeGames");
                 }
 
                 const result = (await response.json()) as preMadeGamesListType;
@@ -37,9 +37,9 @@ const ShowPremadeGamesPage = () => {
         void getPremadeGames();
     }, []);
 
-    const premadeGames = premadeGamesList.map(({ id, title }, i) => (
+    const premadeGames = premadeGamesList.map(({ id, title, imageUrl }, i) => (
         <Link key={i} to={`/play-game?preset=${id}`}>
-            <CardLayout name={title} imgSrc={obama} key={i}>
+            <CardLayout name={title} imgSrc={imageUrl} key={i}>
                 <></>
             </CardLayout>
         </Link>
