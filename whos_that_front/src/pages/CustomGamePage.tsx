@@ -1,6 +1,7 @@
 import { useFetcher, useNavigate } from "react-router";
 import { authClient } from "../lib/auth-client";
 import { useState } from "react";
+import Dropzone from "../lib/Dropzone.tsx";
 
 const CreateCustomGamePage = () => {
     const fetcher = useFetcher();
@@ -8,8 +9,11 @@ const CreateCustomGamePage = () => {
     const navigate = useNavigate();
     const acceptedImageTypes = ["image/jpeg", "image/png", "image/webp"];
     const maxSizeBytes = 5 * 1024 * 1024;
+    const [useImageNames, setUseImageNames] = useState(true);
     const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
-    const [isDragOver, setIsDragOver] = useState(false);
+    const [fileNames, setFileNames] = useState<string[]>([]);
+    const [isPublic, setIsPublic] = useState(true);
+    const [errors, setErrors] = useState<string[]>([]);
 
     const {
         data: session,
@@ -17,197 +21,271 @@ const CreateCustomGamePage = () => {
         error, //error object
     } = authClient.useSession(); //ERROR HANDLING
 
-    const handleFileInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        if (e.target.files) handleFiles(e.target.files);
-        // Reset input value to allow selecting same files again if needed
-        e.target.value = "";
+    if (isPending) return <div>Loading...</div>;
+    else if (!session) {
+        void navigate("/");
+        return <></>; // THIS RETURN STATEMENT IS A HACK TO TELL TS THAT SESSION CANNOT BE NULL
+    } else if (error) void navigate("/");
+
+    const handleRemoveImage = (index: number) => {
+        setSelectedFiles(selectedFiles.filter((_, i) => i !== index));
+        setFileNames(fileNames.filter((_, i) => i !== index));
     };
 
-    const handleFileDrop = (e: React.DragEvent<HTMLDivElement>) => {
-        e.preventDefault();
-        setIsDragOver(false);
-        handleFiles(e.dataTransfer.files);
+    const handlePrivacyChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        setIsPublic(e.target.value === "public");
+    };
+
+    const handleUseImageFilenames = (e: React.ChangeEvent<HTMLInputElement>) => {
+        setUseImageNames(e.target.checked);
+    };
+
+    const handleClearCharacterList = () => {
+        setSelectedFiles([]);
+        setFileNames([]);
     };
 
     const handleFiles = (files: FileList) => {
         if (files.length === 0) return;
         const fileArray = Array.from(files);
-        try {
-            for (const file of fileArray) {
-                if (!acceptedImageTypes.includes(file.type)) {
-                    throw new Error("Invalid file type.");
-                } else if (file.size > maxSizeBytes) {
-                    throw new Error("One or more files are too large.");
-                }
+        const fileErrors: string[] = [];
+
+        const validFiles = fileArray.filter((file) => {
+            if (!acceptedImageTypes.includes(file.type)) {
+                fileErrors.push(`${file.name} is of an invalid file type.`);
+            } else if (file.size > maxSizeBytes) {
+                fileErrors.push(`${file.name} too large.`);
+            } else {
+                return true;
             }
-            setSelectedFiles(fileArray);
-        } catch (error) {
-            console.log(String(error)); //HANDLE ERRORS BETTER LATER
-        }
+        });
+
+        setErrors(fileErrors);
+
+        setSelectedFiles([...selectedFiles, ...validFiles]);
+
+        if (useImageNames)
+            setFileNames([
+                ...fileNames,
+                ...validFiles.map((file) => file.name.replace(/\.[^/.]+$/, "").replace(/_/g, " ")),
+            ]);
+        else setFileNames([...fileNames, ...(Array(validFiles.length).fill("") as string[])]);
+        console.log(errors);
     };
 
-    const handleDragOverandEnter = (e: React.DragEvent<HTMLDivElement>) => {
-        e.preventDefault();
-        e.stopPropagation();
-        setIsDragOver(true);
-    };
-
-    const handleDragLeave = (e: React.DragEvent<HTMLDivElement>) => {
-        e.preventDefault();
-        e.stopPropagation();
-        // Only set to false if leaving the dropzone container
-        if (!e.currentTarget.contains(e.relatedTarget as Node)) {
-            setIsDragOver(false);
-        }
-    };
-
-    const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+    const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
         e.stopPropagation();
 
         const formData = new FormData(e.currentTarget);
 
-        selectedFiles.forEach((file) => {
-            formData.append(`images`, file);
+        selectedFiles.forEach((file, i) => {
+            formData.append("images", file);
+            formData.append("names", fileNames[i]);
         });
 
-        // void fetcher.submit(formData, {
-        //     method: "post",
-        //     action: "/create-game/new/uploadImageAction",
-        //     encType: "multipart/form-data",
-        // });
-        console.log(selectedFiles);
+        formData.append("user", session.user.id);
+
+        // eslint-disable-next-line @typescript-eslint/no-confusing-void-expression
+        const result = await fetcher.submit(formData, {
+            method: "post",
+            action: "/create-game/new/createNewGameAction",
+            encType: "multipart/form-data",
+        });
+
+        console.log(result);
+
+        console.log(Array.from(formData.keys()));
+        console.log(Array.from(formData.values()));
     };
 
-    if (isPending) return <div>Loading...</div>;
-    else if (!session) void navigate("/");
-
     return (
-        <form className="mt-10 w-2/5" encType="multipart/form-data" onSubmit={handleSubmit}>
-            <label htmlFor="custom-game-name" className="block text-2xl font-bold text-gray-900">
-                Step 1: What is the theme of your game?
-            </label>
-            <input
-                type="text"
-                name="custom-game-name"
-                placeholder="Game Theme"
-                className="bg-white placeholder:text-gray-400 text-slate-700 text-2xl border border-slate-200 rounded-md px-3 py-2 transition duration-300 ease focus:outline-none focus:border-slate-400 hover:border-slate-300 shadow-sm hover:shadow-md focus:shadow-lg mx-2 mt-2 mb-5 hover:bg-slate-100"
-                required
-                minLength={5}
-                maxLength={30}
-            ></input>
-            <p className="block text-2xl font-bold text-gray-900">
-                Step 2: Upload your custom images!
-            </p>
-            <div
-                className="flex items-center justify-center w-full"
-                onDrop={handleFileDrop}
-                onDragOver={handleDragOverandEnter}
-                onDragEnter={handleDragOverandEnter}
-                onDragLeave={handleDragLeave}
-            >
-                <label
-                    htmlFor="file-upload"
-                    className={`flex flex-col items-center justify-center w-full h-64 border shadow-sm rounded-lg cursor-pointer my-2 transition-all duration-200 ${
-                        isDragOver
-                            ? "border-blue-500 border-2 bg-blue-50 dark:bg-blue-900/20"
-                            : "border-slate-200 bg-white hover:bg-slate-100 dark:hover:bg-slate-800 dark:bg-slate-700 dark:border-slate-600 dark:hover:border-slate-500"
-                    }`}
-                >
-                    <div className="flex flex-col items-center justify-center pt-5 pb-6">
-                        <svg
-                            className={`w-8 h-8 mb-4 transition-colors duration-200 ${
-                                isDragOver ? "text-blue-500" : "text-gray-500 dark:text-gray-400"
-                            }`}
-                            aria-hidden="true"
-                            xmlns="http://www.w3.org/2000/svg"
-                            fill="none"
-                            viewBox="0 0 20 16"
-                        >
-                            <path
-                                stroke="currentColor"
-                                strokeLinecap="round"
-                                strokeLinejoin="round"
-                                strokeWidth="2"
-                                d="M13 13h3a3 3 0 0 0 0-6h-.025A5.56 5.56 0 0 0 16 6.5 5.5 5.5 0 0 0 5.207 5.021C5.137 5.017 5.071 5 5 5a4 4 0 0 0 0 8h2.167M10 15V6m0 0L8 8m2-2 2 2"
-                            />
-                        </svg>
-                        <p
-                            className={`mb-2 text-sm transition-colors duration-200 ${
-                                isDragOver
-                                    ? "text-blue-600 dark:text-blue-400"
-                                    : "text-gray-500 dark:text-gray-400"
-                            }`}
-                        >
-                            <span
-                                className={`font-semibold hover:underline ${
-                                    isDragOver ? "text-blue-600" : "text-blue-500"
-                                }`}
-                            >
-                                {isDragOver ? "Drop images here" : "Click to upload"}
-                            </span>{" "}
-                            {isDragOver || "or drag and drop"}
-                        </p>
-                        <p
-                            className={`text-xs transition-colors duration-200 ${
-                                isDragOver
-                                    ? "text-blue-500 dark:text-blue-400"
-                                    : "text-gray-500 dark:text-gray-400"
-                            }`}
-                        >
-                            PNG or JPG
-                        </p>
-                    </div>
+        <form
+            className="flex justify-between w-5/6 h-full mt-9"
+            encType="multipart/form-data"
+            onSubmit={(e) => {
+                void handleSubmit(e);
+            }}
+        >
+            <div className="w-[45%] mr-10">
+                {/* Step 1 */}
+                <div className="bg-white rounded-lg shadow-sm border-1 border-slate-300 p-4 mr-2 mb-3">
+                    <label
+                        htmlFor="title"
+                        className="block text-2xl font-medium text-gray-900 m-auto"
+                    >
+                        <div className="inline-block bg-blue-500 font-semibold rounded-[50%] w-11 h-11 mr-3 text-white text-center content-center">
+                            1
+                        </div>
+                        Give your game a clear title:
+                    </label>
                     <input
-                        multiple
-                        id="file-upload"
-                        type="file"
-                        className="hidden"
-                        accept={acceptedImageTypes.join(",")}
-                        onChange={handleFileInputChange}
-                    />
-                </label>
-            </div>
+                        type="text"
+                        name="title"
+                        placeholder="(E.g. American Presidents, Famous Actors)"
+                        className="bg-gray-50 border font-medium border-slate-400 text-gray-900 text-lg rounded-lg focus:ring-blue-500 focus:border-blue-500 block ml-13 w-5/6 p-2.5"
+                        required
+                        minLength={5}
+                        maxLength={30}
+                    ></input>
+                </div>
+                {/* Step 2 */}
+                <div className="bg-white rounded-lg shadow-sm border-1 border-slate-300 p-4 mr-2 mb-3">
+                    <label className="block whitespace-pre-wrap text-2xl font-medium text-gray-900 m-auto">
+                        <div className="inline-block bg-blue-500 rounded-[50%] font-semibold w-11 h-11 mr-3 text-white text-center content-center whitespace-pre-wrap">
+                            2
+                        </div>
+                        Start uploading your images:{"  "}
+                    </label>
 
-            <div className="mt-4 mb-6">
-                <h3 className="text-lg font-semibold text-gray-900 mb-2">Selected Files:</h3>
-                <div className="bg-gray-50 border border-gray-200 rounded-md p-3 max-h-48 overflow-y-auto">
-                    {selectedFiles.length > 0 ? (
-                        selectedFiles.map((file, index) => (
-                            <div key={index} className="flex items-center py-2">
-                                <img
-                                    src={URL.createObjectURL(file)}
-                                    alt={file.name}
-                                    className="w-12 h-12 object-cover rounded border border-gray-300 mr-3 flex-shrink-0"
-                                />
-                                <div className="flex-1 min-w-0">
-                                    <span className="text-sm text-gray-700 truncate block">
-                                        {file.name.replace(/\.[^/.]+$/, "").replace(/_/g, " ")}
-                                    </span>
-                                </div>
-                                <span className="text-xs text-gray-500 ml-2 flex-shrink-0">
-                                    {(file.size / 1024 / 1024).toFixed(1)} MB
-                                </span>
-                            </div>
-                        ))
-                    ) : (
-                        <p className="text-sm text-gray-500 italic">No files selected</p>
+                    <Dropzone fileHandler={handleFiles} />
+                    {errors.length > 0 && (
+                        <div className="mb-1 p-2 shadow-xs shadow-red-50 bg-red-50 border border-red-200 rounded-md overflow-y-auto max-h-23">
+                            {errors.map((error, index) => (
+                                <p key={index} className="text-sm text-red-600 ">
+                                    {"Error: " + error}
+                                </p>
+                            ))}
+                        </div>
                     )}
+                    <input
+                        type="checkbox"
+                        id="image-names"
+                        className="ml-3 h-4 w-4 cursor-pointer transition-all appearance-auto shadow hover:shadow-md border border-slate-300 checked:bg-blue-600 checked:border-blue-600 align-text-bottom"
+                        checked={useImageNames}
+                        onChange={handleUseImageFilenames}
+                    ></input>
+                    <label htmlFor="image-names" className="align-middle text-sm">
+                        {" "}
+                        Use File Names as Character Names
+                    </label>
+                </div>
+                {/* Step 4 */}
+                <div className="flex items-center justify-between bg-white rounded-lg shadow-sm border-1 border-slate-300 p-4 mr-2 mb-5 whitespace-pre-wrap font-medium text-lg text-gray-900">
+                    <div className="block text-2xl font-medium text-gray-900">
+                        <div className="inline-block bg-blue-500 font-semibold rounded-[50%] w-11 h-11 mr-3 text-2xl text-white text-center content-center ">
+                            4
+                        </div>
+                        Game Options:
+                    </div>
+                    <div>
+                        <input
+                            type="radio"
+                            id="public"
+                            value="public"
+                            className="h-5 w-5 cursor-pointer transition-all appearance-auto hover:shadow-md border border-slate-300 checked:bg-blue-600 checked:border-blue-600 align-text-top "
+                            name="privacy"
+                            required
+                            checked={isPublic}
+                            onChange={handlePrivacyChange}
+                        ></input>
+                        <label htmlFor="public" className="align-middle mr-5">
+                            {" "}
+                            Public
+                        </label>
+                        <input
+                            type="radio"
+                            id="private"
+                            value="private"
+                            className="h-5 w-5 cursor-pointer transition-all appearance-auto  hover:shadow-md border border-slate-300 checked:bg-blue-600 checked:border-blue-600 align-text-top"
+                            name="privacy"
+                            required
+                            checked={!isPublic}
+                            onChange={handlePrivacyChange}
+                        ></input>
+                        <label htmlFor="private" className="align-middle">
+                            {" "}
+                            Private
+                        </label>
+                    </div>
                 </div>
             </div>
-
-            <p>
-                Note: The image file&apos;s name will be used in the game, removing any extensions.
-                <br></br>
-                E.g. &quot;John_Doe.jpg&quot; will have the name &quot;John Doe&quot; in game.
-            </p>
-            <button
-                className="float-right mx-4 mt-2 px-3 w-fill h-12 text-xl text-neutral-100 font-bold border-b-9 border-x-1 border-blue-600 bg-blue-500 hover:bg-blue-600 hover:border-blue-700 rounded-md cursor-pointer shadow-md text-shadow-xs active:border-none active:translate-y-[1px] active:shadow-2xs  active:inset-shadow-md"
-                type="submit"
-                disabled={busy}
-            >
-                {busy ? "Submitting..." : "Submit"}
-            </button>
+            <div className="flex-1">
+                {/* Step 3 */}
+                <div className="bg-white rounded-lg shadow-sm border-1 border-slate-300 p-4 mr-2 mb-3">
+                    <h3 className="text-2xl font-semibold text-gray-900 mb-2 whitespace-pre-wrap">
+                        <div className="inline-block bg-blue-500 font-bold rounded-[50%] w-11 h-11 mr-3 text-white text-center content-center">
+                            3
+                        </div>
+                        {selectedFiles.length > 0
+                            ? "Character List: "
+                            : "Your Characters Will Appear Here:  "}
+                        <button
+                            className={`float-right px-2 mr-5 w-fit h-11 text-xl text-neutral-100 font-semibold border-b-8 border-x-1 border-slate-500 bg-slate-400 hover:bg-slate-500 hover:border-slate-600 rounded-md cursor-pointer shadow-md text-shadow-xs active:border-none active:translate-y-[1px] active:shadow-2xs active:inset-shadow-md ${
+                                selectedFiles.length > 0 ? "" : "hidden"
+                            }`}
+                            disabled={busy}
+                            type="button"
+                            onClick={handleClearCharacterList}
+                        >
+                            Clear List
+                        </button>
+                    </h3>
+                    <div className="bg-gray-50 border border-gray-200 rounded-md overflow-y-auto max-h-135 shadow-sm mt-3">
+                        {selectedFiles.length > 0 ? (
+                            selectedFiles.map((file, index) => (
+                                <div
+                                    key={index}
+                                    className={`flex items-center py-2 ${
+                                        index % 2 === 0 ? "bg-gray-300" : "bg-gray-100"
+                                    }`}
+                                >
+                                    <button
+                                        className="ml-5 text-lg hover:underline hover:cursor-pointer"
+                                        onClick={() => {
+                                            handleRemoveImage(index);
+                                        }}
+                                    >
+                                        X
+                                    </button>
+                                    <div className="text-2xl font-bold mx-5">{index + 1}</div>
+                                    <img
+                                        src={URL.createObjectURL(file)}
+                                        alt={file.name}
+                                        className="w-20 h-30 object-cover rounded border border-gray-300 flex-shrink-0 mr-6"
+                                    />
+                                    <div className="flex-1 min-w-0">
+                                        <input
+                                            type="text"
+                                            value={fileNames[index] || ""}
+                                            onChange={(e) => {
+                                                const newNames = [...fileNames];
+                                                newNames[index] = e.target.value;
+                                                setFileNames(newNames);
+                                            }}
+                                            className="text-xl align-sub font-bold text-gray-700 bg-transparent border-none outline-none w-9/10 focus:bg-white focus:border-2 focus:border-black px-1 py-0.5 rounded-md"
+                                            placeholder="(Enter character name)"
+                                        />
+                                    </div>
+                                </div>
+                            ))
+                        ) : (
+                            <p className="text-sm text-gray-500 italic p-10">No images uploaded</p>
+                        )}
+                    </div>
+                    {selectedFiles.length > 24 ? (
+                        <p className="p-2 shadow-xs shadow-red-50 bg-red-50 border border-red-200 rounded-md text-red-500 mt-2">
+                            You have too many characters! There is a maximum of 24.
+                        </p>
+                    ) : (
+                        <></>
+                    )}
+                    {selectedFiles.length < 6 ? (
+                        <p className="p-2 bg-amber-50 border border-amber-200 rounded-md text-slate-500 mt-2">
+                            Need at least 6 characters!
+                        </p>
+                    ) : (
+                        <></>
+                    )}
+                </div>
+                <button
+                    className="float-right px-2 mr-5 w-42 h-17 text-2xl text-neutral-100 font-bold border-b-9 border-x-1 border-blue-600 bg-blue-500 hover:bg-blue-600 hover:border-blue-700 rounded-md cursor-pointer shadow-md text-shadow-xs active:border-none active:translate-y-[1px] active:shadow-2xs  active:inset-shadow-md"
+                    type="submit"
+                    disabled={busy}
+                >
+                    {busy ? "Saving..." : "Save Game"}
+                </button>
+            </div>
         </form>
     );
 };

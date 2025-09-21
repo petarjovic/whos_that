@@ -25,7 +25,6 @@ const Hero = () => {
             <h1 className="w-1/3 my-1 text-center">
                 <Link
                     to={"/"}
-                    reloadDocument={true} //maybe not needed??
                     id="title"
                     className="font-digitag text-8xl font-bold text-amber-500 hover:text-amber-600 cursor-pointer drop-shadow-[0_5px_5px_rgba(0,0,0,0.7)] tracking-wide active:translate-y-1"
                 >
@@ -37,7 +36,6 @@ const Hero = () => {
                 <h2>
                     <Link
                         to={session ? "/account" : "/sign-up"}
-                        reloadDocument={true} //maybe not needed??
                         className=" text-xl font-bold text-white text-shadow-sm/25 hover:text-shadow-sm/90 active:translate-y-0.5"
                     >
                         <span className="text-shadow-sm text-2xl">

@@ -44,6 +44,7 @@ const GameStateManager = ({ newGame }: { newGame: boolean }) => {
                     }
 
                     const result = (await response.json()) as CardDataType[];
+                    console.log(result);
                     setCardData(result);
                 } catch (error) {
                     console.error("Error:", error);

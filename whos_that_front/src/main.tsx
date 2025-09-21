@@ -38,8 +38,8 @@ const router = createBrowserRouter([
                 errorElement: <ErrorPage error={undefined} />, //improve before prod
                 children: [
                     {
-                        path: "/create-game/new/uploadImageAction",
-                        action: Actions.uploadImageAction,
+                        path: "/create-game/new/createNewGameAction",
+                        action: Actions.createNewGameAction,
                     },
                 ],
             },
@@ -55,7 +55,12 @@ const router = createBrowserRouter([
             },
             {
                 path: "/premade-games",
-                element: <ShowPremadeGamesPage />,
+                element: <ShowPremadeGamesPage myGames={false} />,
+                errorElement: <ErrorPage error={undefined} />, //improve before prod
+            },
+            {
+                path: "/my-games",
+                element: <ShowPremadeGamesPage myGames={true} />,
                 errorElement: <ErrorPage error={undefined} />, //improve before prod
             },
             {

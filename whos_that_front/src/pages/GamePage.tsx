@@ -3,6 +3,7 @@ import { useNavigate } from "react-router";
 import { Card, OpponentTargetCard } from "../layouts/Cards";
 import type { CardDataType } from "../../../whos_that_server/src/config/types.ts";
 import type { EndStateType } from "../lib/types.ts";
+import { useState } from "react";
 
 interface GameProps {
     emitPlayAgain: () => void;
@@ -13,6 +14,11 @@ interface GameProps {
     cardData: CardDataType[];
 }
 
+interface confirmGuess {
+    isOpen: boolean;
+    isWinner: boolean | null;
+}
+
 const Game = ({
     emitPlayAgain,
     emitGuess,
@@ -21,29 +27,40 @@ const Game = ({
     oppWinningKey,
     cardData,
 }: GameProps) => {
-    const handleCheckWinner = (win: boolean) => {
-        emitGuess(win);
+    const [confirmGuessModal, setConfirmGuessModal] = useState<confirmGuess>({
+        isOpen: false,
+        isWinner: null,
+    });
+
+    const handleConfirmGuessModalResult = (cofirmGuess: boolean) => {
+        if (cofirmGuess && confirmGuessModal.isWinner !== null)
+            emitGuess(confirmGuessModal.isWinner);
+        setConfirmGuessModal({ isOpen: false, isWinner: null });
     };
+
+    const handleOpenConfirmModal = (winner: boolean) => {
+        setConfirmGuessModal({ isOpen: true, isWinner: winner });
+    };
+
     const handlePlayAgain = () => {
         emitPlayAgain();
     };
-
-    const cards = cardData.map(({ imageUrl, name, orderIndex }) => (
-        <Card
-            name={name}
-            imgSrc={imageUrl}
-            key={orderIndex}
-            winner={winningKey === orderIndex}
-            handleCheckWinner={handleCheckWinner}
-        />
-    ));
 
     const oppTargetCardData = cardData.find((card) => card.orderIndex === oppWinningKey);
 
     return (
         <>
             <div id="gameboard" className="flex flex-wrap items-center justify-evenly mx-10 mt-10">
-                {cards}
+                {cardData.map(({ imageUrl, name, orderIndex }) => (
+                    <Card
+                        name={name}
+                        imgSrc={imageUrl}
+                        winner={winningKey === orderIndex}
+                        key={orderIndex}
+                        openConfirmModal={handleOpenConfirmModal}
+                        resetOnNewGame={endState}
+                    />
+                ))}
                 <EndTurnButton />
                 <OpponentTargetCard
                     name={oppTargetCardData?.name ?? ""} //FIX THIS
@@ -52,6 +69,10 @@ const Game = ({
                 ;
             </div>
             <GameEndModal endState={endState} handlePlayAgain={handlePlayAgain} />
+            <ConfirmGuessModal
+                isOpen={confirmGuessModal.isOpen}
+                confirmGuess={handleConfirmGuessModalResult}
+            />
         </>
     );
 };
@@ -110,6 +131,42 @@ const GameEndModal = ({ endState, handlePlayAgain }: GameEndModalProps) => {
                     className="w-50 h-20 m-auto text-2xl text-neutral-100 font-bold border-b-9 border-x-1 border-red-700 bg-red-600 hover:bg-red-700 hover:border-red-800 px-1 rounded-md cursor-pointer shadow-md text-shadow-xs active:border-none active:translate-y-[1px] active:shadow-2xs active:inset-shadow-md"
                 >
                     Exit
+                </button>
+            </div>
+        </ReactModal>
+    );
+};
+
+interface ConfirmGuessModalProps {
+    isOpen: boolean;
+    confirmGuess: (confirmed: boolean) => void;
+}
+
+const ConfirmGuessModal = ({ isOpen, confirmGuess }: ConfirmGuessModalProps) => {
+    return (
+        <ReactModal
+            isOpen={isOpen}
+            className="border-slate-300 border-3 shadow-2xl rounded-2xl bg-radial from-slate-100 to-slate-200  fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 h-fit w-fit inline-block text-center p-10"
+        >
+            <p className="m-auto my-12 text-5xl font-bold">
+                Are you sure this <br /> is the guy!?
+            </p>
+            <div className="flex flex-row justify-between">
+                <button
+                    className="mr-10 w-50 h-20 m-auto text-2xl text-neutral-100 font-bold border-b-9 border-green-700 bg-green-600 hover:bg-green-700 hover:border-green-800 px-1 rounded-md cursor-pointer shadow-md text-shadow-xs active:border-none active:translate-y-[1px] active:shadow-2xs active:inset-shadow-md"
+                    onClick={() => {
+                        confirmGuess(true);
+                    }}
+                >
+                    It&#39;s Him.
+                </button>
+                <button
+                    className="ml-20 w-50 h-20 m-auto text-2xl text-neutral-100 font-bold border-b-9 border-amber-600 bg-amber-500 hover:bg-amber-600 hover:border-amber-700 px-1 rounded-md cursor-pointer shadow-md text-shadow-xs active:border-none active:translate-y-[1px] active:shadow-2xs active:inset-shadow-md"
+                    onClick={() => {
+                        confirmGuess(false);
+                    }}
+                >
+                    ...On Second Thought
                 </button>
             </div>
         </ReactModal>

@@ -1,6 +1,6 @@
-import ReactModal from "react-modal";
 import black from "../assets/black.jpg";
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import type { EndStateType } from "../lib/types";
 
 interface CardLayoutProps {
     children: React.ReactNode;
@@ -27,66 +27,41 @@ interface CardProps {
     name: string;
     imgSrc: string;
     winner: boolean;
-    handleCheckWinner: (win: boolean) => void;
+    openConfirmModal: (win: boolean) => void;
+    resetOnNewGame: EndStateType;
 }
-export const Card = ({ name, imgSrc, winner, handleCheckWinner }: CardProps) => {
-    const [flipped, setflipped] = useState(false);
-    const [openModal, setOpenModal] = useState(false);
+export const Card = ({ name, imgSrc, winner, openConfirmModal, resetOnNewGame }: CardProps) => {
+    const [flipped, setFlipped] = useState(false);
 
-    const handleCloseModalAndCheckWinner = () => {
-        setOpenModal(false);
-        handleCheckWinner(winner);
-    };
+    useEffect(() => {
+        if (resetOnNewGame.length === 0) setFlipped(false);
+    }, [resetOnNewGame]);
 
     return (
         <>
             <CardLayout name={name} imgSrc={flipped ? black : imgSrc}>
                 <div className="box-content flex justify-between h-[9.5%] border-t-3 border-gray-200">
                     <button
-                        className="text-lg text-neutral-100 font-bold bg-green-600 hover:bg-green-800 border-gray-200 px-1 h-full w-[35%] border-r-3 cursor-pointer rounded-sm text-shadow-xs"
+                        className="text-lg text-neutral-100 font-bold bg-green-600 hover:bg-green-800 border-gray-200 px-1 h-full w-[35%] border-r-3 cursor-pointer rounded-sm text-shadow-xs text-center"
                         onClick={() => {
-                            setOpenModal(true);
+                            openConfirmModal(winner);
                         }}
                     >
-                        The Guy
+                        Guess
                     </button>
                     <div className="relative top-0.5 text-2xl font-bold m-auto text-center align-sub">
                         ❓
                     </div>
                     <button
-                        className="text-lg text-neutral-100 font-bold  bg-red-600 hover:bg-red-800 border-gray-200 px-1 h-full w-[35%] border-l-3 cursor-pointer rounded-md"
+                        className="text-lg text-neutral-100 font-bold  bg-red-600 hover:bg-red-800 border-gray-200 px-1 h-full w-[35%] border-l-3 cursor-pointer rounded-md text-center"
                         onClick={() => {
-                            setflipped(!flipped);
+                            setFlipped(!flipped);
                         }}
                     >
-                        Not Guy
+                        Flip
                     </button>
                 </div>
             </CardLayout>
-            <ReactModal
-                isOpen={openModal}
-                className="border-slate-300 border-3 shadow-2xl rounded-2xl bg-radial from-slate-100 to-slate-200  fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 h-fit w-fit inline-block text-center p-10"
-            >
-                <p className="m-auto my-12 text-5xl font-bold">
-                    Are you sure this <br /> is the guy!?
-                </p>
-                <div className="flex flex-row justify-between">
-                    <button
-                        className="mr-10 w-50 h-20 m-auto text-2xl text-neutral-100 font-bold border-b-9 border-green-700 bg-green-600 hover:bg-green-700 hover:border-green-800 px-1 rounded-md cursor-pointer shadow-md text-shadow-xs active:border-none active:translate-y-[1px] active:shadow-2xs active:inset-shadow-md"
-                        onClick={handleCloseModalAndCheckWinner}
-                    >
-                        It&#39;s Him.
-                    </button>
-                    <button
-                        className="ml-20 w-50 h-20 m-auto text-2xl text-neutral-100 font-bold border-b-9 border-amber-600 bg-amber-500 hover:bg-amber-600 hover:border-amber-700 px-1 rounded-md cursor-pointer shadow-md text-shadow-xs active:border-none active:translate-y-[1px] active:shadow-2xs active:inset-shadow-md"
-                        onClick={() => {
-                            setOpenModal(false);
-                        }}
-                    >
-                        ...On Second Thought
-                    </button>
-                </div>
-            </ReactModal>
         </>
     );
 };
