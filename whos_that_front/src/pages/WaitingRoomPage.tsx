@@ -8,7 +8,7 @@ const WaitingRoom = ({ gameId }: { gameId: string }) => {
                 Created game with id:{" "}
                 <span className="text-5xl font-black text-amber-600">{gameId || "..."}</span>
             </p>
-            <p className="m-auto font-semibold text-lg">Send this code to your opponent!</p>
+            <p className="m-auto text-lg font-semibold">Send this code to your opponent!</p>
         </>
     );
 };

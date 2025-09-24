@@ -13,7 +13,7 @@ const GameTypePage = () => {
     } = authClient.useSession(); //ERROR HANDLING
 
     return (
-        <div className="flex justify-between mt-26 w-[45%] h-full">
+        <div className="mt-26 flex h-full w-[45%] justify-between">
             <Link to={isPending ? "" : "/premade-games"}>
                 <CardLayout name="Browse Public Games" imgSrc={obama}>
                     <></>

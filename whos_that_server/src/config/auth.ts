@@ -30,8 +30,9 @@ export const auth = betterAuth({
     },
     trustedOrigins: ["http://localhost:5173"],
     discord: {
-        clientId: process.env.DISCORD_CLIENT_ID as string,
-        clientSecret: process.env.DISCORD_CLIENT_SECRET as string,
+        //TODO: ADD DISCORD AUTHENTICATION
+        clientId: process.env.DISCORD_CLIENT_ID ?? "",
+        clientSecret: process.env.DISCORD_CLIENT_SECRET ?? "",
     },
     plugins: [username()],
 });

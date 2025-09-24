@@ -5,9 +5,9 @@ import Game from "../pages/GamePage.tsx";
 import WaitingRoom from "../pages/WaitingRoomPage.tsx";
 import ErrorPage from "../pages/ErrorPage.tsx";
 import type { GameStateType, CardDataType } from "../../../whos_that_server/src/config/types.ts";
-import type { ServerErrorResponse, EndStateType } from "../lib/types.ts";
+import type { ServerResponse, EndStateType } from "../lib/types.ts";
 
-const GameStateManager = ({ newGame }: { newGame: boolean }) => {
+const GameStateManager = ({ isNewGame }: { isNewGame: boolean }) => {
     const navigate = useNavigate();
     let { joinGameId = "" } = useParams();
     if (joinGameId === "getImageAction") joinGameId = "";
@@ -38,7 +38,7 @@ const GameStateManager = ({ newGame }: { newGame: boolean }) => {
 
                     if (!response.ok) {
                         //fix this error handling
-                        const errorData = (await response.json()) as ServerErrorResponse;
+                        const errorData = (await response.json()) as ServerResponse;
                         setError(errorData.message || "Getting images failed.");
                         throw new Error(errorData.message || "Getting images failed.");
                     }
@@ -69,7 +69,7 @@ const GameStateManager = ({ newGame }: { newGame: boolean }) => {
 
         socket.on("playerJoined", (gameData) => {
             //MAKE SURE GAME INFORMATION IS UP TO DATE? AVOID RACE CONDITION
-            console.log(`Player joined: `, gameData.players);
+            console.log("Player joined:", gameData.players);
             setGameState(gameData);
             setEndState("");
         });
@@ -104,23 +104,22 @@ const GameStateManager = ({ newGame }: { newGame: boolean }) => {
 
     //Handle creating a new game
     useEffect(() => {
-        if (newGame && cardData.length) {
-            socket.emit("createGame", gameState.preset, cardData.length, (newGameId, response) => {
+        if (isNewGame && cardData.length > 0) {
+            socket.emit("createGame", gameState.preset, cardData.length, (id, response) => {
                 if (response.success) {
                     console.log(response.msg);
-                    setGameId(newGameId);
-                    void navigate(`/play-game/${newGameId}`);
+                    setGameId(id);
+                    void navigate(`/play-game/${id}`);
                 } else {
                     setError(response.msg);
                 }
             });
         }
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [newGame, cardData.length]);
+    }, [isNewGame, cardData.length, navigate, gameState.preset]);
 
     //Handle joining an existing game
     useEffect(() => {
-        if (!newGame) {
+        if (!isNewGame) {
             socket.emit("joinGame", gameId, (gameData, response) => {
                 setGameState(gameData);
                 if (!response.success) {
@@ -129,8 +128,7 @@ const GameStateManager = ({ newGame }: { newGame: boolean }) => {
                 console.log(response.msg);
             });
         }
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [gameId, newGame]);
+    }, [gameId, isNewGame, navigate]);
 
     const emitGuess = (guessCorrectly: boolean) => {
         socket.emit("guess", gameId, guessCorrectly);
@@ -151,7 +149,7 @@ const GameStateManager = ({ newGame }: { newGame: boolean }) => {
     };
 
     if (error) return <ErrorPage error={error} />;
-    else if (gameState.players.includes("") || !Object.keys(cardData).length)
+    else if (gameState.players.includes("") || Object.keys(cardData).length === 0)
         //diff way to handle perchance
         return <WaitingRoom gameId={gameId} />;
     else

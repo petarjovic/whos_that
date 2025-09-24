@@ -16,7 +16,7 @@ interface GameProps {
 
 interface confirmGuess {
     isOpen: boolean;
-    isWinner: boolean | null;
+    isWinner: boolean | undefined;
 }
 
 const Game = ({
@@ -29,13 +29,13 @@ const Game = ({
 }: GameProps) => {
     const [confirmGuessModal, setConfirmGuessModal] = useState<confirmGuess>({
         isOpen: false,
-        isWinner: null,
+        isWinner: undefined,
     });
 
     const handleConfirmGuessModalResult = (cofirmGuess: boolean) => {
-        if (cofirmGuess && confirmGuessModal.isWinner !== null)
+        if (cofirmGuess && confirmGuessModal.isWinner !== undefined)
             emitGuess(confirmGuessModal.isWinner);
-        setConfirmGuessModal({ isOpen: false, isWinner: null });
+        setConfirmGuessModal({ isOpen: false, isWinner: undefined });
     };
 
     const handleOpenConfirmModal = (winner: boolean) => {
@@ -50,7 +50,7 @@ const Game = ({
 
     return (
         <>
-            <div id="gameboard" className="flex flex-wrap items-center justify-evenly mx-10 mt-10">
+            <div id="gameboard" className="mx-10 mt-10 flex flex-wrap items-center justify-evenly">
                 {cardData.map(({ imageUrl, name, orderIndex }) => (
                     <Card
                         name={name}
@@ -79,8 +79,8 @@ const Game = ({
 
 const EndTurnButton = () => {
     return (
-        <button className="border-zinc-900  border-5 bg-radial from-blue-400 to-blue-900 h-55 w-55 rounded-[5%] overflow-hidden mx-1 my-2.5  cursor-pointer">
-            <div className="font-bold text-3xl text-white drop-shadow-[0_1.2px_1.2px_rgba(0,0,0,0.8)] hover:text-gray-400">
+        <button className="border-5 bg-radial h-55 w-55 mx-1 my-2.5 cursor-pointer overflow-hidden rounded-[5%] border-zinc-900 from-blue-400 to-blue-900">
+            <div className="text-3xl font-bold text-white drop-shadow-[0_1.2px_1.2px_rgba(0,0,0,0.8)] hover:text-gray-400">
                 End Turn
             </div>
         </button>
@@ -97,29 +97,33 @@ const GameEndModal = ({ endState, handlePlayAgain }: GameEndModalProps) => {
     const navigate = useNavigate();
 
     switch (endState) {
-        case "correctGuess":
+        case "correctGuess": {
             modalText = "You've guessed correctly! Congratulations you win!";
             break;
-        case "wrongGuess":
+        }
+        case "wrongGuess": {
             modalText = "Wrong guess! Sorry you've lost, better luck next time!";
             break;
-        case "oppCorrectGuess":
+        }
+        case "oppCorrectGuess": {
             modalText = "Dang, you opponent guessed correctly! You've lost :(";
             break;
-        case "oppWrongGuess":
+        }
+        case "oppWrongGuess": {
             modalText = "Your opponent guessed wrong! A lucky break, you win!";
             break;
+        }
     }
 
     return (
         <ReactModal
             isOpen={Boolean(endState)}
-            className="border-slate-300 border-3 shadow-2xl rounded-2xl bg-radial from-slate-100 to-slate-200  fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 h-fit w-fit inline-block text-center p-10"
+            className="border-3 bg-radial fixed left-1/2 top-1/2 inline-block h-fit w-fit -translate-x-1/2 -translate-y-1/2 rounded-2xl border-slate-300 from-slate-100 to-slate-200 p-10 text-center shadow-2xl"
         >
             <p className="m-auto my-12 text-5xl font-bold">{modalText}</p>
             <div className="m-auto flex flex-row justify-evenly">
                 <button
-                    className="w-50 h-20 m-auto text-2xl text-neutral-100 font-bold border-b-9 border-x-1 border-green-700 bg-green-600 hover:bg-green-700 hover:border-green-800 px-1 rounded-md cursor-pointer shadow-md text-shadow-xs active:border-none active:translate-y-[1px] active:shadow-2xs active:inset-shadow-md"
+                    className="w-50 border-b-9 border-x-1 text-shadow-xs active:shadow-2xs active:inset-shadow-md m-auto h-20 cursor-pointer rounded-md border-green-700 bg-green-600 px-1 text-2xl font-bold text-neutral-100 shadow-md hover:border-green-800 hover:bg-green-700 active:translate-y-[1px] active:border-none"
                     onClick={handlePlayAgain}
                 >
                     Play again!
@@ -128,7 +132,7 @@ const GameEndModal = ({ endState, handlePlayAgain }: GameEndModalProps) => {
                     onClick={() => {
                         void navigate("/");
                     }}
-                    className="w-50 h-20 m-auto text-2xl text-neutral-100 font-bold border-b-9 border-x-1 border-red-700 bg-red-600 hover:bg-red-700 hover:border-red-800 px-1 rounded-md cursor-pointer shadow-md text-shadow-xs active:border-none active:translate-y-[1px] active:shadow-2xs active:inset-shadow-md"
+                    className="w-50 border-b-9 border-x-1 text-shadow-xs active:shadow-2xs active:inset-shadow-md m-auto h-20 cursor-pointer rounded-md border-red-700 bg-red-600 px-1 text-2xl font-bold text-neutral-100 shadow-md hover:border-red-800 hover:bg-red-700 active:translate-y-[1px] active:border-none"
                 >
                     Exit
                 </button>
@@ -146,14 +150,14 @@ const ConfirmGuessModal = ({ isOpen, confirmGuess }: ConfirmGuessModalProps) => 
     return (
         <ReactModal
             isOpen={isOpen}
-            className="border-slate-300 border-3 shadow-2xl rounded-2xl bg-radial from-slate-100 to-slate-200  fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 h-fit w-fit inline-block text-center p-10"
+            className="border-3 bg-radial fixed left-1/2 top-1/2 inline-block h-fit w-fit -translate-x-1/2 -translate-y-1/2 rounded-2xl border-slate-300 from-slate-100 to-slate-200 p-10 text-center shadow-2xl"
         >
             <p className="m-auto my-12 text-5xl font-bold">
                 Are you sure this <br /> is the guy!?
             </p>
             <div className="flex flex-row justify-between">
                 <button
-                    className="mr-10 w-50 h-20 m-auto text-2xl text-neutral-100 font-bold border-b-9 border-green-700 bg-green-600 hover:bg-green-700 hover:border-green-800 px-1 rounded-md cursor-pointer shadow-md text-shadow-xs active:border-none active:translate-y-[1px] active:shadow-2xs active:inset-shadow-md"
+                    className="w-50 border-b-9 text-shadow-xs active:shadow-2xs active:inset-shadow-md m-auto mr-10 h-20 cursor-pointer rounded-md border-green-700 bg-green-600 px-1 text-2xl font-bold text-neutral-100 shadow-md hover:border-green-800 hover:bg-green-700 active:translate-y-[1px] active:border-none"
                     onClick={() => {
                         confirmGuess(true);
                     }}
@@ -161,7 +165,7 @@ const ConfirmGuessModal = ({ isOpen, confirmGuess }: ConfirmGuessModalProps) => 
                     It&#39;s Him.
                 </button>
                 <button
-                    className="ml-20 w-50 h-20 m-auto text-2xl text-neutral-100 font-bold border-b-9 border-amber-600 bg-amber-500 hover:bg-amber-600 hover:border-amber-700 px-1 rounded-md cursor-pointer shadow-md text-shadow-xs active:border-none active:translate-y-[1px] active:shadow-2xs active:inset-shadow-md"
+                    className="w-50 border-b-9 text-shadow-xs active:shadow-2xs active:inset-shadow-md m-auto ml-20 h-20 cursor-pointer rounded-md border-amber-600 bg-amber-500 px-1 text-2xl font-bold text-neutral-100 shadow-md hover:border-amber-700 hover:bg-amber-600 active:translate-y-[1px] active:border-none"
                     onClick={() => {
                         confirmGuess(false);
                     }}

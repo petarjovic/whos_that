@@ -33,7 +33,7 @@ const Dropzone = ({ fileHandler }: { fileHandler: (files: FileList) => void }) =
 
     return (
         <div
-            className="flex items-center justify-center w-full"
+            className="flex w-full items-center justify-center"
             onDrop={handleFileDrop}
             onDragOver={handleDragOverAndEnter}
             onDragEnter={handleDragOverAndEnter}
@@ -41,15 +41,15 @@ const Dropzone = ({ fileHandler }: { fileHandler: (files: FileList) => void }) =
         >
             <label
                 htmlFor="file-upload"
-                className={`flex flex-col items-center justify-center w-full h-74 border-2 rounded-lg cursor-pointer my-2 transition-all duration-200 ${
+                className={`h-74 my-2 flex w-full cursor-pointer flex-col items-center justify-center rounded-lg border-2 transition-all duration-200 ${
                     isDragOver
-                        ? "border-blue-500 border-2 bg-blue-50 dark:bg-blue-900/20"
-                        : "border-slate-200 bg-white hover:bg-slate-100 dark:hover:bg-slate-800 dark:bg-slate-700 dark:border-slate-600 dark:hover:border-slate-500"
+                        ? "border-2 border-blue-500 bg-blue-50 dark:bg-blue-900/20"
+                        : "border-slate-200 bg-white hover:bg-slate-100 dark:border-slate-600 dark:bg-slate-700 dark:hover:border-slate-500 dark:hover:bg-slate-800"
                 }`}
             >
-                <div className="flex flex-col items-center justify-center pt-5 pb-6">
+                <div className="flex flex-col items-center justify-center pb-6 pt-5">
                     <svg
-                        className={`w-8 h-8 mb-4 transition-colors duration-200 ${
+                        className={`mb-4 h-8 w-8 transition-colors duration-200 ${
                             isDragOver ? "text-blue-500" : "text-gray-500 dark:text-gray-400"
                         }`}
                         aria-hidden="true"

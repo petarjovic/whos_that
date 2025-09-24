@@ -1,16 +1,17 @@
 import multer from "multer";
 import { db, s3 } from "./config/awsConections.ts";
 import type { Express } from "express";
-import { PutObjectCommand, GetObjectCommand, ListObjectsV2Command } from "@aws-sdk/client-s3";
+import { PutObjectCommand, GetObjectCommand } from "@aws-sdk/client-s3";
 import sharp from "sharp";
 import * as schema from "./config/db/schema.ts";
 import { eq, and } from "drizzle-orm";
-import type { CardDataType } from "./config/types.ts";
+import type { CardDataType, CreateGameRequest } from "./config/types.ts";
 import { nanoid } from "nanoid";
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 
 const upload = multer({ storage: multer.memoryStorage() });
 
+//REDO THIS
 function extractS3KeyFromUrl(s3Url: string): string {
     // Handle both URL formats:
     // https://bucket-name.s3.region.amazonaws.com/path/to/file.jpg
@@ -24,54 +25,65 @@ function extractS3KeyFromUrl(s3Url: string): string {
         return pathParts.slice(1).join("/"); // Remove bucket name, keep the rest
     } else {
         // Format: https://bucket-name.s3.region.amazonaws.com/key
-        return url.pathname.substring(1); // Remove leading slash
+        return url.pathname.slice(1); // Remove leading slash
     }
 }
 
 export function setupApiRoutes(app: Express) {
     app.post("/api/createNewGame", upload.array("images", 24), async (req, res) => {
         //ERROR HANDLINHG
-        console.log(req);
+        const body = req.body as CreateGameRequest;
 
-        if (!req.files || !Array.isArray(req.files)) {
+        // Request Validation Redo Later
+        if (!body.title || typeof body.title !== "string") {
+            return res.status(400).json({ message: "Title is required." });
+        } else if (!["public", "private"].includes(body.privacy)) {
+            return res
+                .status(400)
+                .json({ message: "Privacy setting must be 'public' or 'private'." });
+        } else if (!req.files || !Array.isArray(req.files)) {
             //IDK IF THIS IS THE RIGHT WAY TO HANDLE THIS
-            return res.status(400).json({ error: "No files uploaded" });
+            return res.status(400).json({ message: "No files uploaded." });
+        } else if (!Array.isArray(body.names)) {
+            return res.status(400).json({ message: "No character names." });
+        } else if (req.files.length !== body.names.length) {
+            return res
+                .status(400)
+                .json({ message: "Number of files and number of names does not match." });
         }
 
         const fileUploadPromises = [];
 
         const gameItemUrls = [];
         const gameItemNames = [];
-        let newGameId = "";
+        let id = "";
 
         //Create new game entry in database
         try {
-            newGameId = (
-                await db
-                    .insert(schema.games)
-                    .values({
-                        id: nanoid(),
-                        title: req.body.title,
-                        description: "",
-                        isPublic: req.body.privacy === "public",
-                        userId: req.body.user,
-                    })
-                    .returning({ insertedId: schema.games.id })
-            )[0].insertedId; //extract insertedId value
+            [{ insertedId: id }] = await db //extract and asign to id
+                .insert(schema.games)
+                .values({
+                    id: nanoid(),
+                    title: body.title,
+                    description: "",
+                    isPublic: body.privacy === "public",
+                    userId: body.user,
+                })
+                .returning({ insertedId: schema.games.id });
         } catch (error) {
-            console.error("Error creating new game entry: ", error);
-            return res.status(500).json({ error: "Error creating new game entry." });
+            console.error("Error creating new game entry:", error);
+            return res.status(500).json({ message: "Error creating new game entry." });
         }
 
-        if (!newGameId) return res.status(500).json({ error: "Error creating new game entry." }); //Sanity Check
+        if (!id) return res.status(500).json({ error: "Error creating new game entry." }); //Sanity Check
 
         //Create array of promises for uploading game images to S3 bucket
         for (const file of req.files) {
             const buffer = await sharp(file.buffer)
                 .resize({ height: 338 * 2, width: 262 * 2, fit: "cover" })
                 .toBuffer();
-
-            const key = `premadeGames/${req.body.privacy}/${newGameId}/` + file.originalname;
+            const fileExt = file.originalname.split(".").pop() ?? "";
+            const key = `premadeGames/${body.privacy}/${id}/` + nanoid(10) + fileExt;
             const params = {
                 Bucket: process.env.AWS_BUCKET_NAME,
                 Region: process.env.AWS_BUCKET_REGION, //NOT NEEDED?
@@ -86,35 +98,35 @@ export function setupApiRoutes(app: Express) {
             gameItemUrls.push("https://whos-that.s3.amazonaws.com/" + key);
         }
 
-        for (const name of req.body.names) {
+        for (const name of body.names) {
             gameItemNames.push(name);
         }
 
         //Await upload promises
         try {
             const results = await Promise.all(fileUploadPromises);
-            console.log(`Successfully uploaded ${results.length} files`);
+            console.log(`Successfully uploaded ${results.length.toString()} files`);
         } catch (error) {
-            console.error("Error uploading data: ", error);
+            console.error("Error uploading data:", error);
             return res.status(500).json({ message: "Failed to upload one or more files." });
         }
 
         //update gameItems table
         try {
-            for (let i = 0; i < gameItemUrls.length; i++) {
+            for (const [i, gameItemUrl] of gameItemUrls.entries()) {
                 const insertGameItems = await db.insert(schema.gameItems).values({
                     id: nanoid(),
-                    gameId: newGameId,
-                    imageUrl: gameItemUrls[i],
+                    gameId: id,
+                    imageUrl: gameItemUrl,
                     name: gameItemNames[i],
                     orderIndex: i,
                 });
                 console.log(insertGameItems);
             }
             console.log("Successfully updated database.");
-            return res.status(200).json({ message: "Successfully updated database." });
+            return res.status(200).json({ message: "Successfully created new game." });
         } catch (error) {
-            console.error("Error updating db: ", error);
+            console.error("Error updating db:", error);
         }
     });
 
@@ -124,15 +136,14 @@ export function setupApiRoutes(app: Express) {
         const {
             query: { preset: gameId },
         } = req;
-        if (!gameId) return res.status(400).send({ message: "No preset query given." }); //EROROR DO IT RIGFHT ADF:KJDSFLKJSFHLKJFSDK:LFS
+        if (!gameId || typeof gameId !== "string")
+            return res.status(400).send({ message: "Preset query is missing or invalid." }); //Maybe handle better?
 
         try {
-            const isPublic = (
-                await db
-                    .select({ isPublic: schema.games.isPublic })
-                    .from(schema.games)
-                    .where(eq(schema.games.id, gameId as string))
-            )[0].isPublic; //REDO THIS LATER TO BE DONE VIA SOCKET.IO SO THAT PRIVATE GAMES ARE ACC PRIVATE
+            const [{ isPublic }] = await db
+                .select({ isPublic: schema.games.isPublic })
+                .from(schema.games)
+                .where(eq(schema.games.id, gameId)); //REDO THIS LATER TO BE DONE VIA SOCKET.IO SO THAT PRIVATE GAMES ARE ACC PRIVATE
 
             const cardDataList: CardDataType[] = await db
                 .select({
@@ -141,7 +152,7 @@ export function setupApiRoutes(app: Express) {
                     orderIndex: schema.gameItems.orderIndex,
                 })
                 .from(schema.gameItems)
-                .where(eq(schema.gameItems.gameId, gameId as string)); //AS STRING?
+                .where(eq(schema.gameItems.gameId, gameId));
 
             if (isPublic) {
                 return res.status(200).send(cardDataList);
@@ -159,11 +170,10 @@ export function setupApiRoutes(app: Express) {
                         };
                     })
                 );
-                console.log("OK THE PRESIGNED URLS ARE SENT I THINK");
                 return res.status(200).send(cardDataListWithPresignedUrls);
             }
         } catch (error) {
-            console.error("Error: ", error);
+            console.error("Error:", error);
             return res.status(400).json({ message: `Failed to get game: ${gameId}` });
         }
 
@@ -194,7 +204,8 @@ export function setupApiRoutes(app: Express) {
         const {
             query: { userId },
         } = req;
-        if (!userId) return res.status(400).json({ message: "No user-id given." }); //EROROR DO IT RIGFHT ADF:KJDSFLKJSFHLKJFSDK:LFS
+        if (!userId || typeof userId !== "string")
+            return res.status(400).json({ message: "No user-id given." }); //EROROR DO IT RIGFHT ADF:KJDSFLKJSFHLKJFSDK:LFS
         const gameTitleIdImageList = await db
             .select({
                 id: schema.games.id,
@@ -210,7 +221,7 @@ export function setupApiRoutes(app: Express) {
                     eq(schema.gameItems.orderIndex, 0)
                 )
             )
-            .where(eq(schema.games.userId, userId as string));
+            .where(eq(schema.games.userId, userId));
 
         res.send(gameTitleIdImageList.filter(({ imageUrl }) => imageUrl !== null));
     });

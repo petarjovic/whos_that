@@ -45,12 +45,12 @@ const router = createBrowserRouter([
             },
             {
                 path: "/play-game",
-                element: <GameStateManager newGame={true} />,
+                element: <GameStateManager isNewGame={true} />,
                 errorElement: <ErrorPage error={undefined} />, //improve before prod
             },
             {
                 path: "/play-game/:joinGameId",
-                element: <GameStateManager newGame={false} />,
+                element: <GameStateManager isNewGame={false} />,
                 errorElement: <ErrorPage error={undefined} />, //improve before prod
             },
             {
@@ -78,7 +78,7 @@ const router = createBrowserRouter([
     },
 ]);
 
-const rootElement = document.getElementById("root");
+const rootElement = document.querySelector("#root");
 if (!rootElement) {
     throw new Error("Failed to find root element, DOM rapture has occured.");
 }

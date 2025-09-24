@@ -1,13 +1,14 @@
-import { useFetcher, useNavigate } from "react-router";
+import { useNavigation, useNavigate, useSubmit } from "react-router";
 import { authClient } from "../lib/auth-client";
 import { useState } from "react";
 import Dropzone from "../lib/Dropzone.tsx";
 
 const CreateCustomGamePage = () => {
-    const fetcher = useFetcher();
-    const busy = fetcher.state !== "idle";
+    const submit = useSubmit();
+    const navigation = useNavigation();
+    const busy = navigation.state !== "idle";
     const navigate = useNavigate();
-    const acceptedImageTypes = ["image/jpeg", "image/png", "image/webp"];
+    const acceptedImageTypes = new Set(["image/jpeg", "image/png", "image/webp"]);
     const maxSizeBytes = 5 * 1024 * 1024;
     const [useImageNames, setUseImageNames] = useState(true);
     const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
@@ -47,11 +48,11 @@ const CreateCustomGamePage = () => {
 
     const handleFiles = (files: FileList) => {
         if (files.length === 0) return;
-        const fileArray = Array.from(files);
+        const fileArray = [...files];
         const fileErrors: string[] = [];
 
         const validFiles = fileArray.filter((file) => {
-            if (!acceptedImageTypes.includes(file.type)) {
+            if (!acceptedImageTypes.has(file.type)) {
                 fileErrors.push(`${file.name} is of an invalid file type.`);
             } else if (file.size > maxSizeBytes) {
                 fileErrors.push(`${file.name} too large.`);
@@ -67,13 +68,18 @@ const CreateCustomGamePage = () => {
         if (useImageNames)
             setFileNames([
                 ...fileNames,
-                ...validFiles.map((file) => file.name.replace(/\.[^/.]+$/, "").replace(/_/g, " ")),
+                ...validFiles.map((file) =>
+                    file.name.replace(/\.[^./]+$/, "").replaceAll("_", " ")
+                ),
             ]);
-        else setFileNames([...fileNames, ...(Array(validFiles.length).fill("") as string[])]);
+        else {
+            const emptyFileNames = Array.from({ length: validFiles.length }).fill("") as string[];
+            setFileNames([...fileNames, ...emptyFileNames]);
+        }
         console.log(errors);
     };
 
-    const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
         e.stopPropagation();
 
@@ -86,35 +92,31 @@ const CreateCustomGamePage = () => {
 
         formData.append("user", session.user.id);
 
-        // eslint-disable-next-line @typescript-eslint/no-confusing-void-expression
-        const result = await fetcher.submit(formData, {
+        void submit(formData, {
             method: "post",
             action: "/create-game/new/createNewGameAction",
             encType: "multipart/form-data",
+            replace: true,
         });
 
-        console.log(result);
-
-        console.log(Array.from(formData.keys()));
-        console.log(Array.from(formData.values()));
+        console.log([...formData.keys()]);
+        console.log([...formData.values()]);
     };
 
     return (
         <form
-            className="flex justify-between w-5/6 h-full mt-9"
+            className="mt-9 flex h-full w-5/6 justify-between"
             encType="multipart/form-data"
-            onSubmit={(e) => {
-                void handleSubmit(e);
-            }}
+            onSubmit={handleSubmit}
         >
-            <div className="w-[45%] mr-10">
+            <div className="mr-10 w-[45%]">
                 {/* Step 1 */}
-                <div className="bg-white rounded-lg shadow-sm border-1 border-slate-300 p-4 mr-2 mb-3">
+                <div className="border-1 mb-3 mr-2 rounded-lg border-slate-300 bg-white p-4 shadow-sm">
                     <label
                         htmlFor="title"
-                        className="block text-2xl font-medium text-gray-900 m-auto"
+                        className="m-auto block text-2xl font-medium text-gray-900"
                     >
-                        <div className="inline-block bg-blue-500 font-semibold rounded-[50%] w-11 h-11 mr-3 text-white text-center content-center">
+                        <div className="mr-3 inline-block h-11 w-11 content-center rounded-[50%] bg-blue-500 text-center font-semibold text-white">
                             1
                         </div>
                         Give your game a clear title:
@@ -123,16 +125,16 @@ const CreateCustomGamePage = () => {
                         type="text"
                         name="title"
                         placeholder="(E.g. American Presidents, Famous Actors)"
-                        className="bg-gray-50 border font-medium border-slate-400 text-gray-900 text-lg rounded-lg focus:ring-blue-500 focus:border-blue-500 block ml-13 w-5/6 p-2.5"
+                        className="ml-13 block w-5/6 rounded-lg border border-slate-400 bg-gray-50 p-2.5 text-lg font-medium text-gray-900 focus:border-blue-500 focus:ring-blue-500"
                         required
                         minLength={5}
                         maxLength={30}
                     ></input>
                 </div>
                 {/* Step 2 */}
-                <div className="bg-white rounded-lg shadow-sm border-1 border-slate-300 p-4 mr-2 mb-3">
-                    <label className="block whitespace-pre-wrap text-2xl font-medium text-gray-900 m-auto">
-                        <div className="inline-block bg-blue-500 rounded-[50%] font-semibold w-11 h-11 mr-3 text-white text-center content-center whitespace-pre-wrap">
+                <div className="border-1 mb-3 mr-2 rounded-lg border-slate-300 bg-white p-4 shadow-sm">
+                    <label className="m-auto block whitespace-pre-wrap text-2xl font-medium text-gray-900">
+                        <div className="mr-3 inline-block h-11 w-11 content-center whitespace-pre-wrap rounded-[50%] bg-blue-500 text-center font-semibold text-white">
                             2
                         </div>
                         Start uploading your images:{"  "}
@@ -140,9 +142,9 @@ const CreateCustomGamePage = () => {
 
                     <Dropzone fileHandler={handleFiles} />
                     {errors.length > 0 && (
-                        <div className="mb-1 p-2 shadow-xs shadow-red-50 bg-red-50 border border-red-200 rounded-md overflow-y-auto max-h-23">
+                        <div className="shadow-xs max-h-23 mb-1 overflow-y-auto rounded-md border border-red-200 bg-red-50 p-2 shadow-red-50">
                             {errors.map((error, index) => (
-                                <p key={index} className="text-sm text-red-600 ">
+                                <p key={index} className="text-sm text-red-600">
                                     {"Error: " + error}
                                 </p>
                             ))}
@@ -151,7 +153,7 @@ const CreateCustomGamePage = () => {
                     <input
                         type="checkbox"
                         id="image-names"
-                        className="ml-3 h-4 w-4 cursor-pointer transition-all appearance-auto shadow hover:shadow-md border border-slate-300 checked:bg-blue-600 checked:border-blue-600 align-text-bottom"
+                        className="ml-3 h-4 w-4 cursor-pointer appearance-auto border border-slate-300 align-text-bottom shadow transition-all checked:border-blue-600 checked:bg-blue-600 hover:shadow-md"
                         checked={useImageNames}
                         onChange={handleUseImageFilenames}
                     ></input>
@@ -161,9 +163,9 @@ const CreateCustomGamePage = () => {
                     </label>
                 </div>
                 {/* Step 4 */}
-                <div className="flex items-center justify-between bg-white rounded-lg shadow-sm border-1 border-slate-300 p-4 mr-2 mb-5 whitespace-pre-wrap font-medium text-lg text-gray-900">
+                <div className="border-1 mb-5 mr-2 flex items-center justify-between whitespace-pre-wrap rounded-lg border-slate-300 bg-white p-4 text-lg font-medium text-gray-900 shadow-sm">
                     <div className="block text-2xl font-medium text-gray-900">
-                        <div className="inline-block bg-blue-500 font-semibold rounded-[50%] w-11 h-11 mr-3 text-2xl text-white text-center content-center ">
+                        <div className="mr-3 inline-block h-11 w-11 content-center rounded-[50%] bg-blue-500 text-center text-2xl font-semibold text-white">
                             4
                         </div>
                         Game Options:
@@ -173,13 +175,13 @@ const CreateCustomGamePage = () => {
                             type="radio"
                             id="public"
                             value="public"
-                            className="h-5 w-5 cursor-pointer transition-all appearance-auto hover:shadow-md border border-slate-300 checked:bg-blue-600 checked:border-blue-600 align-text-top "
+                            className="h-5 w-5 cursor-pointer appearance-auto border border-slate-300 align-text-top transition-all checked:border-blue-600 checked:bg-blue-600 hover:shadow-md"
                             name="privacy"
                             required
                             checked={isPublic}
                             onChange={handlePrivacyChange}
                         ></input>
-                        <label htmlFor="public" className="align-middle mr-5">
+                        <label htmlFor="public" className="mr-5 align-middle">
                             {" "}
                             Public
                         </label>
@@ -187,7 +189,7 @@ const CreateCustomGamePage = () => {
                             type="radio"
                             id="private"
                             value="private"
-                            className="h-5 w-5 cursor-pointer transition-all appearance-auto  hover:shadow-md border border-slate-300 checked:bg-blue-600 checked:border-blue-600 align-text-top"
+                            className="h-5 w-5 cursor-pointer appearance-auto border border-slate-300 align-text-top transition-all checked:border-blue-600 checked:bg-blue-600 hover:shadow-md"
                             name="privacy"
                             required
                             checked={!isPublic}
@@ -202,16 +204,16 @@ const CreateCustomGamePage = () => {
             </div>
             <div className="flex-1">
                 {/* Step 3 */}
-                <div className="bg-white rounded-lg shadow-sm border-1 border-slate-300 p-4 mr-2 mb-3">
-                    <h3 className="text-2xl font-semibold text-gray-900 mb-2 whitespace-pre-wrap">
-                        <div className="inline-block bg-blue-500 font-bold rounded-[50%] w-11 h-11 mr-3 text-white text-center content-center">
+                <div className="border-1 mb-3 mr-2 rounded-lg border-slate-300 bg-white p-4 shadow-sm">
+                    <h3 className="mb-2 whitespace-pre-wrap text-2xl font-semibold text-gray-900">
+                        <div className="mr-3 inline-block h-11 w-11 content-center rounded-[50%] bg-blue-500 text-center font-bold text-white">
                             3
                         </div>
                         {selectedFiles.length > 0
                             ? "Character List: "
                             : "Your Characters Will Appear Here:  "}
                         <button
-                            className={`float-right px-2 mr-5 w-fit h-11 text-xl text-neutral-100 font-semibold border-b-8 border-x-1 border-slate-500 bg-slate-400 hover:bg-slate-500 hover:border-slate-600 rounded-md cursor-pointer shadow-md text-shadow-xs active:border-none active:translate-y-[1px] active:shadow-2xs active:inset-shadow-md ${
+                            className={`border-x-1 text-shadow-xs active:shadow-2xs active:inset-shadow-md float-right mr-5 h-11 w-fit cursor-pointer rounded-md border-b-8 border-slate-500 bg-slate-400 px-2 text-xl font-semibold text-neutral-100 shadow-md hover:border-slate-600 hover:bg-slate-500 active:translate-y-[1px] active:border-none ${
                                 selectedFiles.length > 0 ? "" : "hidden"
                             }`}
                             disabled={busy}
@@ -221,7 +223,7 @@ const CreateCustomGamePage = () => {
                             Clear List
                         </button>
                     </h3>
-                    <div className="bg-gray-50 border border-gray-200 rounded-md overflow-y-auto max-h-135 shadow-sm mt-3">
+                    <div className="max-h-135 mt-3 overflow-y-auto rounded-md border border-gray-200 bg-gray-50 shadow-sm">
                         {selectedFiles.length > 0 ? (
                             selectedFiles.map((file, index) => (
                                 <div
@@ -231,47 +233,48 @@ const CreateCustomGamePage = () => {
                                     }`}
                                 >
                                     <button
-                                        className="ml-5 text-lg hover:underline hover:cursor-pointer"
+                                        className="ml-5 text-lg hover:cursor-pointer hover:underline"
                                         onClick={() => {
                                             handleRemoveImage(index);
                                         }}
+                                        type="button"
                                     >
                                         X
                                     </button>
-                                    <div className="text-2xl font-bold mx-5">{index + 1}</div>
+                                    <div className="mx-5 text-2xl font-bold">{index + 1}</div>
                                     <img
                                         src={URL.createObjectURL(file)}
                                         alt={file.name}
-                                        className="w-20 h-30 object-cover rounded border border-gray-300 flex-shrink-0 mr-6"
+                                        className="h-30 mr-6 w-20 flex-shrink-0 rounded border border-gray-300 object-cover"
                                     />
-                                    <div className="flex-1 min-w-0">
+                                    <div className="min-w-0 flex-1">
                                         <input
                                             type="text"
                                             value={fileNames[index] || ""}
                                             onChange={(e) => {
-                                                const newNames = [...fileNames];
-                                                newNames[index] = e.target.value;
-                                                setFileNames(newNames);
+                                                const names = [...fileNames];
+                                                names[index] = e.target.value;
+                                                setFileNames(names);
                                             }}
-                                            className="text-xl align-sub font-bold text-gray-700 bg-transparent border-none outline-none w-9/10 focus:bg-white focus:border-2 focus:border-black px-1 py-0.5 rounded-md"
+                                            className="w-9/10 rounded-md border-none bg-transparent px-1 py-0.5 align-sub text-xl font-bold text-gray-700 outline-none focus:border-2 focus:border-black focus:bg-white"
                                             placeholder="(Enter character name)"
                                         />
                                     </div>
                                 </div>
                             ))
                         ) : (
-                            <p className="text-sm text-gray-500 italic p-10">No images uploaded</p>
+                            <p className="p-10 text-sm italic text-gray-500">No images uploaded</p>
                         )}
                     </div>
                     {selectedFiles.length > 24 ? (
-                        <p className="p-2 shadow-xs shadow-red-50 bg-red-50 border border-red-200 rounded-md text-red-500 mt-2">
+                        <p className="shadow-xs mt-2 rounded-md border border-red-200 bg-red-50 p-2 text-red-500 shadow-red-50">
                             You have too many characters! There is a maximum of 24.
                         </p>
                     ) : (
                         <></>
                     )}
                     {selectedFiles.length < 6 ? (
-                        <p className="p-2 bg-amber-50 border border-amber-200 rounded-md text-slate-500 mt-2">
+                        <p className="mt-2 rounded-md border border-amber-200 bg-amber-50 p-2 text-slate-500">
                             Need at least 6 characters!
                         </p>
                     ) : (
@@ -279,7 +282,7 @@ const CreateCustomGamePage = () => {
                     )}
                 </div>
                 <button
-                    className="float-right px-2 mr-5 w-42 h-17 text-2xl text-neutral-100 font-bold border-b-9 border-x-1 border-blue-600 bg-blue-500 hover:bg-blue-600 hover:border-blue-700 rounded-md cursor-pointer shadow-md text-shadow-xs active:border-none active:translate-y-[1px] active:shadow-2xs  active:inset-shadow-md"
+                    className="w-42 h-17 border-b-9 border-x-1 text-shadow-xs active:shadow-2xs active:inset-shadow-md float-right mr-5 cursor-pointer rounded-md border-blue-600 bg-blue-500 px-2 text-2xl font-bold text-neutral-100 shadow-md hover:border-blue-700 hover:bg-blue-600 active:translate-y-[1px] active:border-none"
                     type="submit"
                     disabled={busy}
                 >

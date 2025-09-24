@@ -1,25 +1,21 @@
-export type ResponseType = {
+export interface ResponseType {
     success: boolean;
     msg: string;
-};
+}
 
-export type GameIdMapType = {
-    [gameId: string]: GameStateType;
-};
-
-export type GameStateType = {
+export interface GameStateType {
     players: [string, string];
     cardIdsToGuess: [number, number];
     playAgainReqs: [boolean, boolean];
     preset: string;
     numOfChars: number;
-};
+}
 
-export type CardDataType = {
+export interface CardDataType {
     imageUrl: string;
     name: string;
     orderIndex: number;
-};
+}
 
 export interface ServerToClientEvents {
     playerJoined: (gameState: GameStateType) => void;
@@ -41,4 +37,11 @@ export interface ClientToServerEvents {
     ) => void;
     guess: (gameId: string, guessCorrectness: boolean) => void;
     playAgain: (gameId: string) => void;
+}
+
+export interface CreateGameRequest {
+    title: string;
+    privacy: "public" | "private";
+    user: string;
+    names: string[];
 }

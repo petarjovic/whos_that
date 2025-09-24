@@ -8,7 +8,7 @@ const ErrorPage = ({ error = null }: { error: unknown }) => {
         console.error(error);
     } else {
         console.error(
-            "I have no idea how this state could be reached. Panic. All possible errors: ",
+            "I have no idea how this state could be reached. Panic. All possible errors:",
             routeError,
             error
         );
@@ -16,12 +16,12 @@ const ErrorPage = ({ error = null }: { error: unknown }) => {
 
     return (
         <>
-            <h1 className="my-20 font-bold text-2xl">
+            <h1 className="my-20 text-2xl font-bold">
                 Oh No! There was some sort of error 😞 The server might be down or the spagetthi
                 code might be acting up. Click below to maybe restart. ❌
             </h1>
             <Link to={"/"}>
-                <button className="mt-[2vh] px-4 py-1 w-fill h-18 text-2xl text-neutral-100 font-bold border-b-9 border-x-1 border-blue-600 bg-blue-500 hover:bg-blue-600 hover:border-blue-700 rounded-md cursor-pointer shadow-md text-shadow-xs active:border-none active:translate-y-[1px] active:shadow-2xs  active:inset-shadow-md ">
+                <button className="w-fill h-18 border-b-9 border-x-1 text-shadow-xs active:shadow-2xs active:inset-shadow-md mt-[2vh] cursor-pointer rounded-md border-blue-600 bg-blue-500 px-4 py-1 text-2xl font-bold text-neutral-100 shadow-md hover:border-blue-700 hover:bg-blue-600 active:translate-y-[1px] active:border-none">
                     Home Page
                 </button>
             </Link>

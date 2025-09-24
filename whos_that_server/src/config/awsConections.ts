@@ -5,12 +5,12 @@ import { fromEnv } from "@aws-sdk/credential-providers";
 import * as schema from "./db/schema.ts";
 
 const pool = new Pool({
-    connectionString: process.env.AWS_RDS_URL!,
+    connectionString: process.env.AWS_RDS_URL ?? "", //HANDLE BETTER LATER
     ssl: {
         rejectUnauthorized: false, // TODO: improve for production
     },
     max: 20,
-    idleTimeoutMillis: 30000,
+    idleTimeoutMillis: 30_000,
     connectionTimeoutMillis: 2000,
 });
 

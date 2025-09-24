@@ -1,5 +1,5 @@
 import { nanoid } from "nanoid";
-import type { GameIdMapType, ClientToServerEvents, ServerToClientEvents } from "./config/types";
+import type { GameStateType, ClientToServerEvents, ServerToClientEvents } from "./config/types";
 import type { Server } from "socket.io";
 
 //redo with server logic redo
@@ -9,7 +9,7 @@ function winningKeyGenerator(max: number): [number, number] {
     return [winningKeyOne, winningKeyTwo];
 }
 
-const gamesIdMap: GameIdMapType = {}; // store active games in memory
+const activeRoomIdsMap = new Map<string, GameStateType>(); //Active Games
 
 export function setupSocketEventHandlers(io: Server<ClientToServerEvents, ServerToClientEvents>) {
     io.on("connection", (socket) => {
@@ -18,14 +18,14 @@ export function setupSocketEventHandlers(io: Server<ClientToServerEvents, Server
         // Create a new game
         socket.on("createGame", (preset, numOfChars, ack) => {
             let gameId = nanoid(6);
-            while (gameId in gamesIdMap) gameId = nanoid(6); //setTimeout??
-            gamesIdMap[gameId] = {
+            while (gameId in activeRoomIdsMap) gameId = nanoid(6); //setTimeout??
+            activeRoomIdsMap.set(gameId, {
                 players: ["", ""],
                 playAgainReqs: [false, false],
                 cardIdsToGuess: winningKeyGenerator(numOfChars),
                 preset: preset,
                 numOfChars: numOfChars,
-            };
+            });
 
             //socket.emit("gameCreated", [gameId, games[gameId]]);
             ack(gameId, { success: true, msg: `Created game ${gameId} successfully.` });
@@ -34,18 +34,18 @@ export function setupSocketEventHandlers(io: Server<ClientToServerEvents, Server
 
         //join game
         socket.on("joinGame", (gameId, ack) => {
-            if (gameId in gamesIdMap) {
-                const gameState = gamesIdMap[gameId];
+            const gameState = activeRoomIdsMap.get(gameId);
+            if (gameState) {
                 const players = gameState.players;
 
                 if (!players.includes(socket.id) && players.includes("")) {
                     players[players.indexOf("")] = socket.id;
 
-                    socket.join(gameId);
+                    void socket.join(gameId);
                     socket.to(gameId).emit("playerJoined", gameState);
 
                     console.log(
-                        `Player ${socket.id} joined game ${gameId}. Current game state: `,
+                        `Player ${socket.id} joined game ${gameId}. Current game state:`,
                         gameState
                     );
                     ack(gameState, { success: true, msg: `Joined game ${gameId} successfuly.` });
@@ -73,53 +73,58 @@ export function setupSocketEventHandlers(io: Server<ClientToServerEvents, Server
 
         socket.on("guess", (gameId, guessCorrectness) => {
             console.log(
-                `Recieved correctness of guess by player: ${socket.id} in game: ${gameId}, ${guessCorrectness}`
+                `Recieved correctness of guess by player: ${
+                    socket.id
+                } in game: ${gameId}, ${guessCorrectness.toString()}`
             );
 
             socket.to(gameId).emit("recieveOppGuess", guessCorrectness);
         });
 
         socket.on("disconnecting", () => {
-            socket.rooms.forEach((room: string) => {
-                if (room in gamesIdMap) {
-                    const players = gamesIdMap[room].players;
+            for (const roomId of socket.rooms) {
+                const gameState = activeRoomIdsMap.get(roomId);
+                if (gameState) {
+                    const players = gameState.players;
                     players[players.indexOf(socket.id)] = "";
-                    gamesIdMap[room].playAgainReqs = [false, false];
-                    gamesIdMap[room].cardIdsToGuess = winningKeyGenerator(
-                        gamesIdMap[room].numOfChars
-                    );
-
-                    if (!players.every((p) => p === "")) {
-                        console.log(
-                            `Player ${socket.id} disconnected from ${room}. Current game state: `,
-                            gamesIdMap[room]
-                        );
-                        socket.to(room).emit("opponentDisconnted", gamesIdMap[room]);
+                    gameState.playAgainReqs = [false, false];
+                    gameState.cardIdsToGuess = winningKeyGenerator(gameState.numOfChars);
+                    console.log([players]);
+                    if (players.every((p) => p !== "")) {
+                        activeRoomIdsMap.delete(roomId);
+                        console.log("Deleted room:", roomId);
                     } else {
-                        console.log("Deleting: ", room, gamesIdMap[room].players, socket.id);
-                        delete gamesIdMap[room];
-                        console.log("Deleted: ", room);
+                        console.log(`Player ${socket.id} disconnected from ${roomId}.`);
+                        socket.to(roomId).emit("opponentDisconnted", gameState);
                     }
                 }
-            });
-            console.log("User disconnected: ", socket.id);
+            }
+            console.log("User disconnected:", socket.id);
         });
 
-        socket.on("playAgain", (room) => {
-            const index = gamesIdMap[room].players.indexOf(socket.id);
-
-            if (index !== -1) {
-                gamesIdMap[room].playAgainReqs[index] = true;
-                if (gamesIdMap[room].playAgainReqs.every((bool) => bool)) {
-                    gamesIdMap[room].cardIdsToGuess = winningKeyGenerator(
-                        gamesIdMap[room].numOfChars
-                    );
-                    gamesIdMap[room].playAgainReqs = [false, false];
-                    io.to(room).emit("playAgainConfirmed", gamesIdMap[room]);
+        socket.on("playAgain", (roomId) => {
+            const gameState = activeRoomIdsMap.get(roomId);
+            if (gameState) {
+                const playerIndex = gameState.players.indexOf(socket.id);
+                if (playerIndex === -1) {
+                    const playerNotInRoom = `Player ${socket.id} requesting to play again was not found in game ${roomId} .`;
+                    io.to(roomId).emit("errorMessage", {
+                        message: playerNotInRoom,
+                    });
+                } else {
+                    gameState.playAgainReqs[playerIndex] = true;
+                    if (gameState.playAgainReqs.every(Boolean)) {
+                        //Both players agree to play again, reset state
+                        gameState.cardIdsToGuess = winningKeyGenerator(gameState.numOfChars);
+                        gameState.playAgainReqs = [false, false];
+                        io.to(roomId).emit("playAgainConfirmed", gameState);
+                    }
                 }
             } else {
-                io.to(room).emit("errorMessage", {
-                    message: `Player ${socket.id} requesting to play again was not found in game ${room} .`,
+                const roomDoesNotExist = `Player: ${socket.id} sent play again request to room: ${roomId} which does not exist.`;
+                console.error(roomDoesNotExist);
+                io.to(roomId).emit("errorMessage", {
+                    message: roomDoesNotExist,
                 });
             }
         });

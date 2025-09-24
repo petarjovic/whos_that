@@ -27,8 +27,8 @@ const SignInPage = () => {
         }
     };
     return (
-        <div className="bg-white rounded-lg shadow-2xl p-8 max-w-md w-full mt-20 tracking-wide">
-            <h2 className="text-2xl font-bold text-center text-zinc-900 mb-6">Sign In</h2>
+        <div className="mt-20 w-full max-w-md rounded-lg bg-white p-8 tracking-wide shadow-2xl">
+            <h2 className="mb-6 text-center text-2xl font-bold text-zinc-900">Sign In</h2>
             <form
                 id="signInForm"
                 onSubmit={(e) => {
@@ -36,13 +36,13 @@ const SignInPage = () => {
                 }}
             >
                 <div className="mb-4">
-                    <label htmlFor="username" className="block text-zinc-800 font-semibold mb-2">
+                    <label htmlFor="username" className="mb-2 block font-semibold text-zinc-800">
                         Username or Email
                     </label>
                     <input
                         type="text"
                         id="existing-username"
-                        className="w-full px-4 py-2 border border-gray-400 rounded-lg focus:outline-none focus:ring-2 focus:border-gray-100 focus:ring-blue-400 placeholder:text-gray-400 inset-shadow-md hover:shadow-sm hover:inset-shadow-lg"
+                        className="inset-shadow-md hover:inset-shadow-lg w-full rounded-lg border border-gray-400 px-4 py-2 placeholder:text-gray-400 hover:shadow-sm focus:border-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-400"
                         placeholder="Enter your username or email"
                         autoComplete="email"
                         onChange={(e) => {
@@ -56,13 +56,13 @@ const SignInPage = () => {
                     </p> */}
                 </div>
                 <div className="mb-4">
-                    <label htmlFor="password" className="block text-zinc-800 font-semibold mb-2">
+                    <label htmlFor="password" className="mb-2 block font-semibold text-zinc-800">
                         Password
                     </label>
                     <input
                         type="password"
                         id="existing-password"
-                        className="w-full px-4 py-2 border border-gray-400 rounded-lg focus:outline-none focus:ring-2 focus:border-gray-100 focus:ring-blue-400 placeholder:text-gray-400 inset-shadow-md hover:shadow-sm hover:inset-shadow-lg"
+                        className="inset-shadow-md hover:inset-shadow-lg w-full rounded-lg border border-gray-400 px-4 py-2 placeholder:text-gray-400 hover:shadow-sm focus:border-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-400"
                         placeholder="********"
                         autoComplete="current-password"
                         onChange={(e) => {
@@ -78,14 +78,14 @@ const SignInPage = () => {
 
                 <button
                     type="submit"
-                    className="w-full bg-blue-500 text-white py-2 rounded-lg font-semibold hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-400 focus:ring-opacity-50 hover:shadow-md"
+                    className="w-full rounded-lg bg-blue-500 py-2 font-semibold text-white hover:bg-blue-600 hover:shadow-md focus:outline-none focus:ring-2 focus:ring-blue-400 focus:ring-opacity-50"
                 >
                     Log In
                 </button>
             </form>
-            <p className="text-center text-gray-600 mt-4">
+            <p className="mt-4 text-center text-gray-600">
                 Don&apos;t have an account yet?{" "}
-                <Link to="/sign-up" className="text-blue-500 font-semibold hover:underline">
+                <Link to="/sign-up" className="font-semibold text-blue-500 hover:underline">
                     Sign Up
                 </Link>
             </p>

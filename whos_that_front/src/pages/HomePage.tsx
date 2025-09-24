@@ -13,20 +13,20 @@ const HomePage = () => {
     return (
         <div className="mt-50 text-center">
             <button
-                className="mx-4 px-5 w-fill h-18 text-2xl text-white font-bold border-b-9 border-x-1 border-blue-600 bg-blue-500 hover:bg-blue-600 hover:border-blue-700 rounded-md cursor-pointer shadow-md text-shadow-xs/30 active:border-b-1 active:translate-y-[1px] active:shadow-2xs  active:inset-shadow-md "
+                className="w-fill h-18 border-b-9 border-x-1 text-shadow-xs/30 active:border-b-1 active:shadow-2xs active:inset-shadow-md mx-4 cursor-pointer rounded-md border-blue-600 bg-blue-500 px-5 text-2xl font-bold text-white shadow-md hover:border-blue-700 hover:bg-blue-600 active:translate-y-[1px]"
                 onClick={() => {
                     void navigate("/create-game");
                 }}
             >
                 Play New Game
             </button>
-            <p className="font-digitag mt-35 text-5xl font-bold text-white text-shadow-sm">OR</p>
+            <p className="font-digitag mt-35 text-shadow-sm text-5xl font-bold text-white">OR</p>
             <form className="mt-35 items-center" onSubmit={handleJoinExistingGame}>
                 <input
                     id="gameIdInput"
                     name="gameIdInput"
                     type="text"
-                    className="align-sub bg-white placeholder:text-gray-400 text-slate-700 text-2xl border border-slate-200 rounded-md px-3 py-2 transition duration-300 ease focus:outline-none focus:border-slate-400 hover:border-slate-300 shadow-sm hover:shadow-md focus:shadow-lg"
+                    className="ease rounded-md border border-slate-200 bg-white px-3 py-2 align-sub text-2xl text-slate-700 shadow-sm transition duration-300 placeholder:text-gray-400 hover:border-slate-300 hover:shadow-md focus:border-slate-400 focus:shadow-lg focus:outline-none"
                     required
                     minLength={6}
                     maxLength={6}
@@ -37,7 +37,7 @@ const HomePage = () => {
                     }}
                 />
                 <button
-                    className="mx-4 px-4 w-fill h-15 text-2xl text-white font-bold border-b-9 border-x-1 border-blue-600 bg-blue-500 hover:bg-blue-600 hover:border-blue-700 rounded-md cursor-pointer shadow-md text-shadow-xs/30 active:border-b-1 active:translate-y-[1px] active:shadow-2xs  active:inset-shadow-md"
+                    className="w-fill h-15 border-b-9 border-x-1 text-shadow-xs/30 active:border-b-1 active:shadow-2xs active:inset-shadow-md mx-4 cursor-pointer rounded-md border-blue-600 bg-blue-500 px-4 text-2xl font-bold text-white shadow-md hover:border-blue-700 hover:bg-blue-600 active:translate-y-[1px]"
                     type="submit"
                 >
                     Join Existing Game

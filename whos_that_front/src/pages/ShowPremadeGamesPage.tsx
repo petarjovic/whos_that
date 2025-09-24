@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router";
 import { CardLayout } from "../layouts/Cards.tsx";
-import type { ServerErrorResponse } from "../lib/types.ts";
+import type { ServerResponse } from "../lib/types.ts";
 import { authClient } from "../lib/auth-client.ts";
 
 type preMadeGamesListType = {
@@ -32,13 +32,13 @@ const ShowPremadeGamesPage = ({ myGames }: { myGames: boolean }) => {
                         }
                     );
 
-                    if (!response.ok) {
-                        const errorData = (await response.json()) as ServerErrorResponse;
-                        throw new Error(errorData.message || "Failed to get premadeGames");
+                    if (response.ok) {
+                        const result = (await response.json()) as preMadeGamesListType;
+                        setPremadeGamesList(result);
+                    } else {
+                        const errorData = (await response.json()) as ServerResponse;
+                        throw new Error(errorData.message || "Failed to get premadeGames.");
                     }
-
-                    const result = (await response.json()) as preMadeGamesListType;
-                    setPremadeGamesList(result);
                 } catch (error) {
                     console.error("Error:", error);
                     return error; //fix error handling
@@ -46,7 +46,7 @@ const ShowPremadeGamesPage = ({ myGames }: { myGames: boolean }) => {
             };
             void getPremadeGames();
         } else if ((!isPending && myGames && !session) || authError) void navigate("/");
-    }, [myGames, session, isPending, authError]);
+    }, [myGames, session, isPending, authError, navigate]);
 
     const premadeGames = premadeGamesList.map(({ id, title, imageUrl }, i) => (
         <Link key={i} to={`/play-game?preset=${id}`}>
@@ -57,7 +57,7 @@ const ShowPremadeGamesPage = ({ myGames }: { myGames: boolean }) => {
     ));
 
     return (
-        <div id="gameboard" className="flex flex-wrap items-center justify-evenly mx-10 mt-10">
+        <div id="gameboard" className="mx-10 mt-10 flex flex-wrap items-center justify-evenly">
             {premadeGames}
         </div>
     );

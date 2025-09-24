@@ -1,6 +1,6 @@
 import black from "../assets/black.jpg";
 import { useState, useEffect } from "react";
-import type { EndStateType } from "../lib/types";
+import type { EndStateType } from "../lib/types.ts";
 
 interface CardLayoutProps {
     children: React.ReactNode;
@@ -10,12 +10,9 @@ interface CardLayoutProps {
 
 export const CardLayout = ({ children, name, imgSrc }: CardLayoutProps) => {
     return (
-        <figure
-            className="border-3 border-gray-200 flex flex-col justify-between bg-gray-200 h-100 w-66 rounded-lg overflow-hidden mx-1 my-2.5 
-            shadow-xs/15 hover:shadow-xl/30 transition-shadow hover:translate-y-[-1px]"
-        >
-            <img className="object-fill h-[84.5%] max-h-[85%] rounded-xs" src={imgSrc} alt={name} />
-            <figcaption className=" text-zinc-900 relative bottom-0.75 text-center text-xl font-bold m-auto h-[4.5%] w-full">
+        <figure className="border-3 h-100 w-66 shadow-xs/15 hover:shadow-xl/30 mx-1 my-2.5 flex flex-col justify-between overflow-hidden rounded-lg border-gray-200 bg-gray-200 transition-shadow hover:translate-y-[-1px]">
+            <img className="rounded-xs h-[84.5%] max-h-[85%] object-fill" src={imgSrc} alt={name} />
+            <figcaption className="bottom-0.75 relative m-auto h-[4.5%] w-full text-center text-xl font-bold text-zinc-900">
                 {name}
             </figcaption>
             {children}
@@ -40,20 +37,20 @@ export const Card = ({ name, imgSrc, winner, openConfirmModal, resetOnNewGame }:
     return (
         <>
             <CardLayout name={name} imgSrc={flipped ? black : imgSrc}>
-                <div className="box-content flex justify-between h-[9.5%] border-t-3 border-gray-200">
+                <div className="border-t-3 box-content flex h-[9.5%] justify-between border-gray-200">
                     <button
-                        className="text-lg text-neutral-100 font-bold bg-green-600 hover:bg-green-800 border-gray-200 px-1 h-full w-[35%] border-r-3 cursor-pointer rounded-sm text-shadow-xs text-center"
+                        className="border-r-3 text-shadow-xs h-full w-[35%] cursor-pointer rounded-sm border-gray-200 bg-green-600 px-1 text-center text-lg font-bold text-neutral-100 hover:bg-green-800"
                         onClick={() => {
                             openConfirmModal(winner);
                         }}
                     >
                         Guess
                     </button>
-                    <div className="relative top-0.5 text-2xl font-bold m-auto text-center align-sub">
+                    <div className="relative top-0.5 m-auto text-center align-sub text-2xl font-bold">
                         ❓
                     </div>
                     <button
-                        className="text-lg text-neutral-100 font-bold  bg-red-600 hover:bg-red-800 border-gray-200 px-1 h-full w-[35%] border-l-3 cursor-pointer rounded-md text-center"
+                        className="border-l-3 h-full w-[35%] cursor-pointer rounded-md border-gray-200 bg-red-600 px-1 text-center text-lg font-bold text-neutral-100 hover:bg-red-800"
                         onClick={() => {
                             setFlipped(!flipped);
                         }}
@@ -69,7 +66,7 @@ export const Card = ({ name, imgSrc, winner, openConfirmModal, resetOnNewGame }:
 export const OpponentTargetCard = ({ name, imgSrc }: { name: string; imgSrc: string }) => {
     return (
         <CardLayout name={name} imgSrc={imgSrc}>
-            <p className="text-center text-lg font-bold m-auto h-full bg-gray-200 w-full mt-2">
+            <p className="m-auto mt-2 h-full w-full bg-gray-200 text-center text-lg font-bold">
                 Your Opponent has to Guess
             </p>
         </CardLayout>
