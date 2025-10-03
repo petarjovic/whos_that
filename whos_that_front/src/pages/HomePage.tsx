@@ -11,9 +11,9 @@ const HomePage = () => {
     };
 
     return (
-        <div className="mt-50 text-center">
+        <div className="mt-40 text-center">
             <button
-                className="w-fill h-18 border-b-9 border-x-1 text-shadow-xs/30 active:border-b-1 active:shadow-2xs active:inset-shadow-md mx-4 cursor-pointer rounded-md border-blue-600 bg-blue-500 px-5 text-2xl font-bold text-white shadow-md hover:border-blue-700 hover:bg-blue-600 active:translate-y-[1px]"
+                className="w-fill h-18 border-b-9 border-x-1 text-shadow-xs/30 active:border-b-1 active:shadow-2xs active:inset-shadow-md mx-4 cursor-pointer rounded-md border-blue-600 bg-blue-500 px-5 text-2xl font-semibold text-white shadow-md hover:border-blue-700 hover:bg-blue-600 active:translate-y-[1px]"
                 onClick={() => {
                     void navigate("/create-game");
                 }}
@@ -26,7 +26,7 @@ const HomePage = () => {
                     id="gameIdInput"
                     name="gameIdInput"
                     type="text"
-                    className="ease rounded-md border border-slate-200 bg-white px-3 py-2 align-sub text-2xl text-slate-700 shadow-sm transition duration-300 placeholder:text-gray-400 hover:border-slate-300 hover:shadow-md focus:border-slate-400 focus:shadow-lg focus:outline-none"
+                    className="inset-shadow-sm shadow-xs rounded-md border border-cyan-500 bg-white p-2.5 align-sub text-2xl text-slate-700 transition-all duration-300 placeholder:text-gray-400 hover:border-slate-300 hover:shadow-md focus:border-slate-400 focus:shadow-lg focus:outline-none"
                     required
                     minLength={6}
                     maxLength={6}
@@ -37,7 +37,7 @@ const HomePage = () => {
                     }}
                 />
                 <button
-                    className="w-fill h-15 border-b-9 border-x-1 text-shadow-xs/30 active:border-b-1 active:shadow-2xs active:inset-shadow-md mx-4 cursor-pointer rounded-md border-blue-600 bg-blue-500 px-4 text-2xl font-bold text-white shadow-md hover:border-blue-700 hover:bg-blue-600 active:translate-y-[1px]"
+                    className="w-fill h-15 border-b-9 border-x-1 text-shadow-xs/30 active:border-b-1 active:shadow-2xs active:inset-shadow-md duration-5 mx-4 cursor-pointer rounded-md border-blue-600 bg-blue-500 px-4 text-2xl font-bold text-white shadow-md transition-all hover:border-blue-700 hover:bg-blue-600 active:translate-y-[1px]"
                     type="submit"
                 >
                     Join Existing Game
@@ -48,3 +48,4 @@ const HomePage = () => {
 };
 
 export default HomePage;
+

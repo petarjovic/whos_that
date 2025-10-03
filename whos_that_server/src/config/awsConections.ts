@@ -3,6 +3,7 @@ import { Pool } from "pg";
 import { S3Client } from "@aws-sdk/client-s3";
 import { fromEnv } from "@aws-sdk/credential-providers";
 import * as schema from "./db/schema.ts";
+import { CloudFrontClient } from "@aws-sdk/client-cloudfront";
 
 const pool = new Pool({
     connectionString: process.env.AWS_RDS_URL ?? "", //HANDLE BETTER LATER
@@ -19,4 +20,8 @@ export const db = drizzle(pool, { schema });
 export const s3 = new S3Client({
     credentials: fromEnv(),
     region: process.env.AWS_BUCKET_REGION,
+});
+
+export const cloudFront = new CloudFrontClient({
+    credentials: fromEnv(),
 });

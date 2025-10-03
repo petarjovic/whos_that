@@ -16,6 +16,7 @@ app.use(
         credentials: true,
     })
 );
+app.use(express.json());
 app.all("/api/auth/{*any}", toNodeHandler(auth));
 
 const server = http.createServer(app);

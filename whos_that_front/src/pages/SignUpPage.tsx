@@ -17,7 +17,8 @@ const SignUpPage = () => {
         error, //error object
     } = authClient.useSession(); //ERROR HANDLING
 
-    if (session) void navigate("/");
+    if (isPending) return <div>Loading...</div>;
+    else if (session) void navigate("/");
 
     const handleSignUp = async (e: FormEvent) => {
         //ERROR HANDLING

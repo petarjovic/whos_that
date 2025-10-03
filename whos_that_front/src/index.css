@@ -6,6 +6,16 @@
     * {
         font-family: Arial, sans-serif;
     }
+    select,
+    ::picker(select) {
+        appearance: base-select;
+    }
+    select::picker-icon {
+        display: none;
+    }
+    option::checkmark {
+        display: none;
+    }
 }
 
 @font-face {
@@ -17,3 +27,4 @@
     --font-digitag: "Digitag", Arial, sans-serif;
     --font-sedgwick: "Sedgwick Ave", Arial, sans-serif;
 }
+

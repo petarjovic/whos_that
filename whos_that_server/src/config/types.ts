@@ -11,10 +11,22 @@ export interface GameStateType {
     numOfChars: number;
 }
 
-export interface CardDataType {
-    imageUrl: string;
+interface CardDataType {
     name: string;
     orderIndex: number;
+}
+
+export interface CardDataIdType extends CardDataType {
+    gameItemId: string;
+}
+
+export interface CardDataUrlType extends CardDataType {
+    imageUrl: string;
+} //??
+
+export interface GameDataType {
+    title: string;
+    cardData: CardDataUrlType[];
 }
 
 export interface ServerToClientEvents {
@@ -43,5 +55,9 @@ export interface CreateGameRequest {
     title: string;
     privacy: "public" | "private";
     user: string;
-    names: string[];
+    namesAndFileTypes: { type: string; name: string }[];
+}
+
+export interface CreateGameResponse {
+    [charName: string]: { signedUrl: string; itemId: string };
 }

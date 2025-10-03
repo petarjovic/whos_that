@@ -14,6 +14,7 @@ import CreateCustomGamePage from "./pages/CustomGamePage.tsx";
 import * as Actions from "./logic/Actions.tsx";
 import SignUpPage from "./pages/SignUpPage.tsx";
 import SignInPage from "./pages/SignInPage.tsx";
+import AccountPage from "./pages/AccountPage.tsx";
 
 ReactModal.setAppElement("#root");
 
@@ -64,6 +65,11 @@ const router = createBrowserRouter([
                 errorElement: <ErrorPage error={undefined} />, //improve before prod
             },
             {
+                path: "/account",
+                element: <AccountPage />,
+                errorElement: <ErrorPage error={undefined} />, //improve before prod
+            },
+            {
                 path: "/login",
                 element: <SignInPage />,
                 errorElement: <ErrorPage error={undefined} />, //improve before prod
@@ -88,3 +94,4 @@ createRoot(rootElement).render(
         <RouterProvider router={router} />
     </StrictMode>
 );
+

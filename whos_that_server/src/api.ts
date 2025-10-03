@@ -1,36 +1,49 @@
-import multer from "multer";
-import { db, s3 } from "./config/awsConections.ts";
+import { db, s3, cloudFront } from "./config/awsConections.ts";
 import type { Express } from "express";
-import { PutObjectCommand, GetObjectCommand } from "@aws-sdk/client-s3";
-import sharp from "sharp";
+import { PutObjectCommand, GetObjectCommand, DeleteObjectCommand } from "@aws-sdk/client-s3";
 import * as schema from "./config/db/schema.ts";
 import { eq, and } from "drizzle-orm";
-import type { CardDataType, CreateGameRequest } from "./config/types.ts";
+import type {
+    CardDataIdType,
+    CardDataUrlType,
+    CreateGameRequest,
+    CreateGameResponse,
+} from "./config/types.ts";
 import { nanoid } from "nanoid";
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
+import { getSignedUrl as getCloudfrontSignedUrl } from "@aws-sdk/cloudfront-signer";
 
-const upload = multer({ storage: multer.memoryStorage() });
-
-//REDO THIS
-function extractS3KeyFromUrl(s3Url: string): string {
-    // Handle both URL formats:
-    // https://bucket-name.s3.region.amazonaws.com/path/to/file.jpg
-    // https://s3.region.amazonaws.com/bucket-name/path/to/file.jpg
-
-    const url = new URL(s3Url);
-
-    if (url.hostname.startsWith("s3.")) {
-        // Format: https://s3.region.amazonaws.com/bucket-name/key
-        const pathParts = url.pathname.split("/").filter((part) => part.length > 0);
-        return pathParts.slice(1).join("/"); // Remove bucket name, keep the rest
-    } else {
-        // Format: https://bucket-name.s3.region.amazonaws.com/key
-        return url.pathname.slice(1); // Remove leading slash
+const constructImageUrl = (isPublic: boolean, gameId: string, gameItemId: string): string => {
+    if (!process.env.AWS_CLOUDFRONT_DOMAIN) {
+        throw new Error("AWS_CLOUDFRONT_DOMAIN environment variable is not defined.");
     }
-}
+    return (
+        `https://${process.env.AWS_CLOUDFRONT_DOMAIN}.s3.amazonaws.com/` +
+        constructS3ImageKey(isPublic, gameId, gameItemId)
+    );
+};
+
+const constructS3ImageKey = (isPublic: boolean, gameId: string, gameItemId: string): string => {
+    const privacyStr = isPublic ? "public" : "private";
+    return `premadeGames/${privacyStr}/${gameId}/${gameItemId}`;
+};
+
+const cardDataIdToUrl = (
+    cardDataIdList: CardDataIdType[],
+    isPublic: boolean,
+    gameId: string
+): CardDataUrlType[] => {
+    return cardDataIdList.map(({ name, orderIndex, gameItemId }) => {
+        return {
+            name,
+            orderIndex,
+            imageUrl: constructImageUrl(isPublic, gameId, gameItemId),
+        };
+    });
+};
 
 export function setupApiRoutes(app: Express) {
-    app.post("/api/createNewGame", upload.array("images", 24), async (req, res) => {
+    app.post("/api/createNewGame", async (req, res) => {
         //ERROR HANDLINHG
         const body = req.body as CreateGameRequest;
 
@@ -41,26 +54,27 @@ export function setupApiRoutes(app: Express) {
             return res
                 .status(400)
                 .json({ message: "Privacy setting must be 'public' or 'private'." });
-        } else if (!req.files || !Array.isArray(req.files)) {
-            //IDK IF THIS IS THE RIGHT WAY TO HANDLE THIS
-            return res.status(400).json({ message: "No files uploaded." });
-        } else if (!Array.isArray(body.names)) {
-            return res.status(400).json({ message: "No character names." });
-        } else if (req.files.length !== body.names.length) {
-            return res
-                .status(400)
-                .json({ message: "Number of files and number of names does not match." });
+        } else if (!body.user || typeof body.user !== "string") {
+            return res.status(400).json({ message: "User ID is required." });
+        } else if (!Array.isArray(body.namesAndFileTypes)) {
+            return res.status(400).json({ message: "NamesAndFileTypes must be an array." });
+        } else {
+            const acceptedTypes = new Set(["image/jpeg", "image/png", "image/webp"]);
+            for (const { type, name } of body.namesAndFileTypes) {
+                if (!type || !name) {
+                    return res.status(400).json({ message: "Each file must have type and name." });
+                } else if (!acceptedTypes.has(type)) {
+                    return res.status(400).json({ message: `Invalid file type: ${type}` });
+                } else if (typeof name !== "string" || name.trim().length === 0) {
+                    return res.status(400).json({ message: "Each file must have a valid name." });
+                }
+            }
         }
 
-        const fileUploadPromises = [];
+        let gameId = "";
 
-        const gameItemUrls = [];
-        const gameItemNames = [];
-        let id = "";
-
-        //Create new game entry in database
         try {
-            [{ insertedId: id }] = await db //extract and asign to id
+            [{ insertedId: gameId }] = await db //extract and asign to id
                 .insert(schema.games)
                 .values({
                     id: nanoid(),
@@ -75,62 +89,46 @@ export function setupApiRoutes(app: Express) {
             return res.status(500).json({ message: "Error creating new game entry." });
         }
 
-        if (!id) return res.status(500).json({ error: "Error creating new game entry." }); //Sanity Check
+        if (!gameId) return res.status(500).json({ error: "Error creating new game entry." }); //Sanity Check
 
-        //Create array of promises for uploading game images to S3 bucket
-        for (const file of req.files) {
-            const buffer = await sharp(file.buffer)
-                .resize({ height: 338 * 2, width: 262 * 2, fit: "cover" })
-                .toBuffer();
-            const fileExt = file.originalname.split(".").pop() ?? "";
-            const key = `premadeGames/${body.privacy}/${id}/` + nanoid(10) + fileExt;
-            const params = {
+        const presignedUploadUrls: CreateGameResponse = {};
+
+        for (const { type, name } of body.namesAndFileTypes) {
+            const gameItemId = nanoid();
+            const command = new PutObjectCommand({
                 Bucket: process.env.AWS_BUCKET_NAME,
-                Region: process.env.AWS_BUCKET_REGION, //NOT NEEDED?
-                Key: key,
-                Body: buffer,
-                ContentType: file.mimetype,
-            };
-            const uploadCommand = new PutObjectCommand(params);
-
-            fileUploadPromises.push(s3.send(uploadCommand));
-
-            gameItemUrls.push("https://whos-that.s3.amazonaws.com/" + key);
-        }
-
-        for (const name of body.names) {
-            gameItemNames.push(name);
-        }
-
-        //Await upload promises
-        try {
-            const results = await Promise.all(fileUploadPromises);
-            console.log(`Successfully uploaded ${results.length.toString()} files`);
-        } catch (error) {
-            console.error("Error uploading data:", error);
-            return res.status(500).json({ message: "Failed to upload one or more files." });
+                Key: constructS3ImageKey(body.privacy === "public", gameId, gameItemId),
+                ContentType: type,
+            });
+            const signedUrl = await getSignedUrl(s3, command, {
+                expiresIn: 120,
+            });
+            presignedUploadUrls[name] = { signedUrl: signedUrl, itemId: gameItemId };
         }
 
         //update gameItems table
+
         try {
-            for (const [i, gameItemUrl] of gameItemUrls.entries()) {
+            let i = 0;
+            for (const [name, { itemId }] of Object.entries(presignedUploadUrls)) {
                 const insertGameItems = await db.insert(schema.gameItems).values({
-                    id: nanoid(),
-                    gameId: id,
-                    imageUrl: gameItemUrl,
-                    name: gameItemNames[i],
+                    id: itemId,
+                    gameId: gameId,
+                    imageUrl: constructImageUrl(body.privacy === "public", gameId, itemId), //WILL BE REMOVED?
+                    name: name,
                     orderIndex: i,
                 });
+                i++;
                 console.log(insertGameItems);
             }
             console.log("Successfully updated database.");
-            return res.status(200).json({ message: "Successfully created new game." });
+            return res.status(200).json(presignedUploadUrls);
         } catch (error) {
             console.error("Error updating db:", error);
         }
     });
 
-    app.get("/api/preMadeGame", async (req, res) => {
+    app.get("/api/gameData", async (req, res) => {
         //ERROR HANDLINHG FOR REAL DO IT SOON OML
 
         const {
@@ -140,14 +138,14 @@ export function setupApiRoutes(app: Express) {
             return res.status(400).send({ message: "Preset query is missing or invalid." }); //Maybe handle better?
 
         try {
-            const [{ isPublic }] = await db
-                .select({ isPublic: schema.games.isPublic })
+            const [{ isPublic, title }] = await db
+                .select({ title: schema.games.title, isPublic: schema.games.isPublic })
                 .from(schema.games)
                 .where(eq(schema.games.id, gameId)); //REDO THIS LATER TO BE DONE VIA SOCKET.IO SO THAT PRIVATE GAMES ARE ACC PRIVATE
 
-            const cardDataList: CardDataType[] = await db
+            const cardDataIdList: CardDataIdType[] = await db
                 .select({
-                    imageUrl: schema.gameItems.imageUrl,
+                    gameItemId: schema.gameItems.id,
                     name: schema.gameItems.name,
                     orderIndex: schema.gameItems.orderIndex,
                 })
@@ -155,13 +153,14 @@ export function setupApiRoutes(app: Express) {
                 .where(eq(schema.gameItems.gameId, gameId));
 
             if (isPublic) {
-                return res.status(200).send(cardDataList);
+                const cardDataUrlList = cardDataIdToUrl(cardDataIdList, isPublic, gameId);
+                return res.status(200).send({ title: title, cardData: cardDataUrlList });
             } else {
-                const cardDataListWithPresignedUrls = await Promise.all(
-                    cardDataList.map(async (cardData) => {
+                const cardDataPresignedUrlList: CardDataUrlType[] = await Promise.all(
+                    cardDataIdList.map(async (cardData) => {
                         const command = new GetObjectCommand({
                             Bucket: process.env.AWS_BUCKET_NAME,
-                            Key: extractS3KeyFromUrl(cardData.imageUrl),
+                            Key: constructS3ImageKey(false, gameId, cardData.gameItemId),
                         });
                         return {
                             name: cardData.name,
@@ -170,7 +169,7 @@ export function setupApiRoutes(app: Express) {
                         };
                     })
                 );
-                return res.status(200).send(cardDataListWithPresignedUrls);
+                return res.status(200).send({ title: title, cardData: cardDataPresignedUrlList });
             }
         } catch (error) {
             console.error("Error:", error);
@@ -197,7 +196,7 @@ export function setupApiRoutes(app: Express) {
             )
             .where(eq(schema.games.isPublic, true));
 
-        res.send(gameTitleIdImageList.filter(({ imageUrl }) => imageUrl !== null));
+        res.send(gameTitleIdImageList.filter(({ imageUrl }) => imageUrl !== null)); //maybe handle diff?
     });
 
     app.get("/api/getMyGames", async (req, res) => {
@@ -206,11 +205,12 @@ export function setupApiRoutes(app: Express) {
         } = req;
         if (!userId || typeof userId !== "string")
             return res.status(400).json({ message: "No user-id given." }); //EROROR DO IT RIGFHT ADF:KJDSFLKJSFHLKJFSDK:LFS
-        const gameTitleIdImageList = await db
+        const gameInfoList = await db
             .select({
                 id: schema.games.id,
                 title: schema.games.title,
-                imageUrl: schema.gameItems.imageUrl,
+                isPublic: schema.games.isPublic,
+                coverImageId: schema.gameItems.id,
             })
             .from(schema.games)
             //AS STRING?
@@ -223,6 +223,68 @@ export function setupApiRoutes(app: Express) {
             )
             .where(eq(schema.games.userId, userId));
 
-        res.send(gameTitleIdImageList.filter(({ imageUrl }) => imageUrl !== null));
+        const getMyGamesRes = gameInfoList.map(({ id, title, isPublic, coverImageId }) => {
+            return {
+                id,
+                title,
+                isPublic,
+                imageUrl: constructImageUrl(isPublic, id, coverImageId ?? ""),
+            };
+        });
+
+        res.send(getMyGamesRes);
+    });
+
+    app.delete("/api/deleteGame/", async (req, res) => {
+        const {
+            query: { gameId, userId },
+        } = req;
+        if (!gameId || typeof gameId !== "string")
+            return res.status(400).json({ message: "No game-id given." });
+        if (!userId || typeof userId !== "string")
+            return res.status(400).json({ message: "No user-id given." });
+
+        const imageIds = await db
+            .select({ id: schema.gameItems.id })
+            .from(schema.gameItems)
+            .where(eq(schema.gameItems.gameId, gameId));
+
+        const [{ isPublic }] = await db
+            .select({ isPublic: schema.games.isPublic })
+            .from(schema.games)
+            .where(eq(schema.games.id, gameId));
+
+        const delS3Objs = imageIds.map(async ({ id }) => {
+            const command = new DeleteObjectCommand({
+                Bucket: process.env.AWS_BUCKET_NAME,
+                Key: constructS3ImageKey(isPublic, gameId, id),
+            });
+            return await s3.send(command);
+        });
+
+        // const cFCacheInvalidationParams = imageIds.map(async ({ id }) => {
+        //     const command = new DeleteObjectCommand({
+        //     DistributionId: process.env.DISTRIBUTION_ID,
+        //     InvalidationBatch: {
+        //         CallerReference: constructS3ImageKey(isPublic, gameId, id),
+        //         Paths: {
+        //             Quantity: 1
+        //         }
+        //     });
+        //     return await s3.send(command);
+        // });
+
+        const delRes = await db
+            .delete(schema.games)
+            .where(and(eq(schema.games.id, gameId), eq(schema.games.userId, userId)));
+        if (delRes.rowCount !== null && delRes.rowCount >= 1) {
+            const msg = `Deleted game: ${gameId}`;
+            await Promise.all(delS3Objs);
+            //invalidate Cloudfront cache
+            res.status(200).json({ message: msg });
+        } else
+            res.status(400).json({
+                message: `Either ${gameId} does not exist or user ${userId} doesn't not have premission to delete it.`,
+            });
     });
 }

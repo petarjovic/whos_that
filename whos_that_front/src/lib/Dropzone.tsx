@@ -41,10 +41,10 @@ const Dropzone = ({ fileHandler }: { fileHandler: (files: FileList) => void }) =
         >
             <label
                 htmlFor="file-upload"
-                className={`h-74 my-2 flex w-full cursor-pointer flex-col items-center justify-center rounded-lg border-2 transition-all duration-200 ${
+                className={`h-74 inset-shadow-md/5 m-2 my-3 flex w-full cursor-pointer flex-col items-center justify-center rounded-lg border shadow-sm transition-all duration-200 ${
                     isDragOver
-                        ? "border-2 border-blue-500 bg-blue-50 dark:bg-blue-900/20"
-                        : "border-slate-200 bg-white hover:bg-slate-100 dark:border-slate-600 dark:bg-slate-700 dark:hover:border-slate-500 dark:hover:bg-slate-800"
+                        ? "border-2 border-cyan-600 bg-slate-200"
+                        : "border-cyan-400 bg-white hover:bg-slate-100"
                 }`}
             >
                 <div className="flex flex-col items-center justify-center pb-6 pt-5">

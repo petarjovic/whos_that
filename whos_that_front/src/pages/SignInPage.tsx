@@ -8,6 +8,7 @@ const SignInPage = () => {
     const navigate = useNavigate();
     const [username, setUsername] = useState("");
     const [password, setPassword] = useState("");
+    const [errorMsg, setErrorMsg] = useState("");
 
     const {
         data: session,
@@ -15,13 +16,15 @@ const SignInPage = () => {
         error, //error object
     } = authClient.useSession(); //ERROR HANDLING
 
-    if (session) void navigate("/");
+    if (isPending) return <div>Loading...</div>;
+    else if (session) void navigate("/");
 
     const handleLogIn = async (e: FormEvent) => {
         e.preventDefault();
         const logInResult = await logIn(username, password);
         if (logInResult.error) {
             console.error(logInResult.error.message); //HANDLE BETTER
+            setErrorMsg(logInResult.error.message ?? "");
         } else {
             void navigate("/");
         }
@@ -71,9 +74,11 @@ const SignInPage = () => {
                         value={password}
                         required
                     />
-                    {/* <p className="text-red-500 text-sm mt-2 hidden" id="passwordError">
-                        Password is required.
-                    </p> */}
+                    <p
+                        className={`shadow-xs max-h-23 mb-1 mt-3 overflow-y-auto rounded-md border border-red-200 bg-red-50 p-2 text-red-500 shadow-red-50 ${errorMsg ? "" : "hidden"}`}
+                    >
+                        {errorMsg}
+                    </p>
                 </div>
 
                 <button

@@ -4,7 +4,11 @@ import { socket } from "./socket.tsx";
 import Game from "../pages/GamePage.tsx";
 import WaitingRoom from "../pages/WaitingRoomPage.tsx";
 import ErrorPage from "../pages/ErrorPage.tsx";
-import type { GameStateType, CardDataType } from "../../../whos_that_server/src/config/types.ts";
+import type {
+    GameStateType,
+    GameDataType,
+    CardDataUrlType,
+} from "../../../whos_that_server/src/config/types.ts";
 import type { ServerResponse, EndStateType } from "../lib/types.ts";
 
 const GameStateManager = ({ isNewGame }: { isNewGame: boolean }) => {
@@ -12,6 +16,7 @@ const GameStateManager = ({ isNewGame }: { isNewGame: boolean }) => {
     let { joinGameId = "" } = useParams();
     if (joinGameId === "getImageAction") joinGameId = "";
     const [gameId, setGameId] = useState(joinGameId);
+    const [title, setTitle] = useState("");
     const [searchParams] = useSearchParams();
     const [gameState, setGameState] = useState<GameStateType>({
         players: ["", ""],
@@ -23,13 +28,13 @@ const GameStateManager = ({ isNewGame }: { isNewGame: boolean }) => {
     const [endState, setEndState] = useState<EndStateType>("");
     const [error, setError] = useState("");
     //const [images, setImages] = useState({});
-    const [cardData, setCardData] = useState<CardDataType[]>([]);
+    const [cardData, setCardData] = useState<CardDataUrlType[]>([]);
     useEffect(() => {
         const fetchImages = async () => {
             if (gameState.preset) {
                 try {
                     const response: Response = await fetch(
-                        `http://localhost:3001/api/preMadeGame?preset=${gameState.preset}`,
+                        `http://localhost:3001/api/gameData?preset=${gameState.preset}`,
                         {
                             //ERROR PRONE PERHAPS
                             method: "GET",
@@ -43,9 +48,9 @@ const GameStateManager = ({ isNewGame }: { isNewGame: boolean }) => {
                         throw new Error(errorData.message || "Getting images failed.");
                     }
 
-                    const result = (await response.json()) as CardDataType[];
-                    console.log(result);
-                    setCardData(result);
+                    const { title, cardData } = (await response.json()) as GameDataType;
+                    setTitle(title);
+                    setCardData(cardData);
                 } catch (error) {
                     console.error("Error:", error);
                     return error; //fix error handling
@@ -149,7 +154,7 @@ const GameStateManager = ({ isNewGame }: { isNewGame: boolean }) => {
     };
 
     if (error) return <ErrorPage error={error} />;
-    else if (gameState.players.includes("") || Object.keys(cardData).length === 0)
+    else if (gameState.players.includes("") || cardData.length === 0)
         //diff way to handle perchance
         return <WaitingRoom gameId={gameId} />;
     else
@@ -163,6 +168,7 @@ const GameStateManager = ({ isNewGame }: { isNewGame: boolean }) => {
                     gameState.cardIdsToGuess[1 - gameState.players.indexOf(socket.id ?? "")] //handle this fallback different
                 }
                 cardData={cardData}
+                title={title}
             />
         );
 };

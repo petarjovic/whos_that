@@ -90,7 +90,7 @@ export function setupSocketEventHandlers(io: Server<ClientToServerEvents, Server
                     gameState.playAgainReqs = [false, false];
                     gameState.cardIdsToGuess = winningKeyGenerator(gameState.numOfChars);
                     console.log([players]);
-                    if (players.every((p) => p !== "")) {
+                    if (players.every((p) => p === "")) {
                         activeRoomIdsMap.delete(roomId);
                         console.log("Deleted room:", roomId);
                     } else {
