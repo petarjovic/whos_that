@@ -3,7 +3,13 @@ import { useState } from "react";
 const Dropzone = ({ fileHandler }: { fileHandler: (files: FileList) => void }) => {
     const [isDragOver, setIsDragOver] = useState(false);
 
-    const acceptedImageTypes = ["image/jpeg", "image/png", "image/webp"];
+    const acceptedImageTypes = [
+        "image/jpeg",
+        "image/png",
+        "image/webp",
+        "image/heic",
+        "image/heif",
+    ];
 
     const handleFileDrop = (e: React.DragEvent<HTMLDivElement>) => {
         e.preventDefault();
@@ -49,8 +55,8 @@ const Dropzone = ({ fileHandler }: { fileHandler: (files: FileList) => void }) =
             >
                 <div className="flex flex-col items-center justify-center pb-6 pt-5">
                     <svg
-                        className={`mb-4 h-8 w-8 transition-colors duration-200 ${
-                            isDragOver ? "text-blue-500" : "text-gray-500 dark:text-gray-400"
+                        className={`h-15 w-15 mb-4 transition-colors duration-200 ${
+                            isDragOver ? "text-blue-500" : "text-gray-400"
                         }`}
                         aria-hidden="true"
                         xmlns="http://www.w3.org/2000/svg"
@@ -82,13 +88,13 @@ const Dropzone = ({ fileHandler }: { fileHandler: (files: FileList) => void }) =
                         {!isDragOver && "or drag and drop"}
                     </p>
                     <p
-                        className={`text-xs transition-colors duration-200 ${
+                        className={`text-center text-xs transition-colors duration-200 ${
                             isDragOver
                                 ? "text-blue-500 dark:text-blue-400"
                                 : "text-gray-500 dark:text-gray-400"
                         }`}
                     >
-                        PNG or JPG
+                        JPG, PNG, or HEIC
                     </p>
                 </div>
                 <input

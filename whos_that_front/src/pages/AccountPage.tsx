@@ -3,6 +3,11 @@ import { authClient } from "../lib/auth-client";
 import { useState } from "react";
 import { Link } from "react-router";
 
+const maskEmail = (email: string) => {
+    const [local, domain] = email.split("@");
+    return `${local.slice(0, 2)}${"*".repeat(Math.max(local.length - 5, 2))}@${domain}`;
+};
+
 const AccountPage = () => {
     const navigate = useNavigate();
     const [showEmail, setShowEmail] = useState(false);
@@ -11,11 +16,6 @@ const AccountPage = () => {
         isPending, //loading state
         error, //error object
     } = authClient.useSession(); //ERROR HANDLING
-
-    const maskEmail = (email: string) => {
-        const [local, domain] = email.split("@");
-        return `${local.slice(0, 2)}${"*".repeat(Math.max(local.length - 5, 2))}@${domain}`;
-    };
 
     const handleResetPassword = () => {};
 
@@ -55,7 +55,7 @@ const AccountPage = () => {
                             My Games
                         </button>
                     </Link>
-                    <div className="grow text-end">
+                    <div className="hidden grow text-end">
                         {" "}
                         <button
                             onClick={handleResetPassword}

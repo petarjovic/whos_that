@@ -1,7 +1,8 @@
 import { db, s3, cloudFront } from "./config/awsConections.ts";
 import type { Express } from "express";
-import { PutObjectCommand, GetObjectCommand, DeleteObjectCommand } from "@aws-sdk/client-s3";
+import { PutObjectCommand, DeleteObjectCommand } from "@aws-sdk/client-s3";
 import * as schema from "./config/db/schema.ts";
+import * as authSchema from "./config/db/auth-schema.ts";
 import { eq, and } from "drizzle-orm";
 import type {
     CardDataIdType,
@@ -10,16 +11,16 @@ import type {
     CreateGameResponse,
 } from "./config/types.ts";
 import { nanoid } from "nanoid";
-import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
-import { getSignedUrl as getCloudfrontSignedUrl } from "@aws-sdk/cloudfront-signer";
+import { getSignedUrl as getSignedS3Url } from "@aws-sdk/s3-request-presigner";
+import { getSignedUrl as getSignedCFUrl } from "@aws-sdk/cloudfront-signer";
+import { CreateInvalidationCommand } from "@aws-sdk/client-cloudfront";
 
 const constructImageUrl = (isPublic: boolean, gameId: string, gameItemId: string): string => {
-    if (!process.env.AWS_CLOUDFRONT_DOMAIN) {
-        throw new Error("AWS_CLOUDFRONT_DOMAIN environment variable is not defined.");
+    if (!process.env.AWS_CF_DOMAIN) {
+        throw new Error("AWS_CF_DOMAIN environment variable is not defined.");
     }
     return (
-        `https://${process.env.AWS_CLOUDFRONT_DOMAIN}.s3.amazonaws.com/` +
-        constructS3ImageKey(isPublic, gameId, gameItemId)
+        `https://${process.env.AWS_CF_DOMAIN}/` + constructS3ImageKey(isPublic, gameId, gameItemId)
     );
 };
 
@@ -90,6 +91,7 @@ export function setupApiRoutes(app: Express) {
         }
 
         if (!gameId) return res.status(500).json({ error: "Error creating new game entry." }); //Sanity Check
+        console.log("Create game:", gameId);
 
         const presignedUploadUrls: CreateGameResponse = {};
 
@@ -100,7 +102,7 @@ export function setupApiRoutes(app: Express) {
                 Key: constructS3ImageKey(body.privacy === "public", gameId, gameItemId),
                 ContentType: type,
             });
-            const signedUrl = await getSignedUrl(s3, command, {
+            const signedUrl = await getSignedS3Url(s3, command, {
                 expiresIn: 120,
             });
             presignedUploadUrls[name] = { signedUrl: signedUrl, itemId: gameItemId };
@@ -111,7 +113,7 @@ export function setupApiRoutes(app: Express) {
         try {
             let i = 0;
             for (const [name, { itemId }] of Object.entries(presignedUploadUrls)) {
-                const insertGameItems = await db.insert(schema.gameItems).values({
+                await db.insert(schema.gameItems).values({
                     id: itemId,
                     gameId: gameId,
                     imageUrl: constructImageUrl(body.privacy === "public", gameId, itemId), //WILL BE REMOVED?
@@ -119,9 +121,7 @@ export function setupApiRoutes(app: Express) {
                     orderIndex: i,
                 });
                 i++;
-                console.log(insertGameItems);
             }
-            console.log("Successfully updated database.");
             return res.status(200).json(presignedUploadUrls);
         } catch (error) {
             console.error("Error updating db:", error);
@@ -158,13 +158,15 @@ export function setupApiRoutes(app: Express) {
             } else {
                 const cardDataPresignedUrlList: CardDataUrlType[] = await Promise.all(
                     cardDataIdList.map(async (cardData) => {
-                        const command = new GetObjectCommand({
-                            Bucket: process.env.AWS_BUCKET_NAME,
-                            Key: constructS3ImageKey(false, gameId, cardData.gameItemId),
-                        });
+                        const signedUrlParams = {
+                            url: constructImageUrl(false, gameId, cardData.gameItemId),
+                            dateLessThan: new Date(Date.now() + 1000 * 60 * 60 * 24),
+                            privateKey: process.env.AWS_CF_PRIV_KEY!,
+                            keyPairId: process.env.AWS_CF_KEY_PAIR_ID!,
+                        };
                         return {
                             name: cardData.name,
-                            imageUrl: await getSignedUrl(s3, command, { expiresIn: 3600 }),
+                            imageUrl: getSignedCFUrl(signedUrlParams),
                             orderIndex: cardData.orderIndex,
                         };
                     })
@@ -184,9 +186,11 @@ export function setupApiRoutes(app: Express) {
             .select({
                 id: schema.games.id,
                 title: schema.games.title,
+                author: authSchema.user.displayUsername,
                 imageUrl: schema.gameItems.imageUrl,
             })
             .from(schema.games)
+            .leftJoin(authSchema.user, eq(authSchema.user.id, schema.games.userId))
             .leftJoin(
                 schema.gameItems,
                 and(
@@ -224,11 +228,18 @@ export function setupApiRoutes(app: Express) {
             .where(eq(schema.games.userId, userId));
 
         const getMyGamesRes = gameInfoList.map(({ id, title, isPublic, coverImageId }) => {
+            const imageUrl = constructImageUrl(isPublic, id, coverImageId ?? "");
+            const signedUrlParams = {
+                url: imageUrl,
+                dateLessThan: new Date(Date.now() + 1000 * 60 * 60 * 24),
+                privateKey: process.env.AWS_CF_PRIV_KEY!,
+                keyPairId: process.env.AWS_CF_KEY_PAIR_ID!,
+            };
             return {
                 id,
                 title,
                 isPublic,
-                imageUrl: constructImageUrl(isPublic, id, coverImageId ?? ""),
+                imageUrl: isPublic ? imageUrl : getSignedCFUrl(signedUrlParams),
             };
         });
 
@@ -262,17 +273,17 @@ export function setupApiRoutes(app: Express) {
             return await s3.send(command);
         });
 
-        // const cFCacheInvalidationParams = imageIds.map(async ({ id }) => {
-        //     const command = new DeleteObjectCommand({
-        //     DistributionId: process.env.DISTRIBUTION_ID,
-        //     InvalidationBatch: {
-        //         CallerReference: constructS3ImageKey(isPublic, gameId, id),
-        //         Paths: {
-        //             Quantity: 1
-        //         }
-        //     });
-        //     return await s3.send(command);
-        // });
+        const cFCacheInvalidationCommand = new CreateInvalidationCommand({
+            //THIS MIGHT BE NOT WORKING CORRECTLY DOUBLE CHECK
+            DistributionId: process.env.AWS_CF_DISTRIBUTION_ID!,
+            InvalidationBatch: {
+                CallerReference: nanoid(),
+                Paths: {
+                    Quantity: 1,
+                    Items: [`/premadeGames/${isPublic ? "public" : "private"}/${gameId}/*`],
+                },
+            },
+        });
 
         const delRes = await db
             .delete(schema.games)
@@ -281,6 +292,7 @@ export function setupApiRoutes(app: Express) {
             const msg = `Deleted game: ${gameId}`;
             await Promise.all(delS3Objs);
             //invalidate Cloudfront cache
+            await cloudFront.send(cFCacheInvalidationCommand);
             res.status(200).json({ message: msg });
         } else
             res.status(400).json({

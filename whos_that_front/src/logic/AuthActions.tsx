@@ -1,4 +1,6 @@
+import type { FormEvent } from "react";
 import { authClient } from "../lib/auth-client.ts";
+import type { SocialSignInProviders } from "../lib/types.ts";
 
 export const signUp = async (username: string, email: string, password: string) => {
     //ERROR HANDLING
@@ -40,4 +42,26 @@ export const logOut = async () => {
     const logOutResult = await authClient.signOut();
     console.log(logOutResult);
     return logOutResult;
+};
+
+const signInSocial = async (provider: SocialSignInProviders) => {
+    //ERROR HANDLING
+    const socialSignInResult = await authClient.signIn.social({
+        provider,
+        callbackURL: "http://localhost:5173/account",
+    });
+    return socialSignInResult;
+};
+
+export const handleSocialSignIn = async (e: FormEvent, provider: SocialSignInProviders) => {
+    //CONVERGE WITH SIGNUP PAGE SAME FUNCTION
+    //ERROR HANDLING
+    e.preventDefault();
+    const socialSignInResult = await signInSocial(provider);
+    console.log(socialSignInResult.data);
+    if (socialSignInResult.error) {
+        console.error(socialSignInResult.error.message); //HANDLE BETTER
+    } else {
+        globalThis.location.assign(socialSignInResult.data.url ?? "http://localhost:5173/"); //FIIX LATER
+    }
 };

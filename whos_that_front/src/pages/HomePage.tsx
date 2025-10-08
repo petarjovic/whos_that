@@ -11,9 +11,9 @@ const HomePage = () => {
     };
 
     return (
-        <div className="mt-40 text-center">
+        <div className="mt-42 text-center">
             <button
-                className="w-fill h-18 border-b-9 border-x-1 text-shadow-xs/30 active:border-b-1 active:shadow-2xs active:inset-shadow-md mx-4 cursor-pointer rounded-md border-blue-600 bg-blue-500 px-5 text-2xl font-semibold text-white shadow-md hover:border-blue-700 hover:bg-blue-600 active:translate-y-[1px]"
+                className="w-fill h-22 border-b-9 border-x-1 text-shadow-xs/30 active:border-b-1 active:shadow-2xs active:inset-shadow-md mx-4 cursor-pointer rounded-md border-blue-600 bg-blue-500 px-5 text-3xl font-semibold text-white shadow-md hover:border-blue-700 hover:bg-blue-600 hover:text-slate-200 active:translate-y-[1px]"
                 onClick={() => {
                     void navigate("/create-game");
                 }}
@@ -37,7 +37,7 @@ const HomePage = () => {
                     }}
                 />
                 <button
-                    className="w-fill h-15 border-b-9 border-x-1 text-shadow-xs/30 active:border-b-1 active:shadow-2xs active:inset-shadow-md duration-5 mx-4 cursor-pointer rounded-md border-blue-600 bg-blue-500 px-4 text-2xl font-bold text-white shadow-md transition-all hover:border-blue-700 hover:bg-blue-600 active:translate-y-[1px]"
+                    className="w-fill h-17 border-b-9 border-x-1 text-shadow-xs/30 active:border-b-1 active:shadow-2xs active:inset-shadow-md duration-5 mx-4 cursor-pointer rounded-md border-blue-600 bg-blue-500 px-4 text-2xl font-bold text-white shadow-md transition-all hover:border-blue-700 hover:bg-blue-600 hover:text-slate-200 active:translate-y-[1px]"
                     type="submit"
                 >
                     Join Existing Game

@@ -5,3 +5,5 @@ export type EndStateType = "" | "correctGuess" | "wrongGuess" | "oppCorrectGuess
 export interface ServerResponse {
     message: string;
 }
+
+export type SocialSignInProviders = "discord";

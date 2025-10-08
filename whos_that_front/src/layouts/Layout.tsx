@@ -6,7 +6,7 @@ const Layout = () => {
         <>
             <div
                 id="flexContainer"
-                className="flex min-h-screen w-full flex-col items-center justify-start bg-gradient-to-b from-cyan-500 to-cyan-600 bg-fixed"
+                className="flex min-h-screen w-full flex-col items-center justify-start bg-gradient-to-b from-cyan-400 to-cyan-600 to-90% bg-fixed"
             >
                 <Hero />
                 <Outlet />

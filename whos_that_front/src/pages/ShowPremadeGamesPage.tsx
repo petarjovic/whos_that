@@ -4,16 +4,17 @@ import { CardLayout } from "../layouts/Cards.tsx";
 import type { ServerResponse } from "../lib/types.ts";
 import { authClient } from "../lib/auth-client.ts";
 
-type preMadeGamesListType = {
+interface presetInfo {
     title: string;
     id: string;
+    author: string | null;
     imageUrl: string;
     isPublic: boolean;
-}[];
+}
 
 const ShowPremadeGamesPage = ({ myGames }: { myGames: boolean }) => {
     const navigate = useNavigate();
-    const [premadeGamesList, setPremadeGamesList] = useState<preMadeGamesListType>([]);
+    const [premadeGamesList, setPremadeGamesList] = useState<presetInfo[]>([]);
     const {
         data: session,
         isPending, //loading state
@@ -37,7 +38,7 @@ const ShowPremadeGamesPage = ({ myGames }: { myGames: boolean }) => {
                     );
 
                     if (response.ok) {
-                        const result = (await response.json()) as preMadeGamesListType;
+                        const result = (await response.json()) as presetInfo[];
                         setPremadeGamesList(result);
                     } else {
                         const errorData = (await response.json()) as ServerResponse;
@@ -92,8 +93,8 @@ const ShowPremadeGamesPage = ({ myGames }: { myGames: boolean }) => {
     };
 
     return (
-        <div id="gameboard" className="mx-10 mt-10 flex flex-wrap items-center justify-evenly">
-            {premadeGamesList.map(({ id, title, imageUrl, isPublic }, i) => (
+        <div className="mx-10 mt-10 flex flex-wrap items-center justify-evenly">
+            {premadeGamesList.map(({ id, title, imageUrl, isPublic, author }, i) => (
                 <Link key={i} to={`/play-game?preset=${id}`}>
                     <CardLayout name={title} imgSrc={imageUrl} key={i}>
                         {myGames ? (
@@ -116,12 +117,16 @@ const ShowPremadeGamesPage = ({ myGames }: { myGames: boolean }) => {
                                         Delete Game
                                     </option>
                                 </select>
-                                <p className="text-center text-sm">
+                                <p
+                                    className={`text-center text-sm font-semibold ${isPublic ? "text-green-600" : "text-red-600"}`}
+                                >
                                     {isPublic ? "Public" : "Private"}
                                 </p>
                             </>
                         ) : (
-                            <></>
+                            <p className="mb-0.5 text-center text-sm italic tracking-wide text-gray-600">
+                                {author ?? ""}{" "}
+                            </p>
                         )}
                     </CardLayout>
                 </Link>

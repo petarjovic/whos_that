@@ -24,4 +24,5 @@ export const s3 = new S3Client({
 
 export const cloudFront = new CloudFrontClient({
     credentials: fromEnv(),
+    region: "us-east-1",
 });

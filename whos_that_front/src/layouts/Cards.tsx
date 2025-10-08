@@ -18,7 +18,7 @@ export const CardLayout = ({
 }: CardLayoutProps) => {
     return (
         <figure
-            className={`border-3 shadow-xs/15 ${isGame || isOppCard ? "h-72 w-48" : "h-86 w-56"} mx-1 my-1 flex flex-col justify-between overflow-hidden rounded-lg ${isOppCard ? "border-orange-300 bg-orange-300" : "hover:shadow-xl/30 border-gray-200 bg-gray-200 hover:translate-y-[-1px]"} transition-shadow`}
+            className={`border-3 shadow-xs/15 ${isGame || isOppCard ? "my-1 h-72 w-48" : "h-86 my-2 w-56"} mx-1 flex flex-col justify-between overflow-hidden rounded-lg ${isOppCard ? "border-orange-300 bg-orange-300" : "hover:shadow-xl/25 border-gray-200 bg-gray-200 hover:translate-y-[-1px]"} transition-shadow`}
         >
             <img
                 className="rounded-xs h-[84.5%] max-h-[85%] bg-gray-300 object-fill"
@@ -26,7 +26,7 @@ export const CardLayout = ({
                 alt={name}
             />
             <figcaption
-                className={`bottom-0.75 text-md relative m-auto h-[4.5%] w-full text-center font-bold ${isOppCard ? "text-cyan-950" : "text-zinc-900"}`}
+                className={`bottom-0.75 ${isGame || isOppCard ? "text-md" : "text-lg hover:text-blue-500"} relative m-auto h-[4.5%] w-full text-center font-semibold`}
             >
                 {name}
             </figcaption>

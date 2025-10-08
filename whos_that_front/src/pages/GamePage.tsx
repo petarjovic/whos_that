@@ -88,7 +88,7 @@ const Game = ({
 
     return (
         <>
-            <p className="font-digitag text-shadow-sm/40 mt-1 w-full text-center text-8xl tracking-wider text-white">
+            <p className="font-times text-shadow-sm/40 my-2 w-full text-center text-6xl tracking-wider text-white">
                 {title}
             </p>
             <div

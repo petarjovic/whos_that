@@ -29,10 +29,17 @@ export const auth = betterAuth({
         },
     },
     trustedOrigins: ["http://localhost:5173"],
-    discord: {
-        //TODO: ADD DISCORD AUTHENTICATION
-        clientId: process.env.DISCORD_CLIENT_ID ?? "",
-        clientSecret: process.env.DISCORD_CLIENT_SECRET ?? "",
+    socialProviders: {
+        discord: {
+            //TODO: ADD DISCORD AUTHENTICATION
+            clientId: process.env.DISCORD_CLIENT_ID!,
+            clientSecret: process.env.DISCORD_CLIENT_SECRET!,
+        },
     },
-    plugins: [username()],
+    plugins: [
+        username({
+            maxUsernameLength: 20,
+        }),
+    ],
+    baseURL: process.env.BETTER_AUTH_URL!,
 });
