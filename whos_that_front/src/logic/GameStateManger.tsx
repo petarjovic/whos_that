@@ -26,7 +26,7 @@ const GameStateManager = ({ isNewGame }: { isNewGame: boolean }) => {
         numOfChars: 0,
     });
     const [endState, setEndState] = useState<EndStateType>("");
-    const [error, setError] = useState("");
+    const [errorMsg, setErrorMsg] = useState("");
     //const [images, setImages] = useState({});
     const [cardData, setCardData] = useState<CardDataUrlType[]>([]);
     useEffect(() => {
@@ -34,7 +34,7 @@ const GameStateManager = ({ isNewGame }: { isNewGame: boolean }) => {
             if (gameState.preset) {
                 try {
                     const response: Response = await fetch(
-                        `http://localhost:3001/api/gameData?preset=${gameState.preset}`,
+                        `http://localhost:3001/api/gameData/${gameState.preset}`,
                         {
                             //ERROR PRONE PERHAPS
                             method: "GET",
@@ -44,7 +44,7 @@ const GameStateManager = ({ isNewGame }: { isNewGame: boolean }) => {
                     if (!response.ok) {
                         //fix this error handling
                         const errorData = (await response.json()) as ServerResponse;
-                        setError(errorData.message || "Getting images failed.");
+                        setErrorMsg(errorData.message || "Getting images failed.");
                         throw new Error(errorData.message || "Getting images failed.");
                     }
 
@@ -64,7 +64,8 @@ const GameStateManager = ({ isNewGame }: { isNewGame: boolean }) => {
         socket.connect();
 
         socket.on("connect_error", (err) => {
-            setError(`Could not connect to server, server responded with: ${err.message}`);
+            console.error(err);
+            setErrorMsg(`Could not connect to server, server responded with:\n${err.message}`);
         });
 
         socket.on("recieveOppGuess", (oppGuess) => {
@@ -92,8 +93,8 @@ const GameStateManager = ({ isNewGame }: { isNewGame: boolean }) => {
 
         //do this correctly later
         socket.on("errorMessage", ({ message }) => {
-            console.error(`Error: ${message}`);
-            setError(message);
+            console.error(message);
+            setErrorMsg(message);
         });
 
         return () => {
@@ -116,7 +117,7 @@ const GameStateManager = ({ isNewGame }: { isNewGame: boolean }) => {
                     setGameId(id);
                     void navigate(`/play-game/${id}`);
                 } else {
-                    setError(response.msg);
+                    setErrorMsg(response.msg);
                 }
             });
         }
@@ -153,7 +154,7 @@ const GameStateManager = ({ isNewGame }: { isNewGame: boolean }) => {
         console.log(`Player %s requested to play again in room ${gameId}`, socket.id);
     };
 
-    if (error) return <ErrorPage error={error} />;
+    if (errorMsg) throw new Error(errorMsg);
     else if (gameState.players.includes("") || cardData.length === 0)
         //diff way to handle perchance
         return <WaitingRoom gameId={gameId} />;

@@ -4,7 +4,7 @@
 
 @layer base {
     * {
-        font-family: Arial, sans-serif;
+        font-family: Helvetica, Arial, sans-serif;
     }
     select,
     ::picker(select) {

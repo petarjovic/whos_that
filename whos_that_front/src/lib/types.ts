@@ -1,9 +1,10 @@
-export type winLoseFlagType = boolean | null;
+import { z } from "zod";
+import * as zod from "./zodSchema.ts";
 
-export type EndStateType = "" | "correctGuess" | "wrongGuess" | "oppCorrectGuess" | "oppWrongGuess";
+export type winLoseFlagType = z.infer<typeof zod.winLoseFlagTypeSchema>;
 
-export interface ServerResponse {
-    message: string;
-}
+export type EndStateType = z.infer<typeof zod.endStateTypeSchema>;
 
-export type SocialSignInProviders = "discord";
+export type ServerResponse = z.infer<typeof zod.serverResponseSchema>;
+
+export type SocialSignInProviders = z.infer<typeof zod.socialSignInProvidersSchema>;

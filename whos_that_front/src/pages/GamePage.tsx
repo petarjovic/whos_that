@@ -3,7 +3,7 @@ import { useNavigate } from "react-router";
 import { Card, OpponentTargetCard } from "../layouts/Cards";
 import type { CardDataUrlType } from "../../../whos_that_server/src/config/types.ts";
 import type { EndStateType } from "../lib/types.ts";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 interface GameProps {
     emitPlayAgain: () => void;
@@ -88,7 +88,7 @@ const Game = ({
 
     return (
         <>
-            <p className="font-times text-shadow-sm/40 my-2 w-full text-center text-6xl tracking-wider text-white">
+            <p className="font-times text-shadow-sm/100 my-2 w-full text-center text-[4.2rem] leading-none tracking-wider text-white">
                 {title}
             </p>
             <div
@@ -97,7 +97,7 @@ const Game = ({
             >
                 {cardList}
             </div>
-            <div className="flex w-full flex-wrap justify-evenly px-10">
+            <div className="mb-1 flex w-full flex-wrap justify-evenly px-10">
                 {lastRow}
                 <OpponentTargetCard
                     name={oppTargetCardData?.name ?? ""} //FIX THIS
@@ -124,6 +124,11 @@ interface GameEndModalProps {
 const GameEndModal = ({ endState, handlePlayAgain }: GameEndModalProps) => {
     let modalText = "";
     const navigate = useNavigate();
+    const [playAgainSent, setPlayAgainSent] = useState(false);
+
+    useEffect(() => {
+        setPlayAgainSent(false);
+    }, [endState]);
 
     switch (endState) {
         case "correctGuess": {
@@ -152,10 +157,14 @@ const GameEndModal = ({ endState, handlePlayAgain }: GameEndModalProps) => {
             <p className="m-auto my-12 text-5xl font-bold">{modalText}</p>
             <div className="m-auto flex flex-row justify-evenly">
                 <button
-                    className="w-50 border-b-9 border-x-1 text-shadow-xs/30 active:shadow-2xs active:inset-shadow-md m-auto h-20 cursor-pointer rounded-md border-green-700 bg-green-600 px-1 text-3xl text-neutral-100 shadow-md hover:border-green-800 hover:bg-green-700 active:translate-y-[1px] active:border-none"
-                    onClick={handlePlayAgain}
+                    className={`w-50 border-b-9 border-x-1 text-shadow-xs/30 active:shadow-2xs active:inset-shadow-md m-auto h-20 cursor-pointer rounded-md px-1 text-3xl text-neutral-100 shadow-md ${playAgainSent ? "border-gray-600 bg-gray-500" : "border-green-700 bg-green-600 hover:border-green-800 hover:bg-green-700 active:translate-y-[1px] active:border-none"}`}
+                    onClick={() => {
+                        setPlayAgainSent(true);
+                        handlePlayAgain();
+                    }}
+                    disabled={playAgainSent}
                 >
-                    Play Again
+                    {playAgainSent ? "Waiting..." : "Play Again"}
                 </button>
                 <button
                     onClick={() => {

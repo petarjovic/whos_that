@@ -2,56 +2,54 @@ import { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router";
 import { CardLayout } from "../layouts/Cards.tsx";
 import type { ServerResponse } from "../lib/types.ts";
-import { authClient } from "../lib/auth-client.ts";
-
-interface presetInfo {
-    title: string;
-    id: string;
-    author: string | null;
-    imageUrl: string;
-    isPublic: boolean;
-}
+import { useBetterAuthSession } from "../layouts/LayoutContextProvider.ts";
+import { serverResponseSchema } from "../lib/zodSchema.ts";
+import { PresetInfoSchema } from "../../../whos_that_server/src/config/zod/zodSchema.ts";
+import type { PresetInfo } from "../../../whos_that_server/src/config/types.ts";
 
 const ShowPremadeGamesPage = ({ myGames }: { myGames: boolean }) => {
     const navigate = useNavigate();
-    const [premadeGamesList, setPremadeGamesList] = useState<presetInfo[]>([]);
-    const {
-        data: session,
-        isPending, //loading state
-        error: authError, //error object
-    } = authClient.useSession(); //ERROR HANDLING
+    const [premadeGamesList, setPremadeGamesList] = useState<PresetInfo>([]);
+    const { session, isPending } = useBetterAuthSession();
+    const [errorMsg, setErrorMsg] = useState("");
 
     //Fetch games
     useEffect(() => {
-        if ((!isPending && myGames && !session) || authError)
+        if (!isPending && myGames && !session)
             void navigate("/"); //Maybe throw error instead?
         else if (!isPending) {
             const getPremadeGames = async () => {
                 try {
                     const response = await fetch(
                         "http://localhost:3001/api/" +
-                            (myGames ? "getMyGames" : "getAllPremadeGames") +
-                            (session ? `?userId=${session.user.id}` : ""),
+                            (myGames ? "getMyGames" : "getAllPremadeGames"),
                         {
+                            credentials: "include",
                             method: "GET",
                         }
                     );
 
                     if (response.ok) {
-                        const result = (await response.json()) as presetInfo[];
-                        setPremadeGamesList(result);
+                        const validatePresetInfo = PresetInfoSchema.safeParse(
+                            await response.json()
+                        );
+                        if (validatePresetInfo.success)
+                            setPremadeGamesList(validatePresetInfo.data);
+                        else setErrorMsg("Client did not understand server response.");
                     } else {
                         const errorData = (await response.json()) as ServerResponse;
-                        throw new Error(errorData.message || "Failed to get premadeGames.");
+                        setErrorMsg(errorData.message || "Failed to get premadeGames.");
                     }
                 } catch (error) {
                     console.error("Error:", error);
-                    return error; //fix error handling
+                    if (error instanceof Error) {
+                        setErrorMsg(error.message);
+                    } else setErrorMsg("Failed to get premadeGames.");
                 }
             };
             void getPremadeGames();
         }
-    }, [myGames, session, isPending, authError, navigate]);
+    }, [myGames, session, isPending, navigate]);
 
     const handleGameSettings = async (
         e: React.ChangeEvent<HTMLSelectElement>,
@@ -70,18 +68,16 @@ const ShowPremadeGamesPage = ({ myGames }: { myGames: boolean }) => {
                     `Are you sure you want to delete ${title}? This action cannot be undone!`
                 );
                 if (confirmed) {
-                    const response = await fetch(
-                        `http://localhost:3001/api/deleteGame?gameId=${gameId}&userId=${session?.user.id ?? ""}`,
-                        {
-                            method: "DELETE",
-                        }
-                    );
+                    const response = await fetch(`http://localhost:3001/api/deleteGame/${gameId}`, {
+                        credentials: "include",
+                        method: "DELETE",
+                    });
                     if (response.ok) {
                         console.log(await response.json());
                         void navigate(0);
                     } else {
-                        const errorData = (await response.json()) as ServerResponse;
-                        console.error(errorData.message || "Failed to delete game.");
+                        const errorData = serverResponseSchema.safeParse(await response.json());
+                        setErrorMsg(errorData.data?.message ?? "Failed to delete game.");
                     }
                     break;
                 } else break;
@@ -91,6 +87,8 @@ const ShowPremadeGamesPage = ({ myGames }: { myGames: boolean }) => {
             }
         }
     };
+
+    if (errorMsg) throw new Error(errorMsg);
 
     return (
         <div className="mx-10 mt-10 flex flex-wrap items-center justify-evenly">

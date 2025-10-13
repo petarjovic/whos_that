@@ -1,38 +1,28 @@
 import { useNavigate } from "react-router";
-import { authClient } from "../lib/auth-client";
+import { useBetterAuthSession } from "../layouts/LayoutContextProvider.ts";
 import { useState } from "react";
 import Dropzone from "../lib/Dropzone.tsx";
-import type { ServerResponse } from "../lib/types.ts";
-import type { CreateGameResponse } from "../../../whos_that_server/src/config/types.ts";
+import { serverResponseSchema, acceptedImageTypesSchema } from "../lib/zodSchema.ts";
+import { createGameResponseSchema } from "../../../whos_that_server/src/config/zod/zodSchema.ts";
 import { resizeImages } from "../lib/imageresizer.ts";
 import { isHeic } from "heic-to";
 import { heicTo } from "heic-to";
 
 const CreateCustomGamePage = () => {
     const navigate = useNavigate();
-    const acceptedImageTypes = new Set([
-        "image/jpeg",
-        "image/png",
-        "image/webp",
-        "image/heic",
-        "image/heif",
-    ]);
     const maxSizeBytes = 5 * 1024 * 1024;
     const [useImageNames, setUseImageNames] = useState(false);
     const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
     const [fileNames, setFileNames] = useState<string[]>([]);
     const [isPublic, setIsPublic] = useState(true);
     const [isLoading, setIsLoading] = useState(false);
-    const [errors, setErrors] = useState<string[]>([]);
+    const [imageErrors, setImageErrors] = useState<string[]>([]);
+    const [errorMsg, setErrorMsg] = useState("");
 
-    const {
-        data: session,
-        isPending, //loading state
-        error, //error object
-    } = authClient.useSession(); //ERROR HANDLING
+    const { session, isPending } = useBetterAuthSession();
 
     if (isPending) return <div>Loading...</div>;
-    else if (session === null || error) {
+    else if (session === null) {
         void navigate("/");
         return <></>; // THIS RETURN STATEMENT IS A HACK TO TELL TS THAT SESSION CANNOT BE NULL
     }
@@ -59,12 +49,16 @@ const CreateCustomGamePage = () => {
         if (files.length === 0) return;
         setIsLoading(true);
         const fileArray = [...files];
-        const fileErrors: string[] = [];
+        const imageErrorsTemp: string[] = [];
 
         const validFilesUnfiltered = await Promise.all(
             fileArray.map(async (file) => {
                 console.log(`${file.name} has type: ${file.type}`);
-                if (await isHeic(file)) {
+                if (file.size > maxSizeBytes) {
+                    imageErrorsTemp.push(`${file.name} too large.`);
+                } else if (!acceptedImageTypesSchema.safeParse(file.type).success) {
+                    imageErrorsTemp.push(`${file.name} is of an invalid file type.`);
+                } else if (await isHeic(file)) {
                     const blobAsJpeg = await heicTo({
                         blob: file,
                         type: "image/jpeg",
@@ -73,10 +67,6 @@ const CreateCustomGamePage = () => {
                         type: "image/jpeg",
                         lastModified: Date.now(),
                     });
-                } else if (!acceptedImageTypes.has(file.type)) {
-                    fileErrors.push(`${file.name} is of an invalid file type.`);
-                } else if (file.size > maxSizeBytes) {
-                    fileErrors.push(`${file.name} too large.`);
                 } else {
                     return file;
                 }
@@ -84,7 +74,7 @@ const CreateCustomGamePage = () => {
         );
         const validFiles = validFilesUnfiltered.filter((file) => file !== undefined);
 
-        setErrors(fileErrors);
+        setImageErrors(imageErrorsTemp);
 
         setSelectedFiles([...selectedFiles, ...validFiles]);
 
@@ -118,63 +108,94 @@ const CreateCustomGamePage = () => {
         const requestBody = {
             title: formData.get("title") as string,
             privacy: formData.get("privacy") as string,
-            user: session.user.id,
             namesAndFileTypes: compressedFiles.map((f, i) => ({
                 type: f.type,
                 name: fileNames[i],
             })),
         };
 
-        const response: Response = await fetch("http://localhost:3001/api/createNewGame", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify(requestBody),
-        });
+        let response;
+
+        try {
+            response = await fetch("http://localhost:3001/api/createNewGame", {
+                method: "POST",
+                body: JSON.stringify(requestBody),
+                credentials: "include",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+            });
+        } catch (error) {
+            console.error(error);
+            if (error instanceof Error) setErrorMsg(error.message);
+            else setErrorMsg("Fetch request to server failed.");
+            return;
+        }
 
         if (!response.ok) {
-            const data = (await response.json()) as ServerResponse;
-            console.error(data.message);
-            return data;
+            const validateServerRes = serverResponseSchema.safeParse(await response.json());
+            const msg = validateServerRes.success
+                ? validateServerRes.data.message
+                : "Game creation failed.";
+            setErrorMsg(msg);
+            return;
         }
 
-        const data = (await response.json()) as CreateGameResponse;
+        const validateCreateGameRes = createGameResponseSchema.safeParse(await response.json());
 
-        const uploadPromises = compressedFiles.map((file, i) =>
-            fileNames[i] in data
-                ? fetch(data[fileNames[i]].signedUrl, {
-                      method: "PUT",
-                      body: file,
-                      headers: {
-                          "Content-Type": file.type,
-                      },
-                  })
-                : undefined
-        );
-        if (uploadPromises.includes(undefined)) {
-            throw new Error("Could not upload all files."); //HANDLE BETTER LATER
+        if (validateCreateGameRes.success) {
+            const createGameResData = validateCreateGameRes.data;
+            const uploadPromises = compressedFiles.map((file, i) =>
+                fileNames[i] in createGameResData.gameItems
+                    ? fetch(createGameResData.gameItems[fileNames[i]].signedUrl, {
+                          method: "PUT",
+                          body: file,
+                          headers: {
+                              "Content-Type": file.type,
+                          },
+                      })
+                    : undefined
+            );
+            if (uploadPromises.includes(undefined)) {
+                setErrorMsg(
+                    "Server did not send enough S3 presigned upload urls during game creation."
+                );
+                return;
+            }
+
+            const uploadResponses = await Promise.allSettled(uploadPromises as Promise<Response>[]);
+            console.log(uploadResponses);
+
+            for (const response of uploadResponses) {
+                if (response.status !== "fulfilled" || !response.value.ok) {
+                    //Delete any created game data
+                    await fetch(
+                        `http://localhost:3001/api/deleteGame/${createGameResData.gameId}`,
+                        {
+                            credentials: "include",
+                            method: "DELETE",
+                        }
+                    );
+                    setErrorMsg(
+                        "Image uploads failed, server may be down or experiencing issues, please try again later."
+                    );
+                    return;
+                }
+            }
+
+            setIsLoading(false);
+            void navigate("/my-games");
+        } else {
+            setErrorMsg("Client didn't understand server's response");
+            return;
         }
-        const uploadResponses = await Promise.all(uploadPromises);
-        console.log(uploadResponses);
-        setIsLoading(false);
-        void navigate("/my-games");
-
-        // await fetch("http://localhost:3001/api/finalizeGame", {
-        //     method: "POST",
-        //     headers: { "Content-Type": "application/json" },
-        //     body: JSON.stringify({
-        //         gameId: "some-id",
-        //         keys: urls.map((u) => u.key),
-        //     }),
-        // });
-
-        // console.log([...formData.keys()]);
-        // console.log([...formData.values()]);
     };
+
+    if (errorMsg) throw new Error(errorMsg);
 
     return (
         <form
             className="mt-9 flex h-full w-5/6 justify-between"
-            encType="multipart/form-data"
             onSubmit={(e) => {
                 void handleSubmit(e);
             }}
@@ -215,9 +236,9 @@ const CreateCustomGamePage = () => {
                             void handleFiles(files);
                         }}
                     />
-                    {errors.length > 0 && (
+                    {imageErrors.length > 0 && (
                         <div className="shadow-xs max-h-23 mb-1 overflow-y-auto rounded-md border border-red-200 bg-red-50 p-2 shadow-red-50">
-                            {errors.map((error, index) => (
+                            {imageErrors.map((error, index) => (
                                 <p key={index} className="text-sm text-red-600">
                                     {"Error: " + error}
                                 </p>
@@ -330,6 +351,8 @@ const CreateCustomGamePage = () => {
                                                 names[index] = e.target.value;
                                                 setFileNames(names);
                                             }}
+                                            minLength={5}
+                                            maxLength={20}
                                             className="w-9/10 rounded-md border-none bg-transparent px-1 py-0.5 align-sub text-xl font-bold text-gray-700 outline-none focus:border-2 focus:border-black focus:bg-white"
                                             placeholder="(Enter character name)"
                                             required

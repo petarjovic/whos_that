@@ -25,7 +25,9 @@ export default tseslint.config([
             "unicorn/filename-case": "off",
             "unicorn/prevent-abbreviations": "off",
             "unicorn/no-array-for-each": "off",
+            "unicorn/no-negated-condition": "off",
             "@typescript-eslint/consistent-indexed-object-style": ["error", "index-signature"],
+            "unicorn/prefer-ternary": "warn",
         },
         languageOptions: {
             ecmaVersion: 2020,
@@ -62,3 +64,4 @@ export default tseslint.config([
         },
     },
 ]);
+

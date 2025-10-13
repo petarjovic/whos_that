@@ -1,7 +1,10 @@
 import { useNavigate } from "react-router";
-import { authClient } from "../lib/auth-client";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Link } from "react-router";
+import { useBetterAuthSession } from "../layouts/LayoutContextProvider";
+import { authClient } from "../lib/auth-client";
+import type { SocialSignInProviders } from "../lib/types";
+import DiscordLoginButton from "../lib/DiscordLoginButton";
 
 const maskEmail = (email: string) => {
     const [local, domain] = email.split("@");
@@ -11,16 +14,32 @@ const maskEmail = (email: string) => {
 const AccountPage = () => {
     const navigate = useNavigate();
     const [showEmail, setShowEmail] = useState(false);
-    const {
-        data: session,
-        isPending, //loading state
-        error, //error object
-    } = authClient.useSession(); //ERROR HANDLING
+    const { session, isPending } = useBetterAuthSession(); //ERROR HANDLING
+    const [linkedAccounts, setLinkedAccounts] = useState<SocialSignInProviders[]>([]);
+    const [errorMsg, setErrorMsg] = useState("");
 
-    const handleResetPassword = () => {};
+    useEffect(() => {
+        const getLinkedAccounts = async () => {
+            const accounts = await authClient.listAccounts();
+            if (accounts.error) {
+                setErrorMsg("Error getting user's linked accounts.");
+            } else {
+                const providers = accounts.data.map(({ providerId }) => providerId);
+                //def better way to do this lol
+                if (providers.includes("discord")) setLinkedAccounts(["discord"]);
+            }
+        };
+        void getLinkedAccounts();
+    }, []);
+
+    const handleResetPassword = () => {
+        //TODO: implement password resetting
+        return;
+    };
 
     if (isPending) return <div>Loading...</div>;
-    else if (session === null || error) {
+    else if (errorMsg) throw new Error(errorMsg);
+    else if (session === null) {
         void navigate("/sign-up");
         return <></>;
     } else
@@ -46,6 +65,19 @@ const AccountPage = () => {
                                 {showEmail ? session.user.email : maskEmail(session.user.email)}
                             </span>
                         </p>
+                        <p className="mb-2">
+                            Discord Account:{""}
+                            <span
+                                className={`font-semibold ${linkedAccounts.includes("discord") ? "text-green-800" : "text-red-900"}`}
+                            >
+                                {linkedAccounts.includes("discord") ? " Linked" : " Not Linked"}
+                            </span>
+                        </p>
+                        {linkedAccounts.includes("discord") ? (
+                            <></>
+                        ) : (
+                            <DiscordLoginButton text="Link Account" linkAccount={true} />
+                        )}
                     </div>
                     <Link to={"/my-games"}>
                         <button

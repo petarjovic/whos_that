@@ -1,19 +1,18 @@
-import { Link } from "react-router";
-import { authClient } from "../lib/auth-client.ts";
-import { useNavigate } from "react-router";
-import { logOut } from "../logic/AuthActions.tsx";
+import type { AuthData } from "../lib/auth-client";
+import { useNavigate, Link } from "react-router";
+import { authClient } from "../lib/auth-client";
 
-const Hero = () => {
+interface HeroProps extends AuthData {
+    showUserInfo?: boolean;
+}
+
+const Hero = ({ session, isPending, showUserInfo = true }: HeroProps) => {
     const navigate = useNavigate();
-    const {
-        data: session,
-        isPending, //loading state
-        error, //error object
-    } = authClient.useSession();
 
     const handleLogOut = async () => {
-        const logOutResult = await logOut();
+        const logOutResult = await authClient.signOut();
         if (logOutResult.error) {
+            //handle better?
             console.error(logOutResult.error);
         }
         void navigate("/");
@@ -40,7 +39,7 @@ const Hero = () => {
                 </Link>
             </h1>
             <div className="flex w-1/4 shrink justify-end">
-                <h2 className="inline-block">
+                <h2 className={showUserInfo ? "inline-block" : "hidden"}>
                     <Link
                         to={session ? "/account" : "/sign-up"}
                         className="text-shadow-sm/25 align-sub text-2xl font-bold text-white hover:text-blue-100"
@@ -48,12 +47,13 @@ const Hero = () => {
                         <span className="text-shadow-sm text-2xl">
                             {isPending ? "" : session ? "🙋‍♂️ " : "👤 "}
                         </span>
-                        <button className="cursor-pointer hover:underline active:translate-y-0.5">
+                        <button type="button" className="cursor-pointer hover:underline">
                             {isPending ? "" : (session?.user.displayUsername ?? "Sign Up")}
                         </button>
                     </Link>
 
                     <button
+                        type="button"
                         className="px-2.25 w-fill border-b-5 border-x-1 text-shadow-xs/40 active:border-b-1 active:shadow-2xs active:inset-shadow-md duration-2 ml-10 cursor-pointer rounded-md border-cyan-500 bg-cyan-400 py-1 text-2xl font-bold text-white shadow-md transition-all hover:border-cyan-600 hover:bg-cyan-500 active:translate-y-[1px]"
                         onClick={() => {
                             if (!isPending && session) void handleLogOut();
@@ -67,5 +67,4 @@ const Hero = () => {
         </header>
     );
 };
-
 export default Hero;

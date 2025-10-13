@@ -1,16 +1,12 @@
 import { CardLayout } from "../layouts/Cards";
 import PublicGamesImg from "../assets/publicgames.svg";
-import PrivateGamesImg from "../assets/whitehatspy.png";
+import PrivateGamesImg from "../assets/privateGames.png";
 import CustomGameImg from "../assets/CustomGame.svg";
 import { Link } from "react-router";
-import { authClient } from "../lib/auth-client.ts";
+import { useBetterAuthSession } from "../layouts/LayoutContextProvider.ts";
 
 const GameTypePage = () => {
-    const {
-        data: session,
-        isPending, //loading state
-        error, //error object
-    } = authClient.useSession(); //ERROR HANDLING
+    const { session, isPending } = useBetterAuthSession();
 
     return (
         <div className="mt-26 flex h-full w-[45%] justify-between">
