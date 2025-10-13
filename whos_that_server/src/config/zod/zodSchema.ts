@@ -90,3 +90,8 @@ export const createGameResponseSchema = z.record(
         itemId: nanoId21Schema,
     })
 );
+
+export const createGameInputSchema = z.object({
+    preset: nanoId21Schema,
+    numOfChars: z.number().int().min(6).max(50),
+});

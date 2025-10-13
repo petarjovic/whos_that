@@ -3,7 +3,7 @@ import type { Express } from "express";
 import { PutObjectCommand, DeleteObjectsCommand } from "@aws-sdk/client-s3";
 import * as schema from "./config/db/schema.ts";
 import * as authSchema from "./config/db/auth-schema.ts";
-import { eq, and } from "drizzle-orm";
+import { eq, and, sql } from "drizzle-orm";
 import type {
     CardDataIdType,
     CardDataUrlType,
@@ -53,6 +53,34 @@ export function setupApiRoutes(app: Express) {
             const presignedUploadUrls: CreateGameResponse = {};
 
             try {
+                const S3PresignedUrlPromises = body.namesAndFileTypes.map(
+                    async ({ type, name }) => {
+                        const itemId = nanoid();
+                        const command = new PutObjectCommand({
+                            Bucket: env.AWS_BUCKET_NAME,
+                            Key: constructS3ImageKey(body.privacy === "public", gameId, itemId),
+                            ContentType: type,
+                        });
+
+                        const signedUrl = await getSignedS3Url(s3, command, { expiresIn: 120 });
+                        return { name, itemId, signedUrl };
+                    }
+                );
+
+                const S3PresignedUrls = await Promise.all(S3PresignedUrlPromises);
+
+                S3PresignedUrls.forEach(({ name, itemId, signedUrl }) => {
+                    presignedUploadUrls[name] = { signedUrl, itemId };
+                });
+            } catch (error) {
+                console.error(
+                    "Error generating presigned s3 upload urls during game creation:\n",
+                    error
+                );
+                return res.status(500).json({ message: "Error creating new game." });
+            }
+
+            try {
                 const session = await auth.api.getSession({
                     headers: fromNodeHeaders(req.headers),
                 });
@@ -70,19 +98,6 @@ export function setupApiRoutes(app: Express) {
 
                     console.log("Created game:", gameId);
 
-                    for (const { type, name } of body.namesAndFileTypes) {
-                        const itemId = nanoid();
-                        const command = new PutObjectCommand({
-                            Bucket: env.AWS_BUCKET_NAME,
-                            Key: constructS3ImageKey(body.privacy === "public", gameId, itemId),
-                            ContentType: type,
-                        });
-                        const signedUrl = await getSignedS3Url(s3, command, {
-                            expiresIn: 120,
-                        });
-                        presignedUploadUrls[name] = { signedUrl, itemId };
-                    }
-
                     await tx.insert(schema.gameItems).values(
                         Object.entries(presignedUploadUrls).map(([name, { itemId }], i) => ({
                             id: itemId,
@@ -95,7 +110,7 @@ export function setupApiRoutes(app: Express) {
 
                 return res.status(200).json(presignedUploadUrls);
             } catch (error) {
-                console.error("Error while creating new game:", error);
+                console.error("Error while creating new game:\n", error);
                 return res.status(500).json({ message: "Error creating new game." });
             }
         } else {
@@ -267,29 +282,29 @@ export function setupApiRoutes(app: Express) {
             });
             if (!session) return res.status(401).json({ message: "Unauthorized." });
 
-            const isPublicData = await db
-                .select({ isPublic: schema.games.isPublic })
+            const gameWithItems = await db
+                .select({
+                    isPublic: schema.games.isPublic,
+                    imageIds: sql<string[]>`array_agg(${schema.gameItems.id})`,
+                })
                 .from(schema.games)
-                .where(eq(schema.games.id, gameId));
-
-            const imageIds = await db
-                .select({ id: schema.gameItems.id })
-                .from(schema.gameItems)
-                .where(eq(schema.gameItems.gameId, gameId));
+                .leftJoin(schema.gameItems, eq(schema.gameItems.gameId, schema.games.id))
+                .where(eq(schema.games.id, gameId))
+                .groupBy(schema.games.id);
 
             const dbDelRes = await db
                 .delete(schema.games)
                 .where(and(eq(schema.games.id, gameId), eq(schema.games.userId, session.user.id)));
 
-            if (isPublicData.length > 0 && dbDelRes.rowCount !== null && dbDelRes.rowCount >= 1) {
+            if (gameWithItems.length > 0 && dbDelRes.rowCount !== null && dbDelRes.rowCount >= 1) {
                 console.log("Deleted Game:", gameId);
-                if (imageIds.length > 0) {
-                    const [{ isPublic }] = isPublicData;
+                const [{ isPublic, imageIds }] = gameWithItems;
 
+                if (imageIds.length > 0) {
                     const delS3ObjsCommand = new DeleteObjectsCommand({
                         Bucket: env.AWS_BUCKET_NAME,
                         Delete: {
-                            Objects: imageIds.map(({ id }) => ({
+                            Objects: imageIds.map((id) => ({
                                 Key: constructS3ImageKey(isPublic, gameId, id),
                             })),
                         },

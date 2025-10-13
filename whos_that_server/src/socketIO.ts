@@ -1,7 +1,7 @@
 import { nanoid } from "nanoid";
 import type { GameStateType, ClientToServerEvents, ServerToClientEvents } from "./config/types";
 import type { Server } from "socket.io";
-import { roomIdSchema } from "./config/zod/zodSchema.ts";
+import { roomIdSchema, createRoomParamsSchema } from "./config/zod/zodSchema.ts";
 import z from "zod";
 
 function winningKeyGenerator(max: number): [number, number] {
@@ -37,9 +37,13 @@ export function setupSocketEventHandlers(io: Server<ClientToServerEvents, Server
 
         // Create a new game
         socket.on("createGame", (preset, numOfChars, ack) => {
-            if (typeof preset === "string" && typeof numOfChars === "number" && numOfChars > 0) {
+            const validateCreateRoomParams = createRoomParamsSchema.safeParse({
+                preset,
+                numOfChars,
+            });
+            if (validateCreateRoomParams.success) {
                 let roomId = nanoid(6);
-                while (roomId in ActiveRoomIdsMap) roomId = nanoid(6); //setTimeout??
+                while (ActiveRoomIdsMap.has(roomId)) roomId = nanoid(6); //setTimeout??
                 ActiveRoomIdsMap.set(roomId, {
                     players: ["", ""],
                     playAgainReqs: [false, false],
