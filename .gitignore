@@ -24,4 +24,6 @@ dist-ssr
 
 .env
 *.pem
+zodEnvSchema.ts
+assets/*
 

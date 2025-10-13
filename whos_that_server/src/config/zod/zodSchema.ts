@@ -70,28 +70,41 @@ export const clientToServerEventsSchema = z.object({
 });
 
 export const createGameRequestSchema = z.object({
-    title: z.string().min(5).max(20),
+    title: z.string().max(50),
     privacy: z.union([z.literal("public"), z.literal("private")]),
     namesAndFileTypes: z
         .array(
             z.object({
                 type: z.enum(["image/jpeg", "image/png", "image/webp"]),
-                name: z.string().min(5).max(20),
+                name: z.string().max(50),
             })
         )
         .min(6)
         .max(50),
 });
 
-export const createGameResponseSchema = z.record(
-    z.string(),
-    z.object({
-        signedUrl: z.string(),
-        itemId: nanoId21Schema,
-    })
-);
+export const createGameResponseSchema = z.object({
+    gameId: nanoId21Schema,
+    gameItems: z.record(
+        z.string(),
+        z.object({
+            signedUrl: z.string(),
+            itemId: nanoId21Schema,
+        })
+    ),
+});
 
 export const createRoomParamsSchema = z.object({
     preset: nanoId21Schema,
     numOfChars: z.number().int().min(6).max(50),
 });
+
+export const PresetInfoSchema = z.array(
+    z.object({
+        title: z.string(),
+        id: z.string(),
+        author: z.string().nullable(),
+        imageUrl: z.string(),
+        isPublic: z.boolean(),
+    })
+);

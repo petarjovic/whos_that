@@ -24,6 +24,11 @@ export const auth = betterAuth({
         maxPasswordLength: 128,
         passwordStrengthCheck: true,
     },
+    account: {
+        accountLinking: {
+            allowDifferentEmails: true,
+        },
+    },
     session: {
         cookieCache: {
             enabled: true,

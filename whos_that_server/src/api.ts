@@ -9,6 +9,7 @@ import type {
     CardDataUrlType,
     CreateGameRequest,
     CreateGameResponse,
+    PresetInfo,
 } from "./config/types.ts";
 import { nanoid } from "nanoid";
 import { getSignedUrl as getSignedS3Url } from "@aws-sdk/s3-request-presigner";
@@ -50,7 +51,7 @@ export function setupApiRoutes(app: Express) {
         if (validRequest.success) {
             const gameId = nanoid();
             const body: CreateGameRequest = validRequest.data;
-            const presignedUploadUrls: CreateGameResponse = {};
+            const response: CreateGameResponse = { gameId: gameId, gameItems: {} };
 
             try {
                 const S3PresignedUrlPromises = body.namesAndFileTypes.map(
@@ -69,9 +70,9 @@ export function setupApiRoutes(app: Express) {
 
                 const S3PresignedUrls = await Promise.all(S3PresignedUrlPromises);
 
-                S3PresignedUrls.forEach(({ name, itemId, signedUrl }) => {
-                    presignedUploadUrls[name] = { signedUrl, itemId };
-                });
+                for (const { name, itemId, signedUrl } of S3PresignedUrls) {
+                    response.gameItems[name] = { signedUrl, itemId };
+                }
             } catch (error) {
                 console.error(
                     "Error generating presigned s3 upload urls during game creation:\n",
@@ -99,7 +100,7 @@ export function setupApiRoutes(app: Express) {
                     console.log("Created game:", gameId);
 
                     await tx.insert(schema.gameItems).values(
-                        Object.entries(presignedUploadUrls).map(([name, { itemId }], i) => ({
+                        Object.entries(response.gameItems).map(([name, { itemId }], i) => ({
                             id: itemId,
                             gameId: gameId,
                             name: name,
@@ -108,7 +109,7 @@ export function setupApiRoutes(app: Express) {
                     );
                 });
 
-                return res.status(200).json(presignedUploadUrls);
+                return res.status(200).json(response);
             } catch (error) {
                 console.error("Error while creating new game:\n", error);
                 return res.status(500).json({ message: "Error creating new game." });
@@ -196,13 +197,14 @@ export function setupApiRoutes(app: Express) {
                 )
                 .where(eq(schema.games.isPublic, true));
 
-            const premadeGamesInfoUrl = premadeGamesInfo
+            const premadeGamesInfoUrl: PresetInfo = premadeGamesInfo
                 .filter(({ coverImageId }) => coverImageId !== null)
                 .map(({ id, title, author, coverImageId }) => {
                     return {
                         id,
                         title,
                         author,
+                        isPublic: true,
                         imageUrl: constructImageUrl(true, id, coverImageId ?? ""),
                     };
                 });
@@ -241,7 +243,7 @@ export function setupApiRoutes(app: Express) {
                 )
                 .where(eq(schema.games.userId, session.user.id));
 
-            const getMyGamesRes = gameInfoList
+            const getMyGamesRes: PresetInfo = gameInfoList
                 .filter(({ coverImageId }) => coverImageId !== null)
                 .map(({ id, title, isPublic, coverImageId }) => {
                     // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
@@ -255,6 +257,7 @@ export function setupApiRoutes(app: Express) {
                     return {
                         id,
                         title,
+                        author: session.user.id,
                         isPublic,
                         imageUrl: isPublic ? imageUrl : getSignedCFUrl(signedUrlParams),
                     };

@@ -10,3 +10,4 @@ export type ServerToClientEvents = z.infer<typeof zod.serverToClientEventsSchema
 export type ClientToServerEvents = z.infer<typeof zod.clientToServerEventsSchema>;
 export type CreateGameRequest = z.infer<typeof zod.createGameRequestSchema>;
 export type CreateGameResponse = z.infer<typeof zod.createGameResponseSchema>;
+export type PresetInfo = z.infer<typeof zod.PresetInfoSchema>;
