@@ -91,7 +91,7 @@ export const createGameResponseSchema = z.record(
     })
 );
 
-export const createGameInputSchema = z.object({
+export const createRoomParamsSchema = z.object({
     preset: nanoId21Schema,
     numOfChars: z.number().int().min(6).max(50),
 });

@@ -183,7 +183,7 @@ export function setupApiRoutes(app: Express) {
                     id: schema.games.id,
                     title: schema.games.title,
                     author: authSchema.user.displayUsername,
-                    gameItemId: schema.gameItems.id,
+                    coverImageId: schema.gameItems.id,
                 })
                 .from(schema.games)
                 .leftJoin(authSchema.user, eq(authSchema.user.id, schema.games.userId))
@@ -196,16 +196,16 @@ export function setupApiRoutes(app: Express) {
                 )
                 .where(eq(schema.games.isPublic, true));
 
-            const premadeGamesInfoUrl = premadeGamesInfo.map(
-                ({ id, title, author, gameItemId }) => {
+            const premadeGamesInfoUrl = premadeGamesInfo
+                .filter(({ coverImageId }) => coverImageId !== null)
+                .map(({ id, title, author, coverImageId }) => {
                     return {
                         id,
                         title,
                         author,
-                        imageUrl: constructImageUrl(true, id, gameItemId ?? ""),
+                        imageUrl: constructImageUrl(true, id, coverImageId ?? ""),
                     };
-                }
-            );
+                });
 
             return res.status(200).send(premadeGamesInfoUrl);
         } catch (error) {
@@ -300,7 +300,7 @@ export function setupApiRoutes(app: Express) {
                 console.log("Deleted Game:", gameId);
                 const [{ isPublic, imageIds }] = gameWithItems;
 
-                if (imageIds.length > 0) {
+                if (imageIds.length > 0 && imageIds[0]) {
                     const delS3ObjsCommand = new DeleteObjectsCommand({
                         Bucket: env.AWS_BUCKET_NAME,
                         Delete: {
