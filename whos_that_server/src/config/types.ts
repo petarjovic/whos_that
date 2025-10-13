@@ -1,63 +1,12 @@
-export interface ResponseType {
-    success: boolean;
-    msg: string;
-}
+import * as zod from "./zod/zodSchema.ts";
+import z from "zod";
 
-export interface GameStateType {
-    players: [string, string];
-    cardIdsToGuess: [number, number];
-    playAgainReqs: [boolean, boolean];
-    preset: string;
-    numOfChars: number;
-}
-
-interface CardDataType {
-    name: string;
-    orderIndex: number;
-}
-
-export interface CardDataIdType extends CardDataType {
-    gameItemId: string;
-}
-
-export interface CardDataUrlType extends CardDataType {
-    imageUrl: string;
-} //??
-
-export interface GameDataType {
-    title: string;
-    cardData: CardDataUrlType[];
-}
-
-export interface ServerToClientEvents {
-    playerJoined: (gameState: GameStateType) => void;
-    recieveOppGuess: (winLose: boolean) => void;
-    opponentDisconnted: (gameState: GameStateType) => void;
-    playAgainConfirmed: (gameState: GameStateType) => void;
-    errorMessage: (error: { message: string }) => void;
-}
-
-export interface ClientToServerEvents {
-    createGame: (
-        preset: string,
-        numOfChars: number,
-        ack: (gameId: string, response: ResponseType) => void
-    ) => void;
-    joinGame: (
-        gameId: string,
-        ack: (gameData: GameStateType, response: ResponseType) => void
-    ) => void;
-    guess: (gameId: string, guessCorrectness: boolean) => void;
-    playAgain: (gameId: string) => void;
-}
-
-export interface CreateGameRequest {
-    title: string;
-    privacy: "public" | "private";
-    user: string;
-    namesAndFileTypes: { type: string; name: string }[];
-}
-
-export interface CreateGameResponse {
-    [charName: string]: { signedUrl: string; itemId: string };
-}
+export type ResponseType = z.infer<typeof zod.responseTypeSchema>;
+export type GameStateType = z.infer<typeof zod.gameStateTypeSchema>;
+export type CardDataIdType = z.infer<typeof zod.cardDataIdTypeSchema>;
+export type CardDataUrlType = z.infer<typeof zod.cardDataUrlTypeSchema>;
+export type GameDataType = z.infer<typeof zod.gameDataTypeSchema>;
+export type ServerToClientEvents = z.infer<typeof zod.serverToClientEventsSchema>;
+export type ClientToServerEvents = z.infer<typeof zod.clientToServerEventsSchema>;
+export type CreateGameRequest = z.infer<typeof zod.createGameRequestSchema>;
+export type CreateGameResponse = z.infer<typeof zod.createGameResponseSchema>;

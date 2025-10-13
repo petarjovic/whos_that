@@ -21,7 +21,6 @@ export const gameItems = pgTable("game_items", {
     gameId: text("game_id")
         .notNull()
         .references(() => games.id, { onDelete: "cascade" }),
-    imageUrl: text("image_url").notNull(),
     name: text("name").notNull(),
     orderIndex: integer("order_index").notNull(),
     createdAt: timestamp("created_at").defaultNow().notNull(),
@@ -37,3 +36,4 @@ export const gameLikes = pgTable("game_likes", {
         .references(() => user.id, { onDelete: "cascade" }),
     createdAt: timestamp("created_at").defaultNow().notNull(),
 });
+

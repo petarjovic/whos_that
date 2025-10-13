@@ -7,8 +7,7 @@ import type { ClientToServerEvents, ServerToClientEvents } from "./config/types.
 import { auth } from "./config/auth.ts";
 import { setupSocketEventHandlers } from "./socketIO.ts";
 import { setupApiRoutes } from "./api.ts";
-const PORT = process.env.PORT ?? "3001";
-
+import env from "./config/zod/zodEnvSchema.ts";
 const app = express();
 app.use(
     cors({
@@ -31,6 +30,6 @@ const io = new Server<ClientToServerEvents, ServerToClientEvents>(server, {
 setupApiRoutes(app);
 setupSocketEventHandlers(io);
 
-server.listen(PORT, () => {
-    console.log(`LISTENING ON PORT: ${PORT}`);
+server.listen(env.PORT, () => {
+    console.log(`LISTENING ON PORT: ${env.PORT.toString()}`);
 });

@@ -4,6 +4,8 @@ import { username } from "better-auth/plugins";
 import { db } from "./awsConections.ts"; // your drizzle instance
 import * as authSchema from "./db/auth-schema.ts";
 import * as appSchema from "./db/schema.ts";
+import env from "./zod/zodEnvSchema.ts";
+
 const schema = {
     ...authSchema,
     ...appSchema,
@@ -32,8 +34,8 @@ export const auth = betterAuth({
     socialProviders: {
         discord: {
             //TODO: ADD DISCORD AUTHENTICATION
-            clientId: process.env.DISCORD_CLIENT_ID!,
-            clientSecret: process.env.DISCORD_CLIENT_SECRET!,
+            clientId: env.DISCORD_CLIENT_ID,
+            clientSecret: env.DISCORD_CLIENT_SECRET,
         },
     },
     plugins: [
@@ -41,5 +43,5 @@ export const auth = betterAuth({
             maxUsernameLength: 20,
         }),
     ],
-    baseURL: process.env.BETTER_AUTH_URL!,
+    baseURL: env.BETTER_AUTH_URL,
 });

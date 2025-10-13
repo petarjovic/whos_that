@@ -1,6 +1,6 @@
 import { db, s3, cloudFront } from "./config/awsConections.ts";
 import type { Express } from "express";
-import { PutObjectCommand, DeleteObjectCommand } from "@aws-sdk/client-s3";
+import { PutObjectCommand, DeleteObjectsCommand } from "@aws-sdk/client-s3";
 import * as schema from "./config/db/schema.ts";
 import * as authSchema from "./config/db/auth-schema.ts";
 import { eq, and } from "drizzle-orm";
@@ -14,14 +14,14 @@ import { nanoid } from "nanoid";
 import { getSignedUrl as getSignedS3Url } from "@aws-sdk/s3-request-presigner";
 import { getSignedUrl as getSignedCFUrl } from "@aws-sdk/cloudfront-signer";
 import { CreateInvalidationCommand } from "@aws-sdk/client-cloudfront";
+import env from "./config/zod/zodEnvSchema.ts";
+import { createGameRequestSchema, nanoId21Schema } from "./config/zod/zodSchema.ts";
+import z from "zod";
+import { auth } from "./config/auth.ts";
+import { fromNodeHeaders } from "better-auth/node";
 
 const constructImageUrl = (isPublic: boolean, gameId: string, gameItemId: string): string => {
-    if (!process.env.AWS_CF_DOMAIN) {
-        throw new Error("AWS_CF_DOMAIN environment variable is not defined.");
-    }
-    return (
-        `https://${process.env.AWS_CF_DOMAIN}/` + constructS3ImageKey(isPublic, gameId, gameItemId)
-    );
+    return `https://${env.AWS_CF_DOMAIN}/` + constructS3ImageKey(isPublic, gameId, gameItemId);
 };
 
 const constructS3ImageKey = (isPublic: boolean, gameId: string, gameItemId: string): string => {
@@ -45,103 +45,85 @@ const cardDataIdToUrl = (
 
 export function setupApiRoutes(app: Express) {
     app.post("/api/createNewGame", async (req, res) => {
-        //ERROR HANDLINHG
-        const body = req.body as CreateGameRequest;
+        const validRequest = createGameRequestSchema.safeParse(req.body);
 
-        // Request Validation Redo Later
-        if (!body.title || typeof body.title !== "string") {
-            return res.status(400).json({ message: "Title is required." });
-        } else if (!["public", "private"].includes(body.privacy)) {
-            return res
-                .status(400)
-                .json({ message: "Privacy setting must be 'public' or 'private'." });
-        } else if (!body.user || typeof body.user !== "string") {
-            return res.status(400).json({ message: "User ID is required." });
-        } else if (!Array.isArray(body.namesAndFileTypes)) {
-            return res.status(400).json({ message: "NamesAndFileTypes must be an array." });
-        } else {
-            const acceptedTypes = new Set(["image/jpeg", "image/png", "image/webp"]);
-            for (const { type, name } of body.namesAndFileTypes) {
-                if (!type || !name) {
-                    return res.status(400).json({ message: "Each file must have type and name." });
-                } else if (!acceptedTypes.has(type)) {
-                    return res.status(400).json({ message: `Invalid file type: ${type}` });
-                } else if (typeof name !== "string" || name.trim().length === 0) {
-                    return res.status(400).json({ message: "Each file must have a valid name." });
-                }
-            }
-        }
+        if (validRequest.success) {
+            const gameId = nanoid();
+            const body: CreateGameRequest = validRequest.data;
+            const presignedUploadUrls: CreateGameResponse = {};
 
-        let gameId = "";
-
-        try {
-            [{ insertedId: gameId }] = await db //extract and asign to id
-                .insert(schema.games)
-                .values({
-                    id: nanoid(),
-                    title: body.title,
-                    description: "",
-                    isPublic: body.privacy === "public",
-                    userId: body.user,
-                })
-                .returning({ insertedId: schema.games.id });
-        } catch (error) {
-            console.error("Error creating new game entry:", error);
-            return res.status(500).json({ message: "Error creating new game entry." });
-        }
-
-        if (!gameId) return res.status(500).json({ error: "Error creating new game entry." }); //Sanity Check
-        console.log("Create game:", gameId);
-
-        const presignedUploadUrls: CreateGameResponse = {};
-
-        for (const { type, name } of body.namesAndFileTypes) {
-            const gameItemId = nanoid();
-            const command = new PutObjectCommand({
-                Bucket: process.env.AWS_BUCKET_NAME,
-                Key: constructS3ImageKey(body.privacy === "public", gameId, gameItemId),
-                ContentType: type,
-            });
-            const signedUrl = await getSignedS3Url(s3, command, {
-                expiresIn: 120,
-            });
-            presignedUploadUrls[name] = { signedUrl: signedUrl, itemId: gameItemId };
-        }
-
-        //update gameItems table
-
-        try {
-            let i = 0;
-            for (const [name, { itemId }] of Object.entries(presignedUploadUrls)) {
-                await db.insert(schema.gameItems).values({
-                    id: itemId,
-                    gameId: gameId,
-                    imageUrl: constructImageUrl(body.privacy === "public", gameId, itemId), //WILL BE REMOVED?
-                    name: name,
-                    orderIndex: i,
+            try {
+                const session = await auth.api.getSession({
+                    headers: fromNodeHeaders(req.headers),
                 });
-                i++;
+
+                if (!session) return res.status(401).json({ message: "Unauthorized." });
+
+                await db.transaction(async (tx) => {
+                    await tx.insert(schema.games).values({
+                        id: gameId,
+                        title: body.title,
+                        description: "",
+                        isPublic: body.privacy === "public",
+                        userId: session.user.id,
+                    });
+
+                    console.log("Created game:", gameId);
+
+                    for (const { type, name } of body.namesAndFileTypes) {
+                        const itemId = nanoid();
+                        const command = new PutObjectCommand({
+                            Bucket: env.AWS_BUCKET_NAME,
+                            Key: constructS3ImageKey(body.privacy === "public", gameId, itemId),
+                            ContentType: type,
+                        });
+                        const signedUrl = await getSignedS3Url(s3, command, {
+                            expiresIn: 120,
+                        });
+                        presignedUploadUrls[name] = { signedUrl, itemId };
+                    }
+
+                    await tx.insert(schema.gameItems).values(
+                        Object.entries(presignedUploadUrls).map(([name, { itemId }], i) => ({
+                            id: itemId,
+                            gameId: gameId,
+                            name: name,
+                            orderIndex: i,
+                        }))
+                    );
+                });
+
+                return res.status(200).json(presignedUploadUrls);
+            } catch (error) {
+                console.error("Error while creating new game:", error);
+                return res.status(500).json({ message: "Error creating new game." });
             }
-            return res.status(200).json(presignedUploadUrls);
-        } catch (error) {
-            console.error("Error updating db:", error);
+        } else {
+            console.error("Error creating new game:\n" + z.prettifyError(validRequest.error));
+            return res.status(422).json({
+                message: "Invalid create game request.",
+            });
         }
     });
 
-    app.get("/api/gameData", async (req, res) => {
-        //ERROR HANDLINHG FOR REAL DO IT SOON OML
-
+    app.get("/api/gameData/:presetId", async (req, res) => {
         const {
-            query: { preset: gameId },
+            params: { presetId },
         } = req;
-        if (!gameId || typeof gameId !== "string")
-            return res.status(400).send({ message: "Preset query is missing or invalid." }); //Maybe handle better?
+        const validGameId = nanoId21Schema.safeParse(presetId);
+        if (!validGameId.success) return res.status(422).json({ message: "Invalid game id." });
+        const gameId = validGameId.data;
 
         try {
-            const [{ isPublic, title }] = await db
+            const gameTitleAndPrivacy = await db
                 .select({ title: schema.games.title, isPublic: schema.games.isPublic })
                 .from(schema.games)
                 .where(eq(schema.games.id, gameId)); //REDO THIS LATER TO BE DONE VIA SOCKET.IO SO THAT PRIVATE GAMES ARE ACC PRIVATE
+
+            if (gameTitleAndPrivacy.length === 0)
+                return res.status(404).json({ message: `Game id: ${gameId} does not exist` });
+
+            const [{ isPublic, title }] = gameTitleAndPrivacy;
 
             const cardDataIdList: CardDataIdType[] = await db
                 .select({
@@ -156,147 +138,197 @@ export function setupApiRoutes(app: Express) {
                 const cardDataUrlList = cardDataIdToUrl(cardDataIdList, isPublic, gameId);
                 return res.status(200).send({ title: title, cardData: cardDataUrlList });
             } else {
-                const cardDataPresignedUrlList: CardDataUrlType[] = await Promise.all(
-                    cardDataIdList.map(async (cardData) => {
+                const cardDataPresignedUrlList: CardDataUrlType[] = cardDataIdList.map(
+                    (cardData) => {
                         const signedUrlParams = {
                             url: constructImageUrl(false, gameId, cardData.gameItemId),
                             dateLessThan: new Date(Date.now() + 1000 * 60 * 60 * 24),
-                            privateKey: process.env.AWS_CF_PRIV_KEY!,
-                            keyPairId: process.env.AWS_CF_KEY_PAIR_ID!,
+                            privateKey: env.AWS_CF_PRIV_KEY,
+                            keyPairId: env.AWS_CF_KEY_PAIR_ID,
                         };
                         return {
                             name: cardData.name,
                             imageUrl: getSignedCFUrl(signedUrlParams),
                             orderIndex: cardData.orderIndex,
                         };
-                    })
+                    }
                 );
                 return res.status(200).send({ title: title, cardData: cardDataPresignedUrlList });
             }
         } catch (error) {
             console.error("Error:", error);
-            return res.status(400).json({ message: `Failed to get game: ${gameId}` });
+            return res.status(500).json({ message: `Failed to get game: ${gameId}` });
         }
-
-        //ERROR HANDLING
     });
 
     app.get("/api/getAllPremadeGames", async (req, res) => {
-        const gameTitleIdImageList = await db
-            .select({
-                id: schema.games.id,
-                title: schema.games.title,
-                author: authSchema.user.displayUsername,
-                imageUrl: schema.gameItems.imageUrl,
-            })
-            .from(schema.games)
-            .leftJoin(authSchema.user, eq(authSchema.user.id, schema.games.userId))
-            .leftJoin(
-                schema.gameItems,
-                and(
-                    eq(schema.gameItems.gameId, schema.games.id),
-                    eq(schema.gameItems.orderIndex, 0)
+        try {
+            const premadeGamesInfo = await db
+                .select({
+                    id: schema.games.id,
+                    title: schema.games.title,
+                    author: authSchema.user.displayUsername,
+                    gameItemId: schema.gameItems.id,
+                })
+                .from(schema.games)
+                .leftJoin(authSchema.user, eq(authSchema.user.id, schema.games.userId))
+                .leftJoin(
+                    schema.gameItems,
+                    and(
+                        eq(schema.gameItems.gameId, schema.games.id),
+                        eq(schema.gameItems.orderIndex, 0)
+                    )
                 )
-            )
-            .where(eq(schema.games.isPublic, true));
+                .where(eq(schema.games.isPublic, true));
 
-        res.send(gameTitleIdImageList.filter(({ imageUrl }) => imageUrl !== null)); //maybe handle diff?
+            const premadeGamesInfoUrl = premadeGamesInfo.map(
+                ({ id, title, author, gameItemId }) => {
+                    return {
+                        id,
+                        title,
+                        author,
+                        imageUrl: constructImageUrl(true, id, gameItemId ?? ""),
+                    };
+                }
+            );
+
+            return res.status(200).send(premadeGamesInfoUrl);
+        } catch (error) {
+            console.error("Get premade games error:", error);
+            return res.status(500).json({ message: "Failed to fetch premade games." });
+        }
     });
 
     app.get("/api/getMyGames", async (req, res) => {
-        const {
-            query: { userId },
-        } = req;
-        if (!userId || typeof userId !== "string")
-            return res.status(400).json({ message: "No user-id given." }); //EROROR DO IT RIGFHT ADF:KJDSFLKJSFHLKJFSDK:LFS
-        const gameInfoList = await db
-            .select({
-                id: schema.games.id,
-                title: schema.games.title,
-                isPublic: schema.games.isPublic,
-                coverImageId: schema.gameItems.id,
-            })
-            .from(schema.games)
-            //AS STRING?
-            .leftJoin(
-                schema.gameItems,
-                and(
-                    eq(schema.gameItems.gameId, schema.games.id),
-                    eq(schema.gameItems.orderIndex, 0)
+        const { headers } = req;
+
+        try {
+            const session = await auth.api.getSession({
+                headers: fromNodeHeaders(headers),
+            });
+
+            if (!session) return res.status(401).json({ message: "Unauthorized." });
+
+            const gameInfoList = await db
+                .select({
+                    id: schema.games.id,
+                    title: schema.games.title,
+                    isPublic: schema.games.isPublic,
+                    coverImageId: schema.gameItems.id,
+                })
+                .from(schema.games)
+                .leftJoin(
+                    schema.gameItems,
+                    and(
+                        eq(schema.gameItems.gameId, schema.games.id),
+                        eq(schema.gameItems.orderIndex, 0)
+                    )
                 )
-            )
-            .where(eq(schema.games.userId, userId));
+                .where(eq(schema.games.userId, session.user.id));
 
-        const getMyGamesRes = gameInfoList.map(({ id, title, isPublic, coverImageId }) => {
-            const imageUrl = constructImageUrl(isPublic, id, coverImageId ?? "");
-            const signedUrlParams = {
-                url: imageUrl,
-                dateLessThan: new Date(Date.now() + 1000 * 60 * 60 * 24),
-                privateKey: process.env.AWS_CF_PRIV_KEY!,
-                keyPairId: process.env.AWS_CF_KEY_PAIR_ID!,
-            };
-            return {
-                id,
-                title,
-                isPublic,
-                imageUrl: isPublic ? imageUrl : getSignedCFUrl(signedUrlParams),
-            };
-        });
+            const getMyGamesRes = gameInfoList
+                .filter(({ coverImageId }) => coverImageId !== null)
+                .map(({ id, title, isPublic, coverImageId }) => {
+                    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+                    const imageUrl = constructImageUrl(isPublic, id, coverImageId!);
+                    const signedUrlParams = {
+                        url: imageUrl,
+                        dateLessThan: new Date(Date.now() + 1000 * 60 * 60 * 24),
+                        privateKey: env.AWS_CF_PRIV_KEY,
+                        keyPairId: env.AWS_CF_KEY_PAIR_ID,
+                    };
+                    return {
+                        id,
+                        title,
+                        isPublic,
+                        imageUrl: isPublic ? imageUrl : getSignedCFUrl(signedUrlParams),
+                    };
+                });
 
-        res.send(getMyGamesRes);
+            res.status(200).send(getMyGamesRes);
+        } catch (error) {
+            console.error(error);
+            res.status(500).json({ message: "Failed to fetch user's premade games " });
+        }
     });
 
-    app.delete("/api/deleteGame/", async (req, res) => {
+    app.delete("/api/deleteGame/:gameId", async (req, res) => {
         const {
-            query: { gameId, userId },
+            params: { gameId: paramGameId },
+            headers,
         } = req;
-        if (!gameId || typeof gameId !== "string")
-            return res.status(400).json({ message: "No game-id given." });
-        if (!userId || typeof userId !== "string")
-            return res.status(400).json({ message: "No user-id given." });
+        const validGameId = nanoId21Schema.safeParse(paramGameId);
+        if (!validGameId.success) return res.status(422).json({ message: "Invalid game id." });
+        const gameId = validGameId.data;
 
-        const imageIds = await db
-            .select({ id: schema.gameItems.id })
-            .from(schema.gameItems)
-            .where(eq(schema.gameItems.gameId, gameId));
-
-        const [{ isPublic }] = await db
-            .select({ isPublic: schema.games.isPublic })
-            .from(schema.games)
-            .where(eq(schema.games.id, gameId));
-
-        const delS3Objs = imageIds.map(async ({ id }) => {
-            const command = new DeleteObjectCommand({
-                Bucket: process.env.AWS_BUCKET_NAME,
-                Key: constructS3ImageKey(isPublic, gameId, id),
+        try {
+            const session = await auth.api.getSession({
+                headers: fromNodeHeaders(headers),
             });
-            return await s3.send(command);
-        });
+            if (!session) return res.status(401).json({ message: "Unauthorized." });
 
-        const cFCacheInvalidationCommand = new CreateInvalidationCommand({
-            //THIS MIGHT BE NOT WORKING CORRECTLY DOUBLE CHECK
-            DistributionId: process.env.AWS_CF_DISTRIBUTION_ID!,
-            InvalidationBatch: {
-                CallerReference: nanoid(),
-                Paths: {
-                    Quantity: 1,
-                    Items: [`/premadeGames/${isPublic ? "public" : "private"}/${gameId}/*`],
-                },
-            },
-        });
+            const isPublicData = await db
+                .select({ isPublic: schema.games.isPublic })
+                .from(schema.games)
+                .where(eq(schema.games.id, gameId));
 
-        const delRes = await db
-            .delete(schema.games)
-            .where(and(eq(schema.games.id, gameId), eq(schema.games.userId, userId)));
-        if (delRes.rowCount !== null && delRes.rowCount >= 1) {
-            const msg = `Deleted game: ${gameId}`;
-            await Promise.all(delS3Objs);
-            //invalidate Cloudfront cache
-            await cloudFront.send(cFCacheInvalidationCommand);
-            res.status(200).json({ message: msg });
-        } else
-            res.status(400).json({
-                message: `Either ${gameId} does not exist or user ${userId} doesn't not have premission to delete it.`,
-            });
+            const imageIds = await db
+                .select({ id: schema.gameItems.id })
+                .from(schema.gameItems)
+                .where(eq(schema.gameItems.gameId, gameId));
+
+            const dbDelRes = await db
+                .delete(schema.games)
+                .where(and(eq(schema.games.id, gameId), eq(schema.games.userId, session.user.id)));
+
+            if (isPublicData.length > 0 && dbDelRes.rowCount !== null && dbDelRes.rowCount >= 1) {
+                console.log("Deleted Game:", gameId);
+                if (imageIds.length > 0) {
+                    const [{ isPublic }] = isPublicData;
+
+                    const delS3ObjsCommand = new DeleteObjectsCommand({
+                        Bucket: env.AWS_BUCKET_NAME,
+                        Delete: {
+                            Objects: imageIds.map(({ id }) => ({
+                                Key: constructS3ImageKey(isPublic, gameId, id),
+                            })),
+                        },
+                    });
+                    const s3DeleteResult = await s3.send(delS3ObjsCommand);
+                    if (s3DeleteResult.Errors) {
+                        console.error(
+                            "S3 batch delete had errors! There are likely orphaned items in S3 bucket:\n",
+                            s3DeleteResult.Errors
+                        );
+                    }
+
+                    const cFCacheInvalidationCommand = new CreateInvalidationCommand({
+                        DistributionId: env.AWS_CF_DISTRIBUTION_ID,
+                        InvalidationBatch: {
+                            CallerReference: nanoid(),
+                            Paths: {
+                                Quantity: 1,
+                                Items: [
+                                    `/premadeGames/${isPublic ? "public" : "private"}/${gameId}/*`,
+                                ],
+                            },
+                        },
+                    });
+                    try {
+                        await cloudFront.send(cFCacheInvalidationCommand);
+                    } catch (cfError) {
+                        console.error("CloudFront cache invalidation failed:", cfError);
+                    }
+                }
+
+                res.status(200).json({ message: `Deleted game: ${gameId}` });
+            } else
+                res.status(404).json({
+                    message: `Either game ${gameId} does not exist or user ${session.user.id} doesn't not have premission to delete it.`,
+                });
+        } catch (error) {
+            console.error(`Error while attempting to delete game: ${gameId}:\n`, error);
+            res.status(500).json({ message: `Error while attempting to delete game: ${gameId}` });
+        }
     });
 }
