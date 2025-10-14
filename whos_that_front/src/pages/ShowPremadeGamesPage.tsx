@@ -15,8 +15,7 @@ const ShowPremadeGamesPage = ({ myGames }: { myGames: boolean }) => {
 
     //Fetch games
     useEffect(() => {
-        if (!isPending && myGames && !session)
-            void navigate("/"); //Maybe throw error instead?
+        if (!isPending && myGames && !session) void navigate("/");
         else if (!isPending) {
             const getPremadeGames = async () => {
                 try {
@@ -56,7 +55,6 @@ const ShowPremadeGamesPage = ({ myGames }: { myGames: boolean }) => {
         gameId: string,
         title: string
     ) => {
-        //SECURITY?
         e.preventDefault();
         e.stopPropagation();
         const opt = e.target.value;
@@ -91,14 +89,17 @@ const ShowPremadeGamesPage = ({ myGames }: { myGames: boolean }) => {
     if (errorMsg) throw new Error(errorMsg);
 
     return (
-        <div className="mx-10 mt-10 flex flex-wrap items-center justify-evenly">
+        <div className="mx-10 mt-3 flex flex-wrap items-center justify-evenly">
+            <h2 className="font-times text-shadow-sm/100 mb-1 w-full text-center text-6xl tracking-wider text-white">
+                {myGames ? "Your Games" : "Public Games"}
+            </h2>
             {premadeGamesList.map(({ id, title, imageUrl, isPublic, author }, i) => (
                 <Link key={i} to={`/play-game?preset=${id}`}>
                     <CardLayout name={title} imgSrc={imageUrl} key={i}>
                         {myGames ? (
                             <>
                                 <select
-                                    className="text-md absolute m-0.5 w-fit cursor-pointer content-center rounded-[50%] bg-slate-100 text-center"
+                                    className="text-md shadow-xs absolute m-1.5 w-fit cursor-pointer content-center rounded-[50%] bg-slate-100 p-[1px] text-center shadow-white"
                                     onClick={(e) => {
                                         e.preventDefault();
                                         e.stopPropagation();
@@ -107,7 +108,7 @@ const ShowPremadeGamesPage = ({ myGames }: { myGames: boolean }) => {
                                         void handleGameSettings(e, id, title);
                                     }}
                                 >
-                                    <button className="text-2xl">⚙️</button>
+                                    <button className="text-3xl">⚙️</button>
                                     <option className="text-md hidden bg-slate-500 px-1 text-white hover:bg-slate-300 hover:text-black">
                                         Change Title
                                     </option>

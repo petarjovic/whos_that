@@ -14,9 +14,13 @@ const maskEmail = (email: string) => {
 const AccountPage = () => {
     const navigate = useNavigate();
     const [showEmail, setShowEmail] = useState(false);
-    const { session, isPending } = useBetterAuthSession(); //ERROR HANDLING
     const [linkedAccounts, setLinkedAccounts] = useState<SocialSignInProviders[]>([]);
     const [errorMsg, setErrorMsg] = useState("");
+
+    const { session, isPending } = useBetterAuthSession();
+    useEffect(() => {
+        if (!session) void navigate("/");
+    }, [session, navigate]);
 
     useEffect(() => {
         const getLinkedAccounts = async () => {
@@ -37,12 +41,10 @@ const AccountPage = () => {
         return;
     };
 
-    if (isPending) return <div>Loading...</div>;
-    else if (errorMsg) throw new Error(errorMsg);
-    else if (session === null) {
-        void navigate("/sign-up");
-        return <></>;
-    } else
+    if (errorMsg) throw new Error(errorMsg);
+    //session cannot actually be null here, check is done to convince typescript
+    else if (isPending || !session) return <div>Loading...</div>;
+    else
         return (
             <div className="my-10 w-1/2 rounded-lg bg-cyan-100 p-6 shadow-md">
                 <div className="flex items-center justify-between">

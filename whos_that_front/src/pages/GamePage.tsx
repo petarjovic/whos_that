@@ -107,7 +107,7 @@ const Game = ({
                 <ConfirmGuessModal
                     isOpen={confirmGuessModal.isOpen}
                     confirmGuess={handleConfirmGuessModalResult}
-                    name={confirmGuessModal.name}
+                    name={confirmGuessModal.isOpen ? confirmGuessModal.name : ""}
                 />
             </div>
         </>
@@ -142,7 +142,7 @@ const GameEndModal = ({ endState, handlePlayAgain }: GameEndModalProps) => {
             break;
         }
         case "oppWrongGuess": {
-            modalText = "Your opponent guessed wrong! \n A lucky break, congratulations you win!";
+            modalText = "Your opponent guessed wrong! \n A lucky break!";
             break;
         }
     }
@@ -150,12 +150,12 @@ const GameEndModal = ({ endState, handlePlayAgain }: GameEndModalProps) => {
     return (
         <ReactModal
             isOpen={Boolean(endState)}
-            className="border-3 bg-radial fixed left-1/2 top-1/2 h-fit w-fit -translate-x-1/2 -translate-y-1/2 whitespace-pre-line rounded-2xl border-slate-200 from-slate-50 to-slate-300 px-5 py-10 text-center shadow-2xl"
+            className="border-3 text-shadow-xs/80 fixed left-1/2 top-1/2 inline-block h-fit w-fit -translate-x-1/2 -translate-y-1/2 rounded-2xl border-cyan-500 bg-cyan-500 p-10 text-center shadow-2xl"
         >
-            <p className="m-auto my-12 text-5xl font-bold">{modalText}</p>
+            <p className="m-auto my-12 text-5xl font-medium text-white">{modalText}</p>
             <div className="m-auto flex flex-row justify-evenly">
                 <button
-                    className={`w-50 border-b-9 border-x-1 text-shadow-xs/30 active:shadow-2xs active:inset-shadow-md m-auto h-20 cursor-pointer rounded-md px-1 text-3xl text-neutral-100 shadow-md ${playAgainSent ? "border-gray-600 bg-gray-500" : "border-green-700 bg-green-600 hover:border-green-800 hover:bg-green-700 active:translate-y-[1px] active:border-none"}`}
+                    className={`w-50 border-b-9 border-x-1 text-shadow-xs/80 active:shadow-2xs active:inset-shadow-md m-auto h-20 cursor-pointer rounded-md px-1 text-3xl text-neutral-100 shadow-md ${playAgainSent ? "border-gray-600 bg-gray-500" : "border-green-700 bg-green-600 hover:border-green-800 hover:bg-green-700 active:translate-y-[1px] active:border-none"}`}
                     onClick={() => {
                         setPlayAgainSent(true);
                         handlePlayAgain();
@@ -168,7 +168,7 @@ const GameEndModal = ({ endState, handlePlayAgain }: GameEndModalProps) => {
                     onClick={() => {
                         void navigate("/");
                     }}
-                    className="w-50 border-b-9 border-x-1 text-shadow-xs/30 active:shadow-2xs active:inset-shadow-md m-auto h-20 cursor-pointer rounded-md border-red-700 bg-red-600 px-1 text-3xl text-neutral-100 shadow-md hover:border-red-800 hover:bg-red-700 active:translate-y-[1px] active:border-none"
+                    className="w-50 border-b-9 border-x-1 text-shadow-xs/80 active:shadow-2xs active:inset-shadow-md m-auto h-20 cursor-pointer rounded-md border-red-700 bg-red-600 px-1 text-3xl text-neutral-100 shadow-md hover:border-red-800 hover:bg-red-700 active:translate-y-[1px] active:border-none"
                 >
                     Exit
                 </button>

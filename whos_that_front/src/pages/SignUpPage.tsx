@@ -1,4 +1,4 @@
-import { useState, type FormEvent } from "react";
+import { useEffect, useState, type FormEvent } from "react";
 import { Link } from "react-router";
 import { useNavigate } from "react-router";
 import { useBetterAuthSession } from "../layouts/LayoutContextProvider";
@@ -16,8 +16,11 @@ const SignUpPage = () => {
 
     const { session, isPending } = useBetterAuthSession();
 
+    useEffect(() => {
+        if (session) void navigate("/");
+    }, [session, navigate]);
+
     if (isPending) return <div>Loading...</div>;
-    else if (session) void navigate("/");
 
     const handleSignUp = async (e: FormEvent) => {
         e.preventDefault();
@@ -32,7 +35,7 @@ const SignUpPage = () => {
             password: password,
             username: username,
             name: "",
-            callbackURL: "http://localhost:5173/",
+            callbackURL: "http://localhost:5173/account",
         });
         console.log(signUpResult.data);
         if (signUpResult.error) {
@@ -125,11 +128,13 @@ const SignUpPage = () => {
                         value={passwordConfirmation}
                         required
                     />
-                    <p
-                        className={`shadow-xs max-h-23 mb-1 mt-3 overflow-y-auto rounded-md border border-red-200 bg-red-50 p-2 text-red-500 shadow-red-50 ${signUpIssue ? "" : "hidden"}`}
-                    >
-                        {signUpIssue}
-                    </p>
+                    {signUpIssue ? (
+                        <p className="shadow-xs max-h-23 mb-1 mt-3 overflow-y-auto rounded-md border border-red-200 bg-red-50 p-2 text-red-500 shadow-red-50">
+                            {signUpIssue}
+                        </p>
+                    ) : (
+                        <></>
+                    )}
                 </div>
                 <button
                     type="submit"
@@ -143,12 +148,13 @@ const SignUpPage = () => {
             </form>
             <p className="mt-4 text-center text-gray-600">
                 Already have an account?{" "}
-                <Link
-                    to="/login"
-                    className={`font-semibold text-blue-500 hover:underline ${signingUp ? "hidden" : ""}`}
-                >
-                    Log In
-                </Link>
+                {signingUp ? (
+                    <Link to="/login" className="font-semibold text-blue-500 hover:underline">
+                        Log In
+                    </Link>
+                ) : (
+                    <div className="font-semibold text-blue-500 hover:underline">Log In</div>
+                )}
             </p>
         </div>
     );

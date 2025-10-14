@@ -26,6 +26,7 @@ const ErrorPage = ({ error }: { error?: unknown }) => {
 
     return (
         <div className="flex min-h-screen w-full flex-col items-center justify-start bg-gradient-to-b from-cyan-400 to-cyan-600 to-90% bg-fixed">
+            {/* eslint-disable-next-line unicorn/no-null */}
             <Hero session={null} isPending={false} showUserInfo={false} />
             <div className="text-shadow-xs/100 mt-15 mx-auto text-center text-2xl text-white">
                 <img

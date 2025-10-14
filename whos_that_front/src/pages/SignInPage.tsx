@@ -1,4 +1,4 @@
-import { useState, type FormEvent } from "react";
+import { useState, useEffect, type FormEvent } from "react";
 import { Link } from "react-router";
 import { authClient } from "../lib/auth-client";
 import { useNavigate } from "react-router";
@@ -14,8 +14,11 @@ const SignInPage = () => {
 
     const { session, isPending } = useBetterAuthSession();
 
+    useEffect(() => {
+        if (session) void navigate("/");
+    }, [session, navigate]);
+
     if (isPending) return <div>Loading...</div>;
-    else if (session) void navigate("/");
 
     const handleLogIn = async (e: FormEvent) => {
         e.preventDefault();
@@ -76,11 +79,13 @@ const SignInPage = () => {
                         value={password}
                         required
                     />
-                    <p
-                        className={`shadow-xs max-h-23 mb-1 mt-3 overflow-y-auto rounded-md border border-red-200 bg-red-50 p-2 text-red-500 shadow-red-50 ${signInIssue ? "" : "hidden"}`}
-                    >
-                        {signInIssue}
-                    </p>
+                    {signInIssue ? (
+                        <p className="shadow-xs max-h-23 mb-1 mt-3 overflow-y-auto rounded-md border border-red-200 bg-red-50 p-2 text-red-500 shadow-red-50">
+                            {signInIssue}
+                        </p>
+                    ) : (
+                        <></>
+                    )}
                 </div>
 
                 <button

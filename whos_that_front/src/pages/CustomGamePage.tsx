@@ -9,9 +9,12 @@ import { isHeic } from "heic-to";
 import { heicTo } from "heic-to";
 import LoadingSpinner from "../lib/LoadingSpinner.tsx";
 
+const MAX_FILESIZE_BYTES = 5 * 1024 * 1024;
+const MIN_NUM_IMGS = 6;
+const MAX_NUM_IMGS = 24;
+
 const CreateCustomGamePage = () => {
     const navigate = useNavigate();
-    const maxSizeBytes = 5 * 1024 * 1024;
     const [useImageNames, setUseImageNames] = useState(false);
     const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
     const [fileNames, setFileNames] = useState<string[]>([]);
@@ -20,7 +23,12 @@ const CreateCustomGamePage = () => {
     const [imageErrors, setImageErrors] = useState<string[]>([]);
     const [errorMsg, setErrorMsg] = useState("");
     const [imageUrls, setImageUrls] = useState<string[]>([]);
+
     const { session, isPending } = useBetterAuthSession();
+
+    useEffect(() => {
+        if (!session) void navigate("/");
+    }, [session, navigate]);
 
     //UseEffect is used to track URLs created for image preview to allow for cleanup
     useEffect(() => {
@@ -35,10 +43,6 @@ const CreateCustomGamePage = () => {
     }, [selectedFiles]);
 
     if (isPending) return <div>Loading...</div>;
-    else if (session === null) {
-        void navigate("/");
-        return <></>; //This return tells linter session != null
-    }
 
     const handleRemoveImage = (index: number) => {
         setSelectedFiles(selectedFiles.filter((_, i) => i !== index));
@@ -78,7 +82,7 @@ const CreateCustomGamePage = () => {
                             type: "image/jpeg",
                             lastModified: Date.now(),
                         });
-                    } else if (file.size > maxSizeBytes) {
+                    } else if (file.size > MAX_FILESIZE_BYTES) {
                         throw new Error(`${file.name} too large`);
                     } else if (!acceptedImageTypesSchema.safeParse(file.type).success) {
                         throw new Error(`${file.name} is of an invalid file type.`);
@@ -125,7 +129,7 @@ const CreateCustomGamePage = () => {
         setIsLoading(true);
         const formData = new FormData(e.currentTarget);
 
-        if (selectedFiles.length < 6 || selectedFiles.length > 24) {
+        if (selectedFiles.length < MIN_NUM_IMGS || selectedFiles.length > MAX_NUM_IMGS) {
             setIsLoading(false);
             return;
         }
@@ -229,13 +233,15 @@ const CreateCustomGamePage = () => {
         >
             <div className="mr-10 w-[45%]">
                 {/* Step 1 */}
-                <div className="mb-3 mr-2 rounded-lg border-cyan-200 bg-cyan-100 p-4 shadow-lg">
+                <div className="mb-3 mr-2 rounded-lg bg-blue-400 p-4 shadow-sm">
                     <label
                         htmlFor="title"
-                        className="m-auto block text-2xl font-medium text-gray-900"
+                        className="text-shadow-xs/75 m-auto block text-3xl font-medium tracking-wide text-white"
                     >
-                        <div className="mr-3 inline-block h-11 w-11 content-center rounded-[50%] bg-blue-500 text-center font-semibold text-white">
-                            1
+                        <div className="mr-3 inline-block h-11 w-11 content-center rounded-[50%] text-center align-middle text-6xl font-bold text-orange-300">
+                            <span className="font-digitag text-shadow-none bottom-4.5 relative right-1.5 font-medium">
+                                1
+                            </span>
                         </div>
                         Game Title:
                     </label>
@@ -243,17 +249,19 @@ const CreateCustomGamePage = () => {
                         type="text"
                         name="title"
                         placeholder="(E.g. American Presidents, Famous Actors)"
-                        className="ml-13 inset-shadow-sm block w-5/6 rounded-lg border border-cyan-400 bg-white px-3 py-2 text-xl font-medium text-gray-900"
+                        className="ml-13 inset-shadow-sm/15 block w-5/6 rounded-lg bg-white px-3 py-2 text-xl font-medium text-gray-900"
                         required
                         minLength={5}
                         maxLength={20}
                     ></input>
                 </div>
                 {/* Step 2 */}
-                <div className="mb-3 mr-2 rounded-lg border-cyan-200 bg-cyan-100 p-4 shadow-lg">
-                    <label className="m-auto block whitespace-pre-wrap text-2xl font-medium text-gray-900">
-                        <div className="mr-3 inline-block h-11 w-11 content-center whitespace-pre-wrap rounded-[50%] bg-blue-500 text-center font-semibold text-white">
-                            2
+                <div className="mb-3 mr-2 rounded-lg border-cyan-200 bg-blue-400 p-4 shadow-sm">
+                    <label className="text-shadow-xs/75 m-auto block text-3xl font-medium tracking-wide text-white">
+                        <div className="mr-3 inline-block h-11 w-11 content-center rounded-[50%] text-center align-middle text-6xl font-bold text-orange-300">
+                            <span className="font-digitag text-shadow-none relative bottom-3.5 right-1 font-medium">
+                                2
+                            </span>
                         </div>
                         Upload Images:
                     </label>
@@ -279,16 +287,21 @@ const CreateCustomGamePage = () => {
                         checked={useImageNames}
                         onChange={handleUseImageFilenames}
                     ></input>
-                    <label htmlFor="image-names" className="align-middle text-sm">
+                    <label
+                        htmlFor="image-names"
+                        className="text-shadow-xs align-middle text-sm text-white"
+                    >
                         {" "}
                         Use File Names as Character Names
                     </label>
                 </div>
                 {/* Step 4 */}
-                <div className="mb-5 mr-2 flex items-center justify-between whitespace-pre-wrap rounded-lg border-cyan-200 bg-cyan-100 p-4 text-lg font-medium text-gray-900 shadow-lg">
-                    <div className="block text-2xl font-medium text-gray-900">
-                        <div className="mr-3 inline-block h-11 w-11 content-center rounded-[50%] bg-blue-500 text-center text-2xl font-semibold text-white">
-                            4
+                <div className="mb-5 mr-2 flex items-center justify-between whitespace-pre-wrap rounded-lg border-cyan-200 bg-blue-400 p-4 text-lg font-medium text-gray-900 shadow-sm">
+                    <div className="text-shadow-xs/75 ml-1 block text-3xl font-medium tracking-wide text-white">
+                        <div className="mr-3 inline-block h-11 w-11 content-center rounded-[50%] text-center align-middle text-6xl font-bold text-orange-300">
+                            <span className="font-digitag text-shadow-none relative bottom-1 right-1 font-medium">
+                                4
+                            </span>
                         </div>
                         Game Options:
                     </div>
@@ -303,7 +316,10 @@ const CreateCustomGamePage = () => {
                             checked={isPublic}
                             onChange={handlePrivacyChange}
                         ></input>
-                        <label htmlFor="public" className="mr-5 align-middle">
+                        <label
+                            htmlFor="public"
+                            className="text-shadow-xs mr-5 align-middle text-white"
+                        >
                             {" "}
                             Public
                         </label>
@@ -317,7 +333,7 @@ const CreateCustomGamePage = () => {
                             checked={!isPublic}
                             onChange={handlePrivacyChange}
                         ></input>
-                        <label htmlFor="private" className="align-middle">
+                        <label htmlFor="private" className="text-shadow-xs align-middle text-white">
                             {" "}
                             Private
                         </label>
@@ -326,24 +342,28 @@ const CreateCustomGamePage = () => {
             </div>
             <div className="flex-1">
                 {/* Step 3 */}
-                <div className="mb-3 mr-2 rounded-lg border-cyan-200 bg-cyan-100 p-4 shadow-md">
-                    <h3 className="mb-2 whitespace-pre-wrap text-2xl font-medium text-gray-900">
-                        <div className="mr-3 inline-block h-11 w-11 content-center rounded-[50%] bg-blue-500 text-center font-bold text-white">
-                            3
+                <div className="mb-3 mr-2 rounded-lg border-cyan-200 bg-blue-400 p-4 shadow-sm">
+                    <h3 className="text-shadow-xs/75 m-auto block text-3xl font-medium tracking-wide text-white">
+                        <div className="mr-3 inline-block h-11 w-11 content-center rounded-[50%] text-center align-middle text-[4rem] font-bold leading-none text-orange-300">
+                            <span className="font-digitag text-shadow-none relative bottom-4 font-medium">
+                                3
+                            </span>
                         </div>
                         {selectedFiles.length > 0
                             ? "Character List: "
                             : "Your Characters Will Appear Here:  "}
-                        <button
-                            className={`border-x-1 text-shadow-xs active:shadow-2xs active:inset-shadow-md float-right mr-5 h-11 w-fit cursor-pointer rounded-md border-b-8 border-blue-500 bg-blue-400 px-2 text-xl font-semibold text-white shadow-md hover:border-blue-600 hover:bg-blue-500 active:translate-y-[1px] active:border-none ${
-                                selectedFiles.length > 0 ? "" : "hidden"
-                            }`}
-                            disabled={isLoading}
-                            type="button"
-                            onClick={handleClearCharacterList}
-                        >
-                            Clear List
-                        </button>
+                        {selectedFiles.length > 0 ? (
+                            <button
+                                className="border-x-1 text-shadow-xs active:shadow-2xs active:inset-shadow-md float-right mr-5 h-11 w-fit cursor-pointer rounded-md border-b-8 border-yellow-600 bg-yellow-500 px-2 text-xl font-semibold text-white shadow-md hover:border-yellow-700 hover:bg-yellow-600 active:translate-y-[1px] active:border-none"
+                                disabled={isLoading}
+                                type="button"
+                                onClick={handleClearCharacterList}
+                            >
+                                Clear List
+                            </button>
+                        ) : (
+                            <></>
+                        )}
                     </h3>
                     <div className="max-h-137 inset-shadow-md/10 mt-3 overflow-y-auto rounded-md border border-cyan-400 bg-gray-50 shadow-sm">
                         {selectedFiles.length > 0 ? (
@@ -378,7 +398,7 @@ const CreateCustomGamePage = () => {
                                                 names[index] = e.target.value;
                                                 setFileNames(names);
                                             }}
-                                            minLength={5}
+                                            minLength={3}
                                             maxLength={20}
                                             className="w-9/10 rounded-md border-none bg-transparent px-1 py-0.5 align-sub text-xl font-bold text-gray-700 outline-none focus:border-2 focus:border-black focus:bg-white"
                                             placeholder="(Enter character name)"
@@ -393,23 +413,23 @@ const CreateCustomGamePage = () => {
                             <p className="p-10 text-sm italic text-gray-500">No images uploaded</p>
                         )}
                     </div>
-                    {selectedFiles.length > 24 ? (
+                    {selectedFiles.length > MAX_NUM_IMGS ? (
                         <p className="shadow-xs mt-2 rounded-md border border-red-200 bg-red-50 p-2 text-red-500 shadow-red-50">
-                            You have too many characters! There is a maximum of 24.
+                            You have too many characters! There is a maximum of {MAX_NUM_IMGS}.
                         </p>
                     ) : (
                         <></>
                     )}
-                    {selectedFiles.length < 6 ? (
-                        <p className="mt-2 rounded-md border border-amber-200 bg-amber-50 p-2 text-slate-500">
-                            Need at least 6 characters!
+                    {selectedFiles.length < MIN_NUM_IMGS ? (
+                        <p className="mt-2 rounded-md border border-yellow-400 bg-yellow-100 p-2 text-gray-500">
+                            Need at least {MIN_NUM_IMGS} characters!
                         </p>
                     ) : (
                         <></>
                     )}
                 </div>
                 <button
-                    className={`w-42 h-17 border-b-9 border-x-1 text-shadow-xs active:shadow-2xs active:inset-shadow-md float-right mb-2 mr-5 cursor-pointer rounded-md px-2 text-2xl font-bold text-white shadow-md active:translate-y-[1px] active:border-none ${isLoading ? "border-gray-800 bg-gray-700" : "border-blue-600 bg-blue-500 hover:border-blue-700 hover:bg-blue-600"}`}
+                    className={`w-42 h-17 border-b-9 border-x-1 text-shadow-xs active:shadow-2xs active:inset-shadow-md float-right mb-2 mr-5 cursor-pointer rounded-md px-2 text-2xl font-bold text-white shadow-md active:translate-y-[1px] active:border-none ${isLoading ? "border-gray-800 bg-gray-700" : "border-green-700 bg-green-600 hover:border-green-800 hover:bg-green-700"}`}
                     type="submit"
                     disabled={isLoading}
                 >

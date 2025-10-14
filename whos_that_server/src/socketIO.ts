@@ -2,7 +2,6 @@ import { nanoid } from "nanoid";
 import type { GameStateType, ClientToServerEvents, ServerToClientEvents } from "./config/types";
 import type { Server } from "socket.io";
 import { roomIdSchema, createRoomParamsSchema } from "./config/zod/zodSchema.ts";
-import z from "zod";
 
 function winningKeyGenerator(max: number): [number, number] {
     const winningKeyOne = Math.floor(Math.random() * max);
@@ -26,7 +25,7 @@ export function setupSocketEventHandlers(io: Server<ClientToServerEvents, Server
         if (roomIdValid.success) return roomIdValid.success;
         else {
             io.to(socketId).emit("errorMessage", {
-                message: z.prettifyError(roomIdValid.error),
+                message: "Invalid room id.",
             });
             return false;
         }

@@ -3,12 +3,10 @@ import { useParams, useNavigate, useSearchParams } from "react-router";
 import { socket } from "./socket.tsx";
 import Game from "../pages/GamePage.tsx";
 import WaitingRoom from "../pages/WaitingRoomPage.tsx";
-import type {
-    GameStateType,
-    GameDataType,
-    CardDataUrlType,
-} from "../../../whos_that_server/src/config/types.ts";
-import type { ServerResponse, EndStateType } from "../lib/types.ts";
+import type { GameStateType, CardDataUrlType } from "../../../whos_that_server/src/config/types.ts";
+import type { EndStateType } from "../lib/types.ts";
+import { gameDataTypeSchema } from "../../../whos_that_server/src/config/zod/zodSchema.ts";
+import { serverResponseSchema } from "../lib/zodSchema.ts";
 
 const GameStateManager = ({ isNewGame }: { isNewGame: boolean }) => {
     const navigate = useNavigate();
@@ -40,25 +38,21 @@ const GameStateManager = ({ isNewGame }: { isNewGame: boolean }) => {
                 try {
                     const response: Response = await fetch(
                         `http://localhost:3001/api/gameData/${gameState.preset}`,
-                        {
-                            //ERROR PRONE PERHAPS
-                            method: "GET",
-                        }
+                        { method: "GET" }
                     );
 
                     if (!response.ok) {
-                        //fix this error handling
-                        const errorData = (await response.json()) as ServerResponse;
-                        setErrorMsg(errorData.message || "Getting images failed.");
+                        const errorData = serverResponseSchema.parse(await response.json());
                         throw new Error(errorData.message || "Getting images failed.");
                     }
 
-                    const { title, cardData } = (await response.json()) as GameDataType;
+                    const { title, cardData } = gameDataTypeSchema.parse(await response.json());
                     setTitle(title);
                     setCardData(cardData);
                 } catch (error) {
-                    console.error("Error:", error);
-                    return error; //fix error handling
+                    console.error(error);
+                    if (error instanceof Error) setErrorMsg(error.message);
+                    else setErrorMsg("Getting images failed.");
                 }
             }
         };
@@ -79,7 +73,6 @@ const GameStateManager = ({ isNewGame }: { isNewGame: boolean }) => {
         });
 
         socket.on("playerJoined", (gameData) => {
-            //MAKE SURE GAME INFORMATION IS UP TO DATE? AVOID RACE CONDITION
             console.log("Player joined:", gameData.players);
             setGameState(gameData);
             setEndState("");
@@ -96,7 +89,6 @@ const GameStateManager = ({ isNewGame }: { isNewGame: boolean }) => {
             setEndState("");
         });
 
-        //do this correctly later
         socket.on("errorMessage", ({ message }) => {
             console.error(message);
             setErrorMsg(message);
