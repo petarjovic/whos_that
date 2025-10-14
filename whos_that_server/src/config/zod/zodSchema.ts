@@ -36,7 +36,7 @@ export const gameDataTypeSchema = z.object({
 
 export const serverToClientEventsSchema = z.object({
     playerJoined: z.function({ input: [gameStateTypeSchema], output: z.void() }),
-    recieveOppGuess: z.function({ input: [z.boolean()], output: z.void() }),
+    receiveOppGuess: z.function({ input: [z.boolean()], output: z.void() }),
     opponentDisconnted: z.function({ input: [gameStateTypeSchema], output: z.void() }),
     playAgainConfirmed: z.function({ input: [gameStateTypeSchema], output: z.void() }),
     errorMessage: z.function({

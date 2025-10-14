@@ -1,6 +1,6 @@
 import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
-import GameStateManager from "./logic/GameStateManger.tsx";
+import GameStateManager from "./logic/GameStateManager.tsx";
 import { createBrowserRouter, RouterProvider } from "react-router";
 import ShowPremadeGamesPage from "./pages/ShowPremadeGamesPage.tsx";
 import ReactModal from "react-modal";

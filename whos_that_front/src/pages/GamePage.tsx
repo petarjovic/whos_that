@@ -15,11 +15,8 @@ interface GameProps {
     title: string;
 }
 
-interface confirmGuess {
-    isOpen: boolean;
-    isWinner: boolean | undefined;
-    name: string;
-}
+type ConfirmGuessModal = { isOpen: false } | { isOpen: true; isWinner: boolean; name: string };
+
 interface gridColsTailwind {
     [key: number]: string;
 }
@@ -48,19 +45,16 @@ const Game = ({
     cardData,
     title,
 }: GameProps) => {
-    const [confirmGuessModal, setConfirmGuessModal] = useState<confirmGuess>({
+    const [confirmGuessModal, setConfirmGuessModal] = useState<ConfirmGuessModal>({
         isOpen: false,
-        isWinner: undefined,
-        name: "",
     });
 
     let numGridCols = Math.ceil(Math.sqrt(cardData.length)) + 3;
     if (numGridCols > 12) numGridCols = 12; //Just in case
 
     const handleConfirmGuessModalResult = (cofirmGuess: boolean) => {
-        if (cofirmGuess && confirmGuessModal.isWinner !== undefined)
-            emitGuess(confirmGuessModal.isWinner);
-        setConfirmGuessModal({ isOpen: false, isWinner: undefined, name: "" });
+        if (cofirmGuess && confirmGuessModal.isOpen) emitGuess(confirmGuessModal.isWinner);
+        setConfirmGuessModal({ isOpen: false });
     };
 
     const handleOpenConfirmModal = (winner: boolean, name: string) => {
@@ -86,6 +80,10 @@ const Game = ({
 
     const oppTargetCardData = cardData.find((card) => card.orderIndex === oppWinningKey);
 
+    if (!oppTargetCardData) {
+        throw new Error("Cannot find oppent's card data.");
+    }
+
     return (
         <>
             <p className="font-times text-shadow-sm/100 my-2 w-full text-center text-[4.2rem] leading-none tracking-wider text-white">
@@ -100,8 +98,8 @@ const Game = ({
             <div className="mb-1 flex w-full flex-wrap justify-evenly px-10">
                 {lastRow}
                 <OpponentTargetCard
-                    name={oppTargetCardData?.name ?? ""} //FIX THIS
-                    imgSrc={oppTargetCardData?.imageUrl ?? ""}
+                    name={oppTargetCardData.name}
+                    imgSrc={oppTargetCardData.imageUrl}
                 />
             </div>
             <div>

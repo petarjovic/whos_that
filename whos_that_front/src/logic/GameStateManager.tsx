@@ -3,7 +3,6 @@ import { useParams, useNavigate, useSearchParams } from "react-router";
 import { socket } from "./socket.tsx";
 import Game from "../pages/GamePage.tsx";
 import WaitingRoom from "../pages/WaitingRoomPage.tsx";
-import ErrorPage from "../pages/ErrorPage.tsx";
 import type {
     GameStateType,
     GameDataType,
@@ -27,8 +26,14 @@ const GameStateManager = ({ isNewGame }: { isNewGame: boolean }) => {
     });
     const [endState, setEndState] = useState<EndStateType>("");
     const [errorMsg, setErrorMsg] = useState("");
-    //const [images, setImages] = useState({});
     const [cardData, setCardData] = useState<CardDataUrlType[]>([]);
+
+    const getPlayerIndex = (): number => {
+        if (!socket.id) return -1;
+        const index = gameState.players.indexOf(socket.id);
+        return index;
+    };
+
     useEffect(() => {
         const fetchImages = async () => {
             if (gameState.preset) {
@@ -68,7 +73,7 @@ const GameStateManager = ({ isNewGame }: { isNewGame: boolean }) => {
             setErrorMsg(`Could not connect to server, server responded with:\n${err.message}`);
         });
 
-        socket.on("recieveOppGuess", (oppGuess) => {
+        socket.on("receiveOppGuess", (oppGuess) => {
             if (oppGuess) setEndState("oppCorrectGuess");
             else setEndState("oppWrongGuess");
         });
@@ -99,7 +104,7 @@ const GameStateManager = ({ isNewGame }: { isNewGame: boolean }) => {
 
         return () => {
             socket.off("connect_error");
-            socket.off("recieveOppGuess");
+            socket.off("receiveOppGuess");
             socket.off("playerJoined");
             socket.off("playAgainConfirmed");
             socket.off("errorMessage");
@@ -156,22 +161,24 @@ const GameStateManager = ({ isNewGame }: { isNewGame: boolean }) => {
 
     if (errorMsg) throw new Error(errorMsg);
     else if (gameState.players.includes("") || cardData.length === 0)
-        //diff way to handle perchance
         return <WaitingRoom gameId={gameId} />;
-    else
+    else {
+        const playerIndex = getPlayerIndex();
+        if (playerIndex === -1) {
+            throw new Error("Socket not connected or this player is somehow not in room.");
+        }
         return (
             <Game
                 emitPlayAgain={emitPlayAgain}
                 emitGuess={emitGuess}
                 endState={endState}
-                oppWinningKey={gameState.cardIdsToGuess[gameState.players.indexOf(socket.id ?? "")]} //handle this fallback different
-                winningKey={
-                    gameState.cardIdsToGuess[1 - gameState.players.indexOf(socket.id ?? "")] //handle this fallback different
-                }
+                oppWinningKey={gameState.cardIdsToGuess[playerIndex]}
+                winningKey={gameState.cardIdsToGuess[1 - playerIndex]}
                 cardData={cardData}
                 title={title}
             />
         );
+    }
 };
 
 export default GameStateManager;

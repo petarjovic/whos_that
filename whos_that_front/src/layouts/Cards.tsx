@@ -93,7 +93,7 @@ export const OpponentTargetCard = ({ name, imgSrc }: { name: string; imgSrc: str
     return (
         <CardLayout name={name} imgSrc={imgSrc} isOppCard={true}>
             <p className="mx-auto mt-0.5 w-full bg-orange-300 text-center text-sm font-bold text-cyan-950">
-                Oppenent To Guess
+                Opponent To Guess
             </p>
         </CardLayout>
     );

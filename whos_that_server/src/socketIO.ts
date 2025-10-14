@@ -108,7 +108,7 @@ export function setupSocketEventHandlers(io: Server<ClientToServerEvents, Server
                     } in game: ${roomId}, ${guessCorrectness.toString()}`
                 );
 
-                socket.to(roomId).emit("recieveOppGuess", guessCorrectness);
+                socket.to(roomId).emit("receiveOppGuess", guessCorrectness);
             }
         });
 
