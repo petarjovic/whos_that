@@ -6,6 +6,7 @@ import { useBetterAuthSession } from "../layouts/LayoutContextProvider.ts";
 import { serverResponseSchema } from "../lib/zodSchema.ts";
 import { PresetInfoSchema } from "../../../whos_that_server/src/config/zod/zodSchema.ts";
 import type { PresetInfo } from "../../../whos_that_server/src/config/types.ts";
+import env from "../lib/zodEnvSchema.ts";
 
 const ShowPremadeGamesPage = ({ myGames }: { myGames: boolean }) => {
     const navigate = useNavigate();
@@ -20,7 +21,7 @@ const ShowPremadeGamesPage = ({ myGames }: { myGames: boolean }) => {
             const getPremadeGames = async () => {
                 try {
                     const response = await fetch(
-                        "http://localhost:3001/api/" +
+                        `${env.VITE_SERVER_URL}/api/` +
                             (myGames ? "getMyGames" : "getAllPremadeGames"),
                         {
                             credentials: "include",
@@ -66,10 +67,13 @@ const ShowPremadeGamesPage = ({ myGames }: { myGames: boolean }) => {
                     `Are you sure you want to delete ${title}? This action cannot be undone!`
                 );
                 if (confirmed) {
-                    const response = await fetch(`http://localhost:3001/api/deleteGame/${gameId}`, {
-                        credentials: "include",
-                        method: "DELETE",
-                    });
+                    const response = await fetch(
+                        `${env.VITE_SERVER_URL}/api/deleteGame/${gameId}`,
+                        {
+                            credentials: "include",
+                            method: "DELETE",
+                        }
+                    );
                     if (response.ok) {
                         console.log(await response.json());
                         void navigate(0);

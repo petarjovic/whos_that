@@ -8,6 +8,7 @@ import { resizeImages } from "../lib/imageresizer.ts";
 import { isHeic } from "heic-to";
 import { heicTo } from "heic-to";
 import LoadingSpinner from "../lib/LoadingSpinner.tsx";
+import env from "../lib/zodEnvSchema.ts";
 
 const MAX_FILESIZE_BYTES = 5 * 1024 * 1024;
 const MIN_NUM_IMGS = 6;
@@ -148,7 +149,7 @@ const CreateCustomGamePage = () => {
         let response;
 
         try {
-            response = await fetch("http://localhost:3001/api/createNewGame", {
+            response = await fetch(`${env.VITE_SERVER_URL}/api/createNewGame`, {
                 method: "POST",
                 body: JSON.stringify(requestBody),
                 credentials: "include",
@@ -201,7 +202,7 @@ const CreateCustomGamePage = () => {
                 if (response.status !== "fulfilled" || !response.value.ok) {
                     //Delete any created game data
                     await fetch(
-                        `http://localhost:3001/api/deleteGame/${createGameResData.gameId}`,
+                        `${env.VITE_SERVER_URL}/api/deleteGame/${createGameResData.gameId}`,
                         {
                             credentials: "include",
                             method: "DELETE",
@@ -233,7 +234,7 @@ const CreateCustomGamePage = () => {
         >
             <div className="mr-10 w-[45%]">
                 {/* Step 1 */}
-                <div className="mb-3 mr-2 rounded-lg bg-blue-400 p-4 shadow-sm">
+                <div className="shadow-sm/30 mb-3 mr-2 rounded-lg bg-blue-400 p-4">
                     <label
                         htmlFor="title"
                         className="text-shadow-xs/75 m-auto block text-3xl font-medium tracking-wide text-white"
@@ -256,7 +257,7 @@ const CreateCustomGamePage = () => {
                     ></input>
                 </div>
                 {/* Step 2 */}
-                <div className="mb-3 mr-2 rounded-lg border-cyan-200 bg-blue-400 p-4 shadow-sm">
+                <div className="shadow-sm/30 mb-3 mr-2 rounded-lg border-cyan-200 bg-blue-400 p-4">
                     <label className="text-shadow-xs/75 m-auto block text-3xl font-medium tracking-wide text-white">
                         <div className="mr-3 inline-block h-11 w-11 content-center rounded-[50%] text-center align-middle text-6xl font-bold text-orange-300">
                             <span className="font-digitag text-shadow-none relative bottom-3.5 right-1 font-medium">
@@ -283,20 +284,20 @@ const CreateCustomGamePage = () => {
                     <input
                         type="checkbox"
                         id="image-names"
-                        className="ml-3 h-4 w-4 cursor-pointer appearance-auto border border-cyan-200 align-text-bottom shadow transition-all checked:border-blue-600 checked:bg-blue-600 hover:shadow-md"
+                        className="ml-3 h-4 w-4 cursor-pointer appearance-auto border border-cyan-200 align-text-top shadow transition-all hover:shadow-md"
                         checked={useImageNames}
                         onChange={handleUseImageFilenames}
                     ></input>
                     <label
                         htmlFor="image-names"
-                        className="text-shadow-xs align-middle text-sm text-white"
+                        className="text-shadow-xs/50 text-md align-middle text-white"
                     >
                         {" "}
                         Use File Names as Character Names
                     </label>
                 </div>
                 {/* Step 4 */}
-                <div className="mb-5 mr-2 flex items-center justify-between whitespace-pre-wrap rounded-lg border-cyan-200 bg-blue-400 p-4 text-lg font-medium text-gray-900 shadow-sm">
+                <div className="shadow-sm/30 mb-5 mr-2 flex items-center justify-between whitespace-pre-wrap rounded-lg border-cyan-200 bg-blue-400 p-4 text-lg font-medium text-gray-900">
                     <div className="text-shadow-xs/75 ml-1 block text-3xl font-medium tracking-wide text-white">
                         <div className="mr-3 inline-block h-11 w-11 content-center rounded-[50%] text-center align-middle text-6xl font-bold text-orange-300">
                             <span className="font-digitag text-shadow-none relative bottom-1 right-1 font-medium">
@@ -310,7 +311,7 @@ const CreateCustomGamePage = () => {
                             type="radio"
                             id="public"
                             value="public"
-                            className="h-5 w-5 cursor-pointer appearance-auto border align-text-top transition-all checked:border-cyan-600 checked:bg-cyan-600"
+                            className="h-5 w-5 cursor-pointer appearance-auto border align-text-top transition-all"
                             name="privacy"
                             required
                             checked={isPublic}
@@ -318,7 +319,7 @@ const CreateCustomGamePage = () => {
                         ></input>
                         <label
                             htmlFor="public"
-                            className="text-shadow-xs mr-5 align-middle text-white"
+                            className="text-shadow-xs/50 mr-5 align-middle text-white"
                         >
                             {" "}
                             Public
@@ -327,13 +328,16 @@ const CreateCustomGamePage = () => {
                             type="radio"
                             id="private"
                             value="private"
-                            className="h-5 w-5 cursor-pointer appearance-auto border align-text-top transition-all checked:border-cyan-600 checked:bg-cyan-600"
+                            className="h-5 w-5 cursor-pointer appearance-auto border align-text-top transition-all"
                             name="privacy"
                             required
                             checked={!isPublic}
                             onChange={handlePrivacyChange}
                         ></input>
-                        <label htmlFor="private" className="text-shadow-xs align-middle text-white">
+                        <label
+                            htmlFor="private"
+                            className="text-shadow-xs/50 align-middle text-white"
+                        >
                             {" "}
                             Private
                         </label>
@@ -342,7 +346,7 @@ const CreateCustomGamePage = () => {
             </div>
             <div className="flex-1">
                 {/* Step 3 */}
-                <div className="mb-3 mr-2 rounded-lg border-cyan-200 bg-blue-400 p-4 shadow-sm">
+                <div className="shadow-sm/30 mb-3 mr-2 rounded-lg border-cyan-200 bg-blue-400 p-4">
                     <h3 className="text-shadow-xs/75 m-auto block text-3xl font-medium tracking-wide text-white">
                         <div className="mr-3 inline-block h-11 w-11 content-center rounded-[50%] text-center align-middle text-[4rem] font-bold leading-none text-orange-300">
                             <span className="font-digitag text-shadow-none relative bottom-4 font-medium">
@@ -365,7 +369,7 @@ const CreateCustomGamePage = () => {
                             <></>
                         )}
                     </h3>
-                    <div className="max-h-137 inset-shadow-md/10 mt-3 overflow-y-auto rounded-md border border-cyan-400 bg-gray-50 shadow-sm">
+                    <div className="max-h-137 inset-shadow-md/10 shadow-sm/30 mt-3 overflow-y-auto rounded-md bg-gray-50">
                         {selectedFiles.length > 0 ? (
                             selectedFiles.map((file, index) => (
                                 <div

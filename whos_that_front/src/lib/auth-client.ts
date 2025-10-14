@@ -1,9 +1,9 @@
 import { createAuthClient } from "better-auth/react";
 import { usernameClient } from "better-auth/client/plugins";
+import env from "../lib/zodEnvSchema.ts";
 
 export const authClient = createAuthClient({
-    /** The base URL of the server (optional if you're using the same domain) */
-    baseURL: "http://localhost:3001",
+    baseURL: env.VITE_SERVER_URL,
     plugins: [usernameClient()],
     fetchOptions: {
         credentials: "include",

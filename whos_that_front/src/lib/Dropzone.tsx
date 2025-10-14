@@ -47,10 +47,8 @@ const Dropzone = ({ fileHandler }: { fileHandler: (files: FileList) => void }) =
         >
             <label
                 htmlFor="file-upload"
-                className={`h-74 inset-shadow-md/5 m-2 my-3 flex w-full cursor-pointer flex-col items-center justify-center rounded-lg border shadow-sm transition-all duration-200 ${
-                    isDragOver
-                        ? "border-2 border-cyan-600 bg-slate-200"
-                        : "border-cyan-400 bg-white hover:bg-slate-100"
+                className={`h-74 inset-shadow-xs/25 shadow-2xs/20 m-2 my-3 flex w-full cursor-pointer flex-col items-center justify-center rounded-lg transition-all duration-200 ${
+                    isDragOver ? "bg-blue-100" : "bg-white hover:bg-blue-50"
                 }`}
             >
                 <div className="flex flex-col items-center justify-center pb-6 pt-5">
@@ -59,7 +57,6 @@ const Dropzone = ({ fileHandler }: { fileHandler: (files: FileList) => void }) =
                             isDragOver ? "text-blue-500" : "text-gray-400"
                         }`}
                         aria-hidden="true"
-                        xmlns="http://www.w3.org/2000/svg"
                         fill="none"
                         viewBox="0 0 20 16"
                     >

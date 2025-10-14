@@ -7,6 +7,7 @@ import type { GameStateType, CardDataUrlType } from "../../../whos_that_server/s
 import type { EndStateType } from "../lib/types.ts";
 import { gameDataTypeSchema } from "../../../whos_that_server/src/config/zod/zodSchema.ts";
 import { serverResponseSchema } from "../lib/zodSchema.ts";
+import env from "../lib/zodEnvSchema.ts";
 
 const GameStateManager = ({ isNewGame }: { isNewGame: boolean }) => {
     const navigate = useNavigate();
@@ -37,7 +38,7 @@ const GameStateManager = ({ isNewGame }: { isNewGame: boolean }) => {
             if (gameState.preset) {
                 try {
                     const response: Response = await fetch(
-                        `http://localhost:3001/api/gameData/${gameState.preset}`,
+                        `${env.VITE_SERVER_URL}/api/gameData/${gameState.preset}`,
                         { method: "GET" }
                     );
 

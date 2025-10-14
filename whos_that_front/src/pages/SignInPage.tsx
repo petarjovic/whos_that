@@ -4,6 +4,7 @@ import { authClient } from "../lib/auth-client";
 import { useNavigate } from "react-router";
 import { useBetterAuthSession } from "../layouts/LayoutContextProvider";
 import DiscordLoginButton from "../lib/DiscordLoginButton";
+import env from "../lib/zodEnvSchema";
 
 const SignInPage = () => {
     const navigate = useNavigate();
@@ -26,7 +27,7 @@ const SignInPage = () => {
         const logInResult = await authClient.signIn.username({
             username: username,
             password: password,
-            callbackURL: "http://localhost:5173/",
+            callbackURL: env.VITE_APP_URL,
         });
         if (logInResult.error) {
             console.error(logInResult.error.message);

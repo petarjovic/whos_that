@@ -1,12 +1,10 @@
 import { io, Socket } from "socket.io-client";
-//see if theres better way of doing this
 import type {
     ServerToClientEvents,
     ClientToServerEvents,
 } from "../../../whos_that_server/src/config/types.ts";
+import env from "../lib/zodEnvSchema.ts";
 
-const ServerURL = "http://localhost:3001";
-
-export const socket: Socket<ServerToClientEvents, ClientToServerEvents> = io(ServerURL, {
+export const socket: Socket<ServerToClientEvents, ClientToServerEvents> = io(env.VITE_SERVER_URL, {
     autoConnect: false,
 });

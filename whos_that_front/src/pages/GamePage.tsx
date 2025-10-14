@@ -120,7 +120,8 @@ interface GameEndModalProps {
 }
 
 const GameEndModal = ({ endState, handlePlayAgain }: GameEndModalProps) => {
-    let modalText = "";
+    let paraText = "";
+    let headingText = "";
     const navigate = useNavigate();
     const [playAgainSent, setPlayAgainSent] = useState(false);
 
@@ -130,19 +131,23 @@ const GameEndModal = ({ endState, handlePlayAgain }: GameEndModalProps) => {
 
     switch (endState) {
         case "correctGuess": {
-            modalText = "Correct! Congratulations you win!";
+            headingText = "You Win!";
+            paraText = "Good guessing!";
             break;
         }
         case "wrongGuess": {
-            modalText = "Oh no, wrong guess! Sorry but you lose!";
+            headingText = "You Lose!";
+            paraText = "Oh no, wrong guess :(";
             break;
         }
         case "oppCorrectGuess": {
-            modalText = "Dang, you opponent guessed correctly! \n You've lost :(";
+            headingText = "You Lose!";
+            paraText = "Dang, you opponent guessed correctly!";
             break;
         }
         case "oppWrongGuess": {
-            modalText = "Your opponent guessed wrong! \n A lucky break!";
+            headingText = "You Win!";
+            paraText = "Your opponent guessed wrong! \n A luck break!";
             break;
         }
     }
@@ -150,12 +155,19 @@ const GameEndModal = ({ endState, handlePlayAgain }: GameEndModalProps) => {
     return (
         <ReactModal
             isOpen={Boolean(endState)}
-            className="border-3 text-shadow-xs/80 fixed left-1/2 top-1/2 inline-block h-fit w-fit -translate-x-1/2 -translate-y-1/2 rounded-2xl border-cyan-500 bg-cyan-500 p-10 text-center shadow-2xl"
+            className="text-shadow-sm/80 shadow-2xl/50 fixed left-1/2 top-1/2 inline-block h-fit w-fit -translate-x-1/2 -translate-y-1/2 rounded-2xl bg-cyan-500 p-10 text-center"
         >
-            <p className="m-auto my-12 text-5xl font-medium text-white">{modalText}</p>
+            <h2
+                className={`font-digitag text-shadow-sm/80 mx-auto text-[10rem] leading-none ${headingText === "You Win!" ? "text-shadow-green-800 text-green-500" : "text-shadow-red-800 text-red-500"} `}
+            >
+                {headingText}
+            </h2>
+            <p className="text-shadow-slate-700 m-auto my-12 whitespace-pre text-5xl font-medium text-white">
+                {paraText}
+            </p>
             <div className="m-auto flex flex-row justify-evenly">
                 <button
-                    className={`w-50 border-b-9 border-x-1 text-shadow-xs/80 active:shadow-2xs active:inset-shadow-md m-auto h-20 cursor-pointer rounded-md px-1 text-3xl text-neutral-100 shadow-md ${playAgainSent ? "border-gray-600 bg-gray-500" : "border-green-700 bg-green-600 hover:border-green-800 hover:bg-green-700 active:translate-y-[1px] active:border-none"}`}
+                    className={`w-50 border-b-9 border-x-1 text-shadow-xs/80 active:shadow-2xs active:inset-shadow-md mr-50 m-auto h-20 cursor-pointer rounded-md px-1 text-3xl text-neutral-100 shadow-md ${playAgainSent ? "border-gray-600 bg-gray-500" : "border-green-700 bg-green-600 hover:border-green-800 hover:bg-green-700 active:translate-y-[1px] active:border-none"}`}
                     onClick={() => {
                         setPlayAgainSent(true);
                         handlePlayAgain();
@@ -187,14 +199,15 @@ const ConfirmGuessModal = ({ isOpen, confirmGuess, name }: ConfirmGuessModalProp
     return (
         <ReactModal
             isOpen={isOpen}
-            className="border-3 bg-radial fixed left-1/2 top-1/2 inline-block h-fit w-fit -translate-x-1/2 -translate-y-1/2 rounded-2xl border-slate-300 from-slate-100 to-slate-200 p-10 text-center shadow-2xl"
+            className="text-shadow-sm/50 shadow-2xl/50 fixed left-1/2 top-1/2 inline-block h-fit w-fit -translate-x-1/2 -translate-y-1/2 rounded-xl border-white bg-cyan-500 p-10 text-center"
         >
-            <p className="m-auto my-12 text-5xl font-medium">
-                Are you sure it&apos;s <span className="font-semibold">{name}</span>?
+            <p className="text-shadow-slate-700 m-auto my-12 whitespace-pre text-5xl font-medium text-white">
+                Are you sure it&apos;s <span className="font-semibold text-yellow-300">{name}</span>
+                ?
             </p>
             <div className="flex flex-row justify-between">
                 <button
-                    className="w-50 border-b-9 text-shadow-xs/30 active:shadow-2xs active:inset-shadow-md m-auto mr-10 h-20 cursor-pointer rounded-md border-green-700 bg-green-600 px-2 text-3xl text-neutral-100 shadow-md hover:border-green-800 hover:bg-green-700 active:translate-y-[1px] active:border-none"
+                    className="w-50 border-b-9 text-shadow-xs/80 active:shadow-2xs active:inset-shadow-md m-auto mr-10 h-20 cursor-pointer rounded-md border-green-700 bg-green-600 px-2 text-3xl text-neutral-100 shadow-md hover:border-green-800 hover:bg-green-700 active:translate-y-[1px] active:border-none"
                     onClick={() => {
                         confirmGuess(true);
                     }}
@@ -202,7 +215,7 @@ const ConfirmGuessModal = ({ isOpen, confirmGuess, name }: ConfirmGuessModalProp
                     Yes I&apos;m sure
                 </button>
                 <button
-                    className="w-50 border-b-9 text-shadow-xs/30 active:shadow-2xs active:inset-shadow-md m-auto ml-20 h-20 cursor-pointer rounded-md border-amber-600 bg-amber-500 px-1 text-2xl text-neutral-100 shadow-md hover:border-amber-700 hover:bg-amber-600 active:translate-y-[1px] active:border-none"
+                    className="w-50 border-b-9 text-shadow-xs/80 active:shadow-2xs active:inset-shadow-md m-auto ml-20 h-20 cursor-pointer rounded-md border-amber-600 bg-amber-500 px-1 text-2xl text-neutral-100 shadow-md hover:border-amber-700 hover:bg-amber-600 active:translate-y-[1px] active:border-none"
                     onClick={() => {
                         confirmGuess(false);
                     }}

@@ -4,6 +4,7 @@ import { useNavigate } from "react-router";
 import { useBetterAuthSession } from "../layouts/LayoutContextProvider";
 import DiscordLoginButton from "../lib/DiscordLoginButton";
 import { authClient } from "../lib/auth-client";
+import env from "../lib/zodEnvSchema";
 
 const SignUpPage = () => {
     const navigate = useNavigate();
@@ -35,7 +36,7 @@ const SignUpPage = () => {
             password: password,
             username: username,
             name: "",
-            callbackURL: "http://localhost:5173/account",
+            callbackURL: `${env.VITE_APP_URL}/account`,
         });
         console.log(signUpResult.data);
         if (signUpResult.error) {
