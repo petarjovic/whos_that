@@ -1,1 +1,0 @@
-ALTER TABLE "game_items" DROP COLUMN "image_url";

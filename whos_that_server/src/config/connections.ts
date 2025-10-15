@@ -1,22 +1,24 @@
-import { drizzle } from "drizzle-orm/node-postgres";
-import { Pool } from "pg";
+import { drizzle } from "drizzle-orm/neon-http";
 import { S3Client } from "@aws-sdk/client-s3";
 import { fromEnv } from "@aws-sdk/credential-providers";
 import * as schema from "./db/schema.ts";
 import { CloudFrontClient } from "@aws-sdk/client-cloudfront";
 import env from "./zod/zodEnvSchema.ts";
+import { neon } from "@neondatabase/serverless";
 
-const pool = new Pool({
-    connectionString: env.AWS_RDS_URL,
-    ssl: {
-        rejectUnauthorized: false, // TODO: improve for production
-    },
-    max: 20,
-    idleTimeoutMillis: 30_000,
-    connectionTimeoutMillis: 2000,
-});
+// const pool = new Pool({
+//     connectionString: env.AWS_RDS_URL,
+//     ssl: {
+//         rejectUnauthorized: false, // TODO: improve for production
+//     },
+//     max: 20,
+//     idleTimeoutMillis: 30_000,
+//     connectionTimeoutMillis: 2000,
+// });
 
-export const db = drizzle(pool, { schema });
+const sql = neon(env.DATABASE_URL);
+
+export const db = drizzle({ client: sql, schema: schema });
 
 export const s3 = new S3Client({
     credentials: fromEnv(),

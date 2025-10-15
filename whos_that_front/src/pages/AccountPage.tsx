@@ -5,6 +5,9 @@ import { useBetterAuthSession } from "../layouts/LayoutContextProvider";
 import { authClient } from "../lib/auth-client";
 import type { SocialSignInProviders } from "../lib/types";
 import DiscordLoginButton from "../lib/DiscordLoginButton";
+import { socialSignInProvidersSchema } from "../lib/zodSchema";
+import { z } from "zod";
+import GoogleLoginButton from "../lib/GoogleLoginButton";
 
 const maskEmail = (email: string) => {
     const [local, domain] = email.split("@");
@@ -25,12 +28,19 @@ const AccountPage = () => {
     useEffect(() => {
         const getLinkedAccounts = async () => {
             const accounts = await authClient.listAccounts();
+            console.log(accounts);
             if (accounts.error) {
                 setErrorMsg("Error getting user's linked accounts.");
             } else {
                 const providers = accounts.data.map(({ providerId }) => providerId);
-                //def better way to do this lol
-                if (providers.includes("discord")) setLinkedAccounts(["discord"]);
+                const zodProviders = z.array(socialSignInProvidersSchema).safeParse(providers);
+                if (!zodProviders.success) {
+                    setErrorMsg(
+                        "Invalid provider. This should be 10000% impossible idk how you did this."
+                    );
+                    return;
+                }
+                setLinkedAccounts(zodProviders.data);
             }
         };
         void getLinkedAccounts();
@@ -68,17 +78,20 @@ const AccountPage = () => {
                             </span>
                         </p>
                         <p className="mb-2">
-                            Discord Account:{""}
-                            <span
-                                className={`font-semibold ${linkedAccounts.includes("discord") ? "text-green-800" : "text-red-900"}`}
-                            >
-                                {linkedAccounts.includes("discord") ? " Linked" : " Not Linked"}
+                            Linked Accounts:{""}{" "}
+                            <span className="font-semibold capitalize text-green-800">
+                                {linkedAccounts.toString()}
                             </span>
                         </p>
                         {linkedAccounts.includes("discord") ? (
                             <></>
                         ) : (
-                            <DiscordLoginButton text="Link Account" linkAccount={true} />
+                            <DiscordLoginButton text="Link Discord Account" linkAccount={true} />
+                        )}
+                        {linkedAccounts.includes("google") ? (
+                            <></>
+                        ) : (
+                            <GoogleLoginButton text="Link Google Account" linkAccount={true} />
                         )}
                     </div>
                     <Link to={"/my-games"}>

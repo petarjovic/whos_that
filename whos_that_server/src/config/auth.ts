@@ -1,7 +1,7 @@
 import { betterAuth } from "better-auth";
 import { drizzleAdapter } from "better-auth/adapters/drizzle";
 import { username } from "better-auth/plugins";
-import { db } from "./awsConections.ts"; // your drizzle instance
+import { db } from "./connections.ts"; // your drizzle instance
 import * as authSchema from "./db/auth-schema.ts";
 import * as appSchema from "./db/schema.ts";
 import env from "./zod/zodEnvSchema.ts";
@@ -25,7 +25,7 @@ export const auth = betterAuth({
     },
     account: {
         accountLinking: {
-            allowDifferentEmails: true,
+            allowDifferentEmails: false,
         },
     },
     session: {
@@ -39,6 +39,11 @@ export const auth = betterAuth({
         discord: {
             clientId: env.DISCORD_CLIENT_ID,
             clientSecret: env.DISCORD_CLIENT_SECRET,
+            scope: ["identify"],
+        },
+        google: {
+            clientId: env.GOOGLE_CLIENT_ID,
+            clientSecret: env.GOOGLE_CLIENT_SECRET,
         },
     },
     plugins: [

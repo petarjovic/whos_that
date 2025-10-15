@@ -14,7 +14,7 @@ export const serverResponseSchema = z.object({
     message: z.string(),
 });
 
-export const socialSignInProvidersSchema = z.literal("discord");
+export const socialSignInProvidersSchema = z.enum(["discord", "google"]);
 
 export const acceptedImageTypesSchema = z.enum([
     "image/jpeg",

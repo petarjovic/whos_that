@@ -100,7 +100,7 @@ const ShowPremadeGamesPage = ({ myGames }: { myGames: boolean }) => {
             </h2>
             {premadeGamesList.length === 0 && (
                 <p className="mx-auto mt-[50%] text-center text-2xl font-semibold text-gray-600">
-                    {myGames ? "You have no games yet." : "No public games... Something's Fishy..."}
+                    {myGames ? "You have no games yet." : "No public games!? Something's Fishy..."}
                 </p>
             )}
             {premadeGamesList.map(({ id, title, imageUrl, isPublic, author }, i) => (

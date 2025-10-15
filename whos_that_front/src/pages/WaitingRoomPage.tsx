@@ -12,6 +12,8 @@ const WaitingRoom = ({ gameId }: { gameId: string }) => {
             </p>
             <p className="text-shadow-xs/80 m-auto text-xl font-semibold tracking-wide text-white">
                 Send this code to your opponent!
+                <br />
+                (or send them a link to this page)
             </p>
         </>
     );

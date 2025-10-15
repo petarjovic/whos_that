@@ -11,9 +11,11 @@ import Layout from "./layouts/Layout.tsx";
 import ErrorPage from "./pages/ErrorPage.tsx";
 import GameTypePage from "./pages/GameTypePage.tsx";
 import CreateCustomGamePage from "./pages/CustomGamePage.tsx";
-import SignUpPage from "./pages/SignUpPage.tsx";
-import SignInPage from "./pages/SignInPage.tsx";
+// import SignUpPage from "./pages/SignUpPage.tsx";
+// import SignInPage from "./pages/SignInPage.tsx";
 import AccountPage from "./pages/AccountPage.tsx";
+import SetUsernamePage from "./pages/SetUsernamePage.tsx";
+import LogInPage from "./pages/LogInPage.tsx";
 
 ReactModal.setAppElement("#root");
 
@@ -56,14 +58,17 @@ const router = createBrowserRouter([
                 element: <AccountPage />,
             },
             {
-                path: "/login",
-                element: <SignInPage />,
+                path: "/log-in",
+                element: <LogInPage />,
             },
+            // {
+            //     path: "/sign-up",
+            //     element: <SignUpPage />,
+            // },
             {
-                path: "/sign-up",
-                element: <SignUpPage />,
+                path: "/set-username",
+                element: <SetUsernamePage />,
             },
-
             { path: "*", element: <NotFoundPage /> },
         ],
     },

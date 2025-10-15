@@ -34,8 +34,8 @@ const ErrorPage = ({ error }: { error?: unknown }) => {
                     src={chalkOutline}
                     alt="Error image"
                     className="rotate-15 mb-15 mx-auto"
-                    width={375}
-                    height={425}
+                    width={325}
+                    height={300}
                 />
                 <h1 className="mb-5 text-5xl text-red-800">Something Went Wrong</h1>
                 <h2>Oh No! {errorMessage}</h2>

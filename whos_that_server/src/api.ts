@@ -1,4 +1,4 @@
-import { db, s3, cloudFront } from "./config/awsConections.ts";
+import { db, s3, cloudFront } from "./config/connections.ts";
 import type { Express } from "express";
 import { PutObjectCommand, DeleteObjectsCommand } from "@aws-sdk/client-s3";
 import * as schema from "./config/db/schema.ts";

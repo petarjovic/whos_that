@@ -8,6 +8,7 @@ import { auth } from "./config/auth.ts";
 import { setupSocketEventHandlers } from "./socketIO.ts";
 import { setupApiRoutes } from "./api.ts";
 import env from "./config/zod/zodEnvSchema.ts";
+
 const app = express();
 app.use(
     cors({

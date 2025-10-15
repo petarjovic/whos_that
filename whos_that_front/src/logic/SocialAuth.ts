@@ -6,11 +6,13 @@ import { logError } from "../lib/logger.ts";
 
 export const handleSocialSignIn = async (e: FormEvent, provider: SocialSignInProviders) => {
     e.preventDefault();
+
     const socialSignInResult = await authClient.signIn.social({
         provider,
-        callbackURL: `${env.VITE_APP_URL}/account`,
-        errorCallbackURL: `${env.VITE_APP_URL}error`,
+        callbackURL: `${env.VITE_APP_URL}/set-username`,
+        errorCallbackURL: `${env.VITE_APP_URL}/error`,
     });
+
     if (socialSignInResult.error) {
         logError(socialSignInResult.error.message);
     } else {

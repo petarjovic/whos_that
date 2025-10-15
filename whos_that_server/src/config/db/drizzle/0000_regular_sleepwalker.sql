@@ -1,7 +1,6 @@
 CREATE TABLE "game_items" (
 	"id" text PRIMARY KEY NOT NULL,
 	"game_id" text NOT NULL,
-	"image_url" text NOT NULL,
 	"name" text NOT NULL,
 	"order_index" integer NOT NULL,
 	"created_at" timestamp DEFAULT now() NOT NULL
@@ -60,7 +59,10 @@ CREATE TABLE "user" (
 	"image" text,
 	"created_at" timestamp DEFAULT now() NOT NULL,
 	"updated_at" timestamp DEFAULT now() NOT NULL,
-	CONSTRAINT "user_email_unique" UNIQUE("email")
+	"username" text,
+	"display_username" text,
+	CONSTRAINT "user_email_unique" UNIQUE("email"),
+	CONSTRAINT "user_username_unique" UNIQUE("username")
 );
 --> statement-breakpoint
 CREATE TABLE "verification" (

@@ -1,4 +1,4 @@
-import { db } from "../awsConections.ts";
+import { db } from "../connections.ts";
 import { games, gameItems } from "./schema.ts";
 import { nanoid } from "nanoid";
 

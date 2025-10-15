@@ -40,7 +40,7 @@ const SignInPage = () => {
     };
 
     return (
-        <div className="mt-20 w-full max-w-md rounded-lg bg-cyan-100 p-8 tracking-wide shadow-2xl">
+        <div className="mt-20 w-full max-w-md rounded-lg bg-cyan-100 p-8 shadow-2xl">
             <h2 className="mb-6 text-center text-2xl font-bold text-zinc-900">Sign In</h2>
             <form
                 id="signInForm"
