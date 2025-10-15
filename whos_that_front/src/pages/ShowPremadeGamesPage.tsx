@@ -7,6 +7,7 @@ import { serverResponseSchema } from "../lib/zodSchema.ts";
 import { PresetInfoSchema } from "../../../whos_that_server/src/config/zod/zodSchema.ts";
 import type { PresetInfo } from "../../../whos_that_server/src/config/types.ts";
 import env from "../lib/zodEnvSchema.ts";
+import { logError, log } from "../lib/logger.ts";
 
 const ShowPremadeGamesPage = ({ myGames }: { myGames: boolean }) => {
     const navigate = useNavigate();
@@ -41,7 +42,7 @@ const ShowPremadeGamesPage = ({ myGames }: { myGames: boolean }) => {
                         setErrorMsg(errorData.message || "Failed to get premadeGames.");
                     }
                 } catch (error) {
-                    console.error("Error:", error);
+                    logError(error);
                     if (error instanceof Error) {
                         setErrorMsg(error.message);
                     } else setErrorMsg("Failed to get premadeGames.");
@@ -75,7 +76,7 @@ const ShowPremadeGamesPage = ({ myGames }: { myGames: boolean }) => {
                         }
                     );
                     if (response.ok) {
-                        console.log(await response.json());
+                        log(await response.json());
                         void navigate(0);
                     } else {
                         const errorData = serverResponseSchema.safeParse(await response.json());
@@ -94,9 +95,14 @@ const ShowPremadeGamesPage = ({ myGames }: { myGames: boolean }) => {
 
     return (
         <div className="mx-10 mt-3 flex flex-wrap items-center justify-evenly">
-            <h2 className="font-times text-shadow-sm/100 mb-1 w-full text-center text-6xl tracking-wider text-white">
+            <h2 className="font-times text-shadow-sm/100 my-2 w-full text-center text-6xl tracking-wider text-white">
                 {myGames ? "Your Games" : "Public Games"}
             </h2>
+            {premadeGamesList.length === 0 && (
+                <p className="mx-auto mt-[50%] text-center text-2xl font-semibold text-gray-600">
+                    {myGames ? "You have no games yet." : "No public games... Something's Fishy..."}
+                </p>
+            )}
             {premadeGamesList.map(({ id, title, imageUrl, isPublic, author }, i) => (
                 <Link key={i} to={`/play-game?preset=${id}`}>
                     <CardLayout name={title} imgSrc={imageUrl} key={i}>

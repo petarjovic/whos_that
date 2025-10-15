@@ -1,4 +1,5 @@
 import Pica from "pica";
+import { logError } from "./logger.ts";
 
 /**
  * Resizes an image file using Pica for high quality results
@@ -62,7 +63,7 @@ export const resizeImage = async (file: File, maxWidth = 224, maxHeight = 688): 
             lastModified: Date.now(),
         });
     } catch (error) {
-        console.error(error);
+        logError(error);
         // eslint-disable-next-line unicorn/prefer-ternary
         if (error instanceof Error) throw error;
         else throw new Error("Image processing error.");

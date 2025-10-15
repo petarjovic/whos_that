@@ -8,6 +8,7 @@ import type { EndStateType } from "../lib/types.ts";
 import { gameDataTypeSchema } from "../../../whos_that_server/src/config/zod/zodSchema.ts";
 import { serverResponseSchema } from "../lib/zodSchema.ts";
 import env from "../lib/zodEnvSchema.ts";
+import { logError, log } from "../lib/logger.ts";
 
 const GameStateManager = ({ isNewGame }: { isNewGame: boolean }) => {
     const navigate = useNavigate();
@@ -51,7 +52,7 @@ const GameStateManager = ({ isNewGame }: { isNewGame: boolean }) => {
                     setTitle(title);
                     setCardData(cardData);
                 } catch (error) {
-                    console.error(error);
+                    logError(error);
                     if (error instanceof Error) setErrorMsg(error.message);
                     else setErrorMsg("Getting images failed.");
                 }
@@ -64,7 +65,7 @@ const GameStateManager = ({ isNewGame }: { isNewGame: boolean }) => {
         socket.connect();
 
         socket.on("connect_error", (err) => {
-            console.error(err);
+            logError(err);
             setErrorMsg(`Could not connect to server, server responded with:\n${err.message}`);
         });
 
@@ -74,7 +75,7 @@ const GameStateManager = ({ isNewGame }: { isNewGame: boolean }) => {
         });
 
         socket.on("playerJoined", (gameData) => {
-            console.log("Player joined:", gameData.players);
+            log(`Player joined: ${gameData.players.toString()}`);
             setGameState(gameData);
             setEndState("");
         });
@@ -85,13 +86,13 @@ const GameStateManager = ({ isNewGame }: { isNewGame: boolean }) => {
         });
 
         socket.on("opponentDisconnted", (gameData) => {
-            console.log("Opponent Disconnected");
+            log("Opponent Disconnected");
             setGameState(gameData);
             setEndState("");
         });
 
         socket.on("errorMessage", ({ message }) => {
-            console.error(message);
+            logError(message);
             setErrorMsg(message);
         });
 
@@ -111,7 +112,7 @@ const GameStateManager = ({ isNewGame }: { isNewGame: boolean }) => {
         if (isNewGame && cardData.length > 0) {
             socket.emit("createGame", gameState.preset, cardData.length, (id, response) => {
                 if (response.success) {
-                    console.log(response.msg);
+                    log(response.msg);
                     setGameId(id);
                     void navigate(`/play-game/${id}`);
                 } else {
@@ -129,16 +130,15 @@ const GameStateManager = ({ isNewGame }: { isNewGame: boolean }) => {
                 if (!response.success) {
                     void navigate("/"); //flesh this out, pop-up upon returning to home page?
                 }
-                console.log(response.msg);
+                log(response.msg);
             });
         }
     }, [gameId, isNewGame, navigate]);
 
     const emitGuess = (guessCorrectly: boolean) => {
         socket.emit("guess", gameId, guessCorrectly);
-        console.log(
-            `Player %s emited guess: ${guessCorrectly.toString()} in game ${gameId}`,
-            socket.id
+        log(
+            `Player ${String(socket.id)} emited guess: ${guessCorrectly.toString()} in game ${gameId}`
         );
         if (guessCorrectly) {
             setEndState("correctGuess");
@@ -149,7 +149,7 @@ const GameStateManager = ({ isNewGame }: { isNewGame: boolean }) => {
 
     const emitPlayAgain = () => {
         socket.emit("playAgain", gameId);
-        console.log(`Player %s requested to play again in room ${gameId}`, socket.id);
+        log(`Player ${String(socket.id)} requested to play again in room ${gameId}`);
     };
 
     if (errorMsg) throw new Error(errorMsg);

@@ -11,7 +11,7 @@ import env from "./config/zod/zodEnvSchema.ts";
 const app = express();
 app.use(
     cors({
-        origin: "http://localhost:5173",
+        origin: env.NODE_ENV === "production" ? env.PROD_CLIENT_URL : env.DEV_CLIENT_URL,
         credentials: true,
     })
 );
@@ -22,7 +22,7 @@ const server = http.createServer(app);
 
 const io = new Server<ClientToServerEvents, ServerToClientEvents>(server, {
     cors: {
-        origin: "http://localhost:5173",
+        origin: env.NODE_ENV === "production" ? env.PROD_CLIENT_URL : env.DEV_CLIENT_URL,
         methods: ["GET", "POST"],
     },
 });

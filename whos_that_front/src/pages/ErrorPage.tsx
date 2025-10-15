@@ -2,6 +2,7 @@ import { Link, useRouteError, isRouteErrorResponse } from "react-router";
 import chalkOutline from "../assets/chalk-outline.svg";
 import Hero from "../layouts/Hero";
 import { useSearchParams } from "react-router";
+import { logError } from "../lib/logger.ts";
 
 const ErrorPage = ({ error }: { error?: unknown }) => {
     let errorMessage = "";
@@ -10,9 +11,9 @@ const ErrorPage = ({ error }: { error?: unknown }) => {
     const [searchParams] = useSearchParams();
     const searchParamError = searchParams.get("error");
 
-    if (routeError) console.error(routeError);
-    if (error) console.error(error);
-    if (searchParamError) console.error(searchParamError);
+    if (routeError) logError(routeError);
+    if (error) logError(error);
+    if (searchParamError) logError(searchParamError);
 
     if (error instanceof Error) {
         errorMessage = error.message;

@@ -22,7 +22,6 @@ export const auth = betterAuth({
         requireEmailVerification: false,
         minPasswordLength: 8,
         maxPasswordLength: 128,
-        passwordStrengthCheck: true,
     },
     account: {
         accountLinking: {
@@ -32,13 +31,12 @@ export const auth = betterAuth({
     session: {
         cookieCache: {
             enabled: true,
-            maxAge: 5 * 60, // Cache duration in seconds
+            maxAge: 5 * 60, //seconds
         },
     },
-    trustedOrigins: ["http://localhost:5173"],
+    trustedOrigins: [env.NODE_ENV === "production" ? env.PROD_CLIENT_URL : env.DEV_CLIENT_URL],
     socialProviders: {
         discord: {
-            //TODO: ADD DISCORD AUTHENTICATION
             clientId: env.DISCORD_CLIENT_ID,
             clientSecret: env.DISCORD_CLIENT_SECRET,
         },

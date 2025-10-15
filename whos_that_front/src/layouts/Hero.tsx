@@ -12,8 +12,8 @@ const Hero = ({ session, isPending, showUserInfo = true }: HeroProps) => {
     const handleLogOut = async () => {
         const logOutResult = await authClient.signOut();
         if (logOutResult.error) {
-            //handle better?
-            console.error(logOutResult.error);
+            if (logOutResult.error instanceof Error) throw logOutResult.error;
+            else throw new Error("Error logging out.");
         }
         void navigate("/");
     };

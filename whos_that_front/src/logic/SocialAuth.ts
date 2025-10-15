@@ -2,6 +2,7 @@ import type { FormEvent } from "react";
 import { authClient } from "../lib/auth-client.ts";
 import type { SocialSignInProviders } from "../lib/types.ts";
 import env from "../lib/zodEnvSchema.ts";
+import { logError } from "../lib/logger.ts";
 
 export const handleSocialSignIn = async (e: FormEvent, provider: SocialSignInProviders) => {
     e.preventDefault();
@@ -11,7 +12,7 @@ export const handleSocialSignIn = async (e: FormEvent, provider: SocialSignInPro
         errorCallbackURL: `${env.VITE_APP_URL}error`,
     });
     if (socialSignInResult.error) {
-        console.error(socialSignInResult.error.message);
+        logError(socialSignInResult.error.message);
     } else {
         globalThis.location.assign(socialSignInResult.data.url ?? env.VITE_APP_URL);
     }

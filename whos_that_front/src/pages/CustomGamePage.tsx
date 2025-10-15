@@ -9,6 +9,7 @@ import { isHeic } from "heic-to";
 import { heicTo } from "heic-to";
 import LoadingSpinner from "../lib/LoadingSpinner.tsx";
 import env from "../lib/zodEnvSchema.ts";
+import { logError, log } from "../lib/logger.ts";
 
 const MAX_FILESIZE_BYTES = 5 * 1024 * 1024;
 const MIN_NUM_IMGS = 6;
@@ -72,7 +73,7 @@ const CreateCustomGamePage = () => {
 
         const validFilePromises = await Promise.allSettled(
             fileArray.map(async (file) => {
-                console.log(`${file.name} has type: ${file.type}`);
+                log(`${file.name} has type: ${file.type}`);
                 try {
                     if (await isHeic(file)) {
                         const blobAsJpeg = await heicTo({
@@ -91,7 +92,7 @@ const CreateCustomGamePage = () => {
                         return file;
                     }
                 } catch (error) {
-                    console.log("Error with HEIC conversion.", error);
+                    log(error);
                     throw new Error(`${file.name} had error with HEIC conversion.`);
                 }
             })
@@ -158,7 +159,7 @@ const CreateCustomGamePage = () => {
                 },
             });
         } catch (error) {
-            console.error(error);
+            logError(error);
             if (error instanceof Error) setErrorMsg(error.message);
             else setErrorMsg("Fetch request to server failed.");
             return;
@@ -196,7 +197,7 @@ const CreateCustomGamePage = () => {
             }
 
             const uploadResponses = await Promise.allSettled(uploadPromises as Promise<Response>[]);
-            console.log(uploadResponses);
+            log(uploadResponses);
 
             for (const response of uploadResponses) {
                 if (response.status !== "fulfilled" || !response.value.ok) {

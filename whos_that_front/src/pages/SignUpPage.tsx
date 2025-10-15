@@ -5,6 +5,7 @@ import { useBetterAuthSession } from "../layouts/LayoutContextProvider";
 import DiscordLoginButton from "../lib/DiscordLoginButton";
 import { authClient } from "../lib/auth-client";
 import env from "../lib/zodEnvSchema";
+import { logError, log } from "../lib/logger.ts";
 
 const SignUpPage = () => {
     const navigate = useNavigate();
@@ -38,11 +39,12 @@ const SignUpPage = () => {
             name: "",
             callbackURL: `${env.VITE_APP_URL}/account`,
         });
-        console.log(signUpResult.data);
+
         if (signUpResult.error) {
-            console.error(signUpResult.error);
+            logError(signUpResult.error);
             setSignUpIssue(signUpResult.error.message ?? "Something went wrong, please try again");
         } else {
+            log(signUpResult.data);
             void navigate("/account");
         }
         setSigningUp(false);

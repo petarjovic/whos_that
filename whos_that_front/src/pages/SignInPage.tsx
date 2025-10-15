@@ -5,6 +5,7 @@ import { useNavigate } from "react-router";
 import { useBetterAuthSession } from "../layouts/LayoutContextProvider";
 import DiscordLoginButton from "../lib/DiscordLoginButton";
 import env from "../lib/zodEnvSchema";
+import { logError } from "../lib/logger.ts";
 
 const SignInPage = () => {
     const navigate = useNavigate();
@@ -30,7 +31,7 @@ const SignInPage = () => {
             callbackURL: env.VITE_APP_URL,
         });
         if (logInResult.error) {
-            console.error(logInResult.error.message);
+            logError(logInResult.error.message);
             setSignInIssue(logInResult.error.message ?? "Error logging in.");
         } else {
             void navigate("/");
