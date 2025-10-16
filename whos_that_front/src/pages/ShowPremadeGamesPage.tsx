@@ -95,7 +95,7 @@ const ShowPremadeGamesPage = ({ myGames }: { myGames: boolean }) => {
 
     return (
         <div className="mx-10 mt-3 flex flex-wrap items-center justify-evenly">
-            <h2 className="font-times text-shadow-sm/100 my-2 w-full text-center text-6xl tracking-wider text-white">
+            <h2 className="font-times text-shadow-sm/100 my-2 w-full text-center text-6xl text-white">
                 {myGames ? "Your Games" : "Public Games"}
             </h2>
             {premadeGamesList.length === 0 && (

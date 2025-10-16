@@ -53,7 +53,7 @@ const Dropzone = ({ fileHandler }: { fileHandler: (files: FileList) => void }) =
             >
                 <div className="flex flex-col items-center justify-center pb-6 pt-5">
                     <svg
-                        className={`h-15 w-15 mb-4 transition-colors duration-200 ${
+                        className={`h-17 w-17 mb-4 transition-colors duration-200 ${
                             isDragOver ? "text-blue-500" : "text-gray-400"
                         }`}
                         aria-hidden="true"
@@ -69,7 +69,7 @@ const Dropzone = ({ fileHandler }: { fileHandler: (files: FileList) => void }) =
                         />
                     </svg>
                     <p
-                        className={`mb-2 text-sm transition-colors duration-200 ${
+                        className={`text-md mb-2 transition-colors duration-200 ${
                             isDragOver
                                 ? "text-blue-600 dark:text-blue-400"
                                 : "text-gray-500 dark:text-gray-400"
@@ -85,7 +85,7 @@ const Dropzone = ({ fileHandler }: { fileHandler: (files: FileList) => void }) =
                         {!isDragOver && "or drag and drop"}
                     </p>
                     <p
-                        className={`text-center text-xs transition-colors duration-200 ${
+                        className={`text-center text-sm transition-colors duration-200 ${
                             isDragOver
                                 ? "text-blue-500 dark:text-blue-400"
                                 : "text-gray-500 dark:text-gray-400"

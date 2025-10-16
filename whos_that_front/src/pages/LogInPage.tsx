@@ -3,7 +3,7 @@ import DiscordLoginButton from "../lib/DiscordLoginButton";
 
 const LogInPage = () => {
     return (
-        <div className="shadow-2xl/40 my-35 bg-linear-to-b w-150 mx-auto rounded-lg from-blue-400 to-blue-500 p-8 text-white">
+        <div className="shadow-2xl/40 my-35 bg-linear-to-b w-150 border-x-1 border-b-10 mx-auto rounded-lg border-blue-600 from-blue-400 to-blue-500 p-8 text-white">
             <h2 className="text-shadow-xs/50 mb-5 text-center text-5xl font-bold tracking-tight text-white">
                 Log In
             </h2>

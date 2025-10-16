@@ -39,21 +39,32 @@ const SetUsernamePage = () => {
     };
 
     return (
-        <div className="mt-20 w-full max-w-md rounded-lg bg-cyan-100 p-8 tracking-wide shadow-2xl">
-            <h2 className="mb-6 text-center text-2xl font-bold text-zinc-900">
-                Choose Your Username
+        <div className="shadow-2xl/40 my-35 bg-linear-to-b w-150 mx-auto rounded-lg from-blue-400 to-blue-500 to-50% p-8 text-white">
+            <h2 className="text-shadow-xs/80 mb-5 text-center text-4xl font-bold tracking-normal text-orange-300">
+                Choose Your <span className="text-orange-300">Username</span>
             </h2>
-            <p className="mb-6 text-center text-gray-600">Please set a username for your account</p>
-            <form onSubmit={(e) => void handleSubmit(e)}>
-                <div className="mb-4">
-                    <label htmlFor="username" className="mb-2 block font-semibold text-zinc-800">
-                        Username
+            <p className="text-shadow-2xs/80 mb-6 text-center text-xl text-white">
+                Please pick a username for yourself, note that your username{" "}
+                <span className="text-xl italic text-orange-300">cannot be changed</span> !
+            </p>
+            <form
+                className="text-center"
+                onSubmit={(e) => {
+                    void handleSubmit(e);
+                }}
+            >
+                <div className="mx-auto mb-4 flex items-center justify-center">
+                    <label
+                        htmlFor="username"
+                        className="text-shadow-xs/80 mr-15 mb-2 mt-1 text-2xl font-semibold text-white"
+                    >
+                        Username:
                     </label>
                     <input
                         type="text"
                         id="username"
-                        className="inset-shadow-md hover:inset-shadow-lg w-full rounded-lg border border-gray-400 bg-white px-4 py-2 placeholder:text-gray-400 hover:shadow-sm focus:border-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-400"
-                        placeholder="Enter your username"
+                        className="inset-shadow-xs hover:inset-shadow-lg w-full rounded-lg border border-blue-300 bg-white px-4 py-2 text-center text-zinc-900 placeholder:text-gray-600 hover:shadow-sm focus:border-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-400"
+                        placeholder="Enter a username"
                         value={username}
                         onChange={(e) => {
                             setUsername(e.target.value);
@@ -64,15 +75,17 @@ const SetUsernamePage = () => {
                         title="Username can only contain letters, numbers, and underscores"
                         required
                     />
-                    {error && (
-                        <p className="shadow-xs mt-3 rounded-md border border-red-200 bg-red-50 p-2 text-red-500 shadow-red-50">
-                            {error}
-                        </p>
-                    )}
                 </div>
+                {error.length > 0 ? (
+                    <p className="shadow-xs max-h-23 mt-3 overflow-y-auto rounded-md border border-red-200 bg-red-50 p-2 text-red-500 shadow-red-50">
+                        {error}
+                    </p>
+                ) : (
+                    <></>
+                )}
                 <button
                     type="submit"
-                    className="w-full rounded-lg bg-blue-500 py-2 font-semibold text-white hover:bg-blue-600 hover:shadow-md focus:outline-none focus:ring-2 focus:ring-blue-400 focus:ring-opacity-50"
+                    className="text-shadow-xs/80 w-8/10 cursor-pointer rounded-lg bg-amber-500 py-2 text-center font-semibold text-white transition-all hover:bg-amber-600 focus:outline-none focus:ring-2 focus:ring-blue-400 focus:ring-opacity-50"
                     disabled={isSubmitting}
                 >
                     {isSubmitting ? "Setting Username..." : "Continue"}

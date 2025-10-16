@@ -88,26 +88,24 @@ export function setupApiRoutes(app: Express) {
 
                 if (!session) return res.status(401).json({ message: "Unauthorized." });
 
-                await db.transaction(async (tx) => {
-                    await tx.insert(schema.games).values({
+                await db.batch([
+                    db.insert(schema.games).values({
                         id: gameId,
                         title: body.title,
                         description: "",
                         isPublic: body.privacy === "public",
                         userId: session.user.id,
-                    });
+                    }),
 
-                    console.log("Created game:", gameId);
-
-                    await tx.insert(schema.gameItems).values(
+                    db.insert(schema.gameItems).values(
                         Object.entries(response.gameItems).map(([name, { itemId }], i) => ({
                             id: itemId,
                             gameId: gameId,
                             name: name,
                             orderIndex: i,
                         }))
-                    );
-                });
+                    ),
+                ]);
 
                 return res.status(200).json(response);
             } catch (error) {

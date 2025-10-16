@@ -19,14 +19,14 @@ const Hero = ({ session, isPending, showUserInfo = true }: HeroProps) => {
     };
 
     return (
-        <header className="bg-radial h-30 shadow-lg/20 flex w-full items-center justify-between rounded-b-[40%] from-blue-400 from-20% to-blue-600 to-70% px-[12%]">
+        <header className="bg-linear-to-b h-30 border-b-10 flex w-full items-center justify-between rounded-b-[40%] border-blue-600 from-blue-400 to-blue-500 to-60% px-[12%] shadow-lg">
             <div className="w-1/4 shrink"></div>
             <h1 className="mt-2 w-fit grow text-center">
                 <Link
                     to={"/"}
                     id="title"
                     reloadDocument={true}
-                    className="font-digitag text-shadow-md/85 cursor-pointer whitespace-pre-wrap text-9xl font-bold tracking-wide text-amber-500 hover:text-amber-600"
+                    className="font-digitag text-shadow-md/85 cursor-pointer whitespace-pre-wrap text-9xl font-bold tracking-wide text-orange-300 hover:text-amber-600"
                 >
                     <>
                         W<span />
@@ -60,7 +60,7 @@ const Hero = ({ session, isPending, showUserInfo = true }: HeroProps) => {
 
                         <button
                             type="button"
-                            className="px-2.25 border-b-5 border-x-1 text-shadow-xs/40 active:border-b-1 active:shadow-2xs active:inset-shadow-md duration-2 ml-10 h-11 w-fit cursor-pointer rounded-md border-cyan-600 bg-cyan-500 py-1 text-2xl font-bold text-white shadow-md transition-all hover:border-cyan-700 hover:bg-cyan-600 active:translate-y-[1px]"
+                            className="px-2.25 border-b-5 border-x-1 text-shadow-xs/40 active:border-b-1 active:shadow-2xs active:inset-shadow-md hover:shadow-sm/20 duration-15 shadow-md/20 ml-10 h-11 w-fit cursor-pointer rounded-md border-cyan-600 bg-cyan-500 py-1 text-2xl font-bold text-white transition-all hover:border-cyan-700 hover:bg-cyan-600 hover:text-gray-200 active:translate-y-[1px]"
                             onClick={() => {
                                 if (!isPending && session) void handleLogOut();
                                 else if (!isPending) void navigate("/log-in");
