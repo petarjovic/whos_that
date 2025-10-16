@@ -235,7 +235,7 @@ const CreateCustomGamePage = () => {
         >
             <div className="mr-10 w-[45%]">
                 {/* Step 1 */}
-                <div className="border-x-1 shadow-md/40 border-b-7 bg-linear-to-b mb-3 mr-2 rounded-lg border-blue-600 from-blue-400 to-blue-500 p-4">
+                <div className="border-x-1 shadow-md/40 border-b-7 bg-linear-to-b mb-3 mr-2 rounded-lg border-blue-600 from-blue-400 to-blue-500 to-75% p-4">
                     <label
                         htmlFor="title"
                         className="text-shadow-xs/75 m-auto block text-4xl font-medium text-white"
@@ -258,7 +258,7 @@ const CreateCustomGamePage = () => {
                     ></input>
                 </div>
                 {/* Step 2 */}
-                <div className="border-x-1 shadow-md/40 border-b-7 bg-linear-to-b mb-3 mr-2 rounded-lg border-blue-600 from-blue-400 to-blue-500 p-4">
+                <div className="border-x-1 shadow-md/40 border-b-7 bg-linear-to-b my-4 mr-2 rounded-lg border-blue-600 from-blue-400 to-blue-500 to-75% p-4">
                     <label className="text-shadow-xs/75 m-auto block text-4xl font-medium text-white">
                         <div className="mr-3 inline-block h-11 w-11 content-center rounded-[50%] text-center align-middle font-bold text-orange-300">
                             <span className="font-digitag text-shadow-xs/50 relative bottom-4 right-1 text-7xl font-medium">
@@ -298,7 +298,7 @@ const CreateCustomGamePage = () => {
                     </label>
                 </div>
                 {/* Step 4 */}
-                <div className="border-x-1 shadow-md/40 border-b-7 bg-linear-to-b mb-5 mr-2 flex items-center justify-between whitespace-pre-wrap rounded-lg border-blue-600 from-blue-400 to-blue-500 p-4 text-lg font-medium text-gray-900">
+                <div className="border-x-1 shadow-md/40 border-b-7 bg-linear-to-b mb-5 mr-2 flex items-center justify-between whitespace-pre-wrap rounded-lg border-blue-600 from-blue-400 to-blue-500 to-75% p-4 text-lg font-medium text-gray-900">
                     <div className="text-shadow-xs/75 ml-1 block text-4xl font-medium text-white">
                         <div className="mr-3 inline-block h-11 w-11 content-center rounded-[50%] text-center align-middle font-bold text-orange-300">
                             <span className="font-digitag text-shadow-xs/50 relative bottom-0.5 right-2 text-7xl font-medium">
@@ -347,7 +347,7 @@ const CreateCustomGamePage = () => {
             </div>
             <div className="flex-1">
                 {/* Step 3 */}
-                <div className="border-x-1 shadow-md/40 border-b-7 bg-linear-to-b mb-3 mr-2 rounded-lg border-blue-600 from-blue-400 to-blue-500 p-4">
+                <div className="border-x-1 shadow-md/40 border-b-7 bg-linear-to-b mb-3 mr-2 rounded-lg border-blue-600 from-blue-400 to-blue-500 to-75% p-4">
                     <h3 className="text-shadow-xs/75 m-auto block text-4xl font-medium text-white">
                         <div className="mr-3 inline-block h-11 w-11 content-center rounded-[50%] text-center align-middle text-[4rem] font-bold leading-none text-orange-300">
                             <span className="font-digitag text-shadow-xs/50 relative bottom-3.5 text-7xl font-medium">
@@ -370,7 +370,7 @@ const CreateCustomGamePage = () => {
                             <></>
                         )}
                     </h3>
-                    <div className="max-h-143 inset-shadow-md/10 shadow-sm/30 mt-3 overflow-y-auto rounded-md bg-gray-50">
+                    <div className="max-h-143 inset-shadow-md/10 mt-3 overflow-y-auto rounded-md bg-gray-50 shadow-sm">
                         {selectedFiles.length > 0 ? (
                             selectedFiles.map((file, index) => (
                                 <div
@@ -419,14 +419,14 @@ const CreateCustomGamePage = () => {
                         )}
                     </div>
                     {selectedFiles.length > MAX_NUM_IMGS ? (
-                        <p className="shadow-xs mt-2 rounded-md border border-red-200 bg-red-50 p-2 text-red-500 shadow-red-50">
+                        <p className="mt-2 rounded-md border border-red-400 bg-red-100 p-2 text-red-500">
                             You have too many characters! There is a maximum of {MAX_NUM_IMGS}.
                         </p>
                     ) : (
                         <></>
                     )}
                     {selectedFiles.length < MIN_NUM_IMGS ? (
-                        <p className="mt-2 rounded-md border border-yellow-400 bg-yellow-100 p-2 text-gray-500">
+                        <p className="mt-2 rounded-md border border-amber-300 bg-amber-100 p-2 text-gray-500">
                             Need at least {MIN_NUM_IMGS} characters!
                         </p>
                     ) : (

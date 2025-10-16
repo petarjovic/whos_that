@@ -39,7 +39,7 @@ const SetUsernamePage = () => {
     };
 
     return (
-        <div className="shadow-2xl/40 my-35 bg-linear-to-b w-150 mx-auto rounded-lg from-blue-400 to-blue-500 to-50% p-8 text-white">
+        <div className="shadow-2xl/40 my-35 bg-linear-to-b w-150 border-x-1 border-b-10 mx-auto rounded-lg border-blue-600 from-blue-400 to-blue-500 to-50% p-8 text-white">
             <h2 className="text-shadow-xs/80 mb-5 text-center text-4xl font-bold tracking-normal text-orange-300">
                 Choose Your <span className="text-orange-300">Username</span>
             </h2>
@@ -53,7 +53,14 @@ const SetUsernamePage = () => {
                     void handleSubmit(e);
                 }}
             >
-                <div className="mx-auto mb-4 flex items-center justify-center">
+                {error.length > 0 ? (
+                    <p className="mx-auto mb-5 w-fit rounded-md border border-red-400 bg-red-200 px-8 py-1.5 text-red-500">
+                        {error}
+                    </p>
+                ) : (
+                    <></>
+                )}
+                <div className="mx-auto mb-6 flex items-center justify-center">
                     <label
                         htmlFor="username"
                         className="text-shadow-xs/80 mr-15 mb-2 mt-1 text-2xl font-semibold text-white"
@@ -63,7 +70,7 @@ const SetUsernamePage = () => {
                     <input
                         type="text"
                         id="username"
-                        className="inset-shadow-xs hover:inset-shadow-lg w-full rounded-lg border border-blue-300 bg-white px-4 py-2 text-center text-zinc-900 placeholder:text-gray-600 hover:shadow-sm focus:border-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-400"
+                        className="inset-shadow-xs w-full rounded-lg border border-blue-500 bg-slate-50 px-3 py-1.5 text-center text-lg text-gray-800 placeholder:text-gray-500 hover:shadow-sm"
                         placeholder="Enter a username"
                         value={username}
                         onChange={(e) => {
@@ -76,16 +83,10 @@ const SetUsernamePage = () => {
                         required
                     />
                 </div>
-                {error.length > 0 ? (
-                    <p className="shadow-xs max-h-23 mt-3 overflow-y-auto rounded-md border border-red-200 bg-red-50 p-2 text-red-500 shadow-red-50">
-                        {error}
-                    </p>
-                ) : (
-                    <></>
-                )}
+
                 <button
                     type="submit"
-                    className="text-shadow-xs/80 w-8/10 cursor-pointer rounded-lg bg-amber-500 py-2 text-center font-semibold text-white transition-all hover:bg-amber-600 focus:outline-none focus:ring-2 focus:ring-blue-400 focus:ring-opacity-50"
+                    className="border-x-1 text-shadow-xs/80 active:shadow-2xs hover:shadow-sm/20 active:inset-shadow-md duration-15 hover:font-gray-200 shadow-md/20 w-7/10 h-12 cursor-pointer rounded-md border-b-8 border-amber-600 bg-amber-500 px-2 text-xl font-semibold text-white transition-all hover:border-amber-700 hover:bg-amber-600 active:translate-y-[1px] active:border-none"
                     disabled={isSubmitting}
                 >
                     {isSubmitting ? "Setting Username..." : "Continue"}

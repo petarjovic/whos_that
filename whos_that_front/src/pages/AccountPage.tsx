@@ -56,8 +56,8 @@ const AccountPage = () => {
     else if (isPending || !session) return <div>Loading...</div>;
     else
         return (
-            <div className="shadow-2xl/30 border-x-1 bg-linear-to-b border-b-10 mx-auto my-10 w-1/2 rounded-lg border-blue-600 from-blue-400 to-blue-500 p-8 text-white">
-                <h2 className="text-shadow-sm/70 mb-7 text-center text-5xl font-bold">
+            <div className="shadow-2xl/30 border-x-1 bg-linear-to-b border-b-10 mx-auto my-10 w-1/2 rounded-lg border-blue-600 from-blue-400 to-blue-500 to-50% p-8 text-white">
+                <h2 className="text-shadow-sm/70 mb-7 text-center text-5xl font-bold text-amber-400">
                     Account Details
                 </h2>
                 <div className="flex items-center justify-between">
@@ -107,7 +107,7 @@ const AccountPage = () => {
 
                     <Link to={"/my-games"}>
                         <button
-                            className="border-b-9 border-x-1 text-shadow-xs/50 active:border-b-1 active:shadow-2xs active:inset-shadow-md duration-15 mx-4 h-14 w-fit cursor-pointer rounded-md border-amber-600 bg-amber-500 px-3 text-2xl font-bold tracking-normal text-white shadow-md transition-all hover:border-amber-700 hover:bg-amber-600 hover:text-slate-200 active:translate-y-[1px]"
+                            className="border-b-9 border-x-1 text-shadow-xs/50 active:border-b-1 active:shadow-2xs active:inset-shadow-md duration-15 mx-4 h-14 w-fit cursor-pointer rounded-md border-amber-600 bg-amber-500 px-3 text-2xl font-bold tracking-normal text-slate-50 shadow-md transition-all hover:border-amber-700 hover:bg-amber-600 hover:text-slate-200 active:translate-y-[1px]"
                             type="button"
                         >
                             My Games
