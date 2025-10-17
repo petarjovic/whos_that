@@ -1,5 +1,5 @@
 import { Link } from "react-router";
-import whiteHatSpy from "../assets/whitehatspy.png";
+import whiteHatSpy from "../assets/404-whitehatspy.png";
 
 const NotFoundPage = () => {
     return (

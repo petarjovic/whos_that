@@ -27,4 +27,4 @@ dist-ssr
 zodEnvSchema.ts
 assets/
 .amazonQ/*
-
+private/*
