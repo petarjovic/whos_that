@@ -10,13 +10,13 @@ import type {
     CreateGameRequest,
     CreateGameResponse,
     PresetInfo,
-} from "./config/types.ts";
+} from "../../common/types/types.ts";
 import { nanoid } from "nanoid";
 import { getSignedUrl as getSignedS3Url } from "@aws-sdk/s3-request-presigner";
 import { getSignedUrl as getSignedCFUrl } from "@aws-sdk/cloudfront-signer";
 import { CreateInvalidationCommand } from "@aws-sdk/client-cloudfront";
 import env from "./config/zod/zodEnvSchema.ts";
-import { createGameRequestSchema, nanoId21Schema } from "./config/zod/zodSchema.ts";
+import { createGameRequestSchema, nanoId21Schema } from "../../common/zodSchemas/zodSchema.ts";
 import z from "zod";
 import { auth } from "./config/auth.ts";
 import { fromNodeHeaders } from "better-auth/node";

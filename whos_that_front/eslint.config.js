@@ -32,7 +32,7 @@ export default tseslint.config([
         languageOptions: {
             ecmaVersion: 2020,
             parserOptions: {
-                project: ["./tsconfig.app.json", "./tsconfig.node.json"],
+                project: ["./tsconfig.json", "../whos_that_server/tsconfig.json"],
             },
         },
     },

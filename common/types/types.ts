@@ -1,4 +1,4 @@
-import * as zod from "./zod/zodSchema.ts";
+import * as zod from "../zodSchemas/zodSchema.ts";
 import z from "zod";
 
 export type ResponseType = z.infer<typeof zod.responseTypeSchema>;
