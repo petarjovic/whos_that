@@ -25,6 +25,5 @@ dist-ssr
 *.env*
 *.pem
 zodEnvSchema.ts
-assets/
 .amazonQ
 private
