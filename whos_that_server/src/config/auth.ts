@@ -51,5 +51,5 @@ export const auth = betterAuth({
             maxUsernameLength: 20,
         }),
     ],
-    baseURL: env.BETTER_AUTH_URL,
+    baseURL: env.NODE_ENV === "production" ? env.PROD_BETTER_AUTH_URL : env.DEV_BETTER_AUTH_URL,
 });
