@@ -1,8 +1,4 @@
 {
     "files": [],
-    "references": [
-        { "path": "./whos_that_front" },
-        { "path": "./whos_that_server" },
-        { "path": "./common" }
-    ]
+    "references": [{ "path": "./whos_that_front" }, { "path": "./whos_that_server" }]
 }
