@@ -1,6 +1,7 @@
 import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react";
 import tailwindcss from "@tailwindcss/vite";
+import * as path from "path";
 
 export default defineConfig({
     plugins: [
@@ -11,5 +12,14 @@ export default defineConfig({
         }),
         tailwindcss(),
     ],
+    resolve: {
+        alias: {
+            "@server/types": path.resolve(__dirname, "../whos_that_server/src/config/types.ts"),
+            "@server/zodSchema": path.resolve(
+                __dirname,
+                "../whos_that_server/src/config/zod/zodSchema.ts"
+            ),
+        },
+    },
 });
 

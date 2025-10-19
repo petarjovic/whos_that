@@ -1,7 +1,7 @@
 import ReactModal from "react-modal";
 import { useNavigate } from "react-router";
 import { Card, OpponentTargetCard } from "../layouts/Cards";
-import type { CardDataUrlType } from "../../../whos_that_server/src/config/types.ts";
+import type { CardDataUrlType } from "@server/types";
 import type { EndStateType } from "../lib/types.ts";
 import { useEffect, useState } from "react";
 

@@ -4,8 +4,8 @@ import { CardLayout } from "../layouts/Cards.tsx";
 import type { ServerResponse } from "../lib/types.ts";
 import { useBetterAuthSession } from "../layouts/LayoutContextProvider.ts";
 import { serverResponseSchema } from "../lib/zodSchema.ts";
-import { PresetInfoSchema } from "../../../whos_that_server/src/config/zod/zodSchema.ts";
-import type { PresetInfo } from "../../../whos_that_server/src/config/types.ts";
+import { PresetInfoSchema } from "@server/zodSchema";
+import type { PresetInfo } from "@server/types";
 import env from "../lib/zodEnvSchema.ts";
 import { logError, log } from "../lib/logger.ts";
 

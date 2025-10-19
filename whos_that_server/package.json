@@ -37,5 +37,6 @@
         "esbuild": "^0.25.9",
         "esm-loader": "tsx@^4.20.4"
     },
-    "//": "The overrides setting is for handling drizzle-kit outdated dependacy, when drizzle updates it can be removed."
+    "//": "The overrides setting is for handling drizzle-kit outdated dependacy, when drizzle fixes it can be removed."
 }
+

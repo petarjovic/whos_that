@@ -1,5 +1,5 @@
-import * as zod from "../zodSchemas/zodSchema.ts";
-import z from "zod";
+import * as zod from "./zod/zodSchema";
+import { z } from "zod";
 
 export type ResponseType = z.infer<typeof zod.responseTypeSchema>;
 export type GameStateType = z.infer<typeof zod.gameStateTypeSchema>;

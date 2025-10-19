@@ -13,7 +13,7 @@ export default tseslint.config([
     globalIgnores(["dist"]),
     //Base rules
     {
-        files: ["**/*.{js,jsx,ts,tsx}", "../whos_that_server/**/*.{js,jsx,ts,tsx}"],
+        files: ["**/*.{js,jsx,ts,tsx}"],
         extends: [
             js.configs.recommended,
             tseslint.configs.strictTypeChecked,
@@ -32,13 +32,14 @@ export default tseslint.config([
         languageOptions: {
             ecmaVersion: 2020,
             parserOptions: {
-                project: ["./tsconfig.json", "../whos_that_server/tsconfig.json"],
+                projectService: true,
+                tsconfigRootDir: import.meta.dirname,
             },
         },
     },
     //Frontend-specific rules
     {
-        files: ["**/*.{jsx,tsx}"],
+        files: ["whos_that_front/**/*.{jsx,tsx}"],
         extends: [
             pluginReact.configs.flat.recommended,
             pluginReact.configs.flat["jsx-runtime"],
@@ -58,7 +59,7 @@ export default tseslint.config([
     },
     //Backend-specific rules
     {
-        files: ["../whos_that_server/**/*.{js,ts}"],
+        files: ["whos_that_server/**/*.{js,ts}"],
         languageOptions: {
             globals: globals.node,
         },

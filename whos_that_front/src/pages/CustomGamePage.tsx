@@ -3,7 +3,7 @@ import { useBetterAuthSession } from "../layouts/LayoutContextProvider.ts";
 import { useState, useEffect } from "react";
 import Dropzone from "../lib/Dropzone.tsx";
 import { serverResponseSchema, acceptedImageTypesSchema } from "../lib/zodSchema.ts";
-import { createGameResponseSchema } from "../../../whos_that_server/src/config/zod/zodSchema.ts";
+import { createGameResponseSchema } from "@server/zodSchema";
 import { resizeImages } from "../lib/imageresizer.ts";
 import { isHeic } from "heic-to";
 import { heicTo } from "heic-to";
