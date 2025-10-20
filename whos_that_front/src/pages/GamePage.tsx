@@ -81,7 +81,7 @@ const Game = ({
     const oppTargetCardData = cardData.find((card) => card.orderIndex === oppWinningKey);
 
     if (!oppTargetCardData) {
-        throw new Error("Cannot find oppent's card data.");
+        throw new Error("Cannot find opponent's card data.");
     }
 
     return (
@@ -91,7 +91,7 @@ const Game = ({
             </p>
             <div
                 id="gameboard"
-                className={`mb-2.5 grid px-10 ${GridColsClasses[numGridCols]} w-full justify-center justify-items-center gap-2.5 overflow-x-hidden`}
+                className={`mb-2.5 grid px-9 ${GridColsClasses[numGridCols]} w-full justify-center justify-items-center gap-2.5`}
             >
                 {cardList}
             </div>
