@@ -91,7 +91,7 @@ const Game = ({
             </p>
             <div
                 id="gameboard"
-                className={`mb-2.5 grid px-10 ${GridColsClasses[numGridCols]} w-full justify-center justify-items-center gap-2.5`}
+                className={`mb-2.5 grid px-10 ${GridColsClasses[numGridCols]} w-full justify-center justify-items-center gap-2.5 overflow-x-hidden`}
             >
                 {cardList}
             </div>
