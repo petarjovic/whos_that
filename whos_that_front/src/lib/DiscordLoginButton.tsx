@@ -1,4 +1,5 @@
 import { handleSocialSignIn, handleSocialLink } from "../logic/SocialAuth";
+import { logError } from "./logger";
 
 interface DiscordLoginButtonProps {
     text?: string;
@@ -11,14 +12,22 @@ const DiscordLoginButton = ({
     linkAccount = false,
     disable = false,
 }: DiscordLoginButtonProps) => {
+    const handleDiscordButtonClick = (e: React.MouseEvent<HTMLButtonElement>) => {
+        e.preventDefault();
+        try {
+            if (linkAccount) void handleSocialLink(e, "discord");
+            else void handleSocialSignIn(e, "discord");
+        } catch (error) {
+            logError(error);
+            throw new Error("Error signing in through Discord, please try again later!");
+        }
+    };
+
     return (
         <button
             type="button"
             className="shadow-xs/20 border-1 hover:shadow-md/15 duration-25 active:shadow-2xs flex h-12 w-fit cursor-pointer items-center justify-center rounded-lg border-indigo-500 bg-[#5865F2] px-3 py-1 text-slate-200 transition-colors hover:border-indigo-400 hover:bg-indigo-600 hover:text-white"
-            onClick={(e) => {
-                if (linkAccount) void handleSocialLink(e, "discord");
-                else void handleSocialSignIn(e, "discord");
-            }}
+            onClick={handleDiscordButtonClick}
             disabled={disable}
         >
             <div>

@@ -1,6 +1,6 @@
 import { CardLayout } from "../layouts/Cards";
-import PublicGamesImg from "../assets/publicgames.svg";
-import PrivateGamesImg from "../assets/privateGames.png";
+import PublicGamesImg from "../assets/PublicGames.svg";
+import PrivateGamesImg from "../assets/PrivateGames.webp";
 import CustomGameImg from "../assets/CustomGame.svg";
 import { Link } from "react-router";
 import { useBetterAuthSession } from "../layouts/LayoutContextProvider.ts";

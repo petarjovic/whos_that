@@ -1,4 +1,5 @@
 import { handleSocialSignIn, handleSocialLink } from "../logic/SocialAuth";
+import { logError } from "./logger";
 
 interface GoogleLoginButtonProps {
     text?: string;
@@ -11,15 +12,23 @@ const GoogleLoginButton = ({
     linkAccount = false,
     disable = false,
 }: GoogleLoginButtonProps) => {
+    const handleGoogleButtonClick = (e: React.MouseEvent<HTMLButtonElement>) => {
+        e.preventDefault();
+        try {
+            if (linkAccount) void handleSocialLink(e, "google");
+            else void handleSocialSignIn(e, "google");
+        } catch (error) {
+            logError(error);
+            throw new Error("Error signing in through Google, please try again later!");
+        }
+    };
+
     return (
         <div className="flex items-center justify-center dark:bg-gray-800">
             <button
                 className="shadow-xs/20 hover:shadow-md/15 h-11.5 duration-25 active:shadow-2xs flex cursor-pointer items-center rounded-lg border border-slate-200 bg-white px-3 py-1 font-bold text-slate-500 transition-colors hover:border-slate-400 hover:bg-slate-100 hover:text-slate-600"
                 disabled={disable}
-                onClick={(e) => {
-                    if (linkAccount) void handleSocialLink(e, "google");
-                    else void handleSocialSignIn(e, "google");
-                }}
+                onClick={handleGoogleButtonClick}
             >
                 <div>
                     <svg

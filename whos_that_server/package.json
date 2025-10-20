@@ -2,10 +2,14 @@
     "name": "whos_that_server",
     "version": "0.0.1",
     "description": "server for who's that game",
-    "main": "server.js",
+    "main": "server.ts",
+    "engines": {
+        "node": ">=22.20.0"
+    },
     "scripts": {
         "test": "echo \"Error: no test specified\" && exit 1",
-        "start": "node --watch --env-file=.env ./src/server.ts"
+        "dev": "node --watch --env-file=.env ./src/server.ts",
+        "start": "node ./src/server.ts"
     },
     "type": "module",
     "author": "Petar Jovic",
@@ -37,6 +41,6 @@
         "esbuild": "^0.25.9",
         "esm-loader": "tsx@^4.20.4"
     },
-    "//": "The overrides setting is for handling drizzle-kit outdated dependacy, when drizzle fixes it can be removed."
+    "//": "The overrides setting is for handling drizzle-kit outdated dependacy with security warnings, when drizzle fixes it can be removed."
 }
 

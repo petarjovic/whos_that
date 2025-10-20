@@ -1,5 +1,5 @@
 import { Link, useRouteError, isRouteErrorResponse } from "react-router";
-import chalkOutline from "../assets/chalk-outline.svg";
+import chalkOutline from "../assets/ChalkOutline.svg";
 import Hero from "../layouts/Hero";
 import { useSearchParams } from "react-router";
 import { logError } from "../lib/logger.ts";
