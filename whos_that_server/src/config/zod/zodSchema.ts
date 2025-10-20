@@ -34,41 +34,6 @@ export const gameDataTypeSchema = z.object({
     cardData: z.array(cardDataUrlTypeSchema),
 });
 
-export const serverToClientEventsSchema = z.object({
-    playerJoined: z.function({ input: [gameStateTypeSchema], output: z.void() }),
-    receiveOppGuess: z.function({ input: [z.boolean()], output: z.void() }),
-    opponentDisconnted: z.function({ input: [gameStateTypeSchema], output: z.void() }),
-    playAgainConfirmed: z.function({ input: [gameStateTypeSchema], output: z.void() }),
-    errorMessage: z.function({
-        input: [
-            z.object({
-                message: z.string(),
-            }),
-        ],
-        output: z.void(),
-    }),
-});
-
-export const clientToServerEventsSchema = z.object({
-    createGame: z.function({
-        input: [
-            z.string(),
-            z.number(),
-            z.function({ input: [z.string(), responseTypeSchema], output: z.void() }),
-        ],
-        output: z.void(),
-    }),
-    joinGame: z.function({
-        input: [
-            z.string(),
-            z.function({ input: [gameStateTypeSchema, responseTypeSchema], output: z.void() }),
-        ],
-        output: z.void(),
-    }),
-    guess: z.function({ input: [z.string(), z.boolean()], output: z.void() }),
-    playAgain: z.function({ input: [z.string()], output: z.void() }),
-});
-
 export const createGameRequestSchema = z.object({
     title: z.string().max(50),
     privacy: z.union([z.literal("public"), z.literal("private")]),
