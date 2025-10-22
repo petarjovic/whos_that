@@ -8,7 +8,7 @@ import { logError } from "./logger.ts";
  * @param maxHeight - Maximum height in pixels
  * @returns Promise resolving to resized File
  */
-export const resizeImage = async (file: File, maxWidth = 224, maxHeight = 688): Promise<File> => {
+export const resizeImage = async (file: File, maxWidth = 500, maxHeight = 750): Promise<File> => {
     const pica = new Pica();
     const objectUrl = URL.createObjectURL(file);
 

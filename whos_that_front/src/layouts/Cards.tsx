@@ -18,7 +18,7 @@ export const CardLayout = ({
 }: PropsWithChildren<CardLayoutProps>) => {
     return (
         <figure
-            className={`border-3 shadow-xs/15 ${isGame || isOppCard ? "my-1 h-72 w-48" : "h-86 my-2 w-56"} mx-1 flex flex-col justify-between overflow-hidden rounded-lg ${isOppCard ? "border-orange-300 bg-orange-300" : "hover:shadow-xl/25 border-gray-200 bg-gray-200 hover:translate-y-[-1px]"} transition-shadow`}
+            className={`border-3 shadow-xs/15 ${isGame || isOppCard ? "w-50 h-75 my-1" : "h-90 my-2 w-60"} mx-1 flex flex-col justify-between overflow-hidden rounded-lg ${isOppCard ? "border-orange-300 bg-orange-300" : "hover:shadow-xl/25 border-gray-200 bg-gray-200 hover:translate-y-[-1px]"} transition-shadow`}
         >
             <img
                 className="rounded-xs h-[84.5%] max-h-[85%] bg-gray-300 object-fill"
