@@ -155,7 +155,8 @@ const GameEndModal = ({ endState, handlePlayAgain }: GameEndModalProps) => {
     return (
         <ReactModal
             isOpen={Boolean(endState)}
-            className="text-shadow-sm/80 shadow-2xl/50 fixed left-1/2 top-1/2 inline-block h-fit w-fit -translate-x-1/2 -translate-y-1/2 rounded-2xl bg-cyan-500 p-10 text-center"
+            className="shadow-2xl/100 border-x-1 bg-linear-to-b border-b-10 text-shadow-xs/100 absolute left-1/2 top-1/2 mx-auto my-10 w-fit -translate-x-1/2 -translate-y-1/2 rounded-lg border-blue-600 from-blue-400 to-blue-500 to-50% p-8 text-center text-neutral-100"
+            overlayClassName="fixed inset-0 bg-gray-500/70"
         >
             <h2
                 className={`font-digitag text-shadow-sm/80 mx-auto text-[10rem] leading-none ${headingText === "You Win!" ? "text-shadow-green-800 text-green-500" : "text-shadow-red-800 text-red-500"} `}
@@ -199,15 +200,16 @@ const ConfirmGuessModal = ({ isOpen, confirmGuess, name }: ConfirmGuessModalProp
     return (
         <ReactModal
             isOpen={isOpen}
-            className="text-shadow-sm/50 shadow-2xl/50 fixed left-1/2 top-1/2 inline-block h-fit w-fit -translate-x-1/2 -translate-y-1/2 rounded-xl border-white bg-cyan-500 p-10 text-center"
+            className="shadow-2xl/100 border-x-1 bg-linear-to-b border-b-10 text-shadow-xs/100 absolute left-1/2 top-1/2 mx-auto my-10 w-fit -translate-x-1/2 -translate-y-1/2 rounded-lg border-blue-600 from-blue-400 to-blue-500 to-50% p-8 text-center text-neutral-100"
+            overlayClassName="fixed inset-0 bg-gray-500/70"
         >
-            <p className="text-shadow-slate-700 m-auto my-12 whitespace-pre text-5xl font-medium text-white">
+            <p className="text-shadow-slate-700 m-auto my-12 whitespace-pre-wrap text-5xl font-medium text-white">
                 Are you sure it&apos;s <span className="font-semibold text-yellow-300">{name}</span>
                 ?
             </p>
             <div className="flex flex-row justify-between">
                 <button
-                    className="w-50 border-b-9 text-shadow-xs/80 active:shadow-2xs active:inset-shadow-md m-auto mr-10 h-20 cursor-pointer rounded-md border-green-700 bg-green-600 px-2 text-3xl text-neutral-100 shadow-md hover:border-green-800 hover:bg-green-700 active:translate-y-[1px] active:border-none"
+                    className="w-50 border-b-9 text-shadow-xs/80 active:shadow-2xs shadow-sm/20 m-auto mr-10 h-20 cursor-pointer rounded-md border-green-700 bg-green-600 px-2 text-3xl text-neutral-100 hover:border-green-800 hover:bg-green-700 active:translate-y-[1px] active:border-none"
                     onClick={() => {
                         confirmGuess(true);
                     }}
@@ -215,7 +217,7 @@ const ConfirmGuessModal = ({ isOpen, confirmGuess, name }: ConfirmGuessModalProp
                     Yes I&apos;m sure
                 </button>
                 <button
-                    className="w-50 border-b-9 text-shadow-xs/80 active:shadow-2xs active:inset-shadow-md m-auto ml-20 h-20 cursor-pointer rounded-md border-amber-600 bg-amber-500 px-1 text-2xl text-neutral-100 shadow-md hover:border-amber-700 hover:bg-amber-600 active:translate-y-[1px] active:border-none"
+                    className="w-50 border-b-9 text-shadow-xs/80 active:shadow-2xs shadow-sm/20 m-auto ml-20 h-20 cursor-pointer rounded-md border-yellow-700 bg-yellow-600 px-1 text-2xl text-neutral-100 hover:border-yellow-800 hover:bg-yellow-700 active:translate-y-[1px] active:border-none"
                     onClick={() => {
                         confirmGuess(false);
                     }}

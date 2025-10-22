@@ -107,7 +107,7 @@ const AccountPage = () => {
 
                     <Link to={"/my-games"}>
                         <button
-                            className="border-b-9 border-x-1 text-shadow-xs/50 active:border-b-1 active:shadow-2xs active:inset-shadow-md duration-15 mx-4 h-14 w-fit cursor-pointer rounded-md border-amber-600 bg-amber-500 px-3 text-2xl font-bold tracking-normal text-slate-50 shadow-md transition-all hover:border-amber-700 hover:bg-amber-600 hover:text-slate-200 active:translate-y-[1px]"
+                            className="border-b-9 border-x-1 text-shadow-xs/50 active:border-b-1 active:shadow-2xs active:inset-shadow-md duration-15 mx-4 h-14 w-fit cursor-pointer rounded-md border-yellow-700 bg-yellow-600 px-3 text-2xl font-bold tracking-normal text-slate-50 shadow-md transition-all hover:border-yellow-800 hover:bg-yellow-700 hover:text-slate-200 active:translate-y-[1px]"
                             type="button"
                         >
                             My Games
