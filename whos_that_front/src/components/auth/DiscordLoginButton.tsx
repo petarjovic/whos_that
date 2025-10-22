@@ -1,5 +1,5 @@
-import { handleSocialSignIn, handleSocialLink } from "../logic/SocialAuth";
-import { logError } from "./logger";
+import { handleSocialSignIn, handleSocialLink } from "../../lib/auth/SocialAuth.ts";
+import { logError } from "../../lib/logger.ts";
 
 interface DiscordLoginButtonProps {
     text?: string;

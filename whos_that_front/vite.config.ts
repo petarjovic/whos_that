@@ -19,6 +19,7 @@ export default defineConfig({
                 __dirname,
                 "../whos_that_server/src/config/zod/zodSchema.ts"
             ),
+            "@client/assets": path.resolve(__dirname, "./src/assets"),
         },
     },
 });

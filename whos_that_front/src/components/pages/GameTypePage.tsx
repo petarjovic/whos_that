@@ -1,9 +1,9 @@
-import { CardLayout } from "../layouts/Cards";
-import PublicGamesImg from "../assets/PublicGames.svg";
-import PrivateGamesImg from "../assets/PrivateGames.webp";
-import CustomGameImg from "../assets/CustomGame.svg";
+import { CardLayout } from "../misc/Cards.tsx";
+import PublicGamesImg from "@client/assets/PublicGames.svg";
+import PrivateGamesImg from "@client/assets/PrivateGames.webp";
+import CustomGameImg from "@client/assets/CustomGame.svg";
 import { Link } from "react-router";
-import { useBetterAuthSession } from "../layouts/LayoutContextProvider.ts";
+import { useBetterAuthSession } from "../../lib/LayoutContextProvider.ts";
 
 const GameTypePage = () => {
     const { session, isPending } = useBetterAuthSession();

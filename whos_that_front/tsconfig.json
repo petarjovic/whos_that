@@ -10,7 +10,8 @@
 
         "paths": {
             "@server/types": ["../whos_that_server/src/config/types.ts"],
-            "@server/zodSchema": ["../whos_that_server/src/config/zod/zodSchema.ts"]
+            "@server/zodSchema": ["../whos_that_server/src/config/zod/zodSchema.ts"],
+            "@client/assets": ["./src/assets/*"]
         },
 
         /* Bundler mode */

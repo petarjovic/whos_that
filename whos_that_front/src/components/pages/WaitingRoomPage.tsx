@@ -1,4 +1,4 @@
-import loadingSpinner from "../assets/BeanEaterLoadingSpinner.svg";
+import loadingSpinner from "../../assets/BeanEaterLoadingSpinner.svg";
 
 const WaitingRoom = ({ gameId }: { gameId: string }) => {
     return (

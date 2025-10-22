@@ -1,5 +1,5 @@
-import GoogleLoginButton from "../lib/GoogleLoginButton";
-import DiscordLoginButton from "../lib/DiscordLoginButton";
+import GoogleLoginButton from "./GoogleLoginButton";
+import DiscordLoginButton from "./DiscordLoginButton";
 
 const LogInPage = () => {
     return (

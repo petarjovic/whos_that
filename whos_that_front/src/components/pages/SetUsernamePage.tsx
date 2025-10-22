@@ -1,8 +1,8 @@
 import { useState, useEffect, type FormEvent } from "react";
 import { useNavigate } from "react-router";
-import { useBetterAuthSession } from "../layouts/LayoutContextProvider";
-import { authClient } from "../lib/auth-client";
-import { logError } from "../lib/logger.ts";
+import { useBetterAuthSession } from "../../lib/LayoutContextProvider.ts";
+import { authClient } from "../../lib/auth/auth-client.ts";
+import { logError } from "../../lib/logger.ts";
 
 const SetUsernamePage = () => {
     const navigate = useNavigate();

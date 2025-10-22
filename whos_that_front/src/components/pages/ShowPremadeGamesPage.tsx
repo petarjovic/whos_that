@@ -1,25 +1,28 @@
 import { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router";
-import { CardLayout } from "../layouts/Cards.tsx";
-import type { ServerResponse } from "../lib/types.ts";
-import { useBetterAuthSession } from "../layouts/LayoutContextProvider.ts";
-import { serverResponseSchema } from "../lib/zodSchema.ts";
+import { CardLayout } from "../misc/Cards.tsx";
+import type { ServerResponse } from "../../lib/types.ts";
+import { useBetterAuthSession } from "../../lib/LayoutContextProvider.ts";
+import { serverResponseSchema } from "../../lib/zodSchema.ts";
 import { PresetInfoSchema } from "@server/zodSchema";
 import type { PresetInfo } from "@server/types";
-import env from "../lib/zodEnvSchema.ts";
-import { logError, log } from "../lib/logger.ts";
+import env from "../../lib/zodEnvSchema.ts";
+import { logError, log } from "../../lib/logger.ts";
+import LoadingSpinner from "../misc/LoadingSpinner.tsx";
 
 const ShowPremadeGamesPage = ({ myGames }: { myGames: boolean }) => {
     const navigate = useNavigate();
     const [premadeGamesList, setPremadeGamesList] = useState<PresetInfo>([]);
     const { session, isPending } = useBetterAuthSession();
     const [errorMsg, setErrorMsg] = useState("");
+    const [isLoading, setIsLoading] = useState(false);
 
     //Fetch games
     useEffect(() => {
         if (!isPending && myGames && !session) void navigate("/");
         else if (!isPending) {
             const getPremadeGames = async () => {
+                setIsLoading(true);
                 try {
                     const response = await fetch(
                         `${env.VITE_SERVER_URL}/api/` +
@@ -46,6 +49,8 @@ const ShowPremadeGamesPage = ({ myGames }: { myGames: boolean }) => {
                     if (error instanceof Error) {
                         setErrorMsg(error.message);
                     } else setErrorMsg("Failed to get premadeGames.");
+                } finally {
+                    setIsLoading(false);
                 }
             };
             void getPremadeGames();
@@ -92,7 +97,7 @@ const ShowPremadeGamesPage = ({ myGames }: { myGames: boolean }) => {
     };
 
     if (errorMsg) throw new Error(errorMsg);
-
+    else if (isLoading) return <LoadingSpinner />;
     return (
         <div className="mx-10 mt-3 flex flex-wrap items-center justify-evenly">
             <h2 className="font-times text-shadow-sm/100 my-2 w-full text-center text-6xl text-white">

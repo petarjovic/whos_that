@@ -1,14 +1,14 @@
 import { useState, useEffect } from "react";
 import { useParams, useNavigate, useSearchParams } from "react-router";
-import { socket } from "./socket.tsx";
-import Game from "../pages/GamePage.tsx";
+import { socket } from "../../lib/socket.ts";
+import Game from "./GamePage.tsx";
 import WaitingRoom from "../pages/WaitingRoomPage.tsx";
 import type { GameStateType, CardDataUrlType } from "@server/types";
-import type { EndStateType } from "../lib/types.ts";
+import type { EndStateType } from "../../lib/types.ts";
 import { gameDataTypeSchema } from "@server/zodSchema";
-import { serverResponseSchema } from "../lib/zodSchema.ts";
-import env from "../lib/zodEnvSchema.ts";
-import { logError, log } from "../lib/logger.ts";
+import { serverResponseSchema } from "../../lib/zodSchema.ts";
+import env from "../../lib/zodEnvSchema.ts";
+import { logError, log } from "../../lib/logger.ts";
 
 const GameStateManager = ({ isNewGame }: { isNewGame: boolean }) => {
     const navigate = useNavigate();

@@ -1,8 +1,8 @@
 import { Link, useRouteError, isRouteErrorResponse } from "react-router";
-import chalkOutline from "../assets/ChalkOutline.svg";
-import Hero from "../layouts/Hero";
+import chalkOutline from "@client/assets/ChalkOutline.svg";
+import Hero from "../../layout/Hero.tsx";
 import { useSearchParams } from "react-router";
-import { logError } from "../lib/logger.ts";
+import { logError } from "../../../lib/logger.ts";
 
 const ErrorPage = ({ error }: { error?: unknown }) => {
     let errorMessage = "";

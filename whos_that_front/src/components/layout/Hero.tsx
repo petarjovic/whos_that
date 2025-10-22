@@ -1,6 +1,6 @@
-import type { AuthData } from "../lib/auth-client";
+import type { AuthData } from "../../lib/auth/auth-client";
 import { useNavigate, Link } from "react-router";
-import { authClient } from "../lib/auth-client";
+import { authClient } from "../../lib/auth/auth-client";
 
 interface HeroProps extends AuthData {
     showUserInfo?: boolean;

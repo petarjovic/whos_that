@@ -1,5 +1,5 @@
 import { Outlet } from "react-router";
-import { authClient, type AuthData } from "../lib/auth-client.ts";
+import { authClient, type AuthData } from "../../lib/auth/auth-client.ts";
 import Hero from "./Hero.tsx";
 import { useEffect } from "react";
 import { useNavigate } from "react-router";

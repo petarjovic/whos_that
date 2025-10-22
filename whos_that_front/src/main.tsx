@@ -1,22 +1,22 @@
 import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
-import GameStateManager from "./logic/GameStateManager.tsx";
+import GameStateManager from "./components/game/GameStateManager.tsx";
 import { createBrowserRouter, RouterProvider } from "react-router";
-import ShowPremadeGamesPage from "./pages/ShowPremadeGamesPage.tsx";
+import ShowPremadeGamesPage from "./components/pages/ShowPremadeGamesPage.tsx";
 import ReactModal from "react-modal";
 import "./index.css";
-import HomePage from "./pages/HomePage.tsx";
-import NotFoundPage from "./pages/NotFoundPage.tsx";
-import Layout from "./layouts/Layout.tsx";
-import ErrorPage from "./pages/ErrorPage.tsx";
-import GameTypePage from "./pages/GameTypePage.tsx";
-import CreateCustomGamePage from "./pages/CustomGamePage.tsx";
+import HomePage from "./components/pages/HomePage.tsx";
+import NotFoundPage from "./components/pages/error/NotFoundPage.tsx";
+import Layout from "./components/layout/Layout.tsx";
+import ErrorPage from "./components/pages/error/ErrorPage.tsx";
+import GameTypePage from "./components/pages/GameTypePage.tsx";
+import CreateCustomGamePage from "./components/pages/CustomGamePage.tsx";
 // import SignUpPage from "./pages/SignUpPage.tsx";
 // import SignInPage from "./pages/SignInPage.tsx";
-import AccountPage from "./pages/AccountPage.tsx";
-import SetUsernamePage from "./pages/SetUsernamePage.tsx";
-import LogInPage from "./pages/LogInPage.tsx";
-import PrivacyPolicyPage from "./pages/PrivacyPolicyPage.tsx";
+import AccountPage from "./components/pages/AccountPage.tsx";
+import SetUsernamePage from "./components/pages/SetUsernamePage.tsx";
+import LogInPage from "./components/auth/LogInPage.tsx";
+import PrivacyPolicyPage from "./components/pages/PrivacyPolicyPage.tsx";
 
 ReactModal.setAppElement("#root");
 

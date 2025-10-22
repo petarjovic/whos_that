@@ -1,8 +1,8 @@
 import ReactModal from "react-modal";
 import { useNavigate } from "react-router";
-import { Card, OpponentTargetCard } from "../layouts/Cards";
+import { Card, OpponentTargetCard } from "../misc/Cards.tsx";
 import type { CardDataUrlType } from "@server/types";
-import type { EndStateType } from "../lib/types.ts";
+import type { EndStateType } from "../../lib/types.ts";
 import { useEffect, useState } from "react";
 
 interface GameProps {

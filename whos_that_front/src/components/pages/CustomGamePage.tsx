@@ -1,15 +1,15 @@
 import { useNavigate } from "react-router";
-import { useBetterAuthSession } from "../layouts/LayoutContextProvider.ts";
+import { useBetterAuthSession } from "../../lib/LayoutContextProvider.ts";
 import { useState, useEffect } from "react";
-import Dropzone from "../lib/Dropzone.tsx";
-import { serverResponseSchema, acceptedImageTypesSchema } from "../lib/zodSchema.ts";
+import Dropzone from "../misc/Dropzone.tsx";
+import { serverResponseSchema, acceptedImageTypesSchema } from "../../lib/zodSchema.ts";
 import { createGameResponseSchema } from "@server/zodSchema";
-import { resizeImages } from "../lib/imageresizer.ts";
+import { resizeImages } from "../../lib/imageresizer.ts";
 import { isHeic } from "heic-to";
 import { heicTo } from "heic-to";
-import LoadingSpinner from "../lib/LoadingSpinner.tsx";
-import env from "../lib/zodEnvSchema.ts";
-import { logError, log } from "../lib/logger.ts";
+import LoadingSpinner from "../misc/LoadingSpinner.tsx";
+import env from "../../lib/zodEnvSchema.ts";
+import { logError, log } from "../../lib/logger.ts";
 
 const MAX_FILESIZE_BYTES = 5 * 1024 * 1024;
 const MIN_NUM_IMGS = 6;

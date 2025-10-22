@@ -1,4 +1,4 @@
-import type { AuthData } from "../lib/auth-client";
+import type { AuthData } from "./auth/auth-client";
 import { useOutletContext } from "react-router";
 
 export function useBetterAuthSession() {

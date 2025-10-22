@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import type { EndStateType } from "../lib/types.ts";
+import type { EndStateType } from "../../lib/types.ts";
 import type { PropsWithChildren } from "react";
 
 interface CardLayoutProps {

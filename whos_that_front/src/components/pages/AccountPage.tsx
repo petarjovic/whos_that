@@ -1,13 +1,13 @@
 import { useNavigate } from "react-router";
 import { useEffect, useState } from "react";
 import { Link } from "react-router";
-import { useBetterAuthSession } from "../layouts/LayoutContextProvider";
-import { authClient } from "../lib/auth-client";
-import type { SocialSignInProviders } from "../lib/types";
-import DiscordLoginButton from "../lib/DiscordLoginButton";
-import { socialSignInProvidersSchema } from "../lib/zodSchema";
+import { useBetterAuthSession } from "../../lib/LayoutContextProvider";
+import { authClient } from "../../lib/auth/auth-client";
+import type { SocialSignInProviders } from "../../lib/types";
+import DiscordLoginButton from "../auth/DiscordLoginButton";
+import { socialSignInProvidersSchema } from "../../lib/zodSchema";
 import { z } from "zod";
-import GoogleLoginButton from "../lib/GoogleLoginButton";
+import GoogleLoginButton from "../auth/GoogleLoginButton";
 
 const maskEmail = (email: string) => {
     const [local, domain] = email.split("@");

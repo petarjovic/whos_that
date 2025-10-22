@@ -1,5 +1,5 @@
-import { handleSocialSignIn, handleSocialLink } from "../logic/SocialAuth";
-import { logError } from "./logger";
+import { handleSocialSignIn, handleSocialLink } from "../../lib/auth/SocialAuth";
+import { logError } from "../../lib/logger";
 
 interface GoogleLoginButtonProps {
     text?: string;

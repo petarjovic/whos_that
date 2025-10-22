@@ -1,8 +1,8 @@
 import type { FormEvent } from "react";
-import { authClient } from "../lib/auth-client.ts";
-import type { SocialSignInProviders } from "../lib/types.ts";
-import env from "../lib/zodEnvSchema.ts";
-import { logError } from "../lib/logger.ts";
+import { authClient } from "./auth-client.ts";
+import type { SocialSignInProviders } from "../types.ts";
+import env from "../zodEnvSchema.ts";
+import { logError } from "../logger.ts";
 
 export const handleSocialSignIn = async (e: FormEvent, provider: SocialSignInProviders) => {
     e.preventDefault();
