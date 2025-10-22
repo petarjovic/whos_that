@@ -5,7 +5,6 @@
 @layer base {
     * {
         font-family: Helvetica, Arial, sans-serif;
-        outline: solid red 1px;
     }
     select,
     ::picker(select) {
