@@ -19,9 +19,8 @@ const Hero = ({ session, isPending, showUserInfo = true }: HeroProps) => {
     };
 
     return (
-        <header className="bg-linear-to-b h-30 border-b-10 flex w-full items-center justify-center rounded-b-[40%] border-blue-600 from-blue-400 to-blue-500 to-60% px-[12%] shadow-lg">
-            <div className="w-3/10"></div>
-            <h1 className="w-4/10 mt-2 text-center">
+        <header className="bg-linear-to-b h-30 border-b-11 relative flex w-full items-center justify-center rounded-b-[40%] border-blue-600 from-blue-400 to-blue-500 to-60% px-[13%] shadow-lg">
+            <h1 className="mt-2 w-fit text-center">
                 <Link
                     to={"/"}
                     id="title"
@@ -40,7 +39,7 @@ const Hero = ({ session, isPending, showUserInfo = true }: HeroProps) => {
                     </>
                 </Link>
             </h1>
-            <div className="w-3/10">
+            <div className="absolute right-[12%] top-1/2 -translate-y-1/2">
                 {showUserInfo ? (
                     <h2 className="items-center-safe flex justify-end">
                         <Link

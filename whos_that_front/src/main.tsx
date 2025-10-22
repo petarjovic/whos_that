@@ -16,6 +16,7 @@ import CreateCustomGamePage from "./pages/CustomGamePage.tsx";
 import AccountPage from "./pages/AccountPage.tsx";
 import SetUsernamePage from "./pages/SetUsernamePage.tsx";
 import LogInPage from "./pages/LogInPage.tsx";
+import PrivacyPolicyPage from "./pages/PrivacyPolicyPage.tsx";
 
 ReactModal.setAppElement("#root");
 
@@ -69,6 +70,7 @@ const router = createBrowserRouter([
                 path: "/set-username",
                 element: <SetUsernamePage />,
             },
+            // { path: "/privacy", element: <PrivacyPolicyPage /> },
             { path: "*", element: <NotFoundPage /> },
         ],
     },

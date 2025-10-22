@@ -26,3 +26,4 @@ dist-ssr
 *.pem
 .amazonQ
 private
+PrivacyPolicyPage.tsx
