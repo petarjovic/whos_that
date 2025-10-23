@@ -147,7 +147,7 @@ const GameEndModal = ({ endState, handlePlayAgain }: GameEndModalProps) => {
         }
         case "oppWrongGuess": {
             headingText = "You Win!";
-            paraText = "Your opponent guessed wrong! \n A luck break!";
+            paraText = "Your opponent guessed wrong! \n A lucky break!";
             break;
         }
     }
@@ -155,11 +155,11 @@ const GameEndModal = ({ endState, handlePlayAgain }: GameEndModalProps) => {
     return (
         <ReactModal
             isOpen={Boolean(endState)}
-            className="shadow-2xl/100 border-x-1 bg-linear-to-b border-b-10 text-shadow-xs/100 absolute left-1/2 top-1/2 mx-auto my-10 w-fit -translate-x-1/2 -translate-y-1/2 rounded-lg border-blue-600 from-blue-400 to-blue-500 to-50% p-8 text-center text-neutral-100"
-            overlayClassName="fixed inset-0 bg-gray-500/70"
+            className="shadow-2xl/30 border-x-1 bg-linear-to-b border-b-13 text-shadow-xs/100 px-15 absolute left-1/2 top-1/2 mx-auto max-h-[90vh] w-auto max-w-4xl -translate-x-1/2 -translate-y-1/2 overflow-y-auto rounded-lg border-blue-600 from-blue-400 to-blue-500 py-8 text-center text-neutral-100 shadow-2xl"
+            overlayClassName="fixed inset-0 bg-gray-700/75"
         >
             <h2
-                className={`font-digitag text-shadow-sm/80 mx-auto text-[10rem] leading-none ${headingText === "You Win!" ? "text-shadow-green-800 text-green-500" : "text-shadow-red-800 text-red-500"} `}
+                className={`font-digitag text-shadow-md/80 mx-auto text-[10rem] leading-none ${headingText === "You Win!" ? "text-shadow-green-900 text-green-500" : "text-shadow-red-900 text-red-700"} `}
             >
                 {headingText}
             </h2>
@@ -168,7 +168,7 @@ const GameEndModal = ({ endState, handlePlayAgain }: GameEndModalProps) => {
             </p>
             <div className="m-auto flex flex-row justify-evenly">
                 <button
-                    className={`w-50 border-b-9 border-x-1 text-shadow-xs/80 active:shadow-2xs mr-50 m-auto h-20 cursor-pointer rounded-md px-1 text-3xl text-neutral-100 shadow-md ${playAgainSent ? "border-gray-600 bg-gray-500" : "border-green-700 bg-green-600 hover:border-green-800 hover:bg-green-700 active:translate-y-[1px] active:border-none"}`}
+                    className={`w-50 border-b-9 border-x-1 text-shadow-xs/100 active:shadow-2xs mr-50 shadow-sm/20 m-auto h-20 cursor-pointer rounded-md px-1 text-3xl text-neutral-100 ${playAgainSent ? "border-gray-600 bg-gray-500" : "border-green-700 bg-green-600 hover:border-green-800 hover:bg-green-700 active:translate-y-[1px] active:border-none"}`}
                     onClick={() => {
                         setPlayAgainSent(true);
                         handlePlayAgain();
@@ -181,7 +181,7 @@ const GameEndModal = ({ endState, handlePlayAgain }: GameEndModalProps) => {
                     onClick={() => {
                         void navigate("/");
                     }}
-                    className="w-50 border-b-9 border-x-1 text-shadow-xs/80 active:shadow-2xs duration-15 hover:shadow-xs m-auto h-20 cursor-pointer rounded-md border-red-700 bg-red-600 px-1 text-3xl text-neutral-100 shadow-sm transition-all hover:border-red-800 hover:bg-red-700 active:translate-y-[1px] active:border-none"
+                    className="w-50 border-b-9 border-x-1 text-shadow-xs/100 active:shadow-2xs duration-15 hover:shadow-xs shadow-sm/20 m-auto h-20 cursor-pointer rounded-md border-red-700 bg-red-600 px-1 text-3xl text-neutral-100 transition-all hover:border-red-800 hover:bg-red-700 active:translate-y-[1px] active:border-none"
                 >
                     Exit
                 </button>
@@ -200,7 +200,7 @@ const ConfirmGuessModal = ({ isOpen, confirmGuess, name }: ConfirmGuessModalProp
     return (
         <ReactModal
             isOpen={isOpen}
-            className="shadow-2xl/100 border-x-1 bg-linear-to-b border-b-10 text-shadow-xs/100 absolute left-1/2 top-1/2 mx-auto my-10 w-fit -translate-x-1/2 -translate-y-1/2 rounded-lg border-blue-600 from-blue-400 to-blue-500 to-50% p-8 text-center text-neutral-100"
+            className="shadow-2xl/30 border-x-1 bg-linear-to-b border-b-13 text-shadow-xs/100 px-15 absolute left-1/2 top-1/2 mx-auto max-h-[90vh] w-auto max-w-2xl -translate-x-1/2 -translate-y-1/2 overflow-y-auto rounded-lg border-blue-700 from-blue-400 to-blue-600 py-8 text-center text-neutral-100 shadow-2xl"
             overlayClassName="fixed inset-0 bg-gray-500/70"
         >
             <p className="text-shadow-slate-700 m-auto my-12 whitespace-pre-wrap text-5xl font-medium text-white">

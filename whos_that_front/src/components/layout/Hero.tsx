@@ -25,7 +25,7 @@ const Hero = ({ session, isPending, showUserInfo = true }: HeroProps) => {
                     to={"/"}
                     id="title"
                     reloadDocument={true}
-                    className="font-digitag text-shadow-md/85 cursor-pointer whitespace-pre-wrap text-9xl font-bold tracking-wide text-orange-300"
+                    className="font-digitag text-shadow-md/85 cursor-pointer whitespace-pre-wrap text-9xl font-bold tracking-wide text-orange-300 hover:text-orange-400"
                 >
                     <>
                         W<span />
