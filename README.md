@@ -2,6 +2,8 @@
 
 "Who's That?" is a website where users can play the classic character elimantion guessing game with custom images.
 
+https://whos-that.com
+
 ## Features
 
 - **Premademade Games:** Users can play the deduction game from a variety of already curated character lists that were uploaded and made public by other players! No account creation required.
@@ -12,7 +14,7 @@
 
 ## Gameplay
 
-A modern spin on the classic board game, players can upload sets of images to be used as "characters" in a game of question asking and deduction. In game players are presented with a list of characters. Each player is shown which the character the opponent needs to guess from among that list. Players take turns asking each other yes-or-no questions to deduce the identity of the character they need to guess. The first player to guess their character correctly wins, but if a player guesses wrong they lose!
+A modern spin on the classic board game, players can upload sets of images to be used as "characters" in a game of question asking and deduction. In game, players are presented with a list of characters. Each player is shown which the character the opponent needs to guess from among that list. Players take turns asking each other yes-or-no questions to deduce the identity of the character they need to guess. The first player to guess their character correctly wins, but if a player guesses wrong they lose!
 
 ## Project Structure
 
