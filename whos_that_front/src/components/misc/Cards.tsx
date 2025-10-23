@@ -18,7 +18,7 @@ export const CardLayout = ({
 }: PropsWithChildren<CardLayoutProps>) => {
     return (
         <figure
-            className={`border-3 shadow-xs/15 ${isGame || isOppCard ? "w-50 h-75 my-1" : "h-90 my-2 w-60"} mx-1 flex flex-col justify-between overflow-hidden rounded-lg ${isOppCard ? "border-orange-300 bg-orange-300" : "hover:shadow-xl/25 border-gray-200 bg-gray-200 hover:translate-y-[-1px]"} transition-shadow`}
+            className={`border-3 shadow-xs/15 ${isGame || isOppCard ? "w-50 h-75 my-0.75" : "h-90 my-2 w-60"} mx-1 flex flex-col justify-between overflow-hidden rounded-lg ${isOppCard ? "border-orange-300 bg-orange-300" : "hover:shadow-xl/25 border-gray-200 bg-gray-200 hover:translate-y-[-1px]"} transition-shadow`}
         >
             <img
                 className="rounded-xs h-[84.5%] max-h-[85%] bg-gray-300 object-fill"
@@ -91,10 +91,12 @@ export const Card = ({
 
 export const OpponentTargetCard = ({ name, imgSrc }: { name: string; imgSrc: string }) => {
     return (
-        <CardLayout name={name} imgSrc={imgSrc} isOppCard={true}>
-            <p className="mx-auto mt-0.5 w-full bg-orange-300 text-center text-sm font-bold text-cyan-950">
-                Opponent To Guess
-            </p>
-        </CardLayout>
+        <div className="animate-[flash-attention_1.5s_ease-in-out_2">
+            <CardLayout name={name} imgSrc={imgSrc} isOppCard={true}>
+                <p className="mx-auto mt-0.5 w-full bg-orange-300 text-center text-sm font-bold text-cyan-950">
+                    Opponent To Guess
+                </p>
+            </CardLayout>
+        </div>
     );
 };

@@ -40,10 +40,10 @@ const SetUsernamePage = () => {
 
     return (
         <div className="shadow-2xl/40 my-35 bg-linear-to-b w-150 border-x-1 border-b-10 mx-auto rounded-lg border-blue-600 from-blue-400 to-blue-500 to-50% p-8 text-white">
-            <h2 className="text-shadow-xs/80 mb-5 text-center text-4xl font-bold tracking-normal text-orange-300">
+            <h2 className="text-shadow-sm/300 mb-5 text-center text-4xl font-bold tracking-normal text-orange-300">
                 Choose Your <span className="text-orange-300">Username</span>
             </h2>
-            <p className="text-shadow-2xs/80 mb-6 text-center text-xl text-white">
+            <p className="text-shadow-sm/25 mb-6 text-center text-xl text-white">
                 Please pick a username for yourself, note that your username{" "}
                 <span className="text-xl italic text-orange-300">cannot be changed</span> !
             </p>
@@ -63,7 +63,7 @@ const SetUsernamePage = () => {
                 <div className="mx-auto mb-6 flex items-center justify-center">
                     <label
                         htmlFor="username"
-                        className="text-shadow-xs/80 mr-15 mb-2 mt-1 text-2xl font-semibold text-white"
+                        className="text-shadow-sm/33 mb-2 mr-5 mt-1 text-2xl font-semibold text-white"
                     >
                         Username:
                     </label>
@@ -79,14 +79,14 @@ const SetUsernamePage = () => {
                         minLength={3}
                         maxLength={20}
                         pattern="[a-zA-Z0-9_]+"
-                        title="Username can only contain letters, numbers, and underscores"
+                        title="Username can only contain letters, numbers, and underscores!"
                         required
                     />
                 </div>
 
                 <button
                     type="submit"
-                    className="border-x-1 text-shadow-xs/80 active:shadow-2xs hover:shadow-sm/20 active:inset-shadow-md duration-15 hover:font-gray-200 shadow-md/20 w-7/10 h-12 cursor-pointer rounded-md border-b-8 border-amber-600 bg-amber-500 px-2 text-xl font-semibold text-white transition-all hover:border-amber-700 hover:bg-amber-600 active:translate-y-[1px] active:border-none"
+                    className="border-x-1 text-shadow-xs/80 active:shadow-2xs hover:shadow-xs/15 shadow-sm/20 duration-15 hover:font-gray-200 w-7/10 h-12 cursor-pointer rounded-md border-b-8 border-amber-600 bg-amber-500 px-2 text-xl font-semibold text-white transition-all hover:border-amber-700 hover:bg-amber-600 active:translate-y-[1px] active:border-none"
                     disabled={isSubmitting}
                 >
                     {isSubmitting ? "Setting Username..." : "Continue"}

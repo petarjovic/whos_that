@@ -10,7 +10,7 @@ const NotFoundPage = () => {
                     404 <span className="text-white">Page Not Found</span>
                 </h1>
                 <Link to={"/"}>
-                    <button className="w-fill h-18 border-b-9 border-x-1 text-shadow-xs active:shadow-2xs active:inset-shadow-md mt-[2vh] cursor-pointer rounded-md border-blue-600 bg-blue-500 px-4 py-1 text-2xl font-bold text-neutral-100 shadow-md hover:border-blue-700 hover:bg-blue-600 active:translate-y-[1px] active:border-none">
+                    <button className="w-fill h-18 border-b-9 border-x-1 text-shadow-xs active:shadow-2xs hover:shadow-xs shadow-sm/20 duration-15 mt-[2vh] cursor-pointer rounded-md border-blue-600 bg-blue-500 px-4 py-1 text-2xl font-bold text-neutral-100 shadow-md transition-all hover:border-blue-700 hover:bg-blue-600 active:translate-y-[1px] active:border-none">
                         Take Me Home
                     </button>
                 </Link>

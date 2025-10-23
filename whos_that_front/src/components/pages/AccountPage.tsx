@@ -8,6 +8,7 @@ import DiscordLoginButton from "../auth/DiscordLoginButton";
 import { socialSignInProvidersSchema } from "../../lib/zodSchema";
 import { z } from "zod";
 import GoogleLoginButton from "../auth/GoogleLoginButton";
+import LoadingSpinner from "../misc/LoadingSpinner";
 
 const maskEmail = (email: string) => {
     const [local, domain] = email.split("@");
@@ -52,20 +53,20 @@ const AccountPage = () => {
     };
 
     if (errorMsg) throw new Error(errorMsg);
-    //session cannot actually be null here, check is done to convince typescript
-    else if (isPending || !session) return <div>Loading...</div>;
+    //session cannot actually be null here since user would get redirected, check is done to convince typescript
+    else if (isPending || !session) return <LoadingSpinner />;
     else
         return (
-            <div className="shadow-2xl/30 border-x-1 bg-linear-to-b border-b-10 mx-auto my-10 w-1/2 rounded-lg border-blue-600 from-blue-400 to-blue-500 to-50% p-8 text-white">
-                <h2 className="text-shadow-sm/70 mb-7 text-center text-5xl font-bold text-amber-400">
+            <div className="shadow-2xl/30 border-x-1 bg-linear-to-b border-b-10 mt-30 mx-auto w-1/2 rounded-lg border-blue-700 from-blue-400 to-blue-600 p-8 text-white">
+                <h2 className="text-shadow-sm/70 mb-7 text-center text-5xl font-bold">
                     Account Details
                 </h2>
                 <div className="flex items-center justify-between">
-                    <div>
-                        <div className="text-shadow-xs/80 text-2xl">
+                    <div className="w-1/2">
+                        <div className="text-shadow-sm/25 text-2xl">
                             <div className="font-bold">
                                 Username:{" "}
-                                <span className="font-medium italic">
+                                <span className="font-medium italic text-amber-400">
                                     {session.user.displayUsername}
                                 </span>
                             </div>
@@ -83,12 +84,12 @@ const AccountPage = () => {
                             </div>
                             <div className="mb-2 font-semibold">
                                 Linked Accounts:{""}{" "}
-                                <span className="capitalize text-green-500">
+                                <span className="align-middle text-3xl capitalize text-green-500">
                                     {linkedAccounts.toString()}
                                 </span>
                             </div>
                         </div>
-                        <div className="text-md mt-5">
+                        <div className="text-md mt-5 text-left">
                             {linkedAccounts.includes("discord") ? (
                                 <></>
                             ) : (
@@ -107,7 +108,7 @@ const AccountPage = () => {
 
                     <Link to={"/my-games"}>
                         <button
-                            className="border-b-9 border-x-1 text-shadow-xs/50 active:border-b-1 active:shadow-2xs active:inset-shadow-md duration-15 mx-4 h-14 w-fit cursor-pointer rounded-md border-yellow-700 bg-yellow-600 px-3 text-2xl font-bold tracking-normal text-slate-50 shadow-md transition-all hover:border-yellow-800 hover:bg-yellow-700 hover:text-slate-200 active:translate-y-[1px]"
+                            className="border-b-9 border-x-1 text-shadow-xs/50 active:border-b-1 active:shadow-2xs duration-15 hover:shadow-xs mx-4 h-14 w-fit cursor-pointer rounded-md border-amber-600 bg-amber-500 px-3 text-2xl font-bold tracking-normal text-slate-50 shadow-sm transition-all hover:border-amber-700 hover:bg-amber-600 hover:text-slate-200 active:translate-y-[1px]"
                             type="button"
                         >
                             My Games
@@ -117,7 +118,7 @@ const AccountPage = () => {
                         {" "}
                         <button
                             onClick={handleResetPassword}
-                            className="w-fill border-b-9 border-x-1 text-shadow-xs/30 active:border-b-1 active:shadow-2xs active:inset-shadow-md text-md mx-4 mt-3 h-10 cursor-pointer rounded-md border-red-700 bg-red-600 px-2 font-semibold text-white shadow-md hover:border-red-800 hover:bg-red-700 active:translate-y-[1px]"
+                            className="w-fill border-b-9 border-x-1 text-shadow-xs/30 active:border-b-1 active:shadow-2xs text-md shadow-sm/20 hover:shadow-xs duration-15 mx-4 mt-3 h-10 cursor-pointer rounded-md border-red-700 bg-red-600 px-2 font-semibold text-white transition-all hover:border-red-800 hover:bg-red-700 active:translate-y-[1px]"
                             type="button"
                         >
                             Reset Password

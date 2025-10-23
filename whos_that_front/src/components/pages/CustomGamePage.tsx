@@ -243,7 +243,7 @@ const CreateCustomGamePage = () => {
                             htmlFor="title"
                             className="text-shadow-xs/75 m-auto block text-4xl font-medium text-white"
                         >
-                            <div className="mr-3 inline-block h-11 w-11 content-center rounded-[50%] text-center align-middle font-bold text-orange-300">
+                            <div className="mr-3 inline-block h-11 w-11 content-center rounded-[50%] text-center align-middle font-bold text-amber-500">
                                 <span className="font-digitag bottom-4.5 text-shadow-xs/50 relative right-1.5 text-7xl font-medium">
                                     1
                                 </span>
@@ -263,7 +263,7 @@ const CreateCustomGamePage = () => {
                     {/* Step 2 */}
                     <div className="border-x-1 shadow-lg/25 border-b-7 bg-linear-to-b my-5 mr-2 rounded-lg border-blue-600 from-blue-400 to-blue-500 to-75% p-4">
                         <label className="text-shadow-xs/75 m-auto block text-4xl font-medium text-white">
-                            <div className="mr-3 inline-block h-11 w-11 content-center rounded-[50%] text-center align-middle font-bold text-orange-300">
+                            <div className="mr-3 inline-block h-11 w-11 content-center rounded-[50%] text-center align-middle font-bold text-amber-500">
                                 <span className="font-digitag text-shadow-xs/50 relative bottom-4 right-1 text-7xl font-medium">
                                     2
                                 </span>
@@ -303,7 +303,7 @@ const CreateCustomGamePage = () => {
                     {/* Step 4 */}
                     <div className="border-x-1 shadow-lg/25 border-b-7 bg-linear-to-b mb-5 mr-2 flex items-center justify-between whitespace-pre-wrap rounded-lg border-blue-600 from-blue-400 to-blue-500 to-75% p-4 text-lg font-medium text-gray-900">
                         <div className="text-shadow-xs/75 ml-1 block text-4xl font-medium text-white">
-                            <div className="mr-3 inline-block h-11 w-11 content-center rounded-[50%] text-center align-middle font-bold text-orange-300">
+                            <div className="mr-3 inline-block h-11 w-11 content-center rounded-[50%] text-center align-middle font-bold text-amber-500">
                                 <span className="font-digitag text-shadow-xs/50 relative bottom-0.5 right-2 text-7xl font-medium">
                                     4
                                 </span>
@@ -352,7 +352,7 @@ const CreateCustomGamePage = () => {
                     {/* Step 3 */}
                     <div className="border-x-1 shadow-lg/25 border-b-7 bg-linear-to-b mb-3 mr-2 rounded-lg border-blue-600 from-blue-400 to-blue-500 to-75% p-4">
                         <h3 className="text-shadow-xs/75 m-auto block text-4xl font-medium text-white">
-                            <div className="mr-3 inline-block h-11 w-11 content-center rounded-[50%] text-center align-middle text-[4rem] font-bold leading-none text-orange-300">
+                            <div className="mr-3 inline-block h-11 w-11 content-center rounded-[50%] text-center align-middle text-[4rem] font-bold leading-none text-amber-500">
                                 <span className="font-digitag text-shadow-xs/50 relative bottom-3.5 text-7xl font-medium">
                                     3
                                 </span>
@@ -373,7 +373,7 @@ const CreateCustomGamePage = () => {
                                 <></>
                             )}
                         </h3>
-                        <div className="max-h-143 inset-shadow-md/10 mt-3 overflow-y-auto rounded-md bg-gray-50 shadow-sm">
+                        <div className="max-h-143 inset-shadow-xs mt-3 overflow-y-auto rounded-md bg-gray-50 shadow-sm">
                             {selectedFiles.length > 0 ? (
                                 selectedFiles.map((file, index) => (
                                     <div
@@ -450,22 +450,24 @@ const CreateCustomGamePage = () => {
             <ReactModal
                 isOpen={showRulesModal}
                 onRequestClose={() => setShowRulesModal(false)}
-                className="shadow-2xl/30 border-x-1 bg-linear-to-b border-b-10 text-shadow-xs/100 absolute left-1/2 top-1/2 mx-auto my-10 w-2/5 -translate-x-1/2 -translate-y-1/2 rounded-lg border-blue-600 from-blue-400 to-blue-500 to-50% p-8 text-center text-neutral-100 shadow-2xl"
+                className="shadow-2xl/30 border-x-1 bg-linear-to-b border-b-10 text-shadow-xs/100 absolute left-1/2 top-1/2 mx-auto w-full max-w-4xl -translate-x-1/2 -translate-y-1/2 rounded-lg border-blue-700 from-blue-500 to-blue-600 p-8 text-center text-neutral-100 shadow-2xl"
                 overlayClassName="fixed inset-0 bg-gray-700/70"
+                shouldCloseOnOverlayClick={false}
+                shouldCloseOnEsc={false}
             >
                 <h2 className="mb-4 text-6xl font-bold text-amber-400">Rules</h2>
-                <ul className="w-9/10 mx-auto mb-4 list-inside list-decimal space-y-2 whitespace-pre-wrap text-left text-2xl tracking-wide">
+                <ul className="w-9/10 mx-auto mb-4 list-inside list-decimal space-y-2 whitespace-nowrap text-left text-2xl tracking-wide">
                     <li>
-                        <span className="text-3xl font-bold text-amber-300">
+                        <span className="text-4xl font-bold text-amber-400">
                             Image content must be appropriate!
                         </span>
                         <br></br>
-                        <span className="pl-10 text-base text-amber-200">
+                        <span className="pl-10 text-lg text-amber-300">
                             No violence, nudity, controlled substances, or hate speech of any
-                            kind... be smart.{" "}
+                            kind.{" "}
                         </span>
                         <br></br>
-                        <span className="pl-10 text-base italic">
+                        <span className="pl-10 text-lg italic">
                             Your content can be removed for any reason at moderator's discrection.
                         </span>
                     </li>
@@ -474,31 +476,31 @@ const CreateCustomGamePage = () => {
                             Do not make public presets that already exist!
                         </span>
                         <br></br>
-                        <span className="pl-10 text-base">
+                        <span className="pl-10 text-lg">
                             Check the list of public games first, duplicate presets will be removed.
                         </span>
                     </li> */}
                     <li>
-                        <span className="font-bold text-amber-200">
+                        <span className="font-bold text-amber-300">
                             Images of real people must be public figures.
                         </span>
                         <br></br>
-                        <span className="pl-10 text-base">
+                        <span className="pl-10 text-lg">
                             No public games made with images of family, friends etc.
                         </span>
                     </li>
                     <li>Images can be a maximum of 5MB.</li>
-                    <li>Game title can be 5-20 characters.</li>
-                    <li>Character names can be 3-20 characters.</li>
+                    <li>Game titles are between 5-20 characters.</li>
+                    <li>Character names are between 3-20 characters.</li>
                     <li>Each character should have a unique name.</li>
                 </ul>
-                <p className="w-8/10 mx-auto text-center">
-                    Not a rule but note: images will work better if they feature the character in
-                    the center. Vertical images also may work better than horizontal but try it out.
+                <p className="w-8/10 mx-auto whitespace-pre-wrap text-center text-lg">
+                    Note: images will work better if they feature the character in the center.{"\n"}
+                    Vertical images also may work better than horizontal ones but try it out.
                 </p>
                 <button
                     onClick={() => setShowRulesModal(false)}
-                    className="border-b-9 border-x-1 text-shadow-xs/40 active:shadow-2xs duration-15 shadow-sm/20 mt-4 w-4/5 cursor-pointer rounded-md border-green-700 bg-green-600 py-4 text-3xl font-bold text-white transition-all hover:border-green-800 hover:bg-green-700 hover:text-gray-200 active:translate-y-[-1px] active:border-none"
+                    className="border-b-9 border-x-1 text-shadow-xs/40 active:shadow-2xs duration-15 hover:shadow-xs mt-4 w-4/5 cursor-pointer rounded-md border-green-700 bg-green-600 py-4 text-3xl font-bold text-white shadow-sm transition-all hover:border-green-800 hover:bg-green-700 hover:text-gray-200 active:translate-y-[-1px] active:border-none"
                 >
                     I Agree
                 </button>

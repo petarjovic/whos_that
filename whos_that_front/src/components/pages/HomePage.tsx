@@ -1,5 +1,6 @@
 import { useNavigate } from "react-router";
 import { useState } from "react";
+import FirstVisitModal from "../misc/FirstVisitModal.tsx"; // Add this import
 
 const HomePage = () => {
     const [gameIdToJoin, setGameIdToJoin] = useState("");
@@ -13,12 +14,12 @@ const HomePage = () => {
     return (
         <div className="my-auto text-center">
             <button
-                className="w-fill border-b-9 border-x-1 text-shadow-xs/50 active:border-b-1 active:shadow-2xs active:inset-shadow-md shadow-md/20 hover:shadow-sm/20 duration-15 mx-4 h-20 cursor-pointer rounded-md border-blue-600 bg-blue-500 px-5 text-3xl font-semibold text-white transition-all hover:border-blue-700 hover:bg-blue-600 hover:text-slate-200 active:translate-y-[1px]"
+                className="w-fill border-b-9 border-x-1 text-shadow-xs/50 active:border-b-1 active:shadow-2xs duration-15 hover:text-shadow-none hover:shadow-xs mx-4 h-20 cursor-pointer rounded-md border-blue-600 bg-blue-500 px-5 text-3xl font-bold text-white shadow-sm transition-all hover:border-blue-700 hover:bg-blue-600 hover:text-gray-100 active:translate-y-[1px]"
                 onClick={() => {
                     void navigate("/create-game");
                 }}
             >
-                Create New Game
+                Play New Game
             </button>
             <p className="font-digitag mt-35 text-shadow-sm/80 text-5xl font-bold tracking-wider text-white">
                 OR
@@ -39,7 +40,7 @@ const HomePage = () => {
                     }}
                 />
                 <button
-                    className="w-fill h-17 border-b-9 border-x-1 text-shadow-xs/50 active:border-b-1 active:shadow-2xs active:inset-shadow-md duration-15 mx-4 cursor-pointer rounded-md border-blue-600 bg-blue-500 px-4 text-2xl font-bold text-white shadow-md transition-all hover:border-blue-700 hover:bg-blue-600 hover:text-slate-200 active:translate-y-[1px]"
+                    className="w-fill h-17 border-b-9 border-x-1 text-shadow-xs/50 active:border-b-1 active:shadow-2xs duration-15 hover:text-shadow-none hover:shadow-xs mx-4 cursor-pointer rounded-md border-blue-600 bg-blue-500 px-4 text-2xl font-bold text-white shadow-sm transition-all hover:border-blue-700 hover:bg-blue-600 hover:text-gray-100 active:translate-y-[1px]"
                     type="submit"
                 >
                     Join Game
@@ -48,6 +49,7 @@ const HomePage = () => {
             <p className="text-shadow-xs/50 fixed bottom-2 left-0 w-full text-center text-white hover:cursor-default">
                 Made By Petar Jovic
             </p>
+            <FirstVisitModal />
         </div>
     );
 };

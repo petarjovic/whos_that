@@ -168,7 +168,7 @@ const GameEndModal = ({ endState, handlePlayAgain }: GameEndModalProps) => {
             </p>
             <div className="m-auto flex flex-row justify-evenly">
                 <button
-                    className={`w-50 border-b-9 border-x-1 text-shadow-xs/80 active:shadow-2xs active:inset-shadow-md mr-50 m-auto h-20 cursor-pointer rounded-md px-1 text-3xl text-neutral-100 shadow-md ${playAgainSent ? "border-gray-600 bg-gray-500" : "border-green-700 bg-green-600 hover:border-green-800 hover:bg-green-700 active:translate-y-[1px] active:border-none"}`}
+                    className={`w-50 border-b-9 border-x-1 text-shadow-xs/80 active:shadow-2xs mr-50 m-auto h-20 cursor-pointer rounded-md px-1 text-3xl text-neutral-100 shadow-md ${playAgainSent ? "border-gray-600 bg-gray-500" : "border-green-700 bg-green-600 hover:border-green-800 hover:bg-green-700 active:translate-y-[1px] active:border-none"}`}
                     onClick={() => {
                         setPlayAgainSent(true);
                         handlePlayAgain();
@@ -181,7 +181,7 @@ const GameEndModal = ({ endState, handlePlayAgain }: GameEndModalProps) => {
                     onClick={() => {
                         void navigate("/");
                     }}
-                    className="w-50 border-b-9 border-x-1 text-shadow-xs/80 active:shadow-2xs active:inset-shadow-md m-auto h-20 cursor-pointer rounded-md border-red-700 bg-red-600 px-1 text-3xl text-neutral-100 shadow-md hover:border-red-800 hover:bg-red-700 active:translate-y-[1px] active:border-none"
+                    className="w-50 border-b-9 border-x-1 text-shadow-xs/80 active:shadow-2xs duration-15 hover:shadow-xs m-auto h-20 cursor-pointer rounded-md border-red-700 bg-red-600 px-1 text-3xl text-neutral-100 shadow-sm transition-all hover:border-red-800 hover:bg-red-700 active:translate-y-[1px] active:border-none"
                 >
                     Exit
                 </button>

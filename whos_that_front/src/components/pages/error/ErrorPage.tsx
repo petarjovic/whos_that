@@ -40,7 +40,7 @@ const ErrorPage = ({ error }: { error?: unknown }) => {
                 <h1 className="mb-5 text-5xl text-red-800">Something Went Wrong</h1>
                 <h2>Oh No! {errorMessage}</h2>
                 <Link to={"/"}>
-                    <button className="w-fill h-18 border-b-9 border-x-1 text-shadow-xs active:shadow-2xs active:inset-shadow-md mt-[2vh] cursor-pointer rounded-md border-blue-600 bg-blue-500 px-4 py-1 text-2xl font-bold text-neutral-100 shadow-md hover:border-blue-700 hover:bg-blue-600 active:translate-y-[1px] active:border-none">
+                    <button className="w-fill h-18 border-b-9 border-x-1 text-shadow-xs/40 active:shadow-2xs shadow-sm/20 hover:shadow-xs duration-15 mt-[2vh] cursor-pointer rounded-md border-blue-600 bg-blue-500 px-4 py-1 text-2xl font-bold text-neutral-100 transition-all hover:border-blue-700 hover:bg-blue-600 active:translate-y-[1px] active:border-none">
                         Take Me Home
                     </button>
                 </Link>
