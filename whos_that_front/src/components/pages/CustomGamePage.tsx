@@ -450,19 +450,19 @@ const CreateCustomGamePage = () => {
             <ReactModal
                 isOpen={showRulesModal}
                 onRequestClose={() => setShowRulesModal(false)}
-                className="shadow-2xl/30 border-x-1 bg-linear-to-b border-b-10 text-shadow-xs/100 absolute left-1/2 top-1/2 mx-auto w-full max-w-4xl -translate-x-1/2 -translate-y-1/2 rounded-lg border-blue-700 from-blue-500 to-blue-600 p-8 text-center text-neutral-100 shadow-2xl"
-                overlayClassName="fixed inset-0 bg-gray-700/70"
+                className="shadow-2xl/30 border-x-1 bg-linear-to-b border-b-10 text-shadow-xs/100 absolute left-1/2 top-1/2 mx-auto w-full max-w-4xl -translate-x-1/2 -translate-y-1/2 rounded-lg border-blue-700 from-blue-400 to-blue-600 p-8 text-center text-neutral-100"
+                overlayClassName="fixed inset-0 bg-gray-700/75"
                 shouldCloseOnOverlayClick={false}
                 shouldCloseOnEsc={false}
             >
-                <h2 className="mb-4 text-6xl font-bold text-amber-400">Rules</h2>
+                <h2 className="mb-4 text-6xl font-bold text-orange-300">Rules</h2>
                 <ul className="w-9/10 mx-auto mb-4 list-inside list-decimal space-y-2 whitespace-nowrap text-left text-2xl tracking-wide">
                     <li>
-                        <span className="text-4xl font-bold text-amber-400">
+                        <span className="text-4xl font-bold text-orange-300">
                             Image content must be appropriate!
                         </span>
                         <br></br>
-                        <span className="pl-10 text-lg text-amber-300">
+                        <span className="pl-10 text-lg text-orange-300">
                             No violence, nudity, controlled substances, or hate speech of any
                             kind.{" "}
                         </span>
@@ -481,7 +481,7 @@ const CreateCustomGamePage = () => {
                         </span>
                     </li> */}
                     <li>
-                        <span className="font-bold text-amber-300">
+                        <span className="font-bold text-orange-300">
                             Images of real people must be public figures.
                         </span>
                         <br></br>
