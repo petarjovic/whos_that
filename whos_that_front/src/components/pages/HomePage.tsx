@@ -47,7 +47,7 @@ const HomePage = () => {
                 </button>
             </form>
             <p className="text-shadow-xs/50 fixed bottom-2 left-0 w-full text-center text-white hover:cursor-default">
-                Made By Petar Jovic
+                Made By Petar J.
             </p>
             <FirstVisitModal />
         </div>
