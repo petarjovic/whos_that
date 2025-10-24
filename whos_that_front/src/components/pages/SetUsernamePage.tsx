@@ -13,6 +13,7 @@ const SetUsernamePage = () => {
 
     useEffect(() => {
         if (!isPending && (!session || session.user.username)) {
+            void navigate("/");
         }
     }, [session, isPending, navigate]);
 
