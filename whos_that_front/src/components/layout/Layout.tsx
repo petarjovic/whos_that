@@ -18,7 +18,7 @@ const Layout = () => {
     return (
         <div
             id="flexContainer"
-            className="flex h-screen w-screen flex-col items-center justify-start overflow-x-hidden bg-gradient-to-b from-cyan-500 to-cyan-600 bg-fixed"
+            className="flex flex-col items-center justify-start overflow-x-hidden bg-gradient-to-b from-cyan-500 to-cyan-600 sm:h-screen sm:w-screen lg:bg-fixed"
         >
             <Hero session={session} isPending={isPending} />
             <Outlet context={{ session, isPending } satisfies AuthData} />

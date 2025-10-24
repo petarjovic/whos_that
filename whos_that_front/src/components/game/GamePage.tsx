@@ -22,18 +22,18 @@ interface gridColsTailwind {
 }
 
 const GridColsClasses: gridColsTailwind = {
-    1: "grid-cols-1",
-    2: "grid-cols-2",
-    3: "grid-cols-3",
-    4: "grid-cols-4",
-    5: "grid-cols-5",
-    6: "grid-cols-6",
-    7: "grid-cols-7",
-    8: "grid-cols-8",
-    9: "grid-cols-9",
-    10: "grid-cols-10",
-    11: "grid-cols-11",
-    12: "grid-cols-12",
+    1: "xl:grid-cols-1",
+    2: "xl:grid-cols-2",
+    3: "xl:grid-cols-3",
+    4: "xl:grid-cols-4",
+    5: "xl:grid-cols-5",
+    6: "xl:grid-cols-6",
+    7: "xl:grid-cols-7",
+    8: "xl:grid-cols-8",
+    9: "xl:grid-cols-9",
+    10: "xl:grid-cols-10",
+    11: "xl:grid-cols-11",
+    12: "xl:grid-cols-12",
 } as const;
 
 const Game = ({
@@ -86,16 +86,16 @@ const Game = ({
 
     return (
         <>
-            <p className="font-times text-shadow-sm/100 my-2 w-full text-center text-[4.2rem] leading-none tracking-wider text-white max-2xl:text-5xl">
+            <p className="font-times text-shadow-sm/100 my-2 w-full text-center text-[4.2rem] leading-none tracking-wider text-white max-2xl:text-5xl max-md:text-4xl">
                 {title}
             </p>
             <div
                 id="gameboard"
-                className={`mb-2.5 grid px-10 max-2xl:px-5 ${GridColsClasses[numGridCols]} w-full justify-center justify-items-center gap-2`}
+                className={`mb-2.5 px-10 max-2xl:px-5 xl:grid ${GridColsClasses[numGridCols]} w-full justify-center justify-items-center gap-2 max-xl:flex max-xl:flex-wrap max-xl:justify-between`}
             >
                 {cardList}
             </div>
-            <div className="mb-1 flex w-full flex-wrap justify-evenly px-10">
+            <div className="mb-1 flex w-full flex-wrap justify-evenly px-10 max-2xl:px-4">
                 {lastRow}
                 <OpponentTargetCard
                     name={oppTargetCardData.name}

@@ -100,7 +100,7 @@ const ShowPremadeGamesPage = ({ myGames }: { myGames: boolean }) => {
     else if (isLoading) return <LoadingSpinner />;
     return (
         <div className="mx-10 mt-3 flex flex-wrap items-center justify-evenly">
-            <h2 className="font-times text-shadow-sm/100 my-2 w-full text-center text-6xl text-white">
+            <h2 className="font-times text-shadow-sm/100 my-2 w-full text-center text-6xl text-white max-md:text-5xl">
                 {myGames ? "Your Games" : "Public Games"}
             </h2>
             {premadeGamesList.length === 0 && (

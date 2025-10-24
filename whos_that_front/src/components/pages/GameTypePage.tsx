@@ -9,7 +9,7 @@ const GameTypePage = () => {
     const { session, isPending } = useBetterAuthSession();
 
     return (
-        <div className="mt-26 flex h-fit w-4/5 max-w-4xl justify-between">
+        <div className="sm:mt-26 flex w-4/5 max-w-4xl items-center max-sm:mt-10 max-sm:min-h-screen max-sm:flex-col sm:h-fit sm:justify-between">
             <Link to={isPending ? "" : "/premade-games"}>
                 <CardLayout name="Browse Public Games" imgSrc={PublicGamesImg}>
                     <></>
@@ -27,7 +27,7 @@ const GameTypePage = () => {
 
             <Link to={isPending ? "" : session ? "/create-game/new" : "/log-in"}>
                 <CardLayout name="Create a Custom Game" imgSrc={CustomGameImg}>
-                    <p className="text-center text-sm">
+                    <p className="text-center text-sm max-sm:text-xs">
                         {session ? "" : "(need to be logged in to create custom games)"}
                     </p>
                 </CardLayout>

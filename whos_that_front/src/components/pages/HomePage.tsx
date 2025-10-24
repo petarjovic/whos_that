@@ -12,9 +12,9 @@ const HomePage = () => {
     };
 
     return (
-        <div className="my-auto text-center">
+        <div className="my-auto text-center max-sm:min-h-screen">
             <button
-                className="border-b-9 border-x-1 text-shadow-xs/80 active:border-b-1 active:shadow-2xs duration-15 hover:text-shadow-none hover:shadow-xs w-fit cursor-pointer rounded-md border-blue-600 bg-blue-500 px-5 py-5 text-3xl font-bold text-white shadow-sm transition-all hover:border-blue-700 hover:bg-blue-600 hover:text-gray-100 active:translate-y-[1px] max-2xl:px-4 max-2xl:py-3 max-2xl:text-2xl"
+                className="border-b-9 border-x-1 text-shadow-xs/80 active:border-b-1 active:shadow-2xs duration-15 hover:text-shadow-none hover:shadow-xs max-sm:mt-25 w-fit cursor-pointer rounded-md border-blue-600 bg-blue-500 px-5 py-5 text-3xl font-bold text-white shadow-sm transition-all hover:border-blue-700 hover:bg-blue-600 hover:text-gray-100 active:translate-y-[1px] max-2xl:px-4 max-2xl:py-3 max-2xl:text-2xl"
                 onClick={() => {
                     void navigate("/create-game");
                 }}
@@ -24,7 +24,10 @@ const HomePage = () => {
             <p className="font-digitag mt-35 text-shadow-sm/80 text-5xl font-bold tracking-wider text-white max-2xl:mt-28 max-2xl:text-4xl">
                 OR
             </p>
-            <form className="mt-35 items-center max-2xl:mt-28" onSubmit={handleJoinExistingGame}>
+            <form
+                className="mt-35 max-sm:mt-18 items-center max-2xl:mt-28"
+                onSubmit={handleJoinExistingGame}
+            >
                 <input
                     id="gameIdInput"
                     name="gameIdInput"
