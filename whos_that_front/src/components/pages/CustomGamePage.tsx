@@ -231,17 +231,17 @@ const CreateCustomGamePage = () => {
     return (
         <>
             <form
-                className="w-9/10 mt-9 flex h-full justify-between"
+                className="my-auto flex h-fit w-full justify-evenly px-5"
                 onSubmit={(e) => {
                     void handleSubmit(e);
                 }}
             >
-                <div className="mr-10 w-[45%]">
+                <div className="mr-5 w-[45%] max-w-3xl">
                     {/* Step 1 */}
                     <div className="border-x-1 shadow-lg/25 border-b-7 bg-linear-to-b mb-3 mr-2 rounded-lg border-blue-600 from-blue-400 to-blue-500 to-75% p-4">
                         <label
                             htmlFor="title"
-                            className="text-shadow-xs/75 m-auto block text-4xl font-medium text-white"
+                            className="text-shadow-xs/75 m-auto block text-4xl font-medium text-white max-2xl:text-3xl"
                         >
                             <div className="mr-3 inline-block h-11 w-11 content-center rounded-[50%] text-center align-middle font-bold text-amber-500">
                                 <span className="font-digitag bottom-4.5 text-shadow-xs/50 relative right-1.5 text-7xl font-medium">
@@ -261,8 +261,8 @@ const CreateCustomGamePage = () => {
                         ></input>
                     </div>
                     {/* Step 2 */}
-                    <div className="border-x-1 shadow-lg/25 border-b-7 bg-linear-to-b my-5 mr-2 rounded-lg border-blue-600 from-blue-400 to-blue-500 to-75% p-4">
-                        <label className="text-shadow-xs/75 m-auto block text-4xl font-medium text-white">
+                    <div className="border-x-1 shadow-lg/25 border-b-7 bg-linear-to-b my-5 mr-2 rounded-lg border-blue-600 from-blue-400 to-blue-500 to-75% p-4 max-2xl:my-3">
+                        <label className="text-shadow-xs/75 m-auto block text-4xl font-medium text-white max-2xl:text-3xl">
                             <div className="mr-3 inline-block h-11 w-11 content-center rounded-[50%] text-center align-middle font-bold text-amber-500">
                                 <span className="font-digitag text-shadow-xs/50 relative bottom-4 right-1 text-7xl font-medium">
                                     2
@@ -294,15 +294,15 @@ const CreateCustomGamePage = () => {
                         ></input>
                         <label
                             htmlFor="image-names"
-                            className="text-shadow-xs/50 align-middle text-lg text-white"
+                            className="text-shadow-xs/50 align-middle text-lg text-white max-2xl:text-base"
                         >
                             {" "}
                             Use File Names as Character Names
                         </label>
                     </div>
                     {/* Step 4 */}
-                    <div className="border-x-1 shadow-lg/25 border-b-7 bg-linear-to-b mb-5 mr-2 flex items-center justify-between whitespace-pre-wrap rounded-lg border-blue-600 from-blue-400 to-blue-500 to-75% p-4 text-lg font-medium text-gray-900">
-                        <div className="text-shadow-xs/75 ml-1 block text-4xl font-medium text-white">
+                    <div className="border-x-1 shadow-lg/25 border-b-7 bg-linear-to-b flex items-center justify-between whitespace-pre-wrap rounded-lg border-blue-600 from-blue-400 to-blue-500 to-75% p-4 text-lg font-medium text-gray-900">
+                        <div className="text-shadow-xs/75 ml-1 block text-4xl font-medium text-white max-2xl:text-3xl">
                             <div className="mr-3 inline-block h-11 w-11 content-center rounded-[50%] text-center align-middle font-bold text-amber-500">
                                 <span className="font-digitag text-shadow-xs/50 relative bottom-0.5 right-2 text-7xl font-medium">
                                     4
@@ -323,7 +323,7 @@ const CreateCustomGamePage = () => {
                             ></input>
                             <label
                                 htmlFor="public"
-                                className="text-shadow-xs/50 mr-5 align-middle text-xl text-white"
+                                className="text-shadow-xs/50 mr-5 align-middle text-xl text-white max-2xl:text-lg"
                             >
                                 {" "}
                                 Public
@@ -340,7 +340,7 @@ const CreateCustomGamePage = () => {
                             ></input>
                             <label
                                 htmlFor="private"
-                                className="text-shadow-xs/50 align-middle text-xl text-white"
+                                className="text-shadow-xs/50 align-middle text-xl text-white max-2xl:text-lg"
                             >
                                 {" "}
                                 Private
@@ -348,10 +348,10 @@ const CreateCustomGamePage = () => {
                         </div>
                     </div>
                 </div>
-                <div className="flex-1">
+                <div className="max-w-4xl flex-1">
                     {/* Step 3 */}
                     <div className="border-x-1 shadow-lg/25 border-b-7 bg-linear-to-b mb-3 mr-2 rounded-lg border-blue-600 from-blue-400 to-blue-500 to-75% p-4">
-                        <h3 className="text-shadow-xs/75 m-auto block text-4xl font-medium text-white">
+                        <h3 className="text-shadow-xs/75 m-auto block text-4xl font-medium text-white max-2xl:text-3xl">
                             <div className="mr-3 inline-block h-11 w-11 content-center rounded-[50%] text-center align-middle text-[4rem] font-bold leading-none text-amber-500">
                                 <span className="font-digitag text-shadow-xs/50 relative bottom-3.5 text-7xl font-medium">
                                     3
@@ -418,7 +418,7 @@ const CreateCustomGamePage = () => {
                             ) : isLoading ? (
                                 <LoadingSpinner />
                             ) : (
-                                <p className="text-md p-10 italic text-gray-600">
+                                <p className="p-10 text-lg italic text-gray-500">
                                     No images uploaded
                                 </p>
                             )}
@@ -439,7 +439,7 @@ const CreateCustomGamePage = () => {
                         )}
                     </div>
                     <button
-                        className={`h-18 border-b-9 border-x-1 text-shadow-xs/40 active:shadow-2xs duration-15 shadow-md/15 float-right mb-2 mr-5 w-fit cursor-pointer rounded-md px-3 text-3xl font-bold text-white transition-all active:translate-y-[1px] active:border-none ${isLoading ? "border-gray-800 bg-gray-700" : "border-green-700 bg-green-600 hover:border-green-800 hover:bg-green-700 hover:text-gray-200"}`}
+                        className={`border-b-9 border-x-1 text-shadow-xs/40 active:shadow-2xs duration-15 shadow-md/15 float-right mb-2 mr-5 w-fit cursor-pointer rounded-md px-4 text-3xl font-bold text-white transition-all active:translate-y-[1px] active:border-none ${isLoading ? "border-gray-800 bg-gray-700" : "border-green-700 bg-green-600 hover:border-green-800 hover:bg-green-700 hover:text-gray-200"} py-4 max-2xl:py-3 max-2xl:text-2xl`}
                         type="submit"
                         disabled={isLoading}
                     >
@@ -450,24 +450,24 @@ const CreateCustomGamePage = () => {
             <ReactModal
                 isOpen={showRulesModal}
                 onRequestClose={() => setShowRulesModal(false)}
-                className="shadow-2xl/30 border-x-1 bg-linear-to-b border-b-10 text-shadow-xs/100 absolute left-1/2 top-1/2 mx-auto w-full max-w-4xl -translate-x-1/2 -translate-y-1/2 rounded-lg border-blue-700 from-blue-400 to-blue-600 p-8 text-center text-neutral-100"
+                className="shadow-2xl/30 border-x-1 bg-linear-to-b border-b-10 text-shadow-xs/100 absolute left-1/2 top-1/2 mx-auto w-full max-w-4xl -translate-x-1/2 -translate-y-1/2 rounded-lg border-blue-700 from-blue-400 to-blue-600 p-8 text-center text-neutral-100 max-2xl:max-w-3xl"
                 overlayClassName="fixed inset-0 bg-gray-700/75"
                 shouldCloseOnOverlayClick={false}
                 shouldCloseOnEsc={false}
             >
                 <h2 className="mb-4 text-6xl font-bold text-orange-300">Rules</h2>
-                <ul className="w-9/10 mx-auto mb-4 list-inside list-decimal space-y-2 whitespace-nowrap text-left text-2xl tracking-wide">
+                <ul className="w-9/10 mx-auto mb-4 list-inside list-decimal space-y-2 whitespace-nowrap text-left text-2xl tracking-wide max-2xl:text-xl">
                     <li>
-                        <span className="text-4xl font-bold text-orange-300">
+                        <span className="text-4xl font-bold text-orange-300 max-2xl:text-3xl">
                             Image content must be appropriate!
                         </span>
                         <br></br>
-                        <span className="pl-10 text-lg text-orange-300">
+                        <span className="pl-10 text-lg text-orange-300 max-2xl:text-base">
                             No violence, nudity, controlled substances, or hate speech of any
                             kind.{" "}
                         </span>
                         <br></br>
-                        <span className="pl-10 text-lg italic">
+                        <span className="pl-10 text-lg italic max-2xl:text-base">
                             Your content can be removed for any reason at moderator's discrection.
                         </span>
                     </li>
@@ -485,7 +485,7 @@ const CreateCustomGamePage = () => {
                             Images of real people must be public figures.
                         </span>
                         <br></br>
-                        <span className="pl-10 text-lg">
+                        <span className="pl-10 text-lg max-2xl:text-base">
                             No public games made with images of family, friends etc.
                         </span>
                     </li>
@@ -494,13 +494,13 @@ const CreateCustomGamePage = () => {
                     <li>Character names are between 3-20 characters.</li>
                     <li>Each character should have a unique name.</li>
                 </ul>
-                <p className="w-8/10 mx-auto whitespace-pre-wrap text-center text-lg">
+                <p className="w-9/10 mx-auto whitespace-pre-wrap text-center text-xl italic max-2xl:text-lg">
                     Note: images will work better if they feature the character in the center.{"\n"}
                     Vertical images also may work better than horizontal ones but try it out.
                 </p>
                 <button
                     onClick={() => setShowRulesModal(false)}
-                    className="border-b-9 border-x-1 text-shadow-xs/40 active:shadow-2xs duration-15 hover:shadow-xs mt-4 w-4/5 cursor-pointer rounded-md border-green-700 bg-green-600 py-4 text-3xl font-bold text-white shadow-sm transition-all hover:border-green-800 hover:bg-green-700 hover:text-gray-200 active:translate-y-[-1px] active:border-none"
+                    className="border-b-9 border-x-1 text-shadow-xs/40 active:shadow-2xs duration-15 hover:shadow-xs mt-4 w-3/5 cursor-pointer rounded-md border-green-700 bg-green-600 py-4 text-3xl font-bold text-white shadow-sm transition-all hover:border-green-800 hover:bg-green-700 hover:text-gray-200 active:translate-y-[-1px] active:border-none max-2xl:w-1/2 max-2xl:py-3 max-2xl:text-2xl"
                 >
                     I Agree
                 </button>

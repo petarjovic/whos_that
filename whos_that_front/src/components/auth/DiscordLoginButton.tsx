@@ -26,13 +26,13 @@ const DiscordLoginButton = ({
     return (
         <button
             type="button"
-            className="shadow-xs/20 hover:shadow-md/15 duration-25 active:shadow-2xs flex h-12 cursor-pointer items-center rounded-lg border border-[#5865F2] bg-white px-3 py-1 font-bold text-[#5865F2] transition-colors hover:border-slate-400 hover:bg-slate-100 hover:text-indigo-700"
+            className="shadow-xs/20 hover:shadow-md/15 duration-25 active:shadow-2xs flex h-12 cursor-pointer items-center rounded-lg border border-[#5865F2] bg-white px-3 py-1 text-base font-bold text-[#5865F2] transition-colors hover:border-slate-400 hover:bg-slate-100 hover:text-indigo-700 max-2xl:h-10 max-2xl:px-2 max-2xl:text-sm"
             onClick={handleDiscordButtonClick}
             disabled={disable}
         >
             <div>
                 <svg
-                    className="h-6.5 w-6.5 mr-2.5"
+                    className="h-6.5 w-6.5 mr-2.5 max-2xl:h-6 max-2xl:w-6"
                     xmlns="http://www.w3.org/2000/svg"
                     width="800px"
                     height="800px"

@@ -47,14 +47,14 @@ const Dropzone = ({ fileHandler }: { fileHandler: (files: FileList) => void }) =
         >
             <label
                 htmlFor="file-upload"
-                className={`h-74 inset-shadow-xs/25 shadow-2xs/20 m-2 my-3 flex w-full cursor-pointer flex-col items-center justify-center rounded-lg transition-all duration-200 ${
+                className={`max-2xl:h-70 inset-shadow-xs/25 shadow-2xs/20 h-90 m-2 my-3 flex w-full cursor-pointer flex-col items-center justify-center rounded-lg transition-all duration-200 ${
                     isDragOver ? "bg-blue-100" : "bg-white hover:bg-blue-50"
                 }`}
             >
                 <div className="flex flex-col items-center justify-center pb-6 pt-5">
                     <svg
-                        className={`h-17 w-17 mb-4 transition-colors duration-200 ${
-                            isDragOver ? "text-blue-500" : "text-gray-400"
+                        className={`h-17 max-2xl:h-13 max-2xl:w-13 mb-4 w-20 transition-colors duration-200 ${
+                            isDragOver ? "text-blue-400" : "text-gray-300"
                         }`}
                         aria-hidden="true"
                         fill="none"
@@ -69,14 +69,14 @@ const Dropzone = ({ fileHandler }: { fileHandler: (files: FileList) => void }) =
                         />
                     </svg>
                     <p
-                        className={`text-md mb-2 transition-colors duration-200 ${
+                        className={`mb-2 transition-colors duration-200 ${
                             isDragOver
                                 ? "text-blue-600 dark:text-blue-400"
                                 : "text-gray-500 dark:text-gray-400"
                         }`}
                     >
                         <span
-                            className={`font-semibold hover:underline ${
+                            className={`text-base font-semibold hover:underline max-2xl:text-sm ${
                                 isDragOver ? "text-blue-600" : "text-blue-500"
                             }`}
                         >
@@ -85,7 +85,7 @@ const Dropzone = ({ fileHandler }: { fileHandler: (files: FileList) => void }) =
                         {!isDragOver && "or drag and drop"}
                     </p>
                     <p
-                        className={`text-center text-sm transition-colors duration-200 ${
+                        className={`text-center text-sm transition-colors duration-200 max-2xl:text-xs ${
                             isDragOver
                                 ? "text-blue-500 dark:text-blue-400"
                                 : "text-gray-500 dark:text-gray-400"

@@ -86,12 +86,12 @@ const Game = ({
 
     return (
         <>
-            <p className="font-times text-shadow-sm/100 my-2 w-full text-center text-[4.2rem] leading-none tracking-wider text-white">
+            <p className="font-times text-shadow-sm/100 my-2 w-full text-center text-[4.2rem] leading-none tracking-wider text-white max-2xl:text-5xl">
                 {title}
             </p>
             <div
                 id="gameboard"
-                className={`mb-2.5 grid px-10 ${GridColsClasses[numGridCols]} w-full justify-center justify-items-center gap-2`}
+                className={`mb-2.5 grid px-10 max-2xl:px-5 ${GridColsClasses[numGridCols]} w-full justify-center justify-items-center gap-2`}
             >
                 {cardList}
             </div>

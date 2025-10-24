@@ -18,7 +18,7 @@ export const CardLayout = ({
 }: PropsWithChildren<CardLayoutProps>) => {
     return (
         <figure
-            className={`border-3 shadow-xs/15 ${isGame || isOppCard ? "my-0.75 h-73 w-49" : "h-90 w-58 my-2"} mx-1 flex flex-col justify-between overflow-hidden rounded-lg ${isOppCard ? "animate-[flash-attention_2s_ease-in-out_1] border-orange-300 bg-orange-300" : "hover:shadow-xl/25 border-gray-200 bg-gray-200 hover:translate-y-[-1px]"} transition-shadow`}
+            className={`border-3 shadow-xs/15 ${isGame || isOppCard ? "my-0.75 h-72 w-48 max-2xl:h-60 max-2xl:w-40" : "h-90 w-58 my-2 max-2xl:h-72 max-2xl:w-48"} mx-1 flex flex-col justify-between overflow-hidden rounded-lg ${isOppCard ? "animate-[flash-attention_2s_ease-in-out_1] border-orange-300 bg-orange-300" : "hover:shadow-xl/25 border-gray-200 bg-gray-200 hover:translate-y-[-1px]"} transition-shadow`}
         >
             <img
                 className="rounded-xs h-[84.5%] max-h-[85%] bg-gray-300 object-fill"
@@ -26,7 +26,7 @@ export const CardLayout = ({
                 alt={name}
             />
             <figcaption
-                className={`bottom-0.75 ${isGame || isOppCard ? "text-md" : "text-lg hover:text-blue-500"} relative m-auto h-[4.5%] w-full text-center font-semibold`}
+                className={`bottom-0.75 ${isGame || isOppCard ? "text-base max-2xl:text-sm" : "text-lg hover:text-blue-500 max-2xl:text-base"} relative m-auto h-[4.5%] w-full text-center font-semibold`}
             >
                 {name}
             </figcaption>
@@ -66,7 +66,7 @@ export const Card = ({
             >
                 <div className="border-t-3 box-content flex h-[9.5%] justify-between border-gray-200">
                     <button
-                        className={`border-r-3 text-shadow-xs text-md h-full w-[35%] cursor-pointer rounded-sm border-gray-200 bg-green-600 px-1 text-center font-semibold text-neutral-100 hover:bg-green-800 ${flipped ? "hidden" : ""}`}
+                        className={`border-r-3 text-shadow-xs text-md h-full w-[35%] cursor-pointer rounded-sm border-gray-200 bg-green-600 px-1 text-center font-semibold text-neutral-100 transition-all hover:bg-green-800 max-2xl:text-sm ${flipped ? "hidden" : ""}`}
                         onClick={() => {
                             openConfirmModal(winner, name);
                         }}
@@ -74,9 +74,11 @@ export const Card = ({
                     >
                         Guess
                     </button>
-                    <div className="relative top-0.5 m-auto text-center align-sub text-lg">❓</div>
+                    <div className="relative top-0.5 m-auto text-center align-sub text-lg max-2xl:text-sm">
+                        ❓
+                    </div>
                     <button
-                        className="border-l-3 text-md h-full w-[35%] cursor-pointer rounded-md border-gray-200 bg-red-600 px-1 text-center font-semibold text-neutral-100 hover:bg-red-800"
+                        className="border-l-3 text-md h-full w-[35%] cursor-pointer rounded-md border-gray-200 bg-red-600 px-1 text-center font-semibold text-neutral-100 hover:bg-red-800 max-2xl:text-sm"
                         onClick={() => {
                             setFlipped(!flipped);
                         }}

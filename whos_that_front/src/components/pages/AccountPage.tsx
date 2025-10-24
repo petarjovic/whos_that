@@ -57,13 +57,13 @@ const AccountPage = () => {
     else if (isPending || !session) return <LoadingSpinner />;
     else
         return (
-            <div className="shadow-2xl/30 border-x-1 bg-linear-to-b border-b-10 mt-30 mx-auto w-1/2 rounded-lg border-blue-700 from-blue-400 to-blue-600 p-8 text-white">
-                <h2 className="text-shadow-sm/70 mb-7 text-center text-5xl font-bold">
+            <div className="shadow-2xl/30 border-x-1 bg-linear-to-b border-b-10 mt-30 mx-auto w-4/5 max-w-4xl rounded-lg border-blue-700 from-blue-400 to-blue-600 p-8 text-white max-2xl:max-w-3xl">
+                <h2 className="text-shadow-xs/100 mb-7 text-center text-5xl font-bold max-2xl:text-4xl">
                     Account Details
                 </h2>
                 <div className="flex items-center justify-between">
                     <div className="w-1/2">
-                        <div className="text-shadow-sm/25 text-2xl">
+                        <div className="text-shadow-xs/100 text-2xl max-2xl:text-xl">
                             <div className="font-bold">
                                 Username:{" "}
                                 <span className="font-medium italic text-amber-400">
@@ -84,7 +84,7 @@ const AccountPage = () => {
                             </div>
                             <div className="mb-2 font-semibold">
                                 Linked Accounts:{""}{" "}
-                                <span className="align-middle text-3xl capitalize text-green-500">
+                                <span className="align-middle text-3xl capitalize text-green-500 max-2xl:text-2xl">
                                     {linkedAccounts.toString()}
                                 </span>
                             </div>
@@ -108,7 +108,7 @@ const AccountPage = () => {
 
                     <Link to={"/my-games"}>
                         <button
-                            className="border-b-9 border-x-1 text-shadow-xs/50 active:border-b-1 active:shadow-2xs duration-15 hover:shadow-xs mx-4 h-14 w-fit cursor-pointer rounded-md border-amber-600 bg-amber-500 px-3 text-2xl font-bold tracking-normal text-slate-50 shadow-sm transition-all hover:border-amber-700 hover:bg-amber-600 hover:text-slate-200 active:translate-y-[1px]"
+                            className="border-b-9 border-x-1 text-shadow-xs/50 active:border-b-1 active:shadow-2xs duration-15 hover:shadow-xs mx-4 w-fit cursor-pointer rounded-md border-amber-600 bg-amber-500 px-4 py-3 text-2xl font-bold tracking-normal text-slate-50 shadow-sm transition-all hover:border-amber-700 hover:bg-amber-600 hover:text-slate-200 active:translate-y-[1px] max-2xl:px-3 max-2xl:py-2 max-2xl:text-xl"
                             type="button"
                         >
                             My Games

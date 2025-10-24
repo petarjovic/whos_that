@@ -9,7 +9,7 @@ const GameTypePage = () => {
     const { session, isPending } = useBetterAuthSession();
 
     return (
-        <div className="mt-26 flex h-fit w-[45%] justify-between">
+        <div className="mt-26 flex h-fit w-4/5 max-w-4xl justify-between">
             <Link to={isPending ? "" : "/premade-games"}>
                 <CardLayout name="Browse Public Games" imgSrc={PublicGamesImg}>
                     <></>
