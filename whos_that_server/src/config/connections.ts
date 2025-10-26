@@ -16,7 +16,7 @@ import { neon } from "@neondatabase/serverless";
 //     connectionTimeoutMillis: 2000,
 // });
 
-const sql = neon(env.DATABASE_URL);
+const sql = neon(env.NODE_ENV === "production" ? env.DATABASE_URL : env.DEV_DATABASE_URL);
 
 export const db = drizzle({ client: sql, schema: schema });
 

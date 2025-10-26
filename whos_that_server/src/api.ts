@@ -1,9 +1,9 @@
 import { db, s3, cloudFront } from "./config/connections.ts";
 import type { Express } from "express";
-import { PutObjectCommand, DeleteObjectsCommand } from "@aws-sdk/client-s3";
+import { PutObjectCommand, DeleteObjectsCommand, CopyObjectCommand } from "@aws-sdk/client-s3";
 import * as schema from "./config/db/schema.ts";
 import * as authSchema from "./config/db/auth-schema.ts";
-import { eq, and, sql } from "drizzle-orm";
+import { eq, and, sql, not } from "drizzle-orm";
 import type {
     CardDataIdType,
     CardDataUrlType,
@@ -132,7 +132,7 @@ export function setupApiRoutes(app: Express) {
             const gameTitleAndPrivacy = await db
                 .select({ title: schema.games.title, isPublic: schema.games.isPublic })
                 .from(schema.games)
-                .where(eq(schema.games.id, gameId)); //REDO THIS LATER TO BE DONE VIA SOCKET.IO SO THAT PRIVATE GAMES ARE ACC PRIVATE
+                .where(eq(schema.games.id, gameId)); //REDO THIS LATER
 
             if (gameTitleAndPrivacy.length === 0)
                 return res.status(404).json({ message: `Game id: ${gameId} does not exist` });
@@ -268,6 +268,138 @@ export function setupApiRoutes(app: Express) {
         }
     });
 
+    app.put("/api/switchPrivacy/:gameId", async (req, res) => {
+        const {
+            params: { gameId: paramGameId },
+            headers,
+        } = req;
+        const validGameId = nanoId21Schema.safeParse(paramGameId);
+        if (!validGameId.success) return res.status(422).json({ message: "Invalid game id." });
+        const gameId = validGameId.data;
+
+        try {
+            const session = await auth.api.getSession({
+                headers: fromNodeHeaders(headers),
+            });
+            if (!session) return res.status(401).json({ message: "Unauthorized." });
+
+            const gameWithItems = await db
+                .select({
+                    isPublic: schema.games.isPublic,
+                    imageIds: sql<string[]>`array_agg(${schema.gameItems.id})`,
+                })
+                .from(schema.games)
+                .leftJoin(schema.gameItems, eq(schema.gameItems.gameId, schema.games.id))
+                .where(eq(schema.games.id, gameId))
+                .groupBy(schema.games.id);
+
+            const dbUpdate = await db
+                .update(schema.games)
+                .set({
+                    isPublic: not(schema.games.isPublic),
+                })
+                .where(and(eq(schema.games.id, gameId), eq(schema.games.userId, session.user.id)));
+
+            if (gameWithItems.length > 0 && dbUpdate.rowCount !== null && dbUpdate.rowCount >= 1) {
+                const [{ isPublic, imageIds }] = gameWithItems;
+                const newIsPublic = !isPublic;
+
+                if (imageIds.length > 0 && imageIds[0]) {
+                    const s3ImageCopyingPromises = imageIds.map((imageId) => {
+                        const oldKey = constructS3ImageKey(isPublic, gameId, imageId);
+                        const newKey = constructS3ImageKey(newIsPublic, gameId, imageId);
+                        return s3.send(
+                            new CopyObjectCommand({
+                                Bucket: env.AWS_BUCKET_NAME,
+                                CopySource: `${env.AWS_BUCKET_NAME}/${oldKey}`,
+                                Key: newKey,
+                            })
+                        );
+                    });
+                    const copyResults = await Promise.allSettled(s3ImageCopyingPromises);
+                    if (copyResults.some((p) => p.status === "rejected")) {
+                        await s3.send(
+                            new DeleteObjectsCommand({
+                                Bucket: env.AWS_BUCKET_NAME,
+                                Delete: {
+                                    Objects: imageIds.map((id) => ({
+                                        Key: constructS3ImageKey(newIsPublic, gameId, id),
+                                    })),
+                                },
+                            })
+                        );
+                        await db
+                            .update(schema.games)
+                            .set({
+                                isPublic: not(schema.games.isPublic),
+                            })
+                            .where(
+                                and(
+                                    eq(schema.games.id, gameId),
+                                    eq(schema.games.userId, session.user.id)
+                                )
+                            );
+                        throw new Error(
+                            "Not all copy operations succeeded, rollback was attempted."
+                        );
+                    }
+
+                    const s3DelObjsCommand = new DeleteObjectsCommand({
+                        Bucket: env.AWS_BUCKET_NAME,
+                        Delete: {
+                            Objects: imageIds.map((id) => ({
+                                Key: constructS3ImageKey(isPublic, gameId, id),
+                            })),
+                        },
+                    });
+                    const s3DeleteResult = await s3.send(s3DelObjsCommand);
+                    if (s3DeleteResult.Errors) {
+                        console.error(
+                            "S3 batch delete for switching privacy settings had errors! There are likely orphaned items in S3 bucket:\n",
+                            s3DeleteResult.Errors
+                        );
+                    }
+
+                    const cFCacheInvalidationCommand = new CreateInvalidationCommand({
+                        DistributionId: env.AWS_CF_DISTRIBUTION_ID,
+                        InvalidationBatch: {
+                            CallerReference: nanoid(),
+                            Paths: {
+                                Quantity: 1,
+                                Items: [
+                                    `/premadeGames/${isPublic ? "public" : "private"}/${gameId}/*`,
+                                ],
+                            },
+                        },
+                    });
+                    try {
+                        await cloudFront.send(cFCacheInvalidationCommand);
+                    } catch (cfError) {
+                        console.error(
+                            "CloudFront cache invalidation failed while swapping privacy settings:",
+                            cfError
+                        );
+                    }
+                }
+
+                console.log("Switched privacy setting of game:", gameId);
+                return res.status(200).send();
+            } else {
+                return res.status(404).json({
+                    message: `Either game ${gameId} does not exist or user ${session.user.id} does not have permission to edit it.`,
+                });
+            }
+        } catch (error) {
+            console.error(
+                `Error while attempting to switch privacy setting of game: ${gameId}:\n`,
+                error
+            );
+            return res.status(500).json({
+                message: `Error while attempting to switch privacy setting of game: ${gameId}.`,
+            });
+        }
+    });
+
     app.delete("/api/deleteGame/:gameId", async (req, res) => {
         const {
             params: { gameId: paramGameId },
@@ -340,7 +472,7 @@ export function setupApiRoutes(app: Express) {
                 res.status(200).json({ message: `Deleted game: ${gameId}` });
             } else
                 res.status(404).json({
-                    message: `Either game ${gameId} does not exist or user ${session.user.id} doesn't not have premission to delete it.`,
+                    message: `Either game ${gameId} does not exist or user ${session.user.id} does not have permission to delete it.`,
                 });
         } catch (error) {
             console.error(`Error while attempting to delete game: ${gameId}:\n`, error);

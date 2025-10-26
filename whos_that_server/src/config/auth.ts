@@ -37,8 +37,12 @@ export const auth = betterAuth({
     trustedOrigins: [env.NODE_ENV === "production" ? env.PROD_CLIENT_URL : env.DEV_CLIENT_URL],
     socialProviders: {
         discord: {
-            clientId: env.DISCORD_CLIENT_ID,
-            clientSecret: env.DISCORD_CLIENT_SECRET,
+            clientId:
+                env.NODE_ENV === "production" ? env.DISCORD_CLIENT_ID : env.DEV_DISCORD_CLIENT_ID,
+            clientSecret:
+                env.NODE_ENV === "production"
+                    ? env.DISCORD_CLIENT_SECRET
+                    : env.DEV_DISCORD_CLIENT_SECRET,
             scope: ["identify"],
         },
         google: {

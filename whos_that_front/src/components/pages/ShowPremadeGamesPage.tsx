@@ -15,7 +15,7 @@ const ShowPremadeGamesPage = ({ myGames }: { myGames: boolean }) => {
     const [premadeGamesList, setPremadeGamesList] = useState<PresetInfo>([]);
     const { session, isPending } = useBetterAuthSession();
     const [errorMsg, setErrorMsg] = useState("");
-    const [isLoading, setIsLoading] = useState(false);
+    const [isLoading, setIsLoading] = useState(true);
 
     //Fetch games
     useEffect(() => {
@@ -64,6 +64,7 @@ const ShowPremadeGamesPage = ({ myGames }: { myGames: boolean }) => {
     ) => {
         e.preventDefault();
         e.stopPropagation();
+        setIsLoading(true);
         const opt = e.target.value;
 
         switch (opt) {
@@ -73,27 +74,60 @@ const ShowPremadeGamesPage = ({ myGames }: { myGames: boolean }) => {
                     `Are you sure you want to delete ${title}? This action cannot be undone!`
                 );
                 if (confirmed) {
+                    try {
+                        const response = await fetch(
+                            `${env.VITE_SERVER_URL}/api/deleteGame/${gameId}`,
+                            {
+                                credentials: "include",
+                                method: "DELETE",
+                            }
+                        );
+                        if (response.ok) {
+                            log(await response.json());
+                            void navigate(0);
+                        } else {
+                            const errorData = serverResponseSchema.safeParse(await response.json());
+                            setErrorMsg(errorData.data?.message ?? "Failed to delete game.");
+                        }
+                        break;
+                    } catch (error) {
+                        logError(error);
+                        setErrorMsg("Failed to delete game.");
+                        break;
+                    }
+                } else break;
+            }
+            case "Make Public":
+            case "Make Private": {
+                try {
+                    console.log("Making Private");
                     const response = await fetch(
-                        `${env.VITE_SERVER_URL}/api/deleteGame/${gameId}`,
+                        `${env.VITE_SERVER_URL}/api/switchPrivacy/${gameId}`,
                         {
                             credentials: "include",
-                            method: "DELETE",
+                            method: "PUT",
                         }
                     );
                     if (response.ok) {
-                        log(await response.json());
                         void navigate(0);
                     } else {
                         const errorData = serverResponseSchema.safeParse(await response.json());
-                        setErrorMsg(errorData.data?.message ?? "Failed to delete game.");
+                        setErrorMsg(
+                            errorData.data?.message ??
+                                "Failed to change game privacy settings, server might be down, try again later."
+                        );
                     }
-                    break;
-                } else break;
+                } catch (error) {
+                    logError(error);
+                    setErrorMsg("Failed to change game privacy settings.");
+                }
+                break;
             }
             default: {
                 break;
             }
         }
+        setIsLoading(false);
     };
 
     if (errorMsg) throw new Error(errorMsg);
@@ -114,20 +148,25 @@ const ShowPremadeGamesPage = ({ myGames }: { myGames: boolean }) => {
                         {myGames ? (
                             <>
                                 <select
-                                    className="text-md shadow-xs absolute m-1.5 w-fit cursor-pointer content-center rounded-[50%] bg-slate-100 p-[1px] text-center shadow-white"
+                                    className="text-md shadow-xs absolute m-1.5 w-fit cursor-pointer content-center rounded-[50%] bg-slate-100 p-px text-center shadow-white"
                                     onClick={(e) => {
                                         e.preventDefault();
                                         e.stopPropagation();
                                     }}
                                     onChange={(e) => {
+                                        e.stopPropagation();
                                         void handleGameSettings(e, id, title);
                                     }}
+                                    defaultValue=""
                                 >
-                                    <button className="text-3xl">⚙️</button>
-                                    <option className="text-md hidden bg-slate-500 px-1 text-white hover:bg-slate-300 hover:text-black">
-                                        Change Title
+                                    <button className="text-3xl" type="button">
+                                        ⚙️
+                                    </button>
+                                    <option className="hidden"></option>
+                                    <option className="bg-slate-500 px-1 text-white hover:bg-slate-300 hover:text-black">
+                                        {isPublic ? "Make Private" : "Make Public"}
                                     </option>
-                                    <option className="text-md bg-slate-500 px-1 text-white hover:bg-red-400">
+                                    <option className="bg-slate-500 px-1 text-white hover:bg-red-400">
                                         Delete Game
                                     </option>
                                 </select>
