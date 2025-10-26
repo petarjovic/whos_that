@@ -10,7 +10,7 @@ const WaitingRoom = ({ gameId }: { gameId: string }) => {
                     {gameId || "..."}
                 </span>
             </p>
-            <p className="text-shadow-xs/90 m-auto text-center text-xl font-semibold text-white max-2xl:text-lg">
+            <p className="text-shadow-xs/90 m-auto text-center text-xl font-semibold text-white max-2xl:text-lg max-sm:mb-20">
                 Send this code to your opponent!
                 <br></br>
                 <span className="text-sm">(or send them the link to this page)</span>
