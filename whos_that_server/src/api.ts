@@ -199,7 +199,8 @@ export function setupApiRoutes(app: Express) {
                         eq(schema.gameItems.gameId, schema.games.id),
                         eq(schema.gameItems.orderIndex, 0)
                     )
-                );
+                )
+                .where(eq(schema.games.isPublic, true));
 
             const premadeGamesInfoUrl: PresetInfo = premadeGamesInfo
                 .filter(({ coverImageId }) => coverImageId !== null)
