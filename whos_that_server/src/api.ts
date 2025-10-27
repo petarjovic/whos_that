@@ -484,13 +484,19 @@ export function setupApiRoutes(app: Express) {
                 }
 
                 res.status(200).json({ message: `Deleted game: ${gameId}` });
-            } else
-                res.status(404).json({
-                    message: `Either game ${gameId} does not exist or user ${session.user.id} does not have permission to delete it.`,
+            } else {
+                console.warn(
+                    `Either game ${gameId} does not exist or user ${session.user.id} does not have permission to delete it.`
+                );
+                return res.status(404).json({
+                    message: `Either this game does not exist or you do not have permission to delete it.`,
                 });
+            }
         } catch (error) {
             console.error(`Error while attempting to delete game: ${gameId}:\n`, error);
-            res.status(500).json({ message: `Error while attempting to delete game: ${gameId}` });
+            return res
+                .status(500)
+                .json({ message: `Error while attempting to delete game: ${gameId}` });
         }
     });
 }
