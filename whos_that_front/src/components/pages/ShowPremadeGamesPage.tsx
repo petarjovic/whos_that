@@ -42,7 +42,7 @@ const ShowPremadeGamesPage = ({ myGames }: { myGames: boolean }) => {
                         else setErrorMsg("Client did not understand server response.");
                     } else {
                         const errorData = (await response.json()) as ServerResponse;
-                        setErrorMsg(errorData.message || "Failed to get premadeGames.");
+                        setErrorMsg(errorData.message ?? "Failed to get premadeGames.");
                     }
                 } catch (error) {
                     logError(error);
@@ -146,9 +146,15 @@ const ShowPremadeGamesPage = ({ myGames }: { myGames: boolean }) => {
                 <Link key={i} to={`/play-game?preset=${id}`}>
                     <CardLayout name={title} imgSrc={imageUrl} key={i}>
                         {myGames ? (
-                            <>
+                            <div className="flex items-baseline justify-between">
+                                <p
+                                    className={`ml-[38.5%] text-center text-base font-semibold ${isPublic ? "text-green-600" : "text-red-600"}`}
+                                >
+                                    {isPublic ? "Public" : "Private"}
+                                </p>
                                 <select
-                                    className="text-md shadow-xs absolute m-1.5 w-fit cursor-pointer content-center rounded-[50%] bg-slate-100 p-px text-center shadow-white"
+                                    className="text-md shadow-xs relative w-fit cursor-pointer content-center rounded-[50%] bg-transparent p-px text-center shadow-white"
+                                    title="Settings"
                                     onClick={(e) => {
                                         e.preventDefault();
                                         e.stopPropagation();
@@ -157,11 +163,11 @@ const ShowPremadeGamesPage = ({ myGames }: { myGames: boolean }) => {
                                         e.stopPropagation();
                                         void handleGameSettings(e, id, title);
                                     }}
-                                    defaultValue=""
                                 >
                                     <button className="text-3xl" type="button">
                                         ⚙️
                                     </button>
+                                    {/* Extra option is needed for functionality, keep it and keep hidden. */}
                                     <option className="hidden"></option>
                                     <option className="bg-slate-500 px-1 text-white hover:bg-slate-300 hover:text-black">
                                         {isPublic ? "Make Private" : "Make Public"}
@@ -170,12 +176,7 @@ const ShowPremadeGamesPage = ({ myGames }: { myGames: boolean }) => {
                                         Delete Game
                                     </option>
                                 </select>
-                                <p
-                                    className={`text-center text-sm font-semibold ${isPublic ? "text-green-600" : "text-red-600"}`}
-                                >
-                                    {isPublic ? "Public" : "Private"}
-                                </p>
-                            </>
+                            </div>
                         ) : (
                             <p className="mb-0.5 text-center text-sm italic tracking-wide text-gray-600">
                                 {author ?? ""}{" "}

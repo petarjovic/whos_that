@@ -452,7 +452,7 @@ const CreateCustomGamePage = () => {
             <ReactModal
                 isOpen={showRulesModal}
                 onRequestClose={() => setShowRulesModal(false)}
-                className="shadow-2xl/30 border-x-1 bg-linear-to-b border-b-10 text-shadow-xs/100 absolute left-1/2 top-1/2 mx-auto w-full max-w-4xl -translate-x-1/2 -translate-y-1/2 rounded-lg border-blue-700 from-blue-400 to-blue-600 p-8 text-center text-neutral-100 max-2xl:max-w-3xl"
+                className="shadow-2xl/50 border-b-10 text-shadow-xs/100 absolute left-1/2 top-1/2 mx-auto w-full max-w-4xl -translate-x-1/2 -translate-y-1/2 rounded-lg border-x border-blue-600 bg-blue-500 p-8 text-center text-neutral-100 max-2xl:max-w-3xl"
                 overlayClassName="fixed inset-0 bg-gray-700/75"
                 shouldCloseOnOverlayClick={false}
                 shouldCloseOnEsc={false}
