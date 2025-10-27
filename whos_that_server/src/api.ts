@@ -1,4 +1,4 @@
-import { db, s3, cloudFront } from "./config/connections.ts";
+import { db, s3, cloudFront, S3_BUCKET_NAME, USE_CLOUDFRONT } from "./config/connections.ts";
 import type { Express } from "express";
 import { PutObjectCommand, DeleteObjectsCommand, CopyObjectCommand } from "@aws-sdk/client-s3";
 import * as schema from "./config/db/schema.ts";
@@ -22,7 +22,14 @@ import { auth } from "./config/auth.ts";
 import { fromNodeHeaders } from "better-auth/node";
 
 const constructImageUrl = (isPublic: boolean, gameId: string, gameItemId: string): string => {
-    return `https://${env.AWS_CF_DOMAIN}/` + constructS3ImageKey(isPublic, gameId, gameItemId);
+    if (USE_CLOUDFRONT) {
+        return `https://${env.AWS_CF_DOMAIN}/` + constructS3ImageKey(isPublic, gameId, gameItemId);
+    } else {
+        return (
+            `https://${S3_BUCKET_NAME}.s3.${env.AWS_BUCKET_REGION}.amazonaws.com/` +
+            constructS3ImageKey(isPublic, gameId, gameItemId)
+        );
+    }
 };
 
 const constructS3ImageKey = (isPublic: boolean, gameId: string, gameItemId: string): string => {
@@ -58,7 +65,7 @@ export function setupApiRoutes(app: Express) {
                     async ({ type, name }) => {
                         const itemId = nanoid();
                         const command = new PutObjectCommand({
-                            Bucket: env.AWS_BUCKET_NAME,
+                            Bucket: S3_BUCKET_NAME,
                             Key: constructS3ImageKey(body.privacy === "public", gameId, itemId),
                             ContentType: type,
                         });
@@ -148,7 +155,7 @@ export function setupApiRoutes(app: Express) {
                 .from(schema.gameItems)
                 .where(eq(schema.gameItems.gameId, gameId));
 
-            if (isPublic) {
+            if (isPublic || !USE_CLOUDFRONT) {
                 const cardDataUrlList = cardDataIdToUrl(cardDataIdList, isPublic, gameId);
                 return res.status(200).send({ title: title, cardData: cardDataUrlList });
             } else {
@@ -192,8 +199,7 @@ export function setupApiRoutes(app: Express) {
                         eq(schema.gameItems.gameId, schema.games.id),
                         eq(schema.gameItems.orderIndex, 0)
                     )
-                )
-                .where(eq(schema.games.isPublic, true));
+                );
 
             const premadeGamesInfoUrl: PresetInfo = premadeGamesInfo
                 .filter(({ coverImageId }) => coverImageId !== null)
@@ -257,7 +263,10 @@ export function setupApiRoutes(app: Express) {
                         title,
                         author: session.user.id,
                         isPublic,
-                        imageUrl: isPublic ? imageUrl : getSignedCFUrl(signedUrlParams),
+                        imageUrl:
+                            isPublic || !USE_CLOUDFRONT
+                                ? imageUrl
+                                : getSignedCFUrl(signedUrlParams),
                     };
                 });
 
@@ -310,8 +319,8 @@ export function setupApiRoutes(app: Express) {
                         const newKey = constructS3ImageKey(newIsPublic, gameId, imageId);
                         return s3.send(
                             new CopyObjectCommand({
-                                Bucket: env.AWS_BUCKET_NAME,
-                                CopySource: `${env.AWS_BUCKET_NAME}/${oldKey}`,
+                                Bucket: S3_BUCKET_NAME,
+                                CopySource: `${S3_BUCKET_NAME}/${oldKey}`,
                                 Key: newKey,
                             })
                         );
@@ -320,7 +329,7 @@ export function setupApiRoutes(app: Express) {
                     if (copyResults.some((p) => p.status === "rejected")) {
                         await s3.send(
                             new DeleteObjectsCommand({
-                                Bucket: env.AWS_BUCKET_NAME,
+                                Bucket: S3_BUCKET_NAME,
                                 Delete: {
                                     Objects: imageIds.map((id) => ({
                                         Key: constructS3ImageKey(newIsPublic, gameId, id),
@@ -345,7 +354,7 @@ export function setupApiRoutes(app: Express) {
                     }
 
                     const s3DelObjsCommand = new DeleteObjectsCommand({
-                        Bucket: env.AWS_BUCKET_NAME,
+                        Bucket: S3_BUCKET_NAME,
                         Delete: {
                             Objects: imageIds.map((id) => ({
                                 Key: constructS3ImageKey(isPublic, gameId, id),
@@ -360,25 +369,27 @@ export function setupApiRoutes(app: Express) {
                         );
                     }
 
-                    const cFCacheInvalidationCommand = new CreateInvalidationCommand({
-                        DistributionId: env.AWS_CF_DISTRIBUTION_ID,
-                        InvalidationBatch: {
-                            CallerReference: nanoid(),
-                            Paths: {
-                                Quantity: 1,
-                                Items: [
-                                    `/premadeGames/${isPublic ? "public" : "private"}/${gameId}/*`,
-                                ],
+                    if (USE_CLOUDFRONT) {
+                        const cFCacheInvalidationCommand = new CreateInvalidationCommand({
+                            DistributionId: env.AWS_CF_DISTRIBUTION_ID,
+                            InvalidationBatch: {
+                                CallerReference: nanoid(),
+                                Paths: {
+                                    Quantity: 1,
+                                    Items: [
+                                        `/premadeGames/${isPublic ? "public" : "private"}/${gameId}/*`,
+                                    ],
+                                },
                             },
-                        },
-                    });
-                    try {
-                        await cloudFront.send(cFCacheInvalidationCommand);
-                    } catch (cfError) {
-                        console.error(
-                            "CloudFront cache invalidation failed while swapping privacy settings:",
-                            cfError
-                        );
+                        });
+                        try {
+                            await cloudFront.send(cFCacheInvalidationCommand);
+                        } catch (cfError) {
+                            console.error(
+                                "CloudFront cache invalidation failed while swapping privacy settings:",
+                                cfError
+                            );
+                        }
                     }
                 }
 
@@ -435,7 +446,7 @@ export function setupApiRoutes(app: Express) {
 
                 if (imageIds.length > 0 && imageIds[0]) {
                     const delS3ObjsCommand = new DeleteObjectsCommand({
-                        Bucket: env.AWS_BUCKET_NAME,
+                        Bucket: S3_BUCKET_NAME,
                         Delete: {
                             Objects: imageIds.map((id) => ({
                                 Key: constructS3ImageKey(isPublic, gameId, id),
@@ -450,22 +461,24 @@ export function setupApiRoutes(app: Express) {
                         );
                     }
 
-                    const cFCacheInvalidationCommand = new CreateInvalidationCommand({
-                        DistributionId: env.AWS_CF_DISTRIBUTION_ID,
-                        InvalidationBatch: {
-                            CallerReference: nanoid(),
-                            Paths: {
-                                Quantity: 1,
-                                Items: [
-                                    `/premadeGames/${isPublic ? "public" : "private"}/${gameId}/*`,
-                                ],
+                    if (USE_CLOUDFRONT) {
+                        const cFCacheInvalidationCommand = new CreateInvalidationCommand({
+                            DistributionId: env.AWS_CF_DISTRIBUTION_ID,
+                            InvalidationBatch: {
+                                CallerReference: nanoid(),
+                                Paths: {
+                                    Quantity: 1,
+                                    Items: [
+                                        `/premadeGames/${isPublic ? "public" : "private"}/${gameId}/*`,
+                                    ],
+                                },
                             },
-                        },
-                    });
-                    try {
-                        await cloudFront.send(cFCacheInvalidationCommand);
-                    } catch (cfError) {
-                        console.error("CloudFront cache invalidation failed:", cfError);
+                        });
+                        try {
+                            await cloudFront.send(cFCacheInvalidationCommand);
+                        } catch (cfError) {
+                            console.error("CloudFront cache invalidation failed:", cfError);
+                        }
                     }
                 }
 

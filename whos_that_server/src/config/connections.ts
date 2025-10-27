@@ -20,6 +20,11 @@ const sql = neon(env.NODE_ENV === "production" ? env.DATABASE_URL : env.DEV_DATA
 
 export const db = drizzle({ client: sql, schema: schema });
 
+export const S3_BUCKET_NAME =
+    env.NODE_ENV === "production" ? env.AWS_BUCKET_NAME : env.DEV_AWS_BUCKET_NAME;
+
+export const USE_CLOUDFRONT = env.NODE_ENV === "production";
+
 export const s3 = new S3Client({
     credentials: fromEnv(),
     region: env.AWS_BUCKET_REGION,

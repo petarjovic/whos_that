@@ -3,6 +3,7 @@ import { z } from "zod";
 const envSchema = z.object({
     PORT: z.coerce.number().min(1000),
     AWS_BUCKET_NAME: z.string(),
+    DEV_AWS_BUCKET_NAME: z.string(),
     AWS_BUCKET_REGION: z.string(),
     AWS_ACCESS_KEY_ID: z.string(),
     AWS_SECRET_ACCESS_KEY: z.string(),
