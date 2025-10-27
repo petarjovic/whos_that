@@ -155,7 +155,7 @@ const GameEndModal = ({ endState, handlePlayAgain }: GameEndModalProps) => {
     return (
         <ReactModal
             isOpen={Boolean(endState)}
-            className="shadow-2xl/30 border-x-1 bg-linear-to-b border-b-13 text-shadow-xs/100 px-15 absolute left-1/2 top-1/2 mx-auto max-h-[90vh] w-auto max-w-4xl -translate-x-1/2 -translate-y-1/2 overflow-y-auto rounded-lg border-blue-600 from-blue-400 to-blue-500 py-8 text-center text-neutral-100 shadow-2xl"
+            className="shadow-2xl/30 max-sm:max-w-9/10 bg-linear-to-b border-b-13 text-shadow-xs/100 px-15 absolute left-1/2 top-1/2 mx-auto max-h-[90vh] w-auto max-w-4xl -translate-x-1/2 -translate-y-1/2 overflow-y-auto rounded-lg border-x border-blue-600 from-blue-400 to-blue-500 py-8 text-center text-neutral-100 shadow-2xl"
             overlayClassName="fixed inset-0 bg-gray-700/75"
         >
             <h2
@@ -163,12 +163,12 @@ const GameEndModal = ({ endState, handlePlayAgain }: GameEndModalProps) => {
             >
                 {headingText}
             </h2>
-            <p className="text-shadow-slate-700 m-auto my-12 whitespace-pre text-5xl font-medium text-white">
+            <p className="text-shadow-slate-700 m-auto my-12 whitespace-pre-wrap text-5xl font-medium text-white max-sm:my-5">
                 {paraText}
             </p>
             <div className="m-auto flex flex-row justify-evenly">
                 <button
-                    className={`w-50 border-b-9 border-x-1 text-shadow-xs/100 active:shadow-2xs mr-50 shadow-sm/20 m-auto h-20 cursor-pointer rounded-md px-1 text-3xl text-neutral-100 ${playAgainSent ? "border-gray-600 bg-gray-500" : "border-green-700 bg-green-600 hover:border-green-800 hover:bg-green-700 active:translate-y-[1px] active:border-none"}`}
+                    className={`w-50 border-b-9 text-shadow-xs/100 active:shadow-2xs mr-50 shadow-sm/20 m-auto cursor-pointer rounded-md border-x px-1 py-5 text-3xl text-neutral-100 ${playAgainSent ? "border-gray-600 bg-gray-500" : "border-green-700 bg-green-600 hover:border-green-800 hover:bg-green-700 active:-translate-y-px active:border-none"} max-sm:mr-10`}
                     onClick={() => {
                         setPlayAgainSent(true);
                         handlePlayAgain();
@@ -181,7 +181,7 @@ const GameEndModal = ({ endState, handlePlayAgain }: GameEndModalProps) => {
                     onClick={() => {
                         void navigate("/");
                     }}
-                    className="w-50 border-b-9 border-x-1 text-shadow-xs/100 active:shadow-2xs duration-15 hover:shadow-xs shadow-sm/20 m-auto h-20 cursor-pointer rounded-md border-red-700 bg-red-600 px-1 text-3xl text-neutral-100 transition-all hover:border-red-800 hover:bg-red-700 active:translate-y-[1px] active:border-none"
+                    className="w-50 border-b-9 text-shadow-xs/100 active:shadow-2xs duration-15 hover:shadow-xs shadow-sm/20 active:-trasnlate-y-px m-auto cursor-pointer rounded-md border-x border-red-800 bg-red-700 px-1 py-5 text-3xl text-neutral-100 transition-all hover:border-red-900 hover:bg-red-800 active:border-none"
                 >
                     Exit
                 </button>
@@ -200,16 +200,16 @@ const ConfirmGuessModal = ({ isOpen, confirmGuess, name }: ConfirmGuessModalProp
     return (
         <ReactModal
             isOpen={isOpen}
-            className="shadow-2xl/30 border-x-1 bg-linear-to-b border-b-13 text-shadow-xs/100 px-15 absolute left-1/2 top-1/2 mx-auto max-h-[90vh] w-auto max-w-2xl -translate-x-1/2 -translate-y-1/2 overflow-y-auto rounded-lg border-blue-700 from-blue-400 to-blue-600 py-8 text-center text-neutral-100 shadow-2xl"
+            className="shadow-2xl/30 bg-linear-to-b border-b-13 text-shadow-xs/100 px-15 max-sm:max-w-9/10 absolute left-1/2 top-1/2 mx-auto max-h-[90vh] w-auto max-w-2xl -translate-x-1/2 -translate-y-1/2 overflow-y-auto rounded-lg border-x border-blue-700 from-blue-400 to-blue-600 py-8 text-center text-neutral-100 shadow-2xl"
             overlayClassName="fixed inset-0 bg-gray-500/70"
         >
             <p className="text-shadow-slate-700 m-auto my-12 whitespace-pre-wrap text-5xl font-medium text-white">
                 Are you sure it&apos;s <span className="font-semibold text-yellow-300">{name}</span>
                 ?
             </p>
-            <div className="flex flex-row justify-between">
+            <div className="flex flex-row justify-between max-sm:justify-center">
                 <button
-                    className="w-50 border-b-9 text-shadow-xs/80 active:shadow-2xs shadow-sm/20 m-auto mr-10 h-20 cursor-pointer rounded-md border-green-700 bg-green-600 px-2 text-3xl text-neutral-100 hover:border-green-800 hover:bg-green-700 active:translate-y-[1px] active:border-none"
+                    className="max-w-50 border-b-9 text-shadow-xs/80 active:shadow-2xs shadow-sm/20 m-auto mr-10 cursor-pointer rounded-md border-green-700 bg-green-600 px-2 py-5 text-3xl text-neutral-100 hover:border-green-800 hover:bg-green-700 active:-translate-y-px active:border-none max-sm:mr-5 max-sm:px-4 max-sm:py-2"
                     onClick={() => {
                         confirmGuess(true);
                     }}
@@ -217,7 +217,7 @@ const ConfirmGuessModal = ({ isOpen, confirmGuess, name }: ConfirmGuessModalProp
                     Yes I&apos;m sure
                 </button>
                 <button
-                    className="w-50 border-b-9 text-shadow-xs/80 active:shadow-2xs shadow-sm/20 m-auto ml-20 h-20 cursor-pointer rounded-md border-yellow-700 bg-yellow-600 px-1 text-2xl text-neutral-100 hover:border-yellow-800 hover:bg-yellow-700 active:translate-y-[1px] active:border-none"
+                    className="max-w-50 border-b-9 text-shadow-xs/80 active:shadow-2xs shadow-sm/20 m-auto ml-20 cursor-pointer rounded-md border-yellow-700 bg-yellow-600 px-1 py-2 text-2xl text-neutral-100 hover:border-yellow-800 hover:bg-yellow-700 active:-translate-y-px active:border-none max-sm:ml-10 max-sm:py-3"
                     onClick={() => {
                         confirmGuess(false);
                     }}
