@@ -1,9 +1,9 @@
 import { betterAuth } from "better-auth";
 import { drizzleAdapter } from "better-auth/adapters/drizzle";
 import { username } from "better-auth/plugins";
-import { db } from "./connections.ts"; // your drizzle instance
-import * as authSchema from "./db/auth-schema.ts";
-import * as appSchema from "./db/schema.ts";
+import { db } from "./connections.ts";
+import * as authSchema from "../db/auth-schema.ts";
+import * as appSchema from "../db/schema.ts";
 import env from "./zod/zodEnvSchema.ts";
 
 const schema = {

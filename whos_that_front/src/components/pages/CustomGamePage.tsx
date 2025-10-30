@@ -397,7 +397,7 @@ const CreateCustomGamePage = () => {
                                         <img
                                             src={imageUrls[index]}
                                             alt={file.name}
-                                            className="h-34 max-sm:h-30 w-24 flex-shrink-0 rounded border-2 object-cover max-sm:mr-1 max-sm:w-20 sm:mr-6"
+                                            className="h-34 max-sm:h-30 w-24 shrink-0 rounded border-2 object-cover max-sm:mr-1 max-sm:w-20 sm:mr-6"
                                         />
                                         <div className="min-w-0 flex-1">
                                             <input

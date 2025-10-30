@@ -6,7 +6,7 @@ import { toNodeHandler } from "better-auth/node";
 import type { ClientToServerEvents, ServerToClientEvents } from "./config/types.ts";
 import { auth } from "./config/auth.ts";
 import { setupSocketEventHandlers } from "./socketIO.ts";
-import { setupApiRoutes } from "./api.ts";
+import { setupApiRoutes } from "./api/api.ts";
 import env from "./config/zod/zodEnvSchema.ts";
 
 const app = express();

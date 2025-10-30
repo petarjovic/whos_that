@@ -1,5 +1,5 @@
 import { defineConfig } from "drizzle-kit";
-import env from "../zod/zodEnvSchema.ts";
+import env from "../config/zod/zodEnvSchema.ts";
 
 export default defineConfig({
     out: "./drizzle",

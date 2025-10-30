@@ -1,8 +1,8 @@
-import { db, s3, cloudFront, S3_BUCKET_NAME, USE_CLOUDFRONT } from "./config/connections.ts";
+import { db, s3, cloudFront, S3_BUCKET_NAME, USE_CLOUDFRONT } from "../config/connections.ts";
 import type { Express } from "express";
 import { PutObjectCommand, DeleteObjectsCommand, CopyObjectCommand } from "@aws-sdk/client-s3";
-import * as schema from "./config/db/schema.ts";
-import * as authSchema from "./config/db/auth-schema.ts";
+import * as schema from "../db/schema.ts";
+import * as authSchema from "../db/auth-schema.ts";
 import { eq, and, sql, not } from "drizzle-orm";
 import type {
     CardDataIdType,
@@ -10,15 +10,15 @@ import type {
     CreateGameRequest,
     CreateGameResponse,
     PresetInfo,
-} from "./config/types.ts";
+} from "../config/types.ts";
 import { nanoid } from "nanoid";
 import { getSignedUrl as getSignedS3Url } from "@aws-sdk/s3-request-presigner";
 import { getSignedUrl as getSignedCFUrl } from "@aws-sdk/cloudfront-signer";
 import { CreateInvalidationCommand } from "@aws-sdk/client-cloudfront";
-import env from "./config/zod/zodEnvSchema.ts";
-import { createGameRequestSchema, nanoId21Schema } from "./config/zod/zodSchema.ts";
+import env from "../config/zod/zodEnvSchema.ts";
+import { createGameRequestSchema, nanoId21Schema } from "../config/zod/zodSchema.ts";
 import z from "zod";
-import { auth } from "./config/auth.ts";
+import { auth } from "../config/auth.ts";
 import { fromNodeHeaders } from "better-auth/node";
 
 const constructImageUrl = (isPublic: boolean, gameId: string, gameItemId: string): string => {
