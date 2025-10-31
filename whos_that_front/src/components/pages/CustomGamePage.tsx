@@ -287,7 +287,7 @@ const CreateCustomGamePage = () => {
                         )}
                         <input
                             type="checkbox"
-                            id="image-names"
+                            name="image-names"
                             className="ml-3 h-5 w-5 cursor-pointer appearance-auto border align-text-bottom accent-amber-500 shadow transition-all hover:shadow-md"
                             checked={useImageNames}
                             onChange={handleUseImageFilenames}
@@ -441,7 +441,7 @@ const CreateCustomGamePage = () => {
                         )}
                     </div>
                     <button
-                        className={`border-b-9 border-x-1 text-shadow-xs/40 active:shadow-2xs duration-15 shadow-md/15 float-right mb-2 mr-5 w-fit cursor-pointer rounded-md px-4 text-3xl font-bold text-white transition-all active:translate-y-[1px] active:border-none ${isLoading ? "border-gray-800 bg-gray-700" : "border-green-700 bg-green-600 hover:border-green-800 hover:bg-green-700 hover:text-gray-200"} py-4 max-2xl:py-3 max-2xl:text-2xl max-sm:mx-auto`}
+                        className={`border-b-9 text-shadow-xs/100 active:shadow-2xs duration-15 shadow-md/15 float-right mb-2 mr-5 w-fit cursor-pointer rounded-md border-x px-4 text-3xl font-bold text-white transition-all active:-translate-y-px active:border-none ${isLoading ? "border-gray-800 bg-gray-700" : "border-green-700 bg-green-600 hover:border-green-800 hover:bg-green-700 hover:text-gray-200"} py-4 max-2xl:py-3 max-2xl:text-2xl max-sm:mx-auto`}
                         type="submit"
                         disabled={isLoading}
                     >
@@ -452,7 +452,7 @@ const CreateCustomGamePage = () => {
             <ReactModal
                 isOpen={showRulesModal}
                 onRequestClose={() => setShowRulesModal(false)}
-                className="shadow-2xl/50 border-b-10 text-shadow-xs/100 absolute left-1/2 top-1/2 mx-auto w-full max-w-4xl -translate-x-1/2 -translate-y-1/2 rounded-lg border-x border-blue-600 bg-blue-500 p-8 text-center text-neutral-100 max-2xl:max-w-3xl"
+                className="shadow-2xl/50 border-b-12 text-shadow-xs/100 bg-linear-to-b absolute left-1/2 top-1/2 mx-auto w-full max-w-4xl -translate-x-1/2 -translate-y-1/2 rounded-lg border-x border-blue-600 from-blue-400 to-blue-500 p-8 text-center font-medium text-neutral-100 max-2xl:max-w-3xl"
                 overlayClassName="fixed inset-0 bg-gray-700/75"
                 shouldCloseOnOverlayClick={false}
                 shouldCloseOnEsc={false}
@@ -502,7 +502,7 @@ const CreateCustomGamePage = () => {
                 </p>
                 <button
                     onClick={() => setShowRulesModal(false)}
-                    className="border-b-9 border-x-1 text-shadow-xs/40 active:shadow-2xs duration-15 hover:shadow-xs mt-4 w-3/5 cursor-pointer rounded-md border-green-700 bg-green-600 py-4 text-3xl font-bold text-white shadow-sm transition-all hover:border-green-800 hover:bg-green-700 hover:text-gray-200 active:translate-y-[-1px] active:border-none max-2xl:w-1/2 max-2xl:py-3 max-2xl:text-2xl"
+                    className="border-b-9 text-shadow-xs/100 active:shadow-2xs duration-15 hover:shadow-xs mt-4 w-3/5 cursor-pointer rounded-md border-x border-green-700 bg-green-600 py-4 text-3xl font-bold text-white shadow-sm transition-all hover:border-green-800 hover:bg-green-700 hover:text-gray-200 active:-translate-y-px active:border-none max-2xl:w-1/2 max-2xl:py-3 max-2xl:text-2xl"
                 >
                     I Agree
                 </button>
