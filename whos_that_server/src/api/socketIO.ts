@@ -1,7 +1,7 @@
 import { nanoid } from "nanoid";
-import type { GameStateType, ClientToServerEvents, ServerToClientEvents } from "./config/types.ts";
+import type { GameStateType, ClientToServerEvents, ServerToClientEvents } from "../config/types.ts";
 import type { Server } from "socket.io";
-import { roomIdSchema, createRoomParamsSchema } from "./config/zod/zodSchema.ts";
+import { roomIdSchema, createRoomParamsSchema } from "../config/zod/zodSchema.ts";
 
 function winningKeyGenerator(max: number): [number, number] {
     const winningKeyOne = Math.floor(Math.random() * max);

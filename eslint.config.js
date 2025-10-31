@@ -8,8 +8,9 @@ import tseslint from "typescript-eslint";
 import { globalIgnores } from "eslint/config";
 import configPrettier from "eslint-config-prettier/flat";
 import unicorn from "eslint-plugin-unicorn";
+import { defineConfig } from "eslint/config";
 
-export default tseslint.config([
+export default defineConfig([
     globalIgnores(["dist"]),
     //Base rules
     {
@@ -39,7 +40,7 @@ export default tseslint.config([
     },
     //Frontend-specific rules
     {
-        files: ["whos_that_front/**/*.{jsx,tsx}"],
+        files: ["./whos_that_front/**/*.{jsx,tsx}"],
         extends: [
             pluginReact.configs.flat.recommended,
             pluginReact.configs.flat["jsx-runtime"],
@@ -59,7 +60,7 @@ export default tseslint.config([
     },
     //Backend-specific rules
     {
-        files: ["whos_that_server/**/*.{js,ts}"],
+        files: ["./whos_that_server/**/*.{js,ts}"],
         languageOptions: {
             globals: globals.node,
         },

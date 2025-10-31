@@ -1,6 +1,6 @@
 import { betterAuth } from "better-auth";
 import { drizzleAdapter } from "better-auth/adapters/drizzle";
-import { username } from "better-auth/plugins";
+import { username, admin } from "better-auth/plugins";
 import { db } from "./connections.ts";
 import * as authSchema from "../db/auth-schema.ts";
 import * as appSchema from "../db/schema.ts";
@@ -54,6 +54,7 @@ export const auth = betterAuth({
         username({
             maxUsernameLength: 20,
         }),
+        admin(),
     ],
     baseURL: env.NODE_ENV === "production" ? env.PROD_BETTER_AUTH_URL : env.DEV_BETTER_AUTH_URL,
 });

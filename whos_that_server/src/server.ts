@@ -5,9 +5,10 @@ import { Server } from "socket.io";
 import { toNodeHandler } from "better-auth/node";
 import type { ClientToServerEvents, ServerToClientEvents } from "./config/types.ts";
 import { auth } from "./config/auth.ts";
-import { setupSocketEventHandlers } from "./socketIO.ts";
+import { setupSocketEventHandlers } from "./api/socketIO.ts";
 import { setupApiRoutes } from "./api/api.ts";
 import env from "./config/zod/zodEnvSchema.ts";
+import { setupAdminRoutes } from "./api/apiAdmin.ts";
 
 const app = express();
 app.use(
@@ -30,6 +31,7 @@ const io = new Server<ClientToServerEvents, ServerToClientEvents>(server, {
 
 setupApiRoutes(app);
 setupSocketEventHandlers(io);
+setupAdminRoutes(app);
 
 server.listen(env.PORT, () => {
     console.log(`LISTENING ON PORT: ${env.PORT.toString()}`);
