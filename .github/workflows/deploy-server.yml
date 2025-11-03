@@ -6,7 +6,7 @@ on:
             - main
         paths:
             - "whos_that_server/**"
-            - ".github/workflows/deploy-backend.yml"
+            - ".github/workflows/deploy-server.yml"
 
 jobs:
     build-and-deploy:
