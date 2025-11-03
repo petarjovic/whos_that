@@ -1,6 +1,6 @@
 import { requireAdmin } from "../middleware/authMw.ts";
 import type { Express } from "express";
-import { db } from "../config/connections.ts";
+import { db, USE_CLOUDFRONT } from "../config/connections.ts";
 import { eq, not, and } from "drizzle-orm";
 import * as schema from "../db/schema.ts";
 import * as authSchema from "../db/auth-schema.ts";
@@ -10,8 +10,10 @@ import {
     switchPrivacySettings,
     constructImageUrl,
 } from "./apiHelpers.ts";
+import { getSignedUrl as getSignedCFUrl } from "@aws-sdk/cloudfront-signer";
 import { checkGameExists, validateGameId } from "../middleware/validatorMw.ts";
 import type { PresetInfo } from "../config/types.ts";
+import env from "../config/zod/zodEnvSchema.ts";
 
 export function setupAdminRoutes(app: Express) {
     app.get("/api/admin/listAllGames", requireAdmin, async (req, res) => {
@@ -36,12 +38,22 @@ export function setupAdminRoutes(app: Express) {
 
             const allGamesInfoUrl: PresetInfo = allGamesInfo.map(
                 ({ id, title, isPublic, author, coverImageId }) => {
+                    const imageUrl = constructImageUrl(isPublic, id, coverImageId!);
+                    const signedUrlParams = {
+                        url: imageUrl,
+                        dateLessThan: new Date(Date.now() + 1000 * 60 * 60 * 24),
+                        privateKey: env.AWS_CF_PRIV_KEY,
+                        keyPairId: env.AWS_CF_KEY_PAIR_ID,
+                    };
                     return {
                         id,
                         title,
                         author,
                         isPublic,
-                        imageUrl: constructImageUrl(isPublic, id, coverImageId ?? ""),
+                        imageUrl:
+                            isPublic || !USE_CLOUDFRONT
+                                ? imageUrl
+                                : getSignedCFUrl(signedUrlParams),
                     };
                 }
             );
