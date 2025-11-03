@@ -34,5 +34,5 @@ setupSocketEventHandlers(io);
 setupAdminRoutes(app);
 
 server.listen(env.PORT, () => {
-    console.log(`LISTENING ON PORT: ${env.PORT.toString()}`);
+    console.log(`WHOS-THAT-SERVER LISTENING ON PORT: ${env.PORT.toString()}`);
 });
