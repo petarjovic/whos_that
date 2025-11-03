@@ -82,4 +82,4 @@ jobs:
 
                       # Show logs
                       echo "Deployment complete. Recent logs:"
-                      docker logs --tail 50 whos-that-server
+                      docker logs whos-that-server --tail 50
