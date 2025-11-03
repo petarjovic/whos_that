@@ -117,7 +117,10 @@ const CreateCustomGamePage = () => {
             setFileNames([
                 ...fileNames,
                 ...validFiles.map((file) =>
-                    file.name.replace(/\.[^./]+$/, "").replaceAll("_", " ")
+                    file.name
+                        .replace(/\.[^./]+$/, "")
+                        .replaceAll("_", " ")
+                        .substring(0, 20)
                 ),
             ]);
         else {
