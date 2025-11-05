@@ -119,7 +119,6 @@ export async function switchPrivacySettings(
         });
 
         const copyResults = await Promise.allSettled(s3ImageCopyingPromises);
-        console.log(copyResults);
         if (copyResults.some((p) => p.status === "rejected")) {
             await s3.send(
                 new DeleteObjectsCommand({

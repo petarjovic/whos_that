@@ -18,7 +18,7 @@ export const CardLayout = ({
 }: PropsWithChildren<CardLayoutProps>) => {
     return (
         <figure
-            className={`border-3 shadow-xs/15 ${isGame || isOppCard ? "my-0.75 h-72 w-48 max-2xl:h-60 max-2xl:w-40" : "h-90 w-58 my-2 max-2xl:h-72 max-2xl:w-48"} mx-1 flex flex-col justify-between overflow-hidden rounded-lg ${isOppCard ? "animate-[flash-attention_2s_ease-in-out_1] border-orange-300 bg-orange-300" : "hover:shadow-xl/25 border-gray-200 bg-gray-200 hover:-translate-y-px"} text-center transition-shadow`}
+            className={`border-3 shadow-xs/15 ${isGame || isOppCard ? "my-0.75 h-72 w-48 max-2xl:h-60 max-2xl:w-40" : "h-90 w-59 my-2 max-2xl:h-72 max-2xl:w-48"} mx-1 flex flex-col justify-between overflow-hidden rounded-lg ${isOppCard ? "animate-[flash-attention_2s_ease-in-out_1] border-orange-300 bg-orange-300" : "hover:shadow-xl/25 border-gray-200 bg-gray-200 hover:-translate-y-px"} text-center transition-shadow`}
         >
             <img
                 className="rounded-xs h-[84.5%] max-h-[85%] bg-gray-300 object-fill"
@@ -26,7 +26,7 @@ export const CardLayout = ({
                 alt={name}
             />
             <figcaption
-                className={`bottom-0.75 ${isGame || isOppCard ? "text-base max-2xl:text-sm" : "text-lg hover:text-blue-500 max-2xl:text-base"} z-1 relative m-auto h-[4.5%] w-full text-center font-semibold`}
+                className={`bottom-0.75 ${isGame || isOppCard ? "text-base" : "text-xl hover:text-blue-500 max-lg:text-lg"} relative m-auto h-[4.5%] w-full text-center font-semibold text-gray-800`}
             >
                 {name}
             </figcaption>

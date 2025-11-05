@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useOptimistic, useState } from "react";
 import { Link, useNavigate } from "react-router";
 import { CardLayout } from "../misc/Cards.tsx";
 import type { ServerResponse } from "../../lib/types.ts";
@@ -53,7 +53,7 @@ const ShareGameModal = ({
 
 const ShowPremadeGamesPage = ({ myGames }: { myGames: boolean }) => {
     const navigate = useNavigate();
-    const [premadeGamesList, setPremadeGamesList] = useState<PresetInfo>([]);
+    const [gamesList, setGamesList] = useState<PresetInfo>([]);
     const { session, isPending } = useBetterAuthSession();
     const [errorMsg, setErrorMsg] = useState("");
     const [isLoading, setIsLoading] = useState(true);
@@ -79,8 +79,7 @@ const ShowPremadeGamesPage = ({ myGames }: { myGames: boolean }) => {
                         const validatePresetInfo = PresetInfoSchema.safeParse(
                             await response.json()
                         );
-                        if (validatePresetInfo.success)
-                            setPremadeGamesList(validatePresetInfo.data);
+                        if (validatePresetInfo.success) setGamesList(validatePresetInfo.data);
                         else {
                             logError(validatePresetInfo.error);
                             setErrorMsg("Client did not understand server response.");
@@ -113,7 +112,17 @@ const ShowPremadeGamesPage = ({ myGames }: { myGames: boolean }) => {
         e.preventDefault();
         e.stopPropagation();
         if (!session) return;
-        setIsLoading(true);
+        setGamesList((prev) =>
+            prev.map((game) =>
+                game.id === gameId
+                    ? {
+                          ...game,
+                          userHasLiked: !game.userHasLiked,
+                          numLikes: game.userHasLiked ? game.numLikes - 1 : game.numLikes + 1,
+                      }
+                    : game
+            )
+        );
 
         try {
             const response = await fetch(`${env.VITE_SERVER_URL}/api/likeGame/${gameId}`, {
@@ -122,7 +131,6 @@ const ShowPremadeGamesPage = ({ myGames }: { myGames: boolean }) => {
             });
 
             if (response.ok) {
-                void navigate(0);
                 return;
             } else {
                 const errorData = (await response.json()) as ServerResponse;
@@ -133,8 +141,6 @@ const ShowPremadeGamesPage = ({ myGames }: { myGames: boolean }) => {
             if (error instanceof Error) {
                 setErrorMsg(error.message);
             } else setErrorMsg("Failed to like game.");
-        } finally {
-            setIsLoading(false);
         }
     };
 
@@ -145,16 +151,15 @@ const ShowPremadeGamesPage = ({ myGames }: { myGames: boolean }) => {
     ) => {
         e.preventDefault();
         e.stopPropagation();
-        setIsLoading(true);
-        const opt = e.target.value;
 
-        switch (opt) {
+        switch (e.target.value) {
             case "Delete Game": {
                 const confirmed = confirm(
-                    //Redo this one day!
+                    //TODO: Redo confirmation
                     `Are you sure you want to delete ${title}? This action cannot be undone!`
                 );
                 if (confirmed) {
+                    setGamesList((prev) => prev.filter((game) => game.id !== gameId));
                     try {
                         const response = await fetch(
                             `${env.VITE_SERVER_URL}/api/deleteGame/${gameId}`,
@@ -163,10 +168,7 @@ const ShowPremadeGamesPage = ({ myGames }: { myGames: boolean }) => {
                                 method: "DELETE",
                             }
                         );
-                        if (response.ok) {
-                            log(await response.json());
-                            void navigate(0);
-                        } else {
+                        if (!response.ok) {
                             const errorData = serverResponseSchema.safeParse(await response.json());
                             setErrorMsg(errorData.data?.message ?? "Failed to delete game.");
                         }
@@ -181,7 +183,17 @@ const ShowPremadeGamesPage = ({ myGames }: { myGames: boolean }) => {
             case "Make Public":
             case "Make Private": {
                 try {
-                    console.log("Making Private");
+                    setGamesList((prev) =>
+                        prev.map((game) =>
+                            game.id === gameId
+                                ? {
+                                      ...game,
+                                      isPublic: !game.isPublic,
+                                  }
+                                : game
+                        )
+                    );
+                    setIsLoading(true);
                     const response = await fetch(
                         `${env.VITE_SERVER_URL}/api/switchPrivacy/${gameId}`,
                         {
@@ -189,15 +201,14 @@ const ShowPremadeGamesPage = ({ myGames }: { myGames: boolean }) => {
                             method: "PUT",
                         }
                     );
-                    if (response.ok) {
-                        void navigate(0);
-                    } else {
+                    if (!response.ok) {
                         const errorData = serverResponseSchema.safeParse(await response.json());
                         setErrorMsg(
                             errorData.data?.message ??
                                 "Failed to change game privacy settings, server might be down, try again later."
                         );
                     }
+                    setIsLoading(false);
                 } catch (error) {
                     logError(error);
                     setErrorMsg("Failed to change game privacy settings.");
@@ -208,7 +219,7 @@ const ShowPremadeGamesPage = ({ myGames }: { myGames: boolean }) => {
                 break;
             }
         }
-        setIsLoading(false);
+        e.target.value = "";
     };
 
     if (errorMsg) throw new Error(errorMsg);
@@ -219,36 +230,34 @@ const ShowPremadeGamesPage = ({ myGames }: { myGames: boolean }) => {
                 <h2 className="font-times text-shadow-sm/100 my-2 w-full text-center text-6xl text-white max-md:text-5xl">
                     {myGames ? "Your Games" : "Public Games"}
                 </h2>
-                {premadeGamesList.length === 0 && (
-                    <p className="mx-auto mt-[50%] text-center text-2xl font-semibold text-gray-600">
-                        {myGames
-                            ? "You have no games yet."
-                            : "No public games!? Something's Fishy..."}
+                {gamesList.length === 0 && (
+                    <p className="text-shadow-xs/100 mx-auto mt-[50%] text-center text-2xl font-medium text-white">
+                        {myGames ? "No games made yet!" : "No public games!? Something's fishy..."}
                     </p>
                 )}
-                {premadeGamesList.map(
+                {gamesList.map(
                     ({ id, title, imageUrl, isPublic, numLikes, author, userHasLiked }, i) => (
                         <Link key={i} to={`/play-game?preset=${id}`}>
                             <CardLayout name={title} imgSrc={imageUrl} key={i}>
                                 {myGames ? (
-                                    <div className="items-center-safe flex justify-between">
+                                    <div className="flex items-baseline justify-between">
                                         <button
                                             type="button"
                                             onClick={(e) => {
                                                 handleShareGame(e, id);
                                             }}
-                                            className="cursor-pointer pl-2 text-xl hover:text-blue-500"
+                                            className="ml-2 cursor-pointer text-xl text-gray-700 hover:scale-105 hover:text-blue-500 active:scale-125 max-lg:text-lg"
                                             title="Share Link"
                                         >
                                             <FaArrowUpRightFromSquare />
                                         </button>
                                         <p
-                                            className={`text-center text-base font-semibold ${isPublic ? "text-green-600" : "text-red-600"}`}
+                                            className={`whitespace-pre text-center text-base font-semibold opacity-80 max-lg:text-sm ${isPublic ? "text-green-600" : "text-red-600"}`}
                                         >
-                                            {isPublic ? "Public" : "Private"}
+                                            {isPublic ? " Public" : " Private"}
                                         </p>
                                         <select
-                                            className="text-md shadow-xs/15 hover:shadow-md/33 active:shadow-2xs relative mb-1 mr-1 w-fit cursor-pointer content-center rounded-[50%] border border-slate-400 bg-gray-300 p-px text-center text-slate-400 hover:text-blue-500"
+                                            className="shadow-xs/15 xl:scale-133 scale-120 hover:shadow-sm/50 xl:hover:scale-140 relative mb-1 mr-1 w-fit cursor-pointer content-center rounded-[50%] border border-slate-400 bg-gray-300 p-px text-center text-base text-slate-400 transition-transform hover:scale-105 hover:text-blue-500 active:shadow-none xl:mb-2 xl:mr-2"
                                             title="Settings"
                                             onClick={(e) => {
                                                 e.preventDefault();
@@ -259,7 +268,10 @@ const ShowPremadeGamesPage = ({ myGames }: { myGames: boolean }) => {
                                                 void handleGameSettings(e, id, title);
                                             }}
                                         >
-                                            <button type="button" className="shadow-xs/50 text-3xl">
+                                            <button
+                                                type="button"
+                                                className="flex items-center justify-center text-2xl max-lg:text-xl"
+                                            >
                                                 <FcSettings />
                                             </button>
                                             {/* Extra option is needed for functionality, keep it and keep hidden. */}
@@ -274,7 +286,7 @@ const ShowPremadeGamesPage = ({ myGames }: { myGames: boolean }) => {
                                     </div>
                                 ) : (
                                     <div className="relative flex items-baseline justify-center">
-                                        <p className="mb-0.5 text-center text-sm italic tracking-wide text-gray-600">
+                                        <p className="mb-0.5 text-center text-sm italic text-gray-600">
                                             {author ?? ""}{" "}
                                         </p>
                                         <p className="absolute bottom-0.5 right-1 text-base text-gray-700">
@@ -291,7 +303,7 @@ const ShowPremadeGamesPage = ({ myGames }: { myGames: boolean }) => {
                                                         userHasLiked
                                                             ? "text-red-600"
                                                             : "text-slate-400"
-                                                    } rounded-[50%] text-2xl hover:text-red-300 max-md:text-xl`}
+                                                    } active:scale-130 rounded-[50%] text-2xl transition-transform hover:scale-105 hover:text-red-300 max-md:text-xl`}
                                                 />
                                             </button>
                                         </p>

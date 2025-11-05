@@ -11,6 +11,7 @@ import LoadingSpinner from "../misc/LoadingSpinner.tsx";
 import env from "../../lib/zodEnvSchema.ts";
 import { logError, log } from "../../lib/logger.ts";
 import ReactModal from "react-modal";
+import { MdOutlineRemoveCircleOutline } from "react-icons/md";
 
 const MAX_FILESIZE_BYTES = 5 * 1024 * 1024;
 const MIN_NUM_IMGS = 6;
@@ -256,7 +257,7 @@ const CreateCustomGamePage = () => {
                         <input
                             type="text"
                             name="title"
-                            placeholder="(E.g. American Presidents, Famous Actors)"
+                            placeholder="(E.g. Superheros, Famous Actors)"
                             className="sm:ml-13 inset-shadow-sm/15 block w-5/6 rounded-lg bg-white px-3 py-2 text-xl font-medium text-gray-900 max-sm:mx-auto"
                             required
                             minLength={5}
@@ -386,13 +387,13 @@ const CreateCustomGamePage = () => {
                                         }`}
                                     >
                                         <button
-                                            className="hover:text-shadow-red-800 text-shadow-sm ml-5 cursor-pointer text-3xl text-red-900 max-sm:ml-1"
+                                            className="text-shadow-sm ml-5 cursor-pointer text-3xl text-red-900 hover:scale-110 hover:text-red-600 max-sm:ml-1"
                                             onClick={() => {
                                                 handleRemoveImage(index);
                                             }}
                                             type="button"
                                         >
-                                            X
+                                            <MdOutlineRemoveCircleOutline />
                                         </button>
                                         <div className="text-3xl max-sm:mx-1 sm:mx-5">
                                             {index + 1}
