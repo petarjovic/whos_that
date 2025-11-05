@@ -286,7 +286,7 @@ const ShowPremadeGamesPage = ({ myGames }: { myGames: boolean }) => {
                                     </div>
                                 ) : (
                                     <div className="relative mb-0.5 flex items-baseline justify-center">
-                                        <p className="not-visited: text-center text-base italic text-gray-600 max-xl:text-sm">
+                                        <p className="not-visited: text-center text-sm italic text-gray-600 max-xl:text-xs">
                                             {author ?? ""}{" "}
                                         </p>
                                         <p className="absolute bottom-0.5 right-1.5 text-base text-gray-700">
