@@ -285,8 +285,8 @@ const ShowPremadeGamesPage = ({ myGames }: { myGames: boolean }) => {
                                         </select>
                                     </div>
                                 ) : (
-                                    <div className="relative mb-0.5 flex items-baseline justify-center">
-                                        <p className="not-visited: text-center text-sm italic text-gray-600 max-xl:text-xs">
+                                    <div className="mb-0.75 relative flex items-center justify-center max-xl:mb-px">
+                                        <p className="mb-0.5 text-center text-sm italic text-gray-600 max-xl:text-xs">
                                             {author ?? ""}{" "}
                                         </p>
                                         <p className="absolute bottom-0.5 right-1.5 text-base text-gray-700">
@@ -303,7 +303,7 @@ const ShowPremadeGamesPage = ({ myGames }: { myGames: boolean }) => {
                                                         userHasLiked
                                                             ? "text-red-600"
                                                             : "text-slate-400"
-                                                    } active:scale-130 rounded-[50%] text-2xl transition-transform hover:scale-105 hover:text-red-300 max-md:text-xl`}
+                                                    } active:scale-130 hover:scale-111 scale-105 rounded-[50%] text-2xl transition-transform hover:text-red-300 max-md:text-xl`}
                                                 />
                                             </button>
                                         </p>

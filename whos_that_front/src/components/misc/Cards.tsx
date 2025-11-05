@@ -26,7 +26,7 @@ export const CardLayout = ({
                 alt={name}
             />
             <figcaption
-                className={` ${isGame || isOppCard ? "bottom-0.75 text-base" : "bottom-px text-xl hover:text-blue-500 max-lg:text-lg"} relative m-auto h-[4.5%] w-full text-center font-semibold leading-none text-gray-800`}
+                className={` ${isGame || isOppCard ? "bottom-0 text-base" : "bottom-0.5 text-lg hover:text-blue-500 max-lg:text-base"} relative m-auto h-[4.5%] w-full text-center font-semibold leading-none text-gray-800`}
             >
                 {name}
             </figcaption>
