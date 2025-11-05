@@ -1,4 +1,4 @@
-import React, { useEffect, useOptimistic, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router";
 import { CardLayout } from "../misc/Cards.tsx";
 import type { ServerResponse } from "../../lib/types.ts";
@@ -7,7 +7,7 @@ import { serverResponseSchema } from "../../lib/zodSchema.ts";
 import { PresetInfoSchema } from "@server/zodSchema";
 import type { PresetInfo } from "@server/types";
 import env from "../../lib/zodEnvSchema.ts";
-import { logError, log } from "../../lib/logger.ts";
+import { logError } from "../../lib/logger.ts";
 import LoadingSpinner from "../misc/LoadingSpinner.tsx";
 import { FaArrowUpRightFromSquare, FaHeart } from "react-icons/fa6";
 import { FcSettings } from "react-icons/fc";
