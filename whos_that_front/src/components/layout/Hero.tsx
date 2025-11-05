@@ -25,7 +25,7 @@ const Hero = ({ session, isPending, showUserInfo = true }: HeroProps) => {
                     to={"/"}
                     id="title"
                     reloadDocument={true}
-                    className="font-digitag text-shadow-md/85 max-lg:leading-0 cursor-pointer whitespace-pre-wrap text-9xl font-bold tracking-wide text-orange-300 hover:text-orange-400 max-2xl:text-8xl max-lg:text-[4.2rem]"
+                    className="font-digitag text-shadow-md/85 max-lg:leading-0 cursor-pointer whitespace-pre-wrap text-9xl font-bold tracking-wide text-orange-300 hover:text-orange-400 max-2xl:text-8xl max-lg:text-[4.2rem] max-sm:text-7xl"
                 >
                     <>
                         W<span />
@@ -62,7 +62,7 @@ const Hero = ({ session, isPending, showUserInfo = true }: HeroProps) => {
 
                         <button
                             type="button"
-                            className="px-2.25 border-b-5 border-x-1 text-shadow-xs/40 active:border-b-1 active:shadow-2xs hover:shadow-sm/20 duration-15 shadow-sm/20 hover:shadow-xs ml-10 w-fit cursor-pointer rounded-md border-cyan-600 bg-cyan-500 py-1.5 text-2xl font-bold text-white transition-all hover:border-cyan-700 hover:bg-cyan-600 hover:text-gray-200 active:translate-y-[1px] max-2xl:ml-5 max-2xl:px-2 max-2xl:py-1 max-2xl:text-xl max-lg:text-sm"
+                            className="px-2.25 border-b-5 text-shadow-xs/40 active:shadow-2xs hover:shadow-sm/20 duration-15 shadow-sm/20 hover:shadow-xs ml-10 w-fit cursor-pointer rounded-md border-x border-cyan-600 bg-cyan-500 py-1.5 text-2xl font-bold text-white transition-all hover:border-cyan-700 hover:bg-cyan-600 hover:text-gray-200 active:-translate-y-px active:border-b max-2xl:ml-5 max-2xl:px-2 max-2xl:py-1 max-2xl:text-xl max-lg:text-sm"
                             onClick={() => {
                                 if (!isPending && session) void handleLogOut();
                                 else if (!isPending) void navigate("/log-in");

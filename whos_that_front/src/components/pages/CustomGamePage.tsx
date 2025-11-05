@@ -241,7 +241,7 @@ const CreateCustomGamePage = () => {
             >
                 <div className="mr-5 w-[45%] max-w-3xl max-sm:w-full">
                     {/* Step 1 */}
-                    <div className="border-x-1 shadow-lg/25 border-b-7 bg-linear-to-b mb-3 rounded-lg border-blue-600 from-blue-400 to-blue-500 to-75% p-4">
+                    <div className="shadow-lg/25 border-b-7 bg-linear-to-b mb-3 rounded-lg border-x border-blue-600 from-blue-400 to-blue-500 to-75% p-4">
                         <label
                             htmlFor="title"
                             className="text-shadow-xs/75 m-auto block text-4xl font-medium text-white max-2xl:text-3xl max-md:text-center"
@@ -264,7 +264,7 @@ const CreateCustomGamePage = () => {
                         ></input>
                     </div>
                     {/* Step 2 */}
-                    <div className="border-x-1 shadow-lg/25 border-b-7 bg-linear-to-b my-5 rounded-lg border-blue-600 from-blue-400 to-blue-500 to-75% p-4 max-2xl:my-3">
+                    <div className="shadow-lg/25 border-b-7 bg-linear-to-b my-5 rounded-lg border-x border-blue-600 from-blue-400 to-blue-500 to-75% p-4 max-2xl:my-3">
                         <label className="text-shadow-xs/75 m-auto block text-4xl font-medium text-white max-2xl:text-3xl max-md:text-center">
                             <div className="mr-3 inline-block h-11 w-11 content-center rounded-[50%] text-center align-middle font-bold text-amber-500">
                                 <span className="font-digitag text-shadow-xs/50 relative bottom-4 right-1 text-7xl font-medium max-sm:bottom-2 max-sm:text-6xl">
@@ -304,7 +304,7 @@ const CreateCustomGamePage = () => {
                         </label>
                     </div>
                     {/* Step 4 */}
-                    <div className="border-x-1 shadow-lg/25 border-b-7 bg-linear-to-b flex items-center justify-between whitespace-pre-wrap rounded-lg border-blue-600 from-blue-400 to-blue-500 to-75% p-4 text-lg font-medium text-gray-900 max-sm:flex-col">
+                    <div className="shadow-lg/25 border-b-7 bg-linear-to-b flex items-center justify-between whitespace-pre-wrap rounded-lg border-x border-blue-600 from-blue-400 to-blue-500 to-75% p-4 text-lg font-medium text-gray-900 max-sm:flex-col">
                         <div className="text-shadow-xs/75 ml-1 block text-4xl font-medium text-white max-2xl:text-3xl">
                             <div className="mr-3 inline-block h-11 w-11 content-center rounded-[50%] text-center align-middle font-bold text-amber-500">
                                 <span className="font-digitag text-shadow-xs/50 relative bottom-0.5 right-2 text-7xl font-medium max-sm:text-6xl">
@@ -353,7 +353,7 @@ const CreateCustomGamePage = () => {
                 </div>
                 <div className="max-w-4xl flex-1 max-sm:flex max-sm:flex-col">
                     {/* Step 3 */}
-                    <div className="border-x-1 shadow-lg/25 border-b-7 bg-linear-to-b mb-3 rounded-lg border-blue-600 from-blue-400 to-blue-500 to-75% max-sm:mt-3 max-sm:p-3 sm:p-4">
+                    <div className="shadow-lg/25 border-b-7 bg-linear-to-b mb-3 rounded-lg border-x border-blue-600 from-blue-400 to-blue-500 to-75% max-sm:mt-3 max-sm:p-3 sm:p-4">
                         <h3 className="text-shadow-xs/75 m-auto block text-4xl font-medium text-white max-2xl:text-3xl max-md:text-center">
                             <div className="mr-3 inline-block h-11 w-11 content-center rounded-[50%] text-center align-middle text-[4rem] font-bold leading-none text-amber-500">
                                 <span className="font-digitag text-shadow-xs/50 relative bottom-3.5 text-7xl font-medium max-sm:bottom-5 max-sm:text-6xl">
@@ -365,7 +365,7 @@ const CreateCustomGamePage = () => {
                                 : "Your Characters Will Appear Here:  "}
                             {selectedFiles.length > 0 ? (
                                 <button
-                                    className="border-x-1 text-shadow-xs/40 active:shadow-2xs hover:shadow-sm/20 duration-15 hover:font-gray-200 shadow-md/20 mr-5 h-11 w-fit cursor-pointer rounded-md border-b-8 border-amber-700 bg-amber-600 px-2 text-xl font-semibold text-white transition-all hover:border-amber-800 hover:bg-amber-700 active:translate-y-[1px] active:border-none sm:float-right"
+                                    className="text-shadow-xs/40 active:shadow-2xs hover:shadow-sm/20 duration-15 hover:font-gray-200 shadow-md/20 mr-5 h-11 w-fit cursor-pointer rounded-md border-x border-b-8 border-amber-700 bg-amber-600 px-2 text-xl font-semibold text-white transition-all hover:border-amber-800 hover:bg-amber-700 active:-translate-y-px active:border-none sm:float-right"
                                     disabled={isLoading}
                                     type="button"
                                     onClick={handleClearCharacterList}

@@ -71,5 +71,7 @@ export const PresetInfoSchema = z.array(
         author: z.string().nullable(),
         imageUrl: z.string(),
         isPublic: z.boolean(),
+        numLikes: z.number(),
+        userHasLiked: z.boolean().nullable(),
     })
 );

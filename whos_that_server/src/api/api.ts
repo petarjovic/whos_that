@@ -3,7 +3,7 @@ import type { Express, Request, Response } from "express";
 import { PutObjectCommand } from "@aws-sdk/client-s3";
 import * as schema from "../db/schema.ts";
 import * as authSchema from "../db/auth-schema.ts";
-import { eq, and, not } from "drizzle-orm";
+import { eq, and, not, count, desc, sql } from "drizzle-orm";
 import type {
     CardDataIdType,
     CardDataUrlType,
@@ -113,12 +113,20 @@ export function setupApiRoutes(app: Express) {
 
     app.get("/api/getAllPremadeGames", async (req, res) => {
         try {
+            const session = await auth.api.getSession({
+                headers: fromNodeHeaders(req.headers),
+            });
+
             const premadeGamesInfo = await db
                 .select({
                     id: schema.games.id,
                     title: schema.games.title,
                     author: authSchema.user.displayUsername,
                     coverImageId: schema.gameItems.id,
+                    numLikes: count(schema.gameLikes.id),
+                    userHasLiked: session
+                        ? sql<boolean>`BOOL_OR(${schema.gameLikes.userId} = ${session.user.id})`
+                        : sql<boolean>`FALSE`,
                 })
                 .from(schema.games)
                 .leftJoin(authSchema.user, eq(authSchema.user.id, schema.games.userId))
@@ -129,16 +137,21 @@ export function setupApiRoutes(app: Express) {
                         eq(schema.gameItems.orderIndex, 0)
                     )
                 )
-                .where(eq(schema.games.isPublic, true));
+                .leftJoin(schema.gameLikes, eq(schema.gameLikes.gameId, schema.games.id))
+                .where(eq(schema.games.isPublic, true))
+                .groupBy(schema.games.id, authSchema.user.displayUsername, schema.gameItems.id)
+                .orderBy(desc(count(schema.gameLikes.id)));
 
             const premadeGamesInfoUrl: PresetInfo = premadeGamesInfo
                 .filter(({ coverImageId }) => coverImageId !== null)
-                .map(({ id, title, author, coverImageId }) => {
+                .map(({ id, title, author, numLikes, coverImageId, userHasLiked }) => {
                     return {
                         id,
                         title,
                         author,
                         isPublic: true,
+                        numLikes,
+                        userHasLiked,
                         imageUrl: constructImageUrl(true, id, coverImageId ?? ""),
                     };
                 });
@@ -153,11 +166,9 @@ export function setupApiRoutes(app: Express) {
     });
 
     app.get("/api/getMyGames", async (req, res) => {
-        const { headers } = req;
-
         try {
             const session = await auth.api.getSession({
-                headers: fromNodeHeaders(headers),
+                headers: fromNodeHeaders(req.headers),
             });
 
             if (!session) return res.status(401).json({ message: "Unauthorized." });
@@ -168,6 +179,7 @@ export function setupApiRoutes(app: Express) {
                     title: schema.games.title,
                     isPublic: schema.games.isPublic,
                     coverImageId: schema.gameItems.id,
+                    numLikes: count(schema.gameLikes.id),
                 })
                 .from(schema.games)
                 .leftJoin(
@@ -177,11 +189,13 @@ export function setupApiRoutes(app: Express) {
                         eq(schema.gameItems.orderIndex, 0)
                     )
                 )
-                .where(eq(schema.games.userId, session.user.id));
+                .leftJoin(schema.gameLikes, eq(schema.gameLikes.gameId, schema.games.id))
+                .where(eq(schema.games.userId, session.user.id))
+                .groupBy(schema.games.id, schema.gameItems.id);
 
             const getMyGamesRes: PresetInfo = gameInfoList
                 .filter(({ coverImageId }) => coverImageId !== null)
-                .map(({ id, title, isPublic, coverImageId }) => {
+                .map(({ id, title, isPublic, numLikes, coverImageId }) => {
                     // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
                     const imageUrl = constructImageUrl(isPublic, id, coverImageId!);
                     const signedUrlParams = {
@@ -195,6 +209,8 @@ export function setupApiRoutes(app: Express) {
                         title,
                         author: session.user.id,
                         isPublic,
+                        numLikes,
+                        userHasLiked: null,
                         imageUrl:
                             isPublic || !USE_CLOUDFRONT
                                 ? imageUrl
@@ -255,6 +271,62 @@ export function setupApiRoutes(app: Express) {
         } catch (error) {
             console.error("Error while attempting to retrieve game data:\n", error);
             return res.status(500).json({ message: "Internal Server Error. Failed to get game." });
+        }
+    });
+
+    app.put("/api/likeGame/:gameId", validateGameId, checkGameExists, async (req, res) => {
+        const {
+            params: { gameId },
+            headers,
+        } = req;
+        try {
+            const session = await auth.api.getSession({
+                headers: fromNodeHeaders(headers),
+            });
+            if (!session) return res.status(401).json({ message: "Unauthorized." });
+
+            const [gameAuthorandLikeStatus] = await db
+                .select({
+                    authorId: schema.games.userId,
+                    likeId: schema.gameLikes.id,
+                })
+                .from(schema.games)
+                .leftJoin(
+                    schema.gameLikes,
+                    and(
+                        eq(schema.gameLikes.gameId, gameId),
+                        eq(schema.gameLikes.userId, session.user.id)
+                    )
+                )
+                .where(eq(schema.games.id, gameId));
+
+            if (gameAuthorandLikeStatus.authorId === session.user.id) {
+                return res.status(400).json({ message: "Cannot like your own game." });
+            }
+
+            if (gameAuthorandLikeStatus.likeId === null) {
+                await db.insert(schema.gameLikes).values({
+                    gameId: req.params.gameId,
+                    userId: session.user.id,
+                });
+                return res.status(200).json({ message: "Liked game." });
+            } else {
+                await db
+                    .delete(schema.gameLikes)
+                    .where(
+                        and(
+                            eq(schema.gameLikes.gameId, gameId),
+                            eq(schema.gameLikes.userId, session.user.id)
+                        )
+                    );
+
+                return res.status(200).json({ message: "Unliked game." });
+            }
+        } catch (error) {
+            console.error("Error while attempting to like game: \n", error);
+            return res
+                .status(500)
+                .json({ message: "Internal Server Error. Failed to like or unlike game." });
         }
     });
 

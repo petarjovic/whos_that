@@ -9,7 +9,9 @@ import type { PresetInfo } from "@server/types";
 import env from "../../lib/zodEnvSchema.ts";
 import { logError, log } from "../../lib/logger.ts";
 import LoadingSpinner from "../misc/LoadingSpinner.tsx";
-import { FaArrowUpRightFromSquare } from "react-icons/fa6";
+import { FaArrowUpRightFromSquare, FaHeart } from "react-icons/fa6";
+import { FcSettings } from "react-icons/fc";
+
 import ReactModal from "react-modal";
 
 const ShareGameModal = ({
@@ -79,7 +81,10 @@ const ShowPremadeGamesPage = ({ myGames }: { myGames: boolean }) => {
                         );
                         if (validatePresetInfo.success)
                             setPremadeGamesList(validatePresetInfo.data);
-                        else setErrorMsg("Client did not understand server response.");
+                        else {
+                            logError(validatePresetInfo.error);
+                            setErrorMsg("Client did not understand server response.");
+                        }
                     } else {
                         const errorData = (await response.json()) as ServerResponse;
                         setErrorMsg(errorData.message ?? "Failed to get premadeGames.");
@@ -102,6 +107,35 @@ const ShowPremadeGamesPage = ({ myGames }: { myGames: boolean }) => {
         e.stopPropagation();
 
         setShareModalGameId(gameId);
+    };
+
+    const handleLikeGame = async (e: React.MouseEvent<HTMLButtonElement>, gameId: string) => {
+        e.preventDefault();
+        e.stopPropagation();
+        if (!session) return;
+        setIsLoading(true);
+
+        try {
+            const response = await fetch(`${env.VITE_SERVER_URL}/api/likeGame/${gameId}`, {
+                credentials: "include",
+                method: "PUT",
+            });
+
+            if (response.ok) {
+                void navigate(0);
+                return;
+            } else {
+                const errorData = (await response.json()) as ServerResponse;
+                setErrorMsg(errorData.message ?? "Failed to like game.");
+            }
+        } catch (error) {
+            logError(error);
+            if (error instanceof Error) {
+                setErrorMsg(error.message);
+            } else setErrorMsg("Failed to like game.");
+        } finally {
+            setIsLoading(false);
+        }
     };
 
     const handleGameSettings = async (
@@ -192,59 +226,81 @@ const ShowPremadeGamesPage = ({ myGames }: { myGames: boolean }) => {
                             : "No public games!? Something's Fishy..."}
                     </p>
                 )}
-                {premadeGamesList.map(({ id, title, imageUrl, isPublic, author }, i) => (
-                    <Link key={i} to={`/play-game?preset=${id}`}>
-                        <CardLayout name={title} imgSrc={imageUrl} key={i}>
-                            {myGames ? (
-                                <div className="flex items-baseline justify-between">
-                                    <button
-                                        type="button"
-                                        onClick={(e) => {
-                                            handleShareGame(e, id);
-                                        }}
-                                        className="cursor-pointer pl-2 text-xl hover:text-blue-500"
-                                        title="Share Link"
-                                    >
-                                        <FaArrowUpRightFromSquare />
-                                    </button>
-                                    <p
-                                        className={`text-center text-base font-semibold ${isPublic ? "text-green-600" : "text-red-600"}`}
-                                    >
-                                        {isPublic ? "Public" : "Private"}
-                                    </p>
-                                    <select
-                                        className="text-md shadow-xs relative w-fit cursor-pointer content-center rounded-[50%] bg-transparent p-px text-center shadow-white"
-                                        title="Settings"
-                                        onClick={(e) => {
-                                            e.preventDefault();
-                                            e.stopPropagation();
-                                        }}
-                                        onChange={(e) => {
-                                            e.stopPropagation();
-                                            void handleGameSettings(e, id, title);
-                                        }}
-                                    >
-                                        <button className="text-3xl" type="button">
-                                            ⚙️
+                {premadeGamesList.map(
+                    ({ id, title, imageUrl, isPublic, numLikes, author, userHasLiked }, i) => (
+                        <Link key={i} to={`/play-game?preset=${id}`}>
+                            <CardLayout name={title} imgSrc={imageUrl} key={i}>
+                                {myGames ? (
+                                    <div className="items-center-safe flex justify-between">
+                                        <button
+                                            type="button"
+                                            onClick={(e) => {
+                                                handleShareGame(e, id);
+                                            }}
+                                            className="cursor-pointer pl-2 text-xl hover:text-blue-500"
+                                            title="Share Link"
+                                        >
+                                            <FaArrowUpRightFromSquare />
                                         </button>
-                                        {/* Extra option is needed for functionality, keep it and keep hidden. */}
-                                        <option className="hidden"></option>
-                                        <option className="bg-slate-500 px-1 text-white hover:bg-slate-300 hover:text-black">
-                                            {isPublic ? "Make Private" : "Make Public"}
-                                        </option>
-                                        <option className="bg-slate-500 px-1 text-white hover:bg-red-400">
-                                            Delete Game
-                                        </option>
-                                    </select>
-                                </div>
-                            ) : (
-                                <p className="mb-0.5 text-center text-sm italic tracking-wide text-gray-600">
-                                    {author ?? ""}{" "}
-                                </p>
-                            )}
-                        </CardLayout>
-                    </Link>
-                ))}
+                                        <p
+                                            className={`text-center text-base font-semibold ${isPublic ? "text-green-600" : "text-red-600"}`}
+                                        >
+                                            {isPublic ? "Public" : "Private"}
+                                        </p>
+                                        <select
+                                            className="text-md shadow-xs/15 hover:shadow-md/33 active:shadow-2xs relative mb-1 mr-1 w-fit cursor-pointer content-center rounded-[50%] border border-slate-400 bg-gray-300 p-px text-center text-slate-400 hover:text-blue-500"
+                                            title="Settings"
+                                            onClick={(e) => {
+                                                e.preventDefault();
+                                                e.stopPropagation();
+                                            }}
+                                            onChange={(e) => {
+                                                e.stopPropagation();
+                                                void handleGameSettings(e, id, title);
+                                            }}
+                                        >
+                                            <button type="button" className="shadow-xs/50 text-3xl">
+                                                <FcSettings />
+                                            </button>
+                                            {/* Extra option is needed for functionality, keep it and keep hidden. */}
+                                            <option className="hidden"></option>
+                                            <option className="bg-slate-500 px-1 text-white hover:bg-slate-300 hover:text-black">
+                                                {isPublic ? "Make Private" : "Make Public"}
+                                            </option>
+                                            <option className="bg-slate-500 px-1 text-white hover:bg-red-400">
+                                                Delete Game
+                                            </option>
+                                        </select>
+                                    </div>
+                                ) : (
+                                    <div className="relative flex items-baseline justify-center">
+                                        <p className="mb-0.5 text-center text-sm italic tracking-wide text-gray-600">
+                                            {author ?? ""}{" "}
+                                        </p>
+                                        <p className="absolute bottom-0.5 right-1 text-base text-gray-700">
+                                            <button
+                                                className="flex cursor-pointer items-center whitespace-pre-wrap align-sub"
+                                                onClick={(e) => {
+                                                    handleLikeGame(e, id);
+                                                }}
+                                                title={userHasLiked ? "Unlike Game" : "Like Game"}
+                                            >
+                                                {numLikes}{" "}
+                                                <FaHeart
+                                                    className={`${
+                                                        userHasLiked
+                                                            ? "text-red-600"
+                                                            : "text-slate-400"
+                                                    } rounded-[50%] text-2xl hover:text-red-300 max-md:text-xl`}
+                                                />
+                                            </button>
+                                        </p>
+                                    </div>
+                                )}
+                            </CardLayout>
+                        </Link>
+                    )
+                )}
             </div>
             <ShareGameModal
                 showShareModal={Boolean(shareModalGameId)}

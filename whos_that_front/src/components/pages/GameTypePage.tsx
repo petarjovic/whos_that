@@ -28,7 +28,7 @@ const GameTypePage = () => {
             <Link to={isPending ? "" : session ? "/create-game/new" : "/log-in"}>
                 <CardLayout name="Create a Custom Game" imgSrc={CustomGameImg}>
                     <p className="text-center text-sm max-sm:text-xs">
-                        {session ? "" : "(need to be logged in to create custom games)"}
+                        {session ? "" : "(must be logged)"}
                     </p>
                 </CardLayout>
             </Link>

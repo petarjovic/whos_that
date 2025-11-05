@@ -1,4 +1,4 @@
-import { pgTable, text, timestamp, boolean, integer } from "drizzle-orm/pg-core";
+import { pgTable, text, timestamp, boolean, integer, unique } from "drizzle-orm/pg-core";
 import { user } from "./auth-schema.ts";
 
 export const games = pgTable("games", {
@@ -26,14 +26,19 @@ export const gameItems = pgTable("game_items", {
     createdAt: timestamp("created_at").defaultNow().notNull(),
 });
 
-export const gameLikes = pgTable("game_likes", {
-    id: text("id").primaryKey(),
-    gameId: text("game_id")
-        .notNull()
-        .references(() => games.id, { onDelete: "cascade" }),
-    userId: text("user_id")
-        .notNull()
-        .references(() => user.id, { onDelete: "cascade" }),
-    createdAt: timestamp("created_at").defaultNow().notNull(),
-});
-
+export const gameLikes = pgTable(
+    "game_likes",
+    {
+        id: integer("id").primaryKey().generatedAlwaysAsIdentity(),
+        gameId: text("game_id")
+            .notNull()
+            .references(() => games.id, { onDelete: "cascade" }),
+        userId: text("user_id")
+            .notNull()
+            .references(() => user.id, { onDelete: "cascade" }),
+        createdAt: timestamp("created_at").defaultNow().notNull(),
+    },
+    (table) => ({
+        uniqueGameUser: unique().on(table.gameId, table.userId),
+    })
+);
