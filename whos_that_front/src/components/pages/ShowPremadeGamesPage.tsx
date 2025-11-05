@@ -227,7 +227,7 @@ const ShowPremadeGamesPage = ({ myGames }: { myGames: boolean }) => {
     return (
         <>
             <div className="mx-10 mt-3 flex flex-wrap items-center justify-evenly">
-                <h2 className="font-times text-shadow-sm/100 my-2 w-full text-center text-6xl text-white max-md:text-5xl">
+                <h2 className="font-times text-shadow-sm/100 my-2 w-full text-center text-6xl font-medium text-white max-md:text-5xl">
                     {myGames ? "Your Games" : "Public Games"}
                 </h2>
                 {gamesList.length === 0 && (
@@ -285,11 +285,11 @@ const ShowPremadeGamesPage = ({ myGames }: { myGames: boolean }) => {
                                         </select>
                                     </div>
                                 ) : (
-                                    <div className="relative flex items-baseline justify-center">
-                                        <p className="mb-0.5 text-center text-sm italic text-gray-600">
+                                    <div className="relative mb-0.5 flex items-baseline justify-center">
+                                        <p className="not-visited: text-center text-base italic text-gray-600 max-xl:text-sm">
                                             {author ?? ""}{" "}
                                         </p>
-                                        <p className="absolute bottom-0.5 right-1 text-base text-gray-700">
+                                        <p className="absolute bottom-0.5 right-1.5 text-base text-gray-700">
                                             <button
                                                 className="flex cursor-pointer items-center whitespace-pre-wrap align-sub"
                                                 onClick={(e) => {
