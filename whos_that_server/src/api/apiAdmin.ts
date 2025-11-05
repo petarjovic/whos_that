@@ -50,6 +50,8 @@ export function setupAdminRoutes(app: Express) {
                         title,
                         author,
                         isPublic,
+                        numLikes: -1,
+                        userHasLiked: null,
                         imageUrl:
                             isPublic || !USE_CLOUDFRONT
                                 ? imageUrl
