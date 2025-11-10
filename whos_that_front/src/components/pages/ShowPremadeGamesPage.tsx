@@ -304,7 +304,7 @@ const ShowPremadeGamesPage = ({ myGames }: { myGames: boolean }) => {
                                             >
                                                 <FcSettings />
                                             </button>
-                                            {/* Extra option is needed for functionality, keep it and keep hidden. */}
+                                            {/* Empty option is needed for functionality, keep it and keep hidden. */}
                                             <option className="hidden"></option>
                                             <option className="bg-slate-500 px-1 text-white hover:bg-slate-300 hover:text-black">
                                                 {isPublic ? "Make Private" : "Make Public"}

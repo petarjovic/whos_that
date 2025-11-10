@@ -32,7 +32,7 @@ export const CardLayout = ({
             />
             {/* This is used for character names and game names, height is 4.5%  */}
             <figcaption
-                className={` ${isGame || isOppCard ? "bottom-0 text-base" : "bottom-0 text-lg hover:text-blue-500 max-lg:text-base"} relative m-auto h-[4.5%] w-full text-center font-semibold leading-none text-gray-800`}
+                className={` ${isGame || isOppCard ? "bottom-0 text-base" : "bottom-0 text-xl hover:text-blue-500 max-lg:text-lg"} relative m-auto h-[4.5%] w-full text-center font-semibold leading-none text-gray-800`}
             >
                 {name}
             </figcaption>
