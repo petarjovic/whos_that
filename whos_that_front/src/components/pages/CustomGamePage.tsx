@@ -17,26 +17,35 @@ const MAX_FILESIZE_BYTES = 5 * 1024 * 1024;
 const MIN_NUM_IMGS = 6;
 const MAX_NUM_IMGS = 24;
 
+/**
+ * Game/preset creation page: handles image uploads, character naming, and privacy setting
+ */
 const CreateCustomGamePage = () => {
     const navigate = useNavigate();
-    const [useImageNames, setUseImageNames] = useState(false);
-    const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
-    const [fileNames, setFileNames] = useState<string[]>([]);
-    const [isPublic, setIsPublic] = useState(true);
-    const [isLoading, setIsLoading] = useState(false);
-    const [imageErrors, setImageErrors] = useState<string[]>([]);
-    const [errorMsg, setErrorMsg] = useState("");
-    const [imageUrls, setImageUrls] = useState<string[]>([]);
+
     const [showRulesModal, setShowRulesModal] = useState(true);
+    const [isLoading, setIsLoading] = useState(false); //Flag for submitting and image processing
+
+    const [selectedFiles, setSelectedFiles] = useState<File[]>([]); //List of image files to upload
+    const [charNames, setCharNames] = useState<string[]>([]); //Parallel list of character names
+
+    const [imageUrls, setImageUrls] = useState<string[]>([]); //List of image urls for preview
+    const [imageErrors, setImageErrors] = useState<string[]>([]); //Error msgs for invalid files
+
+    const [useFileNames, setUseFileNames] = useState(false); //Option to use file names for char names
+    const [isPublic, setIsPublic] = useState(true); //Privacy setting for this game
+
+    const [errorMsg, setErrorMsg] = useState(""); //Used to throw error if set to non-empty string
 
     const { session, isPending } = useBetterAuthSession();
-
+    //Redirect user if not logged in
     useEffect(() => {
         if (!session) void navigate("/");
     }, [session, navigate]);
 
-    //UseEffect is used to track URLs created for image preview to allow for cleanup
+    // Generates image urls for previewing uploaded images
     useEffect(() => {
+        // Using useEffect so URLs can be revoked on clean up (i.e. no memory leaks)
         const urls = selectedFiles.map((file) => URL.createObjectURL(file));
         setImageUrls(urls);
 
@@ -51,7 +60,7 @@ const CreateCustomGamePage = () => {
 
     const handleRemoveImage = (index: number) => {
         setSelectedFiles(selectedFiles.filter((_, i) => i !== index));
-        setFileNames(fileNames.filter((_, i) => i !== index));
+        setCharNames(charNames.filter((_, i) => i !== index));
     };
 
     const handlePrivacyChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -59,14 +68,18 @@ const CreateCustomGamePage = () => {
     };
 
     const handleUseImageFilenames = (e: React.ChangeEvent<HTMLInputElement>) => {
-        setUseImageNames(e.target.checked);
+        setUseFileNames(e.target.checked);
     };
 
     const handleClearCharacterList = () => {
         setSelectedFiles([]);
-        setFileNames([]);
+        setCharNames([]);
     };
 
+    /**
+     * Validates images as user uploads them to browser
+     * Checks file sizes and types, converts HEIC to JPEG
+     */
     const handleFiles = async (files: FileList) => {
         if (files.length === 0) return;
         setIsLoading(true);
@@ -74,11 +87,13 @@ const CreateCustomGamePage = () => {
         const imageErrorsTemp: string[] = [];
         const validFiles: File[] = [];
 
+        // Validate files + convert from HEIC
         const validFilePromises = await Promise.allSettled(
             fileArray.map(async (file) => {
                 log(`${file.name} has type: ${file.type}`);
                 try {
                     if (await isHeic(file)) {
+                        // Convert HEIC to JPEG
                         const blobAsJpeg = await heicTo({
                             blob: file,
                             type: "image/jpeg",
@@ -90,6 +105,7 @@ const CreateCustomGamePage = () => {
                     } else if (file.size > MAX_FILESIZE_BYTES) {
                         throw new Error(`${file.name} too large`);
                     } else if (!acceptedImageTypesSchema.safeParse(file.type).success) {
+                        // This type validation doesn't work on HEIC, keep isHeic check early
                         throw new Error(`${file.name} is of an invalid file type.`);
                     } else {
                         return file;
@@ -101,6 +117,7 @@ const CreateCustomGamePage = () => {
             })
         );
 
+        // Separate errors from valid files
         for (const result of validFilePromises) {
             if (result.status === "fulfilled") {
                 validFiles.push(result.value);
@@ -111,12 +128,11 @@ const CreateCustomGamePage = () => {
         }
 
         setImageErrors(imageErrorsTemp);
-
         setSelectedFiles([...selectedFiles, ...validFiles]);
 
-        if (useImageNames)
-            setFileNames([
-                ...fileNames,
+        if (useFileNames)
+            setCharNames([
+                ...charNames,
                 ...validFiles.map((file) =>
                     file.name
                         .replace(/\.[^./]+$/, "")
@@ -126,11 +142,18 @@ const CreateCustomGamePage = () => {
             ]);
         else {
             const emptyFileNames = Array.from({ length: validFiles.length }).fill("") as string[];
-            setFileNames([...fileNames, ...emptyFileNames]);
+            setCharNames([...charNames, ...emptyFileNames]);
         }
         setIsLoading(false);
     };
 
+    /**
+     * Handles game creation workflow:
+     * 1. Compress images client-side
+     * 2. Request presigned S3 URLs from server
+     * 3. Upload images directly to S3
+     * 4. Rollback on failure
+     */
     const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
         e.stopPropagation();
@@ -149,13 +172,13 @@ const CreateCustomGamePage = () => {
             privacy: formData.get("privacy") as string,
             namesAndFileTypes: compressedFiles.map((f, i) => ({
                 type: f.type,
-                name: fileNames[i],
+                name: charNames[i],
             })),
         };
 
         let response;
-
         try {
+            // Request presigned S3 URLs + game metadata
             response = await fetch(`${env.VITE_SERVER_URL}/api/createNewGame`, {
                 method: "POST",
                 body: JSON.stringify(requestBody),
@@ -181,12 +204,15 @@ const CreateCustomGamePage = () => {
         }
 
         const validateCreateGameRes = createGameResponseSchema.safeParse(await response.json());
-
+        // Response contains the generated gameId and "gameItems": a list of objects with
+        // character names as key + obj containing upload url & generated imageIds (used in S3 key) as values
         if (validateCreateGameRes.success) {
             const createGameResData = validateCreateGameRes.data;
+
+            //Upload to S3
             const uploadPromises = compressedFiles.map((file, i) =>
-                fileNames[i] in createGameResData.gameItems
-                    ? fetch(createGameResData.gameItems[fileNames[i]].signedUrl, {
+                charNames[i] in createGameResData.gameItems
+                    ? fetch(createGameResData.gameItems[charNames[i]].signedUrl, {
                           method: "PUT",
                           body: file,
                           headers: {
@@ -205,9 +231,9 @@ const CreateCustomGamePage = () => {
             const uploadResponses = await Promise.allSettled(uploadPromises as Promise<Response>[]);
             log(uploadResponses);
 
+            // Verify upload responses, attempt rollback if any uplaods failed
             for (const response of uploadResponses) {
                 if (response.status !== "fulfilled" || !response.value.ok) {
-                    //Delete any created game data
                     await fetch(
                         `${env.VITE_SERVER_URL}/api/deleteGame/${createGameResData.gameId}`,
                         {
@@ -215,9 +241,7 @@ const CreateCustomGamePage = () => {
                             method: "DELETE",
                         }
                     );
-                    setErrorMsg(
-                        "Image uploads failed, server may be down or experiencing issues, please try again later."
-                    );
+                    setErrorMsg("Image uploads failed, please try again later.");
                     return;
                 }
             }
@@ -225,23 +249,22 @@ const CreateCustomGamePage = () => {
             setIsLoading(false);
             void navigate("/my-games");
         } else {
-            setErrorMsg("Client didn't understand server's response");
+            setErrorMsg("Client didn't understand server's response.");
             return;
         }
     };
 
     if (errorMsg) throw new Error(errorMsg);
-
     return (
         <>
             <form
-                className="max-sm:items-center-safe my-auto flex h-fit w-full justify-evenly max-sm:mt-5 max-sm:flex-col max-sm:px-1 sm:px-5"
+                className="max-sm:items-center-safe m-auto flex h-fit w-full justify-evenly max-sm:mt-5 max-sm:flex-col max-sm:px-1 sm:px-5"
                 onSubmit={(e) => {
                     void handleSubmit(e);
                 }}
             >
                 <div className="mr-5 w-[45%] max-w-3xl max-sm:w-full">
-                    {/* Step 1 */}
+                    {/* Step 1: Title */}
                     <div className="shadow-lg/25 border-b-7 bg-linear-to-b mb-3 rounded-lg border-x border-blue-600 from-blue-400 to-blue-500 to-75% p-4">
                         <label
                             htmlFor="title"
@@ -264,7 +287,7 @@ const CreateCustomGamePage = () => {
                             maxLength={20}
                         ></input>
                     </div>
-                    {/* Step 2 */}
+                    {/* Step 2: Image Uploads */}
                     <div className="shadow-lg/25 border-b-7 bg-linear-to-b my-5 rounded-lg border-x border-blue-600 from-blue-400 to-blue-500 to-75% p-4 max-2xl:my-3">
                         <label className="text-shadow-xs/75 m-auto block text-4xl font-medium text-white max-2xl:text-3xl max-md:text-center">
                             <div className="mr-3 inline-block h-11 w-11 content-center rounded-[50%] text-center align-middle font-bold text-amber-500">
@@ -274,12 +297,12 @@ const CreateCustomGamePage = () => {
                             </div>
                             Upload Images:
                         </label>
-
                         <Dropzone
                             fileHandler={(files) => {
                                 void handleFiles(files);
                             }}
                         />
+                        {/* Image upload errors */}
                         {imageErrors.length > 0 && (
                             <div className="shadow-xs max-h-23 mb-1 overflow-y-auto rounded-md border border-red-200 bg-red-50 p-2 shadow-red-50">
                                 {imageErrors.map((error, index) => (
@@ -289,11 +312,12 @@ const CreateCustomGamePage = () => {
                                 ))}
                             </div>
                         )}
+                        {/* Character names as file names toggle */}
                         <input
                             type="checkbox"
                             name="image-names"
                             className="ml-3 h-5 w-5 cursor-pointer appearance-auto border align-text-bottom accent-amber-500 shadow transition-all hover:shadow-md"
-                            checked={useImageNames}
+                            checked={useFileNames}
                             onChange={handleUseImageFilenames}
                         ></input>
                         <label
@@ -304,7 +328,7 @@ const CreateCustomGamePage = () => {
                             Use File Names as Character Names
                         </label>
                     </div>
-                    {/* Step 4 */}
+                    {/* Step 4: Privacy Settings */}
                     <div className="shadow-lg/25 border-b-7 bg-linear-to-b flex items-center justify-between whitespace-pre-wrap rounded-lg border-x border-blue-600 from-blue-400 to-blue-500 to-75% p-4 text-lg font-medium text-gray-900 max-sm:flex-col">
                         <div className="text-shadow-xs/75 ml-1 block text-4xl font-medium text-white max-2xl:text-3xl">
                             <div className="mr-3 inline-block h-11 w-11 content-center rounded-[50%] text-center align-middle font-bold text-amber-500">
@@ -353,7 +377,7 @@ const CreateCustomGamePage = () => {
                     </div>
                 </div>
                 <div className="max-w-4xl flex-1 max-sm:flex max-sm:flex-col">
-                    {/* Step 3 */}
+                    {/* Step 3: Character Names */}
                     <div className="shadow-lg/25 border-b-7 bg-linear-to-b mb-3 rounded-lg border-x border-blue-600 from-blue-400 to-blue-500 to-75% max-sm:mt-3 max-sm:p-3 sm:p-4">
                         <h3 className="text-shadow-xs/75 m-auto block text-4xl font-medium text-white max-2xl:text-3xl max-md:text-center">
                             <div className="mr-3 inline-block h-11 w-11 content-center rounded-[50%] text-center align-middle text-[4rem] font-bold leading-none text-amber-500">
@@ -364,6 +388,7 @@ const CreateCustomGamePage = () => {
                             {selectedFiles.length > 0
                                 ? "Character List: "
                                 : "Your Characters Will Appear Here:  "}
+                            {/* Clear list button */}
                             {selectedFiles.length > 0 ? (
                                 <button
                                     className="text-shadow-xs/40 active:shadow-2xs hover:shadow-sm/20 duration-15 hover:font-gray-200 shadow-md/20 mr-5 h-11 w-fit cursor-pointer rounded-md border-x border-b-8 border-amber-700 bg-amber-600 px-2 text-xl font-semibold text-white transition-all hover:border-amber-800 hover:bg-amber-700 active:-translate-y-px active:border-none sm:float-right"
@@ -378,6 +403,7 @@ const CreateCustomGamePage = () => {
                             )}
                         </h3>
                         <div className="sm:max-h-143 inset-shadow-xs mt-3 overflow-y-auto rounded-md bg-gray-50 shadow-sm">
+                            {/* Dynamic list of characters */}
                             {selectedFiles.length > 0 ? (
                                 selectedFiles.map((file, index) => (
                                     <div
@@ -406,11 +432,11 @@ const CreateCustomGamePage = () => {
                                         <div className="min-w-0 flex-1">
                                             <input
                                                 type="text"
-                                                value={fileNames[index] || ""}
+                                                value={charNames[index] || ""}
                                                 onChange={(e) => {
-                                                    const names = [...fileNames];
+                                                    const names = [...charNames];
                                                     names[index] = e.target.value;
-                                                    setFileNames(names);
+                                                    setCharNames(names);
                                                 }}
                                                 minLength={3}
                                                 maxLength={20}
@@ -429,6 +455,7 @@ const CreateCustomGamePage = () => {
                                 </p>
                             )}
                         </div>
+                        {/* Character/image min and max warnings */}
                         {selectedFiles.length > MAX_NUM_IMGS ? (
                             <p className="mt-2 rounded-md border border-red-400 bg-red-100 p-2 text-red-500">
                                 You have too many characters! There is a maximum of {MAX_NUM_IMGS}.
@@ -444,8 +471,9 @@ const CreateCustomGamePage = () => {
                             <></>
                         )}
                     </div>
+                    {/* Submit Button */}
                     <button
-                        className={`border-b-9 text-shadow-xs/100 active:shadow-2xs duration-15 shadow-md/15 float-right mb-2 mr-5 w-fit cursor-pointer rounded-md border-x px-4 text-3xl font-bold text-white transition-all active:-translate-y-px active:border-none ${isLoading ? "border-gray-800 bg-gray-700" : "border-green-700 bg-green-600 hover:border-green-800 hover:bg-green-700 hover:text-gray-200"} py-4 max-2xl:py-3 max-2xl:text-2xl max-sm:mx-auto`}
+                        className={`border-b-9 text-shadow-xs/100 active:shadow-2xs duration-15 shadow-md/15 float-right mb-2 mr-5 w-fit cursor-pointer rounded-md border-x px-4 text-3xl font-bold text-white transition-all active:translate-y-[3px] active:border-none ${isLoading ? "border-gray-800 bg-gray-700" : "border-amber-700 bg-amber-600 hover:border-amber-800 hover:bg-amber-700 hover:text-gray-200"} py-4 max-2xl:py-3 max-2xl:text-2xl max-sm:mx-auto`}
                         type="submit"
                         disabled={isLoading}
                     >
@@ -453,6 +481,7 @@ const CreateCustomGamePage = () => {
                     </button>
                 </div>
             </form>
+            {/* Rules Modal */}
             <ReactModal
                 isOpen={showRulesModal}
                 onRequestClose={() => setShowRulesModal(false)}
@@ -506,7 +535,7 @@ const CreateCustomGamePage = () => {
                 </p>
                 <button
                     onClick={() => setShowRulesModal(false)}
-                    className="border-b-9 text-shadow-xs/100 active:shadow-2xs duration-15 hover:shadow-xs mt-4 w-3/5 cursor-pointer rounded-md border-x border-green-700 bg-green-600 py-4 text-3xl font-bold text-white shadow-sm transition-all hover:border-green-800 hover:bg-green-700 hover:text-gray-200 active:-translate-y-px active:border-none max-2xl:w-1/2 max-2xl:py-3 max-2xl:text-2xl"
+                    className="border-b-9 text-shadow-xs/100 active:shadow-2xs duration-15 hover:shadow-xs mt-4 w-2/5 cursor-pointer rounded-md border-x border-green-700 bg-green-600 py-4 text-3xl font-bold text-white shadow-sm transition-all hover:border-green-800 hover:bg-green-700 hover:text-gray-200 active:-translate-y-px active:border-none max-2xl:w-1/2 max-2xl:py-3 max-2xl:text-2xl"
                 >
                     I Agree
                 </button>

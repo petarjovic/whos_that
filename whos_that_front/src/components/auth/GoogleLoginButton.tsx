@@ -7,6 +7,9 @@ interface GoogleLoginButtonProps {
     disable?: boolean;
 }
 
+/**
+ * Button component handling logging in or linking account with Google
+ */
 const GoogleLoginButton = ({
     text = "Login with Google",
     linkAccount = false,
@@ -14,6 +17,7 @@ const GoogleLoginButton = ({
 }: GoogleLoginButtonProps) => {
     const handleGoogleButtonClick = (e: React.MouseEvent<HTMLButtonElement>) => {
         e.preventDefault();
+
         try {
             if (linkAccount) void handleSocialLink(e, "google");
             else void handleSocialSignIn(e, "google");
@@ -30,6 +34,7 @@ const GoogleLoginButton = ({
                 disabled={disable}
                 onClick={handleGoogleButtonClick}
             >
+                {/* Google Logo */}
                 <div>
                     <svg
                         version="1.1"
@@ -57,6 +62,7 @@ const GoogleLoginButton = ({
                         <path fill="none" d="M0 0h48v48H0z"></path>
                     </svg>
                 </div>
+                {/* Button Text */}
                 <span>{text}</span>
             </button>
         </div>

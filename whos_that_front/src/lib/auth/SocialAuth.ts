@@ -1,3 +1,4 @@
+//Helper functions for sign in
 import type { FormEvent } from "react";
 import { authClient } from "./auth-client.ts";
 import type { SocialSignInProviders } from "../types.ts";

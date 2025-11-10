@@ -1,3 +1,4 @@
+//Zod schemas for validation, frontend types are inferred from this
 import { z } from "zod";
 
 export const winLoseFlagTypeSchema = z.boolean().nullable();

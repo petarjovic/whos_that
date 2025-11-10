@@ -3,6 +3,7 @@ import ReactModal from "react-modal";
 
 const VISITED_BEFORE = "hasVisitedBefore";
 
+/* Modal pop up shown to uysers on first time visit to site */
 const FirstVisitModal = () => {
     const [isOpen, setIsOpen] = useState(false);
     const [showGameplay, setShowGameplay] = useState(false);

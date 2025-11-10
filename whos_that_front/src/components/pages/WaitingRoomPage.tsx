@@ -1,5 +1,9 @@
 import loadingSpinner from "../../assets/BeanEaterLoadingSpinner.svg";
 
+/**
+ * Waiting page displayed while waiting for second player to join
+ * Shows room code for opponent to use
+ */
 const WaitingRoom = ({ gameId }: { gameId: string }) => {
     return (
         <>

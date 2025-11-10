@@ -10,16 +10,22 @@ import env from "../../lib/zodEnvSchema.ts";
 import { logError, log } from "../../lib/logger.ts";
 import LoadingSpinner from "../misc/LoadingSpinner.tsx";
 
+/**
+ * Admin dashboard for managing all games (public and private)
+ * Only accessible to users with admin role
+ */
 const AdminPage = () => {
     const navigate = useNavigate();
     const [premadeGamesList, setPremadeGamesList] = useState<PresetInfo>([]);
-    const { session, isPending } = useBetterAuthSession();
-    const [errorMsg, setErrorMsg] = useState("");
+    const [errorMsg, setErrorMsg] = useState(""); //Used to throw error if set to non-empty string
     const [isLoading, setIsLoading] = useState(true);
 
-    //Fetch games
+    const { session, isPending } = useBetterAuthSession();
+
+    // Verify admin access and fetch all games
     useEffect(() => {
         console.log(session?.user.role);
+        // Redirect non-admin users to 404
         if (!isPending && (!session || session.user.role !== "admin")) void navigate("/404");
         else if (!isPending) {
             const getPremadeGames = async () => {
@@ -54,6 +60,10 @@ const AdminPage = () => {
         }
     }, [session, isPending, navigate]);
 
+    /**
+     * Handles admin actions on games (delete and change privacy)
+     * Nearly the same as handleGameSettings func in ShowPremadeGames.tsx
+     */
     const handleGameSettings = async (
         e: React.ChangeEvent<HTMLSelectElement>,
         gameId: string,
@@ -66,8 +76,8 @@ const AdminPage = () => {
 
         switch (opt) {
             case "Delete Game": {
+                // TODO: replace confirmation with custom modal
                 const confirmed = confirm(
-                    //Redo this one day!
                     `Are you sure you want to delete ${title}? This action cannot be undone!`
                 );
                 if (confirmed) {
@@ -94,10 +104,11 @@ const AdminPage = () => {
                     }
                 } else break;
             }
-            case "Make Public":
+
+            case "Make Public": //Catch both cases since logic is the same
             case "Make Private": {
                 try {
-                    console.log("Making Private");
+                    log("Making Private");
                     const response = await fetch(
                         `${env.VITE_SERVER_URL}/api/admin/switchPrivacy/${gameId}`,
                         {

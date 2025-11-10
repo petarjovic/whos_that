@@ -9,6 +9,10 @@ interface CardLayoutProps {
     isGame?: boolean;
 }
 
+/**
+ * Reused card layout component
+ * Adapts styling based on whether it's in-game (including signfiying opponent's card), or browsing
+ */
 export const CardLayout = ({
     children,
     name,
@@ -20,16 +24,19 @@ export const CardLayout = ({
         <figure
             className={`border-3 shadow-xs/15 ${isGame || isOppCard ? "my-0.75 h-72 w-48 max-xl:h-60 max-xl:w-40" : "h-91 w-59 my-2 max-xl:h-72 max-xl:w-48"} mx-1 flex flex-col justify-between overflow-hidden rounded-lg ${isOppCard ? "animate-[flash-attention_2s_ease-in-out_1] border-orange-300 bg-orange-300" : "hover:shadow-xl/25 border-gray-200 bg-gray-200 hover:-translate-y-px"} text-center transition-shadow`}
         >
+            {/* Image takes up 84.5% of card height */}
             <img
                 className="rounded-xs h-[84.5%] max-h-[85%] bg-gray-300 object-fill"
                 src={imgSrc}
                 alt={name}
             />
+            {/* This is used for character names and game names, height is 4.5%  */}
             <figcaption
-                className={` ${isGame || isOppCard ? "bottom-0 text-base" : "bottom-0.5 text-lg hover:text-blue-500 max-lg:text-base"} relative m-auto h-[4.5%] w-full text-center font-semibold leading-none text-gray-800`}
+                className={` ${isGame || isOppCard ? "bottom-0 text-base" : "bottom-0 text-lg hover:text-blue-500 max-lg:text-base"} relative m-auto h-[4.5%] w-full text-center font-semibold leading-none text-gray-800`}
             >
                 {name}
             </figcaption>
+            {/* Children slot (11% height remaining) for in-game controls or metadata */}
             {children}
         </figure>
     );
@@ -40,9 +47,12 @@ interface CardProps {
     imgSrc: string;
     winner: boolean;
     openConfirmModal: (win: boolean, name: string) => void;
-    resetOnNewGame: EndStateType;
+    resetOnNewGame: EndStateType; // Triggers card reset when game ends
     isGame?: boolean;
 }
+/**
+ * Interactive game card with hide/unhide (flip) and "guess" functionality
+ */
 export const Card = ({
     name,
     imgSrc,
@@ -53,6 +63,7 @@ export const Card = ({
 }: CardProps) => {
     const [flipped, setFlipped] = useState(false);
 
+    // Reset card visibility when new game starts (empty string = no end state)
     useEffect(() => {
         if (resetOnNewGame.length === 0) setFlipped(false);
     }, [resetOnNewGame]);
@@ -64,7 +75,9 @@ export const Card = ({
                 imgSrc={flipped ? undefined : imgSrc}
                 isGame={isGame}
             >
-                <div className="border-t-3 box-content flex h-[9.5%] justify-between border-gray-200">
+                {/* In game controls for hiding and guessing characters */}
+                <div className="border-t-3 h-1/10 box-content flex justify-between border-gray-200">
+                    {/* Guess Button */}
                     <button
                         className={`border-r-3 text-shadow-xs text-md h-full w-[35%] cursor-pointer rounded-sm border-gray-200 bg-green-600 px-1 text-center font-semibold text-neutral-100 transition-all hover:bg-green-800 max-2xl:text-sm ${flipped ? "hidden" : ""}`}
                         onClick={() => {
@@ -74,9 +87,11 @@ export const Card = ({
                     >
                         Guess
                     </button>
+                    {/* Visual separator */}
                     <div className="relative top-0.5 m-auto text-center align-sub text-lg max-2xl:text-sm">
                         ❓
                     </div>
+                    {/* Hide/Unhide Button */}
                     <button
                         className="border-l-3 text-md h-full w-[35%] cursor-pointer rounded-md border-gray-200 bg-red-600 px-1 text-center font-semibold text-neutral-100 hover:bg-red-800 max-2xl:text-sm"
                         onClick={() => {
@@ -91,6 +106,9 @@ export const Card = ({
     );
 };
 
+/**
+ * Special card showing which character the opponent needs to guess
+ */
 export const OpponentTargetCard = ({ name, imgSrc }: { name: string; imgSrc: string }) => {
     return (
         <CardLayout name={name} imgSrc={imgSrc} isOppCard={true}>

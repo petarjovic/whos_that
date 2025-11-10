@@ -6,6 +6,10 @@ interface HeroProps extends AuthData {
     showUserInfo?: boolean;
 }
 
+/**
+ * Header component with site title and user authentication controls
+ * showUserInfo can be disabled for error pages
+ */
 const Hero = ({ session, isPending, showUserInfo = true }: HeroProps) => {
     const navigate = useNavigate();
 
@@ -20,14 +24,16 @@ const Hero = ({ session, isPending, showUserInfo = true }: HeroProps) => {
 
     return (
         <header className="bg-linear-to-b h-30 border-b-11 max-2xl:h-22 relative flex w-full items-center justify-center rounded-b-[40%] border-blue-600 from-blue-400 to-blue-500 px-[13%] shadow-lg max-xl:justify-between max-sm:h-fit max-sm:flex-col max-sm:pb-3">
+            {/* Site title */}
             <h1 className="mt-2 w-fit text-center">
                 <Link
                     to={"/"}
                     id="title"
-                    reloadDocument={true}
+                    reloadDocument={true} //forces reload just in case
                     className="font-digitag text-shadow-md/85 max-lg:leading-0 cursor-pointer whitespace-pre-wrap text-9xl font-bold tracking-wide text-orange-300 hover:text-orange-400 max-2xl:text-8xl max-lg:text-[4.2rem] max-sm:text-7xl"
                 >
                     <>
+                        {/* Spans are for improved spacing + styling */}
                         W<span />
                         ho
                         <span className="font-sedgwick align-sub leading-none tracking-tighter">
@@ -42,6 +48,7 @@ const Hero = ({ session, isPending, showUserInfo = true }: HeroProps) => {
                     </>
                 </Link>
             </h1>
+            {/* User authentication info and controls */}
             <div className="lg:absolute lg:right-[12%] lg:top-1/2 lg:-translate-y-1/2">
                 {showUserInfo ? (
                     <h2 className="items-center-safe flex justify-end">

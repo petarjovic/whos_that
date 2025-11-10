@@ -9,18 +9,18 @@ interface GameProps {
     emitPlayAgain: () => void;
     emitGuess: (guessCorrectness: boolean) => void;
     endState: EndStateType;
-    winningKey: number;
-    oppWinningKey: number;
+    winningKey: number; // Character index this player needs to guess
+    oppWinningKey: number; // Character index opponent needs to guess
     cardData: CardDataUrlType[];
     title: string;
 }
 
-type ConfirmGuessModal = { isOpen: false } | { isOpen: true; isWinner: boolean; name: string };
+type ConfirmGuessModalState = { isOpen: false } | { isOpen: true; isWinner: boolean; name: string };
 
 interface gridColsTailwind {
     [key: number]: string;
 }
-
+// Map of grid column counts to Tailwind classes (Tailwind requires this)
 const GridColsClasses: gridColsTailwind = {
     1: "xl:grid-cols-1",
     2: "xl:grid-cols-2",
@@ -36,6 +36,10 @@ const GridColsClasses: gridColsTailwind = {
     12: "xl:grid-cols-12",
 } as const;
 
+/**
+ * Main game component displaying character grid and opponent's target
+ * Handles guess confirmation and play again requests
+ */
 const Game = ({
     emitPlayAgain,
     emitGuess,
@@ -45,12 +49,13 @@ const Game = ({
     cardData,
     title,
 }: GameProps) => {
-    const [confirmGuessModal, setConfirmGuessModal] = useState<ConfirmGuessModal>({
+    const [confirmGuessModal, setConfirmGuessModal] = useState<ConfirmGuessModalState>({
         isOpen: false,
     });
 
+    // Calc num grid cols for consistent layout ("+ 3" is a heuristic I found works)
     let numGridCols = Math.ceil(Math.sqrt(cardData.length)) + 3;
-    if (numGridCols > 12) numGridCols = 12; //Just in case
+    if (numGridCols > 12) numGridCols = 12;
 
     const handleConfirmGuessModalResult = (cofirmGuess: boolean) => {
         if (cofirmGuess && confirmGuessModal.isOpen) emitGuess(confirmGuessModal.isWinner);
@@ -65,6 +70,7 @@ const Game = ({
         emitPlayAgain();
     };
 
+    // Create list of character card components
     const cardList = cardData.map(({ imageUrl, name, orderIndex }) => (
         <Card
             name={name}
@@ -75,26 +81,30 @@ const Game = ({
             resetOnNewGame={endState}
             isGame={true}
         />
-    ));
+    )); // Separate last row of list for layout purposes
     const lastRow = cardList.splice(cardList.length - (cardData.length % numGridCols));
 
     const oppTargetCardData = cardData.find((card) => card.orderIndex === oppWinningKey);
-
     if (!oppTargetCardData) {
+        //Sanity check
         throw new Error("Cannot find opponent's card data.");
     }
 
     return (
         <>
+            {/* Game Title */}
             <p className="font-times text-shadow-sm/100 my-2 w-full text-center text-[4.2rem] leading-none tracking-wider text-white max-2xl:text-5xl max-md:text-4xl">
                 {title}
             </p>
+            {/* Game Board */}
+            {/* Styled as grid on large screens, as flexbox on small screens */}
             <div
                 id="gameboard"
                 className={`mb-2.5 px-10 max-2xl:px-5 xl:grid ${GridColsClasses[numGridCols]} w-full justify-center justify-items-center gap-2 max-xl:flex max-xl:flex-wrap max-xl:justify-between`}
             >
                 {cardList}
             </div>
+            {/* Last Row of Cards: is always flexbox for better visuals */}
             <div className="mb-1 flex w-full flex-wrap justify-evenly px-10 max-2xl:px-4">
                 {lastRow}
                 <OpponentTargetCard
@@ -102,9 +112,10 @@ const Game = ({
                     imgSrc={oppTargetCardData.imageUrl}
                 />
             </div>
+            {/* Modals */}
             <div>
                 <GameEndModal endState={endState} handlePlayAgain={handlePlayAgain} />
-                <ConfirmGuessModal
+                <ConfirmGuessModalState
                     isOpen={confirmGuessModal.isOpen}
                     confirmGuess={handleConfirmGuessModalResult}
                     name={confirmGuessModal.isOpen ? confirmGuessModal.name : ""}
@@ -119,12 +130,17 @@ interface GameEndModalProps {
     handlePlayAgain: () => void;
 }
 
+/**
+ * Modal shown when game ends with win/loss message
+ * Allows play again or exit to home
+ */
 const GameEndModal = ({ endState, handlePlayAgain }: GameEndModalProps) => {
     let paraText = "";
     let headingText = "";
     const navigate = useNavigate();
     const [playAgainSent, setPlayAgainSent] = useState(false);
 
+    // Reset button state when new game starts
     useEffect(() => {
         setPlayAgainSent(false);
     }, [endState]);
@@ -196,7 +212,11 @@ interface ConfirmGuessModalProps {
     name: string;
 }
 
-const ConfirmGuessModal = ({ isOpen, confirmGuess, name }: ConfirmGuessModalProps) => {
+/**
+ * Confirmation modal before submitting a guess
+ * Prevents accidental wrong guesses that end the game
+ */
+const ConfirmGuessModalState = ({ isOpen, confirmGuess, name }: ConfirmGuessModalProps) => {
     return (
         <ReactModal
             isOpen={isOpen}

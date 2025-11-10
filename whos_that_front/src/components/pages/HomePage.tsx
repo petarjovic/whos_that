@@ -1,7 +1,10 @@
 import { useNavigate } from "react-router";
 import { useState } from "react";
-import FirstVisitModal from "../misc/FirstVisitModal.tsx"; // Add this import
+import FirstVisitModal from "../misc/FirstVisitModal.tsx";
 
+/**
+ * Landing page with option to "create new game" or "join existing game" via room code
+ */
 const HomePage = () => {
     const [gameIdToJoin, setGameIdToJoin] = useState("");
     const navigate = useNavigate();
@@ -13,8 +16,9 @@ const HomePage = () => {
 
     return (
         <div className="my-auto text-center max-sm:min-h-screen">
+            {/* Navigating to game */}
             <button
-                className="border-b-9 border-x-1 text-shadow-xs/80 active:border-b-1 active:shadow-2xs duration-15 hover:text-shadow-none hover:shadow-xs max-sm:mt-25 w-fit cursor-pointer rounded-md border-blue-600 bg-blue-500 px-5 py-5 text-3xl font-bold text-white shadow-sm transition-all hover:border-blue-700 hover:bg-blue-600 hover:text-gray-100 active:translate-y-[1px] max-2xl:px-4 max-2xl:py-3 max-2xl:text-2xl"
+                className="border-b-9 text-shadow-xs/80 active:shadow-2xs duration-15 hover:text-shadow-none hover:shadow-xs max-sm:mt-25 w-fit cursor-pointer rounded-md border-x border-blue-600 bg-blue-500 px-5 py-5 text-3xl font-bold text-white shadow-sm transition-all hover:border-blue-700 hover:bg-blue-600 hover:text-gray-100 active:translate-y-px active:border-b max-2xl:px-4 max-2xl:py-3 max-2xl:text-2xl"
                 onClick={() => {
                     void navigate("/create-game");
                 }}
@@ -24,6 +28,7 @@ const HomePage = () => {
             <p className="font-digitag mt-35 text-shadow-sm/80 text-5xl font-bold tracking-wider text-white max-2xl:mt-28 max-2xl:text-4xl">
                 OR
             </p>
+            {/* Form for joining room using code */}
             <form
                 className="mt-35 max-sm:mt-18 items-center max-2xl:mt-28"
                 onSubmit={handleJoinExistingGame}
@@ -43,13 +48,14 @@ const HomePage = () => {
                     }}
                 />
                 <button
-                    className="border-b-9 border-x-1 text-shadow-xs/50 active:border-b-1 active:shadow-2xs duration-15 hover:text-shadow-none hover:shadow-xs px-4.5 mx-4 w-fit cursor-pointer rounded-md border-blue-600 bg-blue-500 py-3.5 text-2xl font-bold text-white shadow-sm transition-all hover:border-blue-700 hover:bg-blue-600 hover:text-gray-100 active:translate-y-[1px] max-2xl:px-4 max-2xl:py-3 max-2xl:text-xl"
+                    className="border-b-9 text-shadow-xs/50 active:shadow-2xs duration-15 hover:text-shadow-none hover:shadow-xs px-4.5 mx-4 w-fit cursor-pointer rounded-md border-x border-blue-600 bg-blue-500 py-3.5 text-2xl font-bold text-white shadow-sm transition-all hover:border-blue-700 hover:bg-blue-600 hover:text-gray-100 active:translate-y-px active:border-b max-2xl:px-4 max-2xl:py-3 max-2xl:text-xl"
                     type="submit"
                 >
                     Join Game
                 </button>
             </form>
-            <p className="text-shadow-xs/100 font-digitag fixed bottom-2 left-0 w-full text-center text-xl text-white hover:cursor-default max-2xl:text-lg">
+            {/* Creator Signature */}
+            <p className="text-shadow-xs/100 font-digitag fixed bottom-2 left-0 w-full text-center text-xl text-white hover:cursor-default max-2xl:text-lg max-sm:hidden">
                 P<span className="font-digitag tracking-widest">eta</span>r Jovic was here
             </p>
             <FirstVisitModal />

@@ -1,3 +1,4 @@
+//BetterAuth client-side
 import { createAuthClient } from "better-auth/react";
 import { usernameClient, adminClient } from "better-auth/client/plugins";
 import env from "../zodEnvSchema.ts";

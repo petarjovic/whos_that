@@ -1,3 +1,4 @@
+//Loading spinner svg
 const LoadingSpinner = () => {
     return (
         <div role="status" className="my-10 ml-[50%] text-center">

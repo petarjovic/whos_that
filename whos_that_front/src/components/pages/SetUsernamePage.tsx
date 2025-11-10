@@ -4,14 +4,19 @@ import { useBetterAuthSession } from "../../lib/LayoutContextProvider.ts";
 import { authClient } from "../../lib/auth/auth-client.ts";
 import { logError } from "../../lib/logger.ts";
 
+/**
+ * One-time username setup page shown after initial account creation
+ * Redirects away if user is not logged in or already has a username
+ */
 const SetUsernamePage = () => {
     const navigate = useNavigate();
     const [username, setUsername] = useState("");
-    const [error, setError] = useState("");
+    const [error, setError] = useState(""); //Error msg displayed to user
     const [isSubmitting, setIsSubmitting] = useState(false);
     const { session, isPending } = useBetterAuthSession();
 
     useEffect(() => {
+        // Redirect if not logged in or username already set
         if (!isPending && (!session || session.user.username)) {
             void navigate("/");
         }
@@ -19,7 +24,7 @@ const SetUsernamePage = () => {
 
     if (isPending) return <div>Loading...</div>;
 
-    const handleSubmit = async (e: FormEvent) => {
+    const handleSubmitUsername = async (e: FormEvent) => {
         e.preventDefault();
         setIsSubmitting(true);
 
@@ -39,7 +44,7 @@ const SetUsernamePage = () => {
     };
 
     return (
-        <div className="shadow-2xl/40 my-35 bg-linear-to-b border-x-1 border-b-10 mx-auto w-2/5 max-w-xl rounded-lg border-blue-600 from-blue-400 to-blue-500 to-50% p-8 text-white">
+        <div className="shadow-2xl/40 my-35 bg-linear-to-b border-b-10 mx-auto w-2/5 max-w-xl rounded-lg border-x border-blue-600 from-blue-400 to-blue-500 to-50% p-8 text-white">
             <h2 className="text-shadow-xs/100 mb-5 text-center text-4xl font-bold text-orange-300">
                 Choose Your <span className="text-orange-300">Username</span>
             </h2>
@@ -50,7 +55,7 @@ const SetUsernamePage = () => {
             <form
                 className="text-center"
                 onSubmit={(e) => {
-                    void handleSubmit(e);
+                    void handleSubmitUsername(e);
                 }}
             >
                 {error.length > 0 ? (
@@ -86,7 +91,7 @@ const SetUsernamePage = () => {
 
                 <button
                     type="submit"
-                    className="border-x-1 text-shadow-xs/100 active:shadow-2xs hover:shadow-xs/15 shadow-sm/20 duration-15 hover:font-gray-200 w-fit cursor-pointer rounded-md border-b-8 border-amber-600 bg-amber-500 px-20 py-2 text-xl font-semibold text-white transition-all hover:border-amber-700 hover:bg-amber-600 active:translate-y-[1px] active:border-none"
+                    className="text-shadow-xs/100 active:shadow-2xs hover:shadow-xs/15 shadow-sm/20 duration-15 hover:font-gray-200 w-fit cursor-pointer rounded-md border-x border-b-8 border-amber-600 bg-amber-500 px-20 py-2 text-xl font-semibold text-white transition-all hover:border-amber-700 hover:bg-amber-600 active:translate-y-px active:border-none"
                     disabled={isSubmitting}
                 >
                     {isSubmitting ? "Setting Username..." : "Continue"}

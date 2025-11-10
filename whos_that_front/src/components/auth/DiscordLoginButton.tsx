@@ -7,6 +7,9 @@ interface DiscordLoginButtonProps {
     disable?: boolean;
 }
 
+/**
+ * Button component handling logging in or linking account with Discord
+ */
 const DiscordLoginButton = ({
     text = "Login with Discord",
     linkAccount = false,
@@ -14,6 +17,7 @@ const DiscordLoginButton = ({
 }: DiscordLoginButtonProps) => {
     const handleDiscordButtonClick = (e: React.MouseEvent<HTMLButtonElement>) => {
         e.preventDefault();
+
         try {
             if (linkAccount) void handleSocialLink(e, "discord");
             else void handleSocialSignIn(e, "discord");
@@ -30,6 +34,7 @@ const DiscordLoginButton = ({
             onClick={handleDiscordButtonClick}
             disabled={disable}
         >
+            {/* Discord Logo */}
             <div>
                 <svg
                     className="h-6.5 w-6.5 mr-2.5 max-2xl:h-6 max-2xl:w-6"
@@ -49,7 +54,7 @@ const DiscordLoginButton = ({
                     </g>
                 </svg>
             </div>
-
+            {/* Button Text */}
             <span className="font-semibold">{text}</span>
         </button>
     );

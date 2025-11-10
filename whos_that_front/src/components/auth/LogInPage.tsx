@@ -1,9 +1,12 @@
 import GoogleLoginButton from "./GoogleLoginButton";
 import DiscordLoginButton from "./DiscordLoginButton";
 
+/**
+ * Login page offering SSO via Discord and Google
+ */
 const LogInPage = () => {
     return (
-        <div className="shadow-2xl/40 my-35 bg-linear-to-b w-xl border-x-1 border-b-10 mx-auto rounded-lg border-blue-700 from-blue-400 to-blue-600 px-12 py-8 text-white max-sm:flex max-sm:max-w-xs max-sm:flex-col">
+        <div className="shadow-2xl/40 my-35 bg-linear-to-b w-xl border-b-10 mx-auto rounded-lg border-x border-blue-700 from-blue-400 to-blue-600 px-12 py-8 text-white max-sm:flex max-sm:max-w-xs max-sm:flex-col">
             <h2 className="text-shadow-xs/100 mb-5 text-center text-5xl font-bold text-white max-2xl:text-4xl">
                 Log In
             </h2>

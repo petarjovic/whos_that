@@ -1,5 +1,6 @@
 import { useState } from "react";
 
+/* Dropzone component for image uploads */
 const Dropzone = ({ fileHandler }: { fileHandler: (files: FileList) => void }) => {
     const [isDragOver, setIsDragOver] = useState(false);
 

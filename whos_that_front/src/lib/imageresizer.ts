@@ -8,7 +8,11 @@ import { logError } from "./logger.ts";
  * @param maxHeight - Maximum height in pixels
  * @returns Promise resolving to resized File
  */
-export const resizeImage = async (file: File, maxWidth = 490, maxHeight = 750): Promise<File> => {
+export const resizeImage = async (
+    file: File,
+    maxWidth: number,
+    maxHeight: number
+): Promise<File> => {
     const pica = new Pica();
     const objectUrl = URL.createObjectURL(file);
 
@@ -51,13 +55,14 @@ export const resizeImage = async (file: File, maxWidth = 490, maxHeight = 750): 
         // Resize with Pica
         await pica.resize(sourceCanvas, targetCanvas);
 
-        // Convert to blob then File
+        // Convert to blob
         const blob = await pica.toBlob(targetCanvas, file.type);
 
-        //clean up canvases
+        // Clean up canvases
         ctxSource.clearRect(0, 0, sourceCanvas.width, sourceCanvas.height);
         ctxTarget.clearRect(0, 0, targetCanvas.width, targetCanvas.height);
 
+        // Convert blob to file
         return new File([blob], file.name, {
             type: file.type,
             lastModified: Date.now(),
@@ -75,14 +80,14 @@ export const resizeImage = async (file: File, maxWidth = 490, maxHeight = 750): 
 /**
  * Resizes multiple images
  * @param files - Array of image files to resize
- * @param maxWidth - Maximum width in pixels (default 224)
- * @param maxHeight - Maximum height in pixels (default 344)
+ * @param maxWidth - Maximum width in pixels
+ * @param maxHeight - Maximum height in pixels
  * @returns Promise resolving to array of resized Files
  */
 export const resizeImages = async (
     files: File[],
-    maxWidth = 224,
-    maxHeight = 344
+    maxWidth = 333,
+    maxHeight = 500
 ): Promise<File[]> => {
     const results = await Promise.all(files.map((file) => resizeImage(file, maxWidth, maxHeight)));
     return results;

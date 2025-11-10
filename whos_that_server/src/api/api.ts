@@ -316,7 +316,7 @@ export function setupApiRoutes(app: Express) {
     });
 
     /**
-     * Toggles like status for a game (like if not liked, unlike if already liked)
+     * Toggles like status in db for a game (like if not liked, unlike if already liked)
      * @route PUT /api/likeGame/:gameId
      * @returns Success message
      */
@@ -353,14 +353,15 @@ export function setupApiRoutes(app: Express) {
                 return res.status(400).json({ message: "Cannot like your own game." });
             }
 
-            // Toggle like status
             if (gameAuthorandLikeStatus.likeId === null) {
+                //insert like in gameLikes table if not liked
                 await db.insert(schema.gameLikes).values({
                     gameId: req.params.gameId,
                     userId: session.user.id,
                 });
                 return res.status(200).json({ message: "Liked game." });
             } else {
+                //delete like in gameLikes if already liked
                 await db
                     .delete(schema.gameLikes)
                     .where(

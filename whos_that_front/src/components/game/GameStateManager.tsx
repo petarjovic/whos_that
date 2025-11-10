@@ -10,13 +10,19 @@ import { serverResponseSchema } from "../../lib/zodSchema.ts";
 import env from "../../lib/zodEnvSchema.ts";
 import { logError, log } from "../../lib/logger.ts";
 
+/**
+ * Manages game state and Socket.IO connection lifecycle
+ * Handles both creating new games and joining existing ones
+ */
 const GameStateManager = ({ isNewGame }: { isNewGame: boolean }) => {
     const navigate = useNavigate();
     let { joinGameId = "" } = useParams();
+    // Filter out invalid route param that shouldn't be treated as game ID
     if (joinGameId === "getImageAction") joinGameId = "";
     const [gameId, setGameId] = useState(joinGameId);
     const [title, setTitle] = useState("");
     const [searchParams] = useSearchParams();
+    // Initialize with preset from URL query param if present
     const [gameState, setGameState] = useState<GameStateType>({
         players: ["", ""],
         playAgainReqs: [false, false],
@@ -28,12 +34,17 @@ const GameStateManager = ({ isNewGame }: { isNewGame: boolean }) => {
     const [errorMsg, setErrorMsg] = useState("");
     const [cardData, setCardData] = useState<CardDataUrlType[]>([]);
 
+    /**
+     * Determines which player slot this client occupies (0 or 1)
+     * Returns -1 if socket not connected or player not in game
+     */
     const getPlayerIndex = (): number => {
         if (!socket.id) return -1;
         const index = gameState.players.indexOf(socket.id);
         return index;
     };
 
+    // Fetch game data (images and metadata) when preset is available
     useEffect(() => {
         const fetchImages = async () => {
             if (gameState.preset) {
@@ -61,6 +72,7 @@ const GameStateManager = ({ isNewGame }: { isNewGame: boolean }) => {
         void fetchImages();
     }, [gameState.preset]);
 
+    // Set up Socket.IO connection and event listeners
     useEffect(() => {
         socket.connect();
 
@@ -96,6 +108,7 @@ const GameStateManager = ({ isNewGame }: { isNewGame: boolean }) => {
             setErrorMsg(message);
         });
 
+        // Cleanup: remove listeners and disconnect on unmount
         return () => {
             socket.off("connect_error");
             socket.off("receiveOppGuess");
@@ -107,7 +120,7 @@ const GameStateManager = ({ isNewGame }: { isNewGame: boolean }) => {
         };
     }, []);
 
-    //Handle creating a new game
+    // Create new game once card data is loaded
     useEffect(() => {
         if (isNewGame && cardData.length > 0) {
             socket.emit("createGame", gameState.preset, cardData.length, (id, response) => {
@@ -122,7 +135,7 @@ const GameStateManager = ({ isNewGame }: { isNewGame: boolean }) => {
         }
     }, [isNewGame, cardData.length, navigate, gameState.preset]);
 
-    //Handle joining an existing game
+    // Join existing game using room ID from URL
     useEffect(() => {
         if (!isNewGame) {
             socket.emit("joinGame", gameId, (gameData, response) => {
@@ -153,6 +166,7 @@ const GameStateManager = ({ isNewGame }: { isNewGame: boolean }) => {
     };
 
     if (errorMsg) throw new Error(errorMsg);
+    // Show waiting room until both players connected and data loaded
     else if (gameState.players.includes("") || cardData.length === 0)
         return <WaitingRoom gameId={gameId} />;
     else {
@@ -160,6 +174,7 @@ const GameStateManager = ({ isNewGame }: { isNewGame: boolean }) => {
         if (playerIndex === -1) {
             throw new Error("Socket not connected or this player is somehow not in room.");
         }
+        // Pass opponent's target as oppWinningKey, player's own target as winningKey
         return (
             <Game
                 emitPlayAgain={emitPlayAgain}
