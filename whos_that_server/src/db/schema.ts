@@ -1,3 +1,5 @@
+// Drizzle schema for non-auth related parts of database
+// Source of truth for database
 import { pgTable, text, timestamp, boolean, integer, unique } from "drizzle-orm/pg-core";
 import { user } from "./auth-schema.ts";
 

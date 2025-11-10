@@ -7,6 +7,13 @@ import * as schema from "../db/schema.ts";
 import { nanoid } from "nanoid";
 import env from "../config/zod/zodEnvSchema.ts";
 
+/**
+ * Constructs the S3 object key for a game image
+ * @param isPublic - Whether the game is public or private
+ * @param gameId - The game ID
+ * @param gameItemId - The game item (image) ID
+ * @returns S3 object key path
+ */
 export const constructS3ImageKey = (
     isPublic: boolean,
     gameId: string,
@@ -16,6 +23,13 @@ export const constructS3ImageKey = (
     return `premadeGames/${privacyStr}/${gameId}/${gameItemId}`;
 };
 
+/**
+ * Constructs the full URL for a game image
+ * @param isPublic - Whether the game is public or private
+ * @param gameId - The game ID
+ * @param gameItemId - The game item (image) ID
+ * @returns Full image URL
+ */
 export const constructImageUrl = (
     isPublic: boolean,
     gameId: string,
@@ -31,6 +45,13 @@ export const constructImageUrl = (
     }
 };
 
+/**
+ * Converts character data lists with Ids, character data lists with Urls
+ * @param cardDataIdList - Array of card data with item IDs {name, orderIndex, imageId}[]
+ * @param isPublic - Whether the game is public or private
+ * @param gameId - The game ID
+ * @returns Array of card data with image URLs {name, orderIndex, imageUrl}[]
+ */
 export const cardDataIdToUrl = (
     cardDataIdList: CardDataIdType[],
     isPublic: boolean,
@@ -45,7 +66,12 @@ export const cardDataIdToUrl = (
     });
 };
 
-export async function getGameWithItems(gameId: string) {
+/**
+ * Retrieves game's privacy setting and all associated image IDs
+ * @param gameId - The game ID
+ * @returns Array with game privacy status and image IDs
+ */
+export async function getPrivacySettingAndImageIds(gameId: string) {
     return await db
         .select({
             isPublic: schema.games.isPublic,
@@ -57,12 +83,19 @@ export async function getGameWithItems(gameId: string) {
         .groupBy(schema.games.id);
 }
 
+/**
+ * Deletes game's images from S3 bucket and invalidates CloudFront cache
+ * @param gameId - The game ID
+ * @param isPublic - Whether the game is public or private
+ * @param imageIds - Array of image IDs to delete
+ */
 export async function deleteImagesFromBucketAndCF(
     gameId: string,
     isPublic: boolean,
     imageIds: string[]
 ) {
     if (imageIds.length > 0 && imageIds[0]) {
+        // Delete images from S3
         const delS3ObjsCommand = new DeleteObjectsCommand({
             Bucket: S3_BUCKET_NAME,
             Delete: {
@@ -79,6 +112,7 @@ export async function deleteImagesFromBucketAndCF(
             );
         }
 
+        // Invalidate CloudFront cache
         if (USE_CLOUDFRONT) {
             const cFCacheInvalidationCommand = new CreateInvalidationCommand({
                 DistributionId: env.AWS_CF_DISTRIBUTION_ID,
@@ -99,6 +133,13 @@ export async function deleteImagesFromBucketAndCF(
     }
 }
 
+/**
+ * Moves game images between public and private folders in S3
+ * @param gameId - The game ID
+ * @param oldIsPublic - Current privacy status
+ * @param newIsPublic - New privacy status
+ * @param imageIds - Array of image IDs to move
+ */
 export async function switchPrivacySettings(
     gameId: string,
     oldIsPublic: boolean,
@@ -106,6 +147,7 @@ export async function switchPrivacySettings(
     imageIds: string[]
 ) {
     if (imageIds.length > 0 && imageIds[0]) {
+        // Copy images to new folder
         const s3ImageCopyingPromises = imageIds.map((imageId) => {
             const oldKey = constructS3ImageKey(oldIsPublic, gameId, imageId);
             const newKey = constructS3ImageKey(newIsPublic, gameId, imageId);
@@ -119,6 +161,8 @@ export async function switchPrivacySettings(
         });
 
         const copyResults = await Promise.allSettled(s3ImageCopyingPromises);
+
+        // Attempt rollback if any copy operation failed
         if (copyResults.some((p) => p.status === "rejected")) {
             await s3.send(
                 new DeleteObjectsCommand({
@@ -138,6 +182,7 @@ export async function switchPrivacySettings(
                 .where(eq(schema.games.id, gameId));
             throw new Error("Not all copy operations succeeded, rollback was attempted.");
         } else {
+            // Delete old images after successful copy
             deleteImagesFromBucketAndCF(gameId, oldIsPublic, imageIds);
         }
     }

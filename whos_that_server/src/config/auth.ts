@@ -6,11 +6,13 @@ import * as authSchema from "../db/auth-schema.ts";
 import * as appSchema from "../db/schema.ts";
 import env from "./zod/zodEnvSchema.ts";
 
+//Composite schema file representing whole db
 const schema = {
     ...authSchema,
     ...appSchema,
 };
 
+//BetterAuth configuration
 export const auth = betterAuth({
     database: drizzleAdapter(db, {
         provider: "pg",

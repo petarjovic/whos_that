@@ -5,7 +5,7 @@ import { eq, not, and } from "drizzle-orm";
 import * as schema from "../db/schema.ts";
 import * as authSchema from "../db/auth-schema.ts";
 import {
-    getGameWithItems,
+    getPrivacySettingAndImageIds,
     deleteImagesFromBucketAndCF,
     switchPrivacySettings,
     constructImageUrl,
@@ -15,9 +15,19 @@ import { checkGameExists, validateGameId } from "../middleware/validatorMw.ts";
 import type { PresetInfo } from "../config/types.ts";
 import env from "../config/zod/zodEnvSchema.ts";
 
+/**
+ * Sets up admin-only API routes for the Express application
+ * @param app - Express application instance
+ */
 export function setupAdminRoutes(app: Express) {
+    /**
+     * Retrieves all games (public and private) for admin review
+     * @route GET /api/admin/listAllGames
+     * @returns List of all games with cover images and metadata
+     */
     app.get("/api/admin/listAllGames", requireAdmin, async (req, res) => {
         try {
+            // Query all games with author and cover image
             const allGamesInfo = await db
                 .select({
                     id: schema.games.id,
@@ -36,6 +46,7 @@ export function setupAdminRoutes(app: Express) {
                     )
                 );
 
+            // Populate response object with data for all games
             const allGamesInfoUrl: PresetInfo = allGamesInfo.map(
                 ({ id, title, isPublic, author, coverImageId }) => {
                     const imageUrl = constructImageUrl(isPublic, id, coverImageId!);
@@ -61,6 +72,7 @@ export function setupAdminRoutes(app: Express) {
             );
 
             return res.status(200).send(allGamesInfoUrl);
+            //Error handling ↓
         } catch (error) {
             console.error("Error when admin attempted to list all games:\n", error);
             return res.status(500).json({
@@ -69,6 +81,11 @@ export function setupAdminRoutes(app: Express) {
         }
     });
 
+    /**
+     * Switches game privacy between public and private (admin override)
+     * @route PUT /api/admin/switchPrivacy/:gameId
+     * @returns Success status
+     */
     app.put(
         "/api/admin/switchPrivacy/:gameId",
         requireAdmin,
@@ -78,8 +95,9 @@ export function setupAdminRoutes(app: Express) {
             const gameId = req.params.gameId;
 
             try {
-                const gameWithItems = await getGameWithItems(gameId);
+                const gameWithItems = await getPrivacySettingAndImageIds(gameId);
 
+                // Update privacy setting in db
                 await db
                     .update(schema.games)
                     .set({
@@ -87,6 +105,7 @@ export function setupAdminRoutes(app: Express) {
                     })
                     .where(eq(schema.games.id, gameId));
 
+                // Move images in S3 between public/private folders
                 const [{ isPublic, imageIds }] = gameWithItems;
                 const newIsPublic = !isPublic;
 
@@ -94,6 +113,7 @@ export function setupAdminRoutes(app: Express) {
 
                 console.log(`Admin switched privacy setting of game:`, gameId);
                 return res.status(200).send();
+                //Error handling ↓
             } catch (error) {
                 console.error(
                     `Error when admin attempted to switch privacy setting of game: ${gameId}:\n`,
@@ -106,6 +126,11 @@ export function setupAdminRoutes(app: Express) {
         }
     );
 
+    /**
+     * Deletes a game and all associated images from S3 (admin override)
+     * @route DELETE /api/admin/deleteGame/:gameId
+     * @returns Success message
+     */
     app.delete(
         "/api/admin/deleteGame/:gameId",
         requireAdmin,
@@ -114,15 +139,18 @@ export function setupAdminRoutes(app: Express) {
         async (req, res) => {
             const gameId = req.params.gameId;
             try {
-                const gameWithItems = await getGameWithItems(gameId);
+                const gameWithItems = await getPrivacySettingAndImageIds(gameId);
 
+                // Delete game from db
                 await db.delete(schema.games).where(eq(schema.games.id, gameId));
 
                 console.log(`Admin deleted game:`, gameId);
                 res.status(200).json({ message: `Deleted game: ${gameId}` });
 
+                // Delete images from S3 and CloudFront
                 const [{ isPublic, imageIds }] = gameWithItems;
                 await deleteImagesFromBucketAndCF(gameId, isPublic, imageIds);
+                //Error handling ↓
             } catch (error) {
                 console.error(`Error when admin attemped to delete game: ${gameId}:\n`, error);
                 return res.status(500).json({

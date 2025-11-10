@@ -1,3 +1,6 @@
+// Auto generated Drizzle schema
+// Generted by BetterAuth cli based on config in auth.ts
+// Source of truth for database
 import { pgTable, text, timestamp, boolean } from "drizzle-orm/pg-core";
 
 export const user = pgTable("user", {
@@ -66,4 +69,3 @@ export const verification = pgTable("verification", {
         .$onUpdate(() => /* @__PURE__ */ new Date())
         .notNull(),
 });
-

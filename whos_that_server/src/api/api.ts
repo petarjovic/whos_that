@@ -25,11 +25,20 @@ import {
     constructImageUrl,
     switchPrivacySettings,
     deleteImagesFromBucketAndCF,
-    getGameWithItems,
+    getPrivacySettingAndImageIds,
 } from "./apiHelpers.ts";
 import { checkGameExists, validateGameId } from "../middleware/validatorMw.ts";
 
+/**
+ * Sets up all API routes for the Express application
+ * @param app - Express application instance
+ */
 export function setupApiRoutes(app: Express) {
+    /**
+     * Generates game in database and sends clients presigned URLS for uploading images
+     * @route POST /api/createNewGame
+     * @returns Game ID and presigned URLs for each image upload
+     */
     app.post("/api/createNewGame", async (req: Request, res: Response) => {
         const validRequest = createGameRequestSchema.safeParse(req.body);
 
@@ -39,6 +48,7 @@ export function setupApiRoutes(app: Express) {
             const response: CreateGameResponse = { gameId: gameId, gameItems: {} };
 
             try {
+                // Generate short-lived presigned upload URLS
                 const S3PresignedUrlPromises = body.namesAndFileTypes.map(
                     async ({ type, name }) => {
                         const itemId = nanoid();
@@ -55,6 +65,7 @@ export function setupApiRoutes(app: Express) {
 
                 const S3PresignedUrls = await Promise.all(S3PresignedUrlPromises);
 
+                // Populate response object with URLs
                 for (const { name, itemId, signedUrl } of S3PresignedUrls) {
                     response.gameItems[name] = { signedUrl, itemId };
                 }
@@ -70,12 +81,14 @@ export function setupApiRoutes(app: Express) {
             }
 
             try {
+                // Verify user is authenticated
                 const session = await auth.api.getSession({
                     headers: fromNodeHeaders(req.headers),
                 });
 
                 if (!session) return res.status(401).json({ message: "Unauthorized." });
 
+                // Insert game data in database then send response
                 await db.batch([
                     db.insert(schema.games).values({
                         id: gameId,
@@ -96,6 +109,8 @@ export function setupApiRoutes(app: Express) {
                 ]);
 
                 return res.status(200).json(response);
+
+                //Error handling ↓
             } catch (error) {
                 console.error("Error while creating new game:\n", error);
                 return res.status(500).json({
@@ -111,12 +126,19 @@ export function setupApiRoutes(app: Express) {
         }
     });
 
+    /**
+     * Retrieves all public games with metadata and like information
+     * @route GET /api/getAllPremadeGames
+     * @returns List of public games with cover images and like counts
+     */
     app.get("/api/getAllPremadeGames", async (req, res) => {
         try {
+            // Check if user is logged in to determine "liked" statuses
             const session = await auth.api.getSession({
                 headers: fromNodeHeaders(req.headers),
             });
 
+            // Query public games with author, cover image, and like data
             const premadeGamesInfo = await db
                 .select({
                     id: schema.games.id,
@@ -142,6 +164,7 @@ export function setupApiRoutes(app: Express) {
                 .groupBy(schema.games.id, authSchema.user.displayUsername, schema.gameItems.id)
                 .orderBy(desc(count(schema.gameLikes.id)));
 
+            // Populate then send response object
             const premadeGamesInfoUrl: PresetInfo = premadeGamesInfo
                 .filter(({ coverImageId }) => coverImageId !== null)
                 .map(({ id, title, author, numLikes, coverImageId, userHasLiked }) => {
@@ -157,6 +180,7 @@ export function setupApiRoutes(app: Express) {
                 });
 
             return res.status(200).send(premadeGamesInfoUrl);
+            //Error handling ↓
         } catch (error) {
             console.error("Error while attempting to retrieve public games:\n", error);
             return res
@@ -165,6 +189,11 @@ export function setupApiRoutes(app: Express) {
         }
     });
 
+    /**
+     * Retrieves all games created by the authenticated user
+     * @route GET /api/getMyGames
+     * @returns List of user's games with signed URLs for cover images
+     */
     app.get("/api/getMyGames", async (req, res) => {
         try {
             const session = await auth.api.getSession({
@@ -173,6 +202,7 @@ export function setupApiRoutes(app: Express) {
 
             if (!session) return res.status(401).json({ message: "Unauthorized." });
 
+            // Query user's games (metadata)
             const gameInfoList = await db
                 .select({
                     id: schema.games.id,
@@ -193,11 +223,12 @@ export function setupApiRoutes(app: Express) {
                 .where(eq(schema.games.userId, session.user.id))
                 .groupBy(schema.games.id, schema.gameItems.id);
 
+            // For each cover image get Cloudfront signed URl
             const getMyGamesRes: PresetInfo = gameInfoList
                 .filter(({ coverImageId }) => coverImageId !== null)
                 .map(({ id, title, isPublic, numLikes, coverImageId }) => {
-                    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
                     const imageUrl = constructImageUrl(isPublic, id, coverImageId!);
+
                     const signedUrlParams = {
                         url: imageUrl,
                         dateLessThan: new Date(Date.now() + 1000 * 60 * 60 * 24),
@@ -219,6 +250,7 @@ export function setupApiRoutes(app: Express) {
                 });
 
             return res.status(200).send(getMyGamesRes);
+            //Error handling ↓
         } catch (error) {
             console.error("Error while attempting to get user's games: \n", error);
             return res
@@ -227,10 +259,16 @@ export function setupApiRoutes(app: Express) {
         }
     });
 
+    /**
+     * Retrieves complete game data including all character cards
+     * @route GET /api/gameData/:gameId
+     * @returns Game title and array of card data with image URLs
+     */
     app.get("/api/gameData/:gameId", validateGameId, checkGameExists, async (req, res) => {
         const gameId = req.params.gameId;
 
         try {
+            // Get game metadata
             const gameTitleAndPrivacy = await db
                 .select({ title: schema.games.title, isPublic: schema.games.isPublic })
                 .from(schema.games)
@@ -238,6 +276,7 @@ export function setupApiRoutes(app: Express) {
 
             const [{ isPublic, title }] = gameTitleAndPrivacy;
 
+            // Get game items (images)
             const cardDataIdList: CardDataIdType[] = await db
                 .select({
                     gameItemId: schema.gameItems.id,
@@ -248,9 +287,11 @@ export function setupApiRoutes(app: Express) {
                 .where(eq(schema.gameItems.gameId, gameId));
 
             if (isPublic || !USE_CLOUDFRONT) {
+                //send direct image urls for public games
                 const cardDataUrlList = cardDataIdToUrl(cardDataIdList, isPublic, gameId);
                 return res.status(200).send({ title: title, cardData: cardDataUrlList });
             } else {
+                //send presigned image urls for private games
                 const cardDataPresignedUrlList: CardDataUrlType[] = cardDataIdList.map(
                     (cardData) => {
                         const signedUrlParams = {
@@ -274,17 +315,24 @@ export function setupApiRoutes(app: Express) {
         }
     });
 
+    /**
+     * Toggles like status for a game (like if not liked, unlike if already liked)
+     * @route PUT /api/likeGame/:gameId
+     * @returns Success message
+     */
     app.put("/api/likeGame/:gameId", validateGameId, checkGameExists, async (req, res) => {
         const {
             params: { gameId },
             headers,
         } = req;
         try {
+            // Verify user is logged in
             const session = await auth.api.getSession({
                 headers: fromNodeHeaders(headers),
             });
             if (!session) return res.status(401).json({ message: "Unauthorized." });
 
+            // Check if user is game author and current like status
             const [gameAuthorandLikeStatus] = await db
                 .select({
                     authorId: schema.games.userId,
@@ -300,10 +348,12 @@ export function setupApiRoutes(app: Express) {
                 )
                 .where(eq(schema.games.id, gameId));
 
+            // Prevent self-liking
             if (gameAuthorandLikeStatus.authorId === session.user.id) {
                 return res.status(400).json({ message: "Cannot like your own game." });
             }
 
+            // Toggle like status
             if (gameAuthorandLikeStatus.likeId === null) {
                 await db.insert(schema.gameLikes).values({
                     gameId: req.params.gameId,
@@ -322,6 +372,7 @@ export function setupApiRoutes(app: Express) {
 
                 return res.status(200).json({ message: "Unliked game." });
             }
+            //Error handling ↓
         } catch (error) {
             console.error("Error while attempting to like game: \n", error);
             return res
@@ -330,6 +381,11 @@ export function setupApiRoutes(app: Express) {
         }
     });
 
+    /**
+     * Switches game privacy between public and private
+     * @route PUT /api/switchPrivacy/:gameId
+     * @returns Success status
+     */
     app.put("/api/switchPrivacy/:gameId", validateGameId, checkGameExists, async (req, res) => {
         const {
             params: { gameId },
@@ -337,13 +393,15 @@ export function setupApiRoutes(app: Express) {
         } = req;
 
         try {
+            // Verify a user is logged in
             const session = await auth.api.getSession({
                 headers: fromNodeHeaders(headers),
             });
             if (!session) return res.status(401).json({ message: "Unauthorized." });
 
-            const gameWithItems = await getGameWithItems(gameId);
+            const gameWithItems = await getPrivacySettingAndImageIds(gameId);
 
+            // Update privacy setting in db (if user owns the game)
             const dbUpdate = await db
                 .update(schema.games)
                 .set({
@@ -351,6 +409,7 @@ export function setupApiRoutes(app: Express) {
                 })
                 .where(and(eq(schema.games.id, gameId), eq(schema.games.userId, session.user.id)));
 
+            //if db updated then move images in S3
             if (dbUpdate.rowCount !== null && dbUpdate.rowCount >= 1) {
                 const [{ isPublic, imageIds }] = gameWithItems;
                 const newIsPublic = !isPublic;
@@ -362,8 +421,10 @@ export function setupApiRoutes(app: Express) {
                 console.log("Switched privacy setting of game:", gameId);
                 return res.status(200).send();
             } else {
+                //if user doesn't own game
                 return res.status(403).json({ message: "Fordbideen" });
             }
+            //Error handling ↓
         } catch (error) {
             console.error(
                 `Error while attempting to switch privacy setting of game: ${gameId}:\n`,
@@ -373,6 +434,11 @@ export function setupApiRoutes(app: Express) {
         }
     });
 
+    /**
+     * Deletes a game and all associated images from S3
+     * @route DELETE /api/deleteGame/:gameId
+     * @returns Success message
+     */
     app.delete("/api/deleteGame/:gameId", validateGameId, checkGameExists, async (req, res) => {
         const {
             params: { gameId },
@@ -380,17 +446,20 @@ export function setupApiRoutes(app: Express) {
         } = req;
 
         try {
+            // Verify a user is logged in
             const session = await auth.api.getSession({
                 headers: fromNodeHeaders(headers),
             });
             if (!session) return res.status(401).json({ message: "Unauthorized." });
 
-            const gameWithItems = await getGameWithItems(gameId);
+            const gameWithItems = await getPrivacySettingAndImageIds(gameId);
 
+            // Delete game in db (if user owns it)
             const dbDelRes = await db
                 .delete(schema.games)
                 .where(and(eq(schema.games.id, gameId), eq(schema.games.userId, session.user.id)));
 
+            // If db updated then delete images in S3 and CloudFront
             if (dbDelRes.rowCount !== null && dbDelRes.rowCount >= 1) {
                 console.log(`User: ${session.user.id} deleted game:`, gameId);
                 const [{ isPublic, imageIds }] = gameWithItems;
@@ -401,6 +470,7 @@ export function setupApiRoutes(app: Express) {
                     message: `User: ${session.user.id} deleted game: ${gameId}`,
                 });
             } else {
+                //if user doesn't own game
                 console.warn(
                     `User: ${session.user.id} requested to delete game: ${gameId} but is not the owner of that game.`
                 );
@@ -408,6 +478,7 @@ export function setupApiRoutes(app: Express) {
                     message: "Forbidden.",
                 });
             }
+            //Error Handling ↓
         } catch (error) {
             console.error(`Error while attempting to delete game: ${gameId}:\n`, error);
             return res.status(500).json({ message: "Internal Server Error" });

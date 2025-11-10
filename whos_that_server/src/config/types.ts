@@ -1,11 +1,8 @@
+//File of custom types, many shared with front-end
 import * as zod from "./zod/zodSchema";
 import { z } from "zod";
 
-export type ResponseType = z.infer<typeof zod.responseTypeSchema>;
-export type GameStateType = z.infer<typeof zod.gameStateTypeSchema>;
-export type CardDataIdType = z.infer<typeof zod.cardDataIdTypeSchema>;
-export type CardDataUrlType = z.infer<typeof zod.cardDataUrlTypeSchema>;
-export type GameDataType = z.infer<typeof zod.gameDataTypeSchema>;
+// SocketIO event interfaces could not be inferred from Zod schema because SocketIO would break
 export interface ServerToClientEvents {
     playerJoined: (gameData: GameStateType) => void;
     receiveOppGuess: (oppGuess: boolean) => void;
@@ -28,6 +25,11 @@ export interface ClientToServerEvents {
     playAgain: (roomId: string) => void;
 }
 
+export type ResponseType = z.infer<typeof zod.responseTypeSchema>;
+export type GameStateType = z.infer<typeof zod.gameStateTypeSchema>;
+export type CardDataIdType = z.infer<typeof zod.cardDataIdTypeSchema>;
+export type CardDataUrlType = z.infer<typeof zod.cardDataUrlTypeSchema>;
+export type GameDataType = z.infer<typeof zod.gameDataTypeSchema>;
 export type CreateGameRequest = z.infer<typeof zod.createGameRequestSchema>;
 export type CreateGameResponse = z.infer<typeof zod.createGameResponseSchema>;
 export type PresetInfo = z.infer<typeof zod.PresetInfoSchema>;

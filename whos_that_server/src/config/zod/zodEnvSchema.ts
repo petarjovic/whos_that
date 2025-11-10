@@ -1,3 +1,4 @@
+//Zod validation for environment variables, this is where env object is exported from
 import { z } from "zod";
 
 const envSchema = z.object({
