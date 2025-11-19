@@ -25,41 +25,35 @@ const FirstVisitModal = () => {
         <ReactModal
             isOpen={isOpen}
             onRequestClose={handleClose}
-            className="shadow-2xl/30 bg-linear-to-b border-b-13 text-shadow-xs/100 w-9/10 absolute left-1/2 top-1/2 mx-auto max-h-[90vh] max-w-6xl -translate-x-1/2 -translate-y-1/2 overflow-y-auto rounded-lg border-x border-blue-700 from-blue-400 to-blue-600 p-8 text-center text-neutral-100 shadow-2xl"
+            className="max-sm:w-9/10 absolute left-1/2 top-1/2 mx-auto max-h-[90vh] max-w-6xl -translate-x-1/2 -translate-y-1/2 overflow-y-auto border-2 bg-neutral-200 text-center shadow max-sm:px-2 max-sm:py-6 sm:p-8"
             shouldCloseOnOverlayClick={false}
             shouldCloseOnEsc={false}
-            overlayClassName="fixed inset-0 bg-gray-600/75"
+            overlayClassName="fixed inset-0 bg-zinc-800/75"
         >
             <div className="text-center">
-                <h1 className="font-digitag text-shadow-md/85 mb-5 whitespace-pre-wrap text-9xl font-bold tracking-wider text-orange-300 max-sm:text-7xl">
+                <h1 className="font-digitag text-shadow-sm/80 mb-4 whitespace-pre-wrap text-9xl font-bold tracking-wider text-orange-300 max-sm:text-7xl">
                     Welcome
                 </h1>
 
                 <div className="mb-7 space-y-3 text-2xl max-sm:text-xl">
                     <p className="text-3xl max-sm:text-2xl">
-                        <span className="font-bold text-orange-300">
+                        <span className="text-shadow-sm/50 font-bold text-orange-300">
                             Who's That<span className="text-red-500">?</span>
                         </span>{" "}
                         is a character elimination game inspired by classic board games!
                     </p>
-                    <p className="mx-auto w-[85%] max-sm:hidden">
-                        Upload images to represent "characters" in your own custom game! Or play
-                        using a premade set of "characters" by browsing existing games. You can play
-                        your custom game privately with friends, or you can you can share it
-                        publicly for others to enjoy.
-                    </p>
 
                     <div className="mt-4">
-                        <h3 className="text-shadow-sm/33 mb-2 text-4xl font-bold text-orange-300 max-sm:text-3xl">
+                        <h3 className="text-shadow-xs/100 mb-2 text-4xl font-bold text-orange-300 max-sm:text-3xl">
                             How to Get Started:
                         </h3>
                         <ul className="space-y-2 pl-4">
                             <li>
-                                Click <strong className="text-2xl">Play New Game</strong> to browse
-                                existing games or create a custom game.
+                                From the homepage you can either browse and play exisiting presets,
+                                or create your own custom preset.
                             </li>
                             <li>
-                                <strong className="text-2xl italic text-orange-300">
+                                <strong className="text-2xl italic text-red-400">
                                     If you have a room code:
                                 </strong>{" "}
                                 enter it in the input box and click join game!
@@ -70,7 +64,7 @@ const FirstVisitModal = () => {
                     <div className="mt-5">
                         <button
                             onClick={() => setShowGameplay(!showGameplay)}
-                            className={`cursor-pointer font-bold ${showGameplay ? "text-shadow-sm/33 text-4xl text-orange-300 max-sm:text-3xl" : "text-shadow-2xs/90 text-3xl underline max-sm:text-2xl"} hover:italic hover:text-amber-500`}
+                            className={`cursor-pointer font-bold ${showGameplay ? "text-shadow-sm/33 text-4xl text-orange-300 max-sm:text-3xl" : "text-3xl text-blue-500 underline max-sm:text-2xl"} hover:italic hover:text-red-400`}
                         >
                             {showGameplay ? "Game Rules:" : "Don't Know How to Play?"}
                         </button>

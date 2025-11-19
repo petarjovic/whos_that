@@ -28,12 +28,12 @@ const router = createBrowserRouter([
                 path: "/",
                 element: <HomePage />,
             },
+            // {
+            //     path: "/create-game",
+            //     element: <GameTypePage />,
+            // },
             {
                 path: "/create-game",
-                element: <GameTypePage />,
-            },
-            {
-                path: "/create-game/new",
                 element: <CreateCustomGamePage />,
             },
             {
@@ -57,7 +57,7 @@ const router = createBrowserRouter([
                 element: <AccountPage />,
             },
             {
-                path: "/log-in",
+                path: "/login",
                 element: <LogInPage />,
             },
             // {
@@ -88,4 +88,3 @@ createRoot(rootElement).render(
         <RouterProvider router={router} />
     </StrictMode>
 );
-

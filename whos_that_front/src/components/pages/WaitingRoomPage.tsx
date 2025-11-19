@@ -8,13 +8,13 @@ const WaitingRoom = ({ gameId }: { gameId: string }) => {
     return (
         <>
             <img className="max-2xl:mt-23 mt-32 text-center" src={loadingSpinner} alt="Your SVG" />
-            <p className="text-shadow-xs/90 mx-auto mt-auto text-center text-4xl font-semibold text-white max-2xl:text-3xl">
+            <p className="mx-auto mt-auto text-center text-4xl font-medium text-zinc-800 max-2xl:text-3xl">
                 Waiting in room:{" "}
-                <span className="text-shadow-xs/90 align-sub text-6xl font-bold tracking-tight text-amber-500 max-2xl:text-5xl">
+                <span className="text-shadow-xs/50 align-sub text-6xl font-bold tracking-tight text-amber-500 max-2xl:text-5xl">
                     {gameId || "..."}
                 </span>
             </p>
-            <p className="text-shadow-xs/90 m-auto text-center text-xl font-semibold text-white max-2xl:text-lg max-sm:mb-20">
+            <p className="m-auto text-center text-xl font-medium text-gray-800 max-sm:mb-20">
                 Send this code to your opponent!
                 <br></br>
                 <span className="text-sm">(or send them the link to this page)</span>

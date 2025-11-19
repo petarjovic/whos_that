@@ -256,8 +256,8 @@ const ShowPremadeGamesPage = ({ myGames }: { myGames: boolean }) => {
     return (
         <>
             <div className="mx-10 mt-3 flex flex-wrap items-center justify-evenly">
-                <h2 className="font-times text-shadow-sm/100 my-2 w-full text-center text-6xl font-medium text-white max-md:text-5xl">
-                    {myGames ? "Your Games" : "Public Games"}
+                <h2 className="text-4xl font-semibold">
+                    {myGames ? "Your Presets" : "Public Presets"}
                 </h2>
                 {gamesList.length === 0 && (
                     <p className="text-shadow-xs/100 mx-auto mt-[50%] text-center text-2xl font-medium text-white">
@@ -333,7 +333,7 @@ const ShowPremadeGamesPage = ({ myGames }: { myGames: boolean }) => {
                                                     className={`${
                                                         userHasLiked
                                                             ? "text-red-600"
-                                                            : "text-slate-400"
+                                                            : "text-zinc-800"
                                                     } active:scale-130 hover:scale-111 scale-105 rounded-[50%] text-2xl transition-transform hover:text-red-300 max-md:text-xl`}
                                                 />
                                             </button>

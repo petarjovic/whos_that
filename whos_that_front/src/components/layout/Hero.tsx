@@ -1,6 +1,7 @@
 import type { AuthData } from "../../lib/auth/auth-client";
 import { useNavigate, Link } from "react-router";
 import { authClient } from "../../lib/auth/auth-client";
+import { GiSherlockHolmes } from "react-icons/gi";
 
 interface HeroProps extends AuthData {
     showUserInfo?: boolean;
@@ -23,66 +24,77 @@ const Hero = ({ session, isPending, showUserInfo = true }: HeroProps) => {
     };
 
     return (
-        <header className="bg-linear-to-b h-30 border-b-11 max-2xl:h-22 relative flex w-full items-center justify-center rounded-b-[40%] border-blue-600 from-blue-400 to-blue-500 px-[13%] shadow-lg max-xl:justify-between max-sm:h-fit max-sm:flex-col max-sm:pb-3">
-            {/* Site title */}
-            <h1 className="mt-2 w-fit text-center">
-                <Link
-                    to={"/"}
-                    id="title"
-                    reloadDocument={true} //forces reload just in case
-                    className="font-digitag text-shadow-md/85 max-lg:leading-0 cursor-pointer whitespace-pre-wrap text-9xl font-bold tracking-wide text-orange-300 hover:text-orange-400 max-2xl:text-8xl max-lg:text-[4.2rem] max-sm:text-7xl"
-                >
-                    <>
-                        {/* Spans are for improved spacing + styling */}
-                        W<span />
-                        ho
-                        <span className="font-sedgwick align-sub leading-none tracking-tighter">
-                            &apos;
-                        </span>
-                        s T
-                        <span />
-                        hat
-                        <span className="font-digitag text-[9rem]/1 tracking-tighter text-red-400 max-2xl:text-8xl max-lg:text-6xl">
-                            ?
-                        </span>
-                    </>
-                </Link>
-            </h1>
-            {/* User authentication info and controls */}
-            <div className="lg:absolute lg:right-[12%] lg:top-1/2 lg:-translate-y-1/2">
-                {showUserInfo ? (
-                    <h2 className="items-center-safe flex justify-end">
+        <div className="w-[90dvw]">
+            <header className="py-2.25 relative flex flex-col items-center justify-center border-b border-zinc-900 sm:pb-5 sm:pt-1 lg:pt-2">
+                {/* Site title */}
+                <p className="z-1 text-sm leading-none text-neutral-700 sm:text-base">
+                    The Classic Character Elimination Game
+                </p>
+                <div className="w-9/10 z-1 h-0 border-t border-zinc-900"></div>
+                <div className="w-9/10 flex justify-between">
+                    <GiSherlockHolmes className="scale-420 sm:scale-600 sm:mt-7.25 lg:mt-7.5 float-left rotate-1 transform text-neutral-700 max-sm:mt-5" />
+                    <h1 className="w-fit pt-5">
                         <Link
-                            to={session ? "/account" : "/log-in"}
-                            className="text-shadow-sm/25 align-sub text-2xl font-bold text-white hover:text-blue-100 max-2xl:text-xl max-lg:text-sm"
+                            to={"/"}
+                            id="title"
+                            reloadDocument={true} //forces reload just in case
+                            className="font-digitag text-shadow-sm/50 leading-0 text-wide sm:top-1.25 cursor-pointer font-bold text-orange-300 hover:text-orange-400 max-sm:text-[4rem] sm:relative sm:text-8xl sm:tracking-wide lg:top-1.5"
                         >
-                            <span className="text-shadow-sm text-3xl max-2xl:text-2xl max-lg:text-base">
-                                {isPending ? "" : session ? "🙋‍♂️ " : "👤 "}
-                            </span>
-                            <button
-                                type="button"
-                                className="inline-block cursor-pointer hover:underline"
-                            >
-                                {session?.user.displayUsername ?? ""}
-                            </button>
+                            <>
+                                {/* Spans are for improved spacing + styling */}
+                                W<span />
+                                ho
+                                <span className="font-sedgwick tracking-tightest right-1.25 relative top-5 sm:right-1.5 sm:top-6">
+                                    &apos;
+                                </span>
+                                <span className="font-digitag relative right-3 top-1 sm:right-4">
+                                    s
+                                </span>
+                                T
+                                <span />
+                                hat
+                                <span className="font-digitag leading-0 top-0.75 relative tracking-tighter text-red-400 max-sm:text-[4.5rem] sm:text-[6.5rem]">
+                                    ?
+                                </span>
+                            </>
                         </Link>
-
+                    </h1>
+                    <GiSherlockHolmes className="scale-420 sm:scale-600 sm:mt-7.25 lg:mt-7.5 float-right -rotate-1 transform text-neutral-700 max-sm:mt-5 max-sm:scale-x-[-4.2] sm:scale-x-[-6]" />
+                </div>
+                {/* User authentication info and controls */}
+            </header>
+            <div
+                className={`flex w-full ${session ? "justify-around" : "justify-center"} text-sm text-neutral-600`}
+            >
+                <div className="z-1 sm:text-base">
+                    {new Date().toLocaleString("en-US", {
+                        dateStyle: "long",
+                    })}
+                </div>
+                {showUserInfo ? (
+                    <div className="xl:right-2/10 xl:top-13 relative top-1 flex items-center justify-end gap-2 xl:absolute">
+                        <Link
+                            to={session ? "/account" : "/login"}
+                            className="cursor-pointer text-lg font-medium italic leading-none text-zinc-800 hover:underline"
+                        >
+                            {session?.user.displayUsername ?? ""}
+                        </Link>
                         <button
                             type="button"
-                            className="px-2.25 border-b-5 text-shadow-xs/40 active:shadow-2xs hover:shadow-sm/20 duration-15 shadow-sm/20 hover:shadow-xs ml-10 w-fit cursor-pointer rounded-md border-x border-cyan-600 bg-cyan-500 py-1.5 text-2xl font-bold text-white transition-all hover:border-cyan-700 hover:bg-cyan-600 hover:text-gray-200 active:-translate-y-px active:border-b max-2xl:ml-5 max-2xl:px-2 max-2xl:py-1 max-2xl:text-xl max-lg:text-sm"
+                            className={`bg-red-400 ${session ? "rounded px-1 py-0.5 text-sm font-normal opacity-85" : "py-1.25 px-2 lg:px-2.5 lg:py-1.5 lg:text-base"} cursor-pointer font-medium text-white hover:bg-red-600`}
                             onClick={() => {
                                 if (!isPending && session) void handleLogOut();
-                                else if (!isPending) void navigate("/log-in");
+                                else if (!isPending) void navigate("/login");
                             }}
                         >
                             {isPending ? "" : session ? "Log Out" : "Sign Up / Log In"}
                         </button>
-                    </h2>
+                    </div>
                 ) : (
                     <></>
                 )}
             </div>
-        </header>
+        </div>
     );
 };
 export default Hero;

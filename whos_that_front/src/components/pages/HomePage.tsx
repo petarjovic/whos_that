@@ -1,6 +1,9 @@
 import { useNavigate } from "react-router";
 import { useState } from "react";
 import FirstVisitModal from "../misc/FirstVisitModal.tsx";
+import PublicGamesImg from "@client/assets/PublicGames.svg";
+import { useBetterAuthSession } from "../../lib/LayoutContextProvider.ts";
+import CustomGameImg from "@client/assets/CustomGame.svg";
 
 /**
  * Landing page with option to "create new game" or "join existing game" via room code
@@ -8,6 +11,7 @@ import FirstVisitModal from "../misc/FirstVisitModal.tsx";
 const HomePage = () => {
     const [gameIdToJoin, setGameIdToJoin] = useState("");
     const navigate = useNavigate();
+    const { session, isPending } = useBetterAuthSession();
 
     const handleJoinExistingGame = (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
@@ -15,51 +19,81 @@ const HomePage = () => {
     };
 
     return (
-        <div className="my-auto text-center max-sm:min-h-screen">
-            {/* Navigating to game */}
-            <button
-                className="border-b-9 text-shadow-xs/80 active:shadow-2xs duration-15 hover:text-shadow-none hover:shadow-xs max-sm:mt-25 w-fit cursor-pointer rounded-md border-x border-blue-600 bg-blue-500 px-5 py-5 text-3xl font-bold text-white shadow-sm transition-all hover:border-blue-700 hover:bg-blue-600 hover:text-gray-100 active:translate-y-px active:border-b max-2xl:px-4 max-2xl:py-3 max-2xl:text-2xl"
-                onClick={() => {
-                    void navigate("/create-game");
-                }}
-            >
-                Play New Game
-            </button>
-            <p className="font-digitag mt-35 text-shadow-sm/80 text-5xl font-bold tracking-wider text-white max-2xl:mt-28 max-2xl:text-4xl">
-                OR
-            </p>
-            {/* Form for joining room using code */}
-            <form
-                className="mt-35 max-sm:mt-18 items-center max-2xl:mt-28"
-                onSubmit={handleJoinExistingGame}
-            >
-                <input
-                    id="gameIdInput"
-                    name="gameIdInput"
-                    type="text"
-                    className="inset-shadow-sm shadow-xs hover:shadow-sm/30 w-fit rounded-md border border-cyan-500 bg-white p-2 text-center align-sub text-2xl text-slate-700 transition-all duration-300 placeholder:text-gray-400 hover:border-slate-300 focus:border-slate-400 focus:shadow-lg max-2xl:p-1.5 max-2xl:text-xl"
-                    required
-                    minLength={6}
-                    maxLength={6}
-                    placeholder="Enter Room Id"
-                    value={gameIdToJoin}
-                    onChange={(e) => {
-                        setGameIdToJoin(e.target.value);
-                    }}
-                />
+        <>
+            <div className="mt-6 flex h-full flex-col gap-5 text-center text-neutral-800 max-md:justify-end md:justify-around 2xl:gap-4">
                 <button
-                    className="border-b-9 text-shadow-xs/50 active:shadow-2xs duration-15 hover:text-shadow-none hover:shadow-xs px-4.5 mx-4 w-fit cursor-pointer rounded-md border-x border-blue-600 bg-blue-500 py-3.5 text-2xl font-bold text-white shadow-sm transition-all hover:border-blue-700 hover:bg-blue-600 hover:text-gray-100 active:translate-y-px active:border-b max-2xl:px-4 max-2xl:py-3 max-2xl:text-xl"
-                    type="submit"
+                    className="hover:scale-102 rounded-xs sm:w-100 cursor-pointer text-center text-lg font-semibold"
+                    onClick={() => {
+                        void navigate(isPending ? "" : "/premade-games");
+                    }}
                 >
-                    Join Game
+                    <div className="rounded-xs border border-neutral-400 bg-neutral-300">
+                        <img
+                            className="h-51 grayscale-25 2xl:h-55 mx-auto object-fill text-center"
+                            src={PublicGamesImg}
+                        ></img>
+                    </div>
+                    Browse Presets
                 </button>
-            </form>
-            {/* Creator Signature */}
-            <p className="text-shadow-xs/100 font-digitag fixed bottom-2 left-0 w-full text-center text-xl text-white hover:cursor-default max-2xl:text-lg max-sm:hidden">
-                P<span className="font-digitag tracking-widest">eta</span>r Jovic was here
-            </p>
-            <FirstVisitModal />
-        </div>
+                <div className="h-0 w-full border-b border-black"></div>
+                <button
+                    className="hover:scale-102 cursor-pointer text-center text-lg font-semibold"
+                    onClick={() => {
+                        void navigate(isPending ? "" : session ? "/create-game" : "/login");
+                    }}
+                >
+                    <div className="rounded-xs border border-neutral-400 bg-neutral-300">
+                        {/* <div className="relative h-0 w-0">
+                            <div className="z-1 top-37 left-24.5 rounded-xs absolute w-fit border border-orange-950 bg-orange-200 px-7 py-2 text-center text-base leading-none text-red-950 opacity-60">
+                                Wanted
+                            </div>
+                        </div> */}
+                        <img
+                            className="h-51 grayscale-25 2xl:h-55 mx-auto object-fill text-center"
+                            src={CustomGameImg}
+                        ></img>
+                    </div>
+                    Create Custom Set
+                </button>
+                <div className="h-0 w-full border-b border-black"></div>
+                {/* Form for joining room using code */}
+                <div className="p-1 text-center">
+                    <form
+                        className="rounded-xs 2xl:py-2.25 flex justify-around border border-neutral-400 bg-neutral-300 py-1.5"
+                        onSubmit={handleJoinExistingGame}
+                    >
+                        <input
+                            id="gameIdInput"
+                            name="gameIdInput"
+                            type="text"
+                            className="rounded-xs w-1/2 border border-neutral-400 bg-neutral-50 px-1 text-center font-medium placeholder:text-zinc-400 max-2xl:py-px 2xl:p-0.5"
+                            required
+                            minLength={6}
+                            maxLength={6}
+                            placeholder="Enter Room Id"
+                            value={gameIdToJoin}
+                            onChange={(e) => {
+                                setGameIdToJoin(e.target.value);
+                            }}
+                        />
+                        <button
+                            className="hover:scale-102 2xl:py-0.75 ml-5 cursor-pointer rounded bg-red-400 px-1.5 py-px font-medium text-white hover:bg-red-500"
+                            type="submit"
+                        >
+                            Join Game
+                        </button>
+                    </form>
+                    <div className="p-px text-lg font-semibold">Join an Exisitng Game</div>
+                </div>
+
+                {/* Creator Signature */}
+                <div className="flex flex-col text-neutral-500">
+                    <p className="text-sm"> By Petar Jovic</p>
+                </div>
+
+                <FirstVisitModal />
+            </div>
+        </>
     );
 };
 

@@ -93,14 +93,12 @@ const Game = ({
     return (
         <>
             {/* Game Title */}
-            <p className="font-times text-shadow-sm/100 my-2 w-full text-center text-[4.2rem] leading-none tracking-wider text-white max-2xl:text-5xl max-md:text-4xl">
-                {title}
-            </p>
+            <p className="my-1 text-4xl font-bold">{title}</p>
             {/* Game Board */}
             {/* Styled as grid on large screens, as flexbox on small screens */}
             <div
                 id="gameboard"
-                className={`mb-2.5 px-10 max-2xl:px-5 xl:grid ${GridColsClasses[numGridCols]} w-full justify-center justify-items-center gap-2 max-xl:flex max-xl:flex-wrap max-xl:justify-between`}
+                className={`mx-auto mb-2.5 px-5 xl:grid ${GridColsClasses[numGridCols]} w-full items-center justify-center justify-items-center gap-2 max-xl:flex max-xl:flex-wrap max-xl:justify-between`}
             >
                 {cardList}
             </div>
