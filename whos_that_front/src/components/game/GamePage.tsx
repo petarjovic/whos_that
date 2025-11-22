@@ -98,12 +98,12 @@ const Game = ({
             {/* Styled as grid on large screens, as flexbox on small screens */}
             <div
                 id="gameboard"
-                className={`mx-auto mb-2.5 px-5 xl:grid ${GridColsClasses[numGridCols]} w-full items-center justify-center justify-items-center gap-2 max-xl:flex max-xl:flex-wrap max-xl:justify-between`}
+                className={`mx-auto mb-2.5 px-5 xl:grid ${GridColsClasses[numGridCols]} w-full items-center justify-center justify-items-center max-xl:flex max-xl:flex-wrap max-xl:justify-between max-xl:gap-2 xl:gap-5`}
             >
                 {cardList}
             </div>
-            {/* Last Row of Cards: is always flexbox for better visuals */}
-            <div className="mb-1 flex w-full flex-wrap justify-evenly px-10 max-2xl:px-4">
+            {/* Last Row of Cards, is always flexbox for better visuals */}
+            <div className="mb-2.5 flex w-full flex-wrap justify-evenly px-10 max-2xl:px-4">
                 {lastRow}
                 <OpponentTargetCard
                     name={oppTargetCardData.name}

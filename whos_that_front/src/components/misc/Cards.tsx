@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import type { EndStateType } from "../../lib/types.ts";
 import type { PropsWithChildren } from "react";
+import { FaQuestion } from "react-icons/fa";
 
 interface CardLayoutProps {
     name: string;
@@ -22,21 +23,19 @@ export const CardLayout = ({
 }: PropsWithChildren<CardLayoutProps>) => {
     return (
         <figure
-            className={`border-2 ${isGame || isOppCard ? "my-0.75 max-xl:h-66 max-xl:w-42 h-72 w-48" : "h-91 w-59 my-2 max-xl:h-72 max-xl:w-48"} rounded-xs flex flex-col justify-between overflow-hidden ${isOppCard ? "animate-[flash-attention_2s_ease-in-out_1] border-orange-300 bg-orange-300" : "border-neutral-900 bg-neutral-400 hover:scale-105"} text-center transition-shadow`}
+            className={`border ${isGame || isOppCard ? "max-xl:h-66 max-xl:w-42 w-50 h-73" : "h-50 w-38 max-xl:h-34 max-xl:w-24"} rounded-xs flex flex-col justify-between overflow-hidden ${isOppCard ? "animate-[flash-attention_2s_ease-in-out_1] border-orange-300 bg-orange-300" : "border-gray-400 bg-white hover:scale-105"} text-center`}
         >
-            {/* Image takes up 84.5% of card height */}
             <img
-                className="rounded-xs mx-1 mt-1 h-[83%] border bg-neutral-300 object-fill"
+                className="max-h-8/10 h-8/10 mx-2 mt-2 border border-neutral-300 bg-neutral-200 object-fill"
                 src={imgSrc}
                 alt={name}
             />
-            {/* This is used for character names and game names, height is 4.5%  */}
             <figcaption
-                className={` ${isGame || isOppCard ? "text-base" : "hover:text-blue-500 max-2xl:text-lg max-md:text-base 2xl:text-xl"} x relative bottom-px mx-auto h-[4.5%] text-center font-semibold leading-none text-black`}
+                className={` ${isGame || isOppCard ? "text-lg max-md:text-base" : "text-base hover:text-blue-500"} h-1/20 relative bottom-px m-auto flex items-center text-center font-semibold leading-none text-black`}
             >
                 {name}
             </figcaption>
-            {/* Children slot (11% height remaining) for in-game controls or metadata */}
+            {/* Children slot (15% height remaining) for in-game controls or metadata */}
             {children}
         </figure>
     );
@@ -76,10 +75,10 @@ export const Card = ({
                 isGame={isGame}
             >
                 {/* In game controls for hiding and guessing characters */}
-                <div className="mx-1 mb-0.5 box-content flex h-[9%] justify-between border-neutral-900 max-sm:mb-px">
+                <div className="mx-1 mb-1 box-content flex h-[9%] justify-between border-neutral-900 max-sm:mb-px">
                     {/* Guess Button */}
                     <button
-                        className={`w-[35%] cursor-pointer border-2 border-neutral-600 bg-green-600 px-0.5 text-center font-semibold text-neutral-100 transition-all hover:bg-green-800 max-2xl:text-sm max-sm:font-medium ${flipped ? "hidden" : ""}`}
+                        className={`w-[34%] cursor-pointer rounded bg-green-500 px-0.5 text-center font-semibold text-neutral-100 transition-all hover:bg-green-700 max-2xl:text-sm max-sm:font-medium ${flipped ? "hidden" : ""}`}
                         onClick={() => {
                             openConfirmModal(winner, name);
                         }}
@@ -88,10 +87,12 @@ export const Card = ({
                         Guess
                     </button>
                     {/* Visual separator */}
-                    <div className="m-auto text-center align-sub text-lg max-2xl:text-sm">❓</div>
+                    <div className="relative top-px m-auto text-center text-lg text-red-600 max-2xl:text-sm">
+                        <FaQuestion />
+                    </div>
                     {/* Hide/Unhide Button */}
                     <button
-                        className="w-[35%] cursor-pointer border-2 border-neutral-600 bg-red-600 px-0.5 text-center font-semibold text-neutral-100 transition-all hover:bg-red-800 max-2xl:text-sm max-sm:font-medium"
+                        className="w-[34%] cursor-pointer rounded bg-red-500 px-0.5 text-center font-semibold text-neutral-100 transition-all hover:bg-red-700 max-2xl:text-sm max-sm:font-medium"
                         onClick={() => {
                             setFlipped(!flipped);
                         }}

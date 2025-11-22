@@ -72,7 +72,7 @@ const Hero = ({ session, isPending, showUserInfo = true }: HeroProps) => {
                     })}
                 </div>
                 {showUserInfo ? (
-                    <div className="xl:right-2/10 xl:top-13 relative top-1 flex items-center justify-end gap-2 xl:absolute">
+                    <div className="xl:right-2/10 xl:top-15 relative top-1 flex items-center justify-end gap-2 xl:absolute">
                         <Link
                             to={session ? "/account" : "/login"}
                             className="cursor-pointer text-lg font-medium italic leading-none text-zinc-800 hover:underline"
@@ -81,7 +81,7 @@ const Hero = ({ session, isPending, showUserInfo = true }: HeroProps) => {
                         </Link>
                         <button
                             type="button"
-                            className={`bg-red-400 ${session ? "rounded px-1 py-0.5 text-sm font-normal opacity-85" : "py-1.25 px-2 lg:px-2.5 lg:py-1.5 lg:text-base"} cursor-pointer font-medium text-white hover:bg-red-600`}
+                            className={`bg-red-400 ${session ? "lg:px-1.75 rounded px-1 py-0.5 text-sm font-normal opacity-85 lg:py-1" : "py-1.25 px-2 lg:px-2.5 lg:py-1.5 lg:text-base"} cursor-pointer font-medium text-white hover:bg-red-600`}
                             onClick={() => {
                                 if (!isPending && session) void handleLogOut();
                                 else if (!isPending) void navigate("/login");

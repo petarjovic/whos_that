@@ -284,7 +284,7 @@ const CreateCustomGamePage = () => {
                             type="text"
                             name="title"
                             placeholder="(E.g. Superheros, Famous Actors)"
-                            className="border-groove w-full rounded border border-neutral-400 bg-neutral-50 p-1 text-center font-medium placeholder:text-gray-400 xl:text-lg 2xl:text-xl"
+                            className="border-groove lg:w-9/10 rounded border border-neutral-400 bg-neutral-50 p-1 text-center font-medium placeholder:text-gray-400 max-lg:w-full xl:text-lg 2xl:text-xl"
                             required
                             minLength={5}
                             maxLength={20}
@@ -327,7 +327,7 @@ const CreateCustomGamePage = () => {
                         </div>
                     </div>
                     {/* Step 2: Image Uploads */}
-                    <div className="rounded-xs flex h-fit w-full flex-col items-center justify-around border border-neutral-800 bg-neutral-300 px-2 py-1 text-center">
+                    <div className="rounded-xs flex h-fit w-full flex-col items-center justify-around border border-neutral-800 bg-neutral-300 py-1 text-center max-lg:px-2 lg:px-4">
                         <label className="flex p-px text-lg font-semibold xl:p-2 xl:text-xl 2xl:text-2xl">
                             <FaCameraRetro size="1.18em" className="relative top-px mr-1" />
                             <div>Upload Custom Images</div>
@@ -383,7 +383,7 @@ const CreateCustomGamePage = () => {
                         {/* Clear list button */}
                         {selectedFiles.length > 0 ? (
                             <button
-                                className="rounded-xs ml-6 flex items-center bg-red-400 px-1 py-px font-medium text-white hover:bg-red-500"
+                                className="rounded-xs lg:px-1.75 lg:py-0.75 ml-6 flex cursor-pointer items-center bg-red-400 font-medium text-white hover:bg-red-500 max-lg:px-1 max-lg:py-px lg:mr-4"
                                 disabled={isLoading}
                                 type="button"
                                 onClick={handleClearCharacterList}
@@ -478,12 +478,12 @@ const CreateCustomGamePage = () => {
             <ReactModal
                 isOpen={showRulesModal}
                 onRequestClose={() => setShowRulesModal(false)}
-                className="absolute left-1/2 top-1/2 mx-auto flex h-fit w-[97%] max-w-4xl -translate-x-1/2 -translate-y-1/2 flex-col gap-4 border-2 border-neutral-800 bg-neutral-200 px-2 py-5 text-center shadow-lg"
-                overlayClassName="fixed inset-0 bg-zinc-700/75"
+                className="absolute left-1/2 top-1/2 mx-auto flex h-fit w-[97%] max-w-4xl -translate-x-1/2 -translate-y-1/2 flex-col gap-4 border-2 border-neutral-800 bg-neutral-200 px-2 text-center shadow-lg max-lg:py-5 lg:py-8"
+                overlayClassName="fixed inset-0 bg-zinc-900/70"
                 shouldCloseOnOverlayClick={false}
                 shouldCloseOnEsc={false}
             >
-                <div className="mb-1 flex items-center justify-center gap-1">
+                <div className="flex items-center justify-center gap-1 text-xl max-lg:mb-1 lg:mb-2">
                     <PiGavelFill size="2.5em" className="" />
                     <h2 className="text-center text-5xl font-bold">Rules</h2>
                     <PiGavelFill size="2.5em" className="scale-x-[-1]" />

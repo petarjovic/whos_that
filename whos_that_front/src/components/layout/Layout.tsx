@@ -22,7 +22,7 @@ const Layout = () => {
     return (
         <div
             id="flexContainer"
-            className="min-w-screen flex h-screen min-h-screen w-screen flex-col items-center justify-start bg-[#f3f3f3] bg-repeat"
+            className="lg:letter shadow-2xl/25 max-lg:min-w-screen pt-2.25 flex flex-col items-center justify-start bg-neutral-200 p-1 text-center max-lg:h-screen max-lg:min-h-screen max-lg:w-screen lg:mt-12 lg:h-fit lg:min-h-[91vh] lg:w-[96vw] lg:min-w-[96vw]"
         >
             <Hero session={session} isPending={isPending} />
             {/* Pass auth data to child routes via context */}
