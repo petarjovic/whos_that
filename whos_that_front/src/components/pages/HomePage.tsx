@@ -8,17 +8,27 @@ import { IoMdSearch } from "react-icons/io";
 import { GiExitDoor } from "react-icons/gi";
 import { CardLayout } from "../misc/Cards.tsx";
 import { Link } from "react-router";
+
 /**
  * Landing page with option to "create new game" or "join existing game" via room code
  */
 const HomePage = () => {
+    const nav = useNavigate();
+
+    const [inputQuery, setInputQuery] = useState("");
     const [gameIdToJoin, setGameIdToJoin] = useState("");
-    const navigate = useNavigate();
     const { session, isPending } = useBetterAuthSession();
+
+    const handleSearch = (e: React.FormEvent) => {
+        e.preventDefault();
+        const url = new URL(`${env.VITE_SERVER_URL}/api/search`);
+
+        void nav(`/search/?q=${inputQuery}`);
+    };
 
     const handleJoinExistingGame = (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
-        void navigate(`/play-game/${gameIdToJoin}`);
+        void nav(`/play-game/${gameIdToJoin}`);
     };
 
     return (
@@ -28,7 +38,7 @@ const HomePage = () => {
                     <div className="px-1 pt-1 text-center">
                         <form
                             className="rounded-xs 2xl:py-2.25 flex justify-around border border-neutral-400 bg-neutral-300 py-1.5"
-                            onSubmit={handleJoinExistingGame}
+                            onSubmit={handleSearch}
                         >
                             <input
                                 id="searchBar"
@@ -40,12 +50,12 @@ const HomePage = () => {
                                 placeholder="Search Game Theme"
                                 value={gameIdToJoin}
                                 onChange={(e) => {
-                                    setGameIdToJoin(e.target.value);
+                                    setInputQuery(e.target.value);
                                 }}
                             />
                             <button
                                 className="hover:scale-102 2xl:py-0.75 flex cursor-pointer rounded bg-red-400 px-1.5 py-px text-white hover:bg-red-500"
-                                type="button"
+                                type="submit"
                             >
                                 <IoMdSearch className="mr-px" size="1.5em" /> Search
                             </button>
@@ -113,7 +123,7 @@ const HomePage = () => {
                     <button
                         className="hover:scale-102 col-start-2 cursor-pointer text-center text-lg font-semibold"
                         onClick={() => {
-                            void navigate(isPending ? "" : session ? "/create-game" : "/login");
+                            void nav(isPending ? "" : session ? "/create-game" : "/login");
                         }}
                     >
                         <div className="rounded-xs border border-neutral-400 bg-neutral-300">

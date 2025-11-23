@@ -9,7 +9,7 @@ import type { PresetInfo } from "@server/types";
 import env from "../../lib/zodEnvSchema.ts";
 import { logError } from "../../lib/logger.ts";
 import LoadingSpinner from "../misc/LoadingSpinner.tsx";
-import { FaArrowUpRightFromSquare, FaHeart } from "react-icons/fa6";
+import { FaArrowUpRightFromSquare } from "react-icons/fa6";
 import { FcSettings } from "react-icons/fc";
 
 import ReactModal from "react-modal";
@@ -59,7 +59,7 @@ const ShareGameModal = ({
  * Public version supports liking (if logged in)
  * User's own supports sharing, privacy toggling, and deletion
  */
-const ShowPremadeGamesPage = ({ myGames }: { myGames: boolean }) => {
+const MyGamesPage = () => {
     const navigate = useNavigate();
     const [gamesList, setGamesList] = useState<PresetInfo>([]);
     const [isLoading, setIsLoading] = useState(true);
@@ -71,19 +71,15 @@ const ShowPremadeGamesPage = ({ myGames }: { myGames: boolean }) => {
     // Fetch game info from appropriate endpoint based on page type
     useEffect(() => {
         // Redirect if trying to access "my games" without auth
-        if (!isPending && myGames && !session) void navigate("/");
+        if (!isPending && !session) void navigate("/");
         else if (!isPending) {
             const getPremadeGames = async () => {
                 setIsLoading(true);
                 try {
-                    const response = await fetch(
-                        `${env.VITE_SERVER_URL}/api/` +
-                            (myGames ? "getMyGames" : "getAllPremadeGames"),
-                        {
-                            credentials: "include",
-                            method: "GET",
-                        }
-                    );
+                    const response = await fetch(`${env.VITE_SERVER_URL}/api/getMyGames`, {
+                        credentials: "include",
+                        method: "GET",
+                    });
 
                     if (response.ok) {
                         const validatePresetInfo = PresetInfoSchema.safeParse(
@@ -92,24 +88,26 @@ const ShowPremadeGamesPage = ({ myGames }: { myGames: boolean }) => {
                         if (validatePresetInfo.success) setGamesList(validatePresetInfo.data);
                         else {
                             logError(validatePresetInfo.error);
-                            setErrorMsg("Client did not understand server response.");
+                            setErrorMsg(
+                                "Client did not understand server response while getting user's games."
+                            );
                         }
                     } else {
                         const errorData = (await response.json()) as ServerResponse;
-                        setErrorMsg(errorData.message ?? "Failed to get premadeGames.");
+                        setErrorMsg(errorData.message ?? "Failed to get user's games.");
                     }
                 } catch (error) {
                     logError(error);
                     if (error instanceof Error) {
                         setErrorMsg(error.message);
-                    } else setErrorMsg("Failed to get premadeGames.");
+                    } else setErrorMsg("Failed to get user's games.");
                 } finally {
                     setIsLoading(false);
                 }
             };
             void getPremadeGames();
         }
-    }, [myGames, session, isPending, navigate]);
+    }, [session, isPending, navigate]);
 
     /**
      * Opens share modal with game link (only used on user's own games)
@@ -119,48 +117,6 @@ const ShowPremadeGamesPage = ({ myGames }: { myGames: boolean }) => {
         e.stopPropagation();
 
         setShareModalGameId(gameId);
-    };
-
-    /**
-     * Handles user liking and unliking game (only used on public games)
-     */
-    const handleLikeGame = async (e: React.MouseEvent<HTMLButtonElement>, gameId: string) => {
-        e.preventDefault();
-        e.stopPropagation();
-        if (!session) return;
-
-        // Optimistically update UI via state
-        setGamesList((prev) =>
-            prev.map((game) =>
-                game.id === gameId
-                    ? {
-                          ...game,
-                          userHasLiked: !game.userHasLiked,
-                          numLikes: game.userHasLiked ? game.numLikes - 1 : game.numLikes + 1,
-                      }
-                    : game
-            )
-        );
-
-        try {
-            //Request to like game on server
-            const response = await fetch(`${env.VITE_SERVER_URL}/api/likeGame/${gameId}`, {
-                credentials: "include",
-                method: "PUT",
-            });
-
-            if (response.ok) {
-                return;
-            } else {
-                const errorData = (await response.json()) as ServerResponse;
-                setErrorMsg(errorData.message ?? "Failed to like game.");
-            }
-        } catch (error) {
-            logError(error);
-            if (error instanceof Error) {
-                setErrorMsg(error.message);
-            } else setErrorMsg("Failed to like game.");
-        }
     };
 
     /**
@@ -252,98 +208,74 @@ const ShowPremadeGamesPage = ({ myGames }: { myGames: boolean }) => {
     };
 
     if (errorMsg) throw new Error(errorMsg);
-    else if (isLoading) return <LoadingSpinner />;
+    else if (isLoading || isPending) return <LoadingSpinner />;
     return (
         <>
             <div className="mx-10 mt-3 flex flex-wrap items-center justify-evenly">
-                <h2 className="text-4xl font-semibold">
-                    {myGames ? "Your Presets" : "Public Presets"}
-                </h2>
+                <h2 className="text-4xl font-semibold">Your Presets</h2>
                 {gamesList.length === 0 && (
-                    <p className="text-shadow-xs/100 mx-auto mt-[50%] text-center text-2xl font-medium text-white">
-                        {myGames ? "No games made yet!" : "No public games!? Something's fishy..."}
+                    <p className="mx-auto mt-[40%] text-center text-xl font-medium">
+                        No games made yet!{" "}
+                        <Link
+                            to={"/create-game"}
+                            className="text-blue-500 underline hover:italic hover:text-red-300"
+                        >
+                            make new game
+                        </Link>
                     </p>
                 )}
-                {gamesList.map(
-                    ({ id, title, imageUrl, isPublic, numLikes, author, userHasLiked }, i) => (
-                        <Link key={i} to={`/play-game?preset=${id}`}>
-                            <CardLayout name={title} imgSrc={imageUrl} key={i}>
-                                {/* Own Games */}
-                                {myGames ? (
-                                    <div className="flex items-baseline justify-between">
-                                        <button
-                                            type="button"
-                                            onClick={(e) => {
-                                                handleShareGame(e, id);
-                                            }}
-                                            className="ml-2 cursor-pointer text-xl text-gray-700 hover:scale-105 hover:text-blue-500 active:scale-125 max-lg:text-lg"
-                                            title="Share Link"
-                                        >
-                                            <FaArrowUpRightFromSquare />
-                                        </button>
-                                        <p
-                                            className={`whitespace-pre text-center text-base font-semibold opacity-80 max-lg:text-sm ${isPublic ? "text-green-600" : "text-red-600"}`}
-                                        >
-                                            {isPublic ? " Public" : " Private"}
-                                        </p>
-                                        <select
-                                            className="shadow-xs/15 xl:scale-133 scale-120 hover:shadow-sm/50 xl:hover:scale-140 xl:mb-1.75 relative mb-1 mr-1 w-fit cursor-pointer content-center rounded-[50%] border border-slate-400 bg-gray-300 p-px text-center text-base text-slate-400 transition-transform hover:scale-105 hover:text-blue-500 active:shadow-none xl:mr-2"
-                                            title="Settings"
-                                            onClick={(e) => {
-                                                e.preventDefault();
-                                                e.stopPropagation();
-                                            }}
-                                            onChange={(e) => {
-                                                e.stopPropagation();
-                                                void handleGameSettings(e, id, title);
-                                            }}
-                                        >
-                                            <button
-                                                type="button"
-                                                className="flex items-center justify-center text-2xl max-lg:text-xl"
-                                            >
-                                                <FcSettings />
-                                            </button>
-                                            {/* Empty option is needed for functionality, keep it and keep hidden. */}
-                                            <option className="hidden"></option>
-                                            <option className="bg-slate-500 px-1 text-white hover:bg-slate-300 hover:text-black">
-                                                {isPublic ? "Make Private" : "Make Public"}
-                                            </option>
-                                            <option className="bg-slate-500 px-1 text-white hover:bg-red-400">
-                                                Delete Game
-                                            </option>
-                                        </select>
-                                    </div>
-                                ) : (
-                                    //Public Games
-                                    <div className="mb-0.75 relative flex items-center justify-center max-xl:mb-px">
-                                        <p className="mb-[1.5px] text-center text-sm italic text-gray-600 max-xl:text-xs">
-                                            {author ?? ""}{" "}
-                                        </p>
-                                        <p className="absolute bottom-0.5 right-1.5 text-base text-gray-700">
-                                            <button
-                                                className="flex cursor-pointer items-center whitespace-pre-wrap align-sub"
-                                                onClick={(e) => {
-                                                    handleLikeGame(e, id);
-                                                }}
-                                                title={userHasLiked ? "Unlike Game" : "Like Game"}
-                                            >
-                                                {numLikes}{" "}
-                                                <FaHeart
-                                                    className={`${
-                                                        userHasLiked
-                                                            ? "text-red-600"
-                                                            : "text-zinc-800"
-                                                    } active:scale-130 hover:scale-111 scale-105 rounded-[50%] text-2xl transition-transform hover:text-red-300 max-md:text-xl`}
-                                                />
-                                            </button>
-                                        </p>
-                                    </div>
-                                )}
-                            </CardLayout>
-                        </Link>
-                    )
-                )}
+                {gamesList.map(({ id, title, imageUrl, isPublic }, i) => (
+                    <Link key={i} to={`/play-game?preset=${id}`}>
+                        <CardLayout name={title} imgSrc={imageUrl} key={i}>
+                            {/* Own Games */}
+
+                            <div className="flex items-baseline justify-between">
+                                <button
+                                    type="button"
+                                    onClick={(e) => {
+                                        handleShareGame(e, id);
+                                    }}
+                                    className="ml-2 cursor-pointer text-xl text-gray-700 hover:scale-105 hover:text-blue-500 active:scale-125 max-lg:text-lg"
+                                    title="Share Link"
+                                >
+                                    <FaArrowUpRightFromSquare />
+                                </button>
+                                <p
+                                    className={`whitespace-pre text-center text-base font-semibold opacity-80 max-lg:text-sm ${isPublic ? "text-green-600" : "text-red-600"}`}
+                                >
+                                    {isPublic ? " Public" : " Private"}
+                                </p>
+                                <select
+                                    className="shadow-xs/15 xl:scale-133 scale-120 hover:shadow-sm/50 xl:hover:scale-140 xl:mb-1.75 relative mb-1 mr-1 w-fit cursor-pointer content-center rounded-[50%] border border-slate-400 bg-gray-300 p-px text-center text-base text-slate-400 transition-transform hover:scale-105 hover:text-blue-500 active:shadow-none xl:mr-2"
+                                    title="Settings"
+                                    onClick={(e) => {
+                                        e.preventDefault();
+                                        e.stopPropagation();
+                                    }}
+                                    onChange={(e) => {
+                                        e.stopPropagation();
+                                        void handleGameSettings(e, id, title);
+                                    }}
+                                >
+                                    <button
+                                        type="button"
+                                        className="flex items-center justify-center text-2xl max-lg:text-xl"
+                                    >
+                                        <FcSettings />
+                                    </button>
+                                    {/* Empty option is needed for functionality, keep it and keep hidden. */}
+                                    <option className="hidden"></option>
+                                    <option className="bg-slate-500 px-1 text-white hover:bg-slate-300 hover:text-black">
+                                        {isPublic ? "Make Private" : "Make Public"}
+                                    </option>
+                                    <option className="bg-slate-500 px-1 text-white hover:bg-red-400">
+                                        Delete Game
+                                    </option>
+                                </select>
+                            </div>
+                        </CardLayout>
+                    </Link>
+                ))}
             </div>
             {/* Modal for sharing link to own games */}
             <ShareGameModal
@@ -355,4 +287,4 @@ const ShowPremadeGamesPage = ({ myGames }: { myGames: boolean }) => {
     );
 };
 
-export default ShowPremadeGamesPage;
+export default MyGamesPage;

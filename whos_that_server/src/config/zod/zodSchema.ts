@@ -5,6 +5,14 @@ import { z } from "zod";
 export const nanoId21Schema = z.string().regex(/^[\w-]{21}$/i);
 export const roomIdSchema = z.string().regex(/^[\w-]{6}$/i);
 
+export const searchQuerySchema = z.object({
+    page: z.number().int().min(1).default(1),
+    limit: z.number().int().min(1).max(50).default(20),
+    search: z.string().max(100).optional(),
+    sort: z.enum(["likes", "newest"]),
+});
+
+//Socket response not htttp
 export const responseTypeSchema = z.object({
     success: z.boolean(),
     msg: z.string(),
@@ -20,7 +28,7 @@ export const gameStateTypeSchema = z.object({
 
 const cardDataTypeSchema = z.object({
     name: z.string(),
-    orderIndex: z.number(),
+    orderIndex: z.number().int(),
 });
 
 export const cardDataIdTypeSchema = cardDataTypeSchema.extend({
@@ -77,3 +85,13 @@ export const PresetInfoSchema = z.array(
         userHasLiked: z.boolean().nullable(),
     })
 );
+
+export const SearchResponseSchema = z.object({
+    games: PresetInfoSchema,
+    pagination: z.object({
+        page: z.number(),
+        limit: z.number(),
+        totalCount: z.number(),
+        totalPages: z.number(),
+    }),
+});

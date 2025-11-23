@@ -3,7 +3,7 @@ import type { Express, Request, Response } from "express";
 import { PutObjectCommand } from "@aws-sdk/client-s3";
 import * as schema from "../db/schema.ts";
 import * as authSchema from "../db/auth-schema.ts";
-import { eq, and, not, count, desc, sql } from "drizzle-orm";
+import { eq, and, not, count, desc, ilike, sql } from "drizzle-orm";
 import type {
     CardDataIdType,
     CardDataUrlType,
@@ -15,7 +15,7 @@ import { nanoid } from "nanoid";
 import { getSignedUrl as getSignedS3Url } from "@aws-sdk/s3-request-presigner";
 import { getSignedUrl as getSignedCFUrl } from "@aws-sdk/cloudfront-signer";
 import env from "../config/zod/zodEnvSchema.ts";
-import { createGameRequestSchema } from "../config/zod/zodSchema.ts";
+import { createGameRequestSchema, searchQuerySchema } from "../config/zod/zodSchema.ts";
 import z from "zod";
 import { auth } from "../config/auth.ts";
 import { fromNodeHeaders } from "better-auth/node";
@@ -131,14 +131,26 @@ export function setupApiRoutes(app: Express) {
      * @route GET /api/getAllPremadeGames
      * @returns List of public games with cover images and like counts
      */
-    app.get("/api/getAllPremadeGames", async (req, res) => {
+    app.get("/api/search", async (req, res) => {
         try {
+            //Validate query params
+            const validQuery = searchQuerySchema.safeParse(req.query);
+            if (!validQuery.success) {
+                return res.status(400).json({ message: "Invalid query parameters." });
+            }
+            const { page, limit, search, sort } = validQuery.data;
+
             // Check if user is logged in to determine "liked" statuses
             const session = await auth.api.getSession({
                 headers: fromNodeHeaders(req.headers),
             });
 
-            // Query public games with author, cover image, and like data
+            const whereConditions = and(
+                eq(schema.games.isPublic, true),
+                search ? ilike(schema.games.title, `%${search}%`) : undefined
+            );
+
+            // Query public games with author, cover image, and like data according to search params
             const premadeGamesInfo = await db
                 .select({
                     id: schema.games.id,
@@ -160,9 +172,23 @@ export function setupApiRoutes(app: Express) {
                     )
                 )
                 .leftJoin(schema.gameLikes, eq(schema.gameLikes.gameId, schema.games.id))
-                .where(eq(schema.games.isPublic, true))
+                .where(whereConditions)
                 .groupBy(schema.games.id, authSchema.user.displayUsername, schema.gameItems.id)
-                .orderBy(desc(count(schema.gameLikes.id)));
+                .orderBy(
+                    sort === "likes"
+                        ? desc(count(schema.gameLikes.id))
+                        : desc(schema.games.createdAt)
+                )
+                .limit(limit)
+                .offset((page - 1) * limit);
+
+            const totalCountResult = await db
+                .select({ count: count() })
+                .from(schema.games)
+                .where(whereConditions);
+
+            const totalCount = totalCountResult[0].count;
+            const totalPages = Math.ceil(totalCount / limit);
 
             // Populate then send response object
             const premadeGamesInfoUrl: PresetInfo = premadeGamesInfo
@@ -179,7 +205,15 @@ export function setupApiRoutes(app: Express) {
                     };
                 });
 
-            return res.status(200).send(premadeGamesInfoUrl);
+            return res.status(200).json({
+                games: premadeGamesInfoUrl,
+                pagination: {
+                    page,
+                    limit,
+                    totalCount,
+                    totalPages,
+                },
+            });
             //Error handling ↓
         } catch (error) {
             console.error("Error while attempting to retrieve public games:\n", error);
@@ -288,7 +322,7 @@ export function setupApiRoutes(app: Express) {
 
             if (isPublic || !USE_CLOUDFRONT) {
                 //send direct image urls for public games
-                const cardDataUrlList = cardDataIdToUrl(cardDataIdList, isPublic, gameId);
+                const cardDataUrlList = cardDataIdToUrl(gameId, isPublic, cardDataIdList);
                 return res.status(200).send({ title: title, cardData: cardDataUrlList });
             } else {
                 //send presigned image urls for private games
