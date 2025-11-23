@@ -33,4 +33,5 @@ export type GameDataType = z.infer<typeof zod.gameDataTypeSchema>;
 export type CreateGameRequest = z.infer<typeof zod.createGameRequestSchema>;
 export type CreateGameResponse = z.infer<typeof zod.createGameResponseSchema>;
 export type PresetInfo = z.infer<typeof zod.PresetInfoSchema>;
+export type PaginationInfo = z.infer<typeof zod.PaginationInfoSchema>;
 export type SearchQuery = z.infer<typeof zod.searchQuerySchema>;

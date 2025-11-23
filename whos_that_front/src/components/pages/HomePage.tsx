@@ -1,5 +1,5 @@
 import { useNavigate } from "react-router";
-import { useState } from "react";
+import { use, useEffect, useState } from "react";
 import FirstVisitModal from "../misc/FirstVisitModal.tsx";
 import PublicGamesImg from "@client/assets/PublicGames.svg";
 import { useBetterAuthSession } from "../../lib/LayoutContextProvider.ts";
@@ -8,6 +8,12 @@ import { IoMdSearch } from "react-icons/io";
 import { GiExitDoor } from "react-icons/gi";
 import { CardLayout } from "../misc/Cards.tsx";
 import { Link } from "react-router";
+import type { PresetInfo } from "@server/types";
+import { PresetInfoSchema } from "@server/zodSchema";
+import env from "../../lib/zodEnvSchema.ts";
+import { FaHeart } from "react-icons/fa";
+import type { ServerResponse } from "../../lib/types.ts";
+import LoadingSpinner from "../misc/LoadingSpinner.tsx";
 
 /**
  * Landing page with option to "create new game" or "join existing game" via room code
@@ -15,15 +21,54 @@ import { Link } from "react-router";
 const HomePage = () => {
     const nav = useNavigate();
 
+    const [errorMsg, setErrorMsg] = useState("");
+    const [isLoading, setIsLoading] = useState(true);
+
+    const [mostLikedGames, setMostLikedGames] = useState<PresetInfo>([]);
+    const [mostRecentGames, setMostRecentGames] = useState<PresetInfo>([]);
     const [inputQuery, setInputQuery] = useState("");
     const [gameIdToJoin, setGameIdToJoin] = useState("");
     const { session, isPending } = useBetterAuthSession();
 
-    const handleSearch = (e: React.FormEvent) => {
-        e.preventDefault();
-        const url = new URL(`${env.VITE_SERVER_URL}/api/search`);
+    //Fetch featured games
+    useEffect(() => {
+        if (!isPending) {
+            const getFeaturedGames = async () => {
+                try {
+                    setIsLoading(true);
+                    const response = await fetch(`${env.VITE_SERVER_URL}/api/featuredGames`, {
+                        credentials: "include",
+                        method: "GET",
+                    });
+                    if (response.ok) {
+                        const validPresetInfo = PresetInfoSchema.safeParse(await response.json());
+                        if (validPresetInfo.success) {
+                            setMostLikedGames(validPresetInfo.data.slice(0, 3));
+                            setMostRecentGames(validPresetInfo.data.slice(3, 6));
+                        } else {
+                            setErrorMsg(
+                                "Client did not understand server response while getting featured games."
+                            );
+                        }
+                    } else {
+                        const errorData = (await response.json()) as ServerResponse;
+                        setErrorMsg(errorData.message ?? "Error: Failed to get user's games.");
+                    }
+                } catch (error) {
+                    console.error(error);
+                } finally {
+                    setIsLoading(false);
+                }
+            };
+            void getFeaturedGames();
+        }
+    }, [isPending]);
 
-        void nav(`/search/?q=${inputQuery}`);
+    const handleSearch = (e?: React.FormEvent) => {
+        if (e) {
+            e.preventDefault();
+            void nav(`/search/?q=${inputQuery}`);
+        } else void nav(`/search/?q=`);
     };
 
     const handleJoinExistingGame = (e: React.FormEvent<HTMLFormElement>) => {
@@ -31,9 +76,10 @@ const HomePage = () => {
         void nav(`/play-game/${gameIdToJoin}`);
     };
 
+    if (errorMsg) throw new Error(errorMsg);
     return (
         <>
-            <div className="h-full text-center text-neutral-800 max-2xl:mt-4 max-xl:flex max-xl:flex-col max-xl:gap-6 max-md:justify-end md:max-xl:justify-around xl:grid xl:grid-cols-2 xl:grid-rows-1 xl:gap-4 2xl:mt-3">
+            <div className="h-full text-center text-neutral-700 max-2xl:mt-4 max-xl:flex max-xl:flex-col max-xl:gap-6 max-md:justify-end md:max-xl:justify-around xl:grid xl:grid-cols-2 xl:grid-rows-1 xl:gap-4 2xl:mt-3">
                 <div className="flex h-full flex-col gap-2 max-xl:justify-end xl:border-r xl:border-neutral-600 xl:pr-4">
                     <div className="px-1 pt-1 text-center">
                         <form
@@ -43,79 +89,106 @@ const HomePage = () => {
                             <input
                                 id="searchBar"
                                 type="search"
-                                className="rounded-xs md:max-xl:w-7/10 max-md:w-6/10 border border-neutral-400 bg-neutral-50 px-1 text-left font-medium placeholder:text-zinc-400 max-2xl:py-px xl:w-3/4 2xl:p-0.5"
-                                required
-                                minLength={6}
-                                maxLength={6}
-                                placeholder="Search Game Theme"
-                                value={gameIdToJoin}
+                                className="rounded-xs md:max-xl:w-5/10 max-md:w-4/10 2xl:p-0.75 xl:w-6/10 border border-neutral-400 bg-neutral-50 px-1 text-left font-medium placeholder:text-zinc-400 max-2xl:py-px xl:text-lg 2xl:pl-3"
+                                maxLength={20}
+                                placeholder="Search Preset Theme"
+                                value={inputQuery}
                                 onChange={(e) => {
                                     setInputQuery(e.target.value);
                                 }}
                             />
                             <button
-                                className="hover:scale-102 2xl:py-0.75 flex cursor-pointer rounded bg-red-400 px-1.5 py-px text-white hover:bg-red-500"
+                                className="hover:scale-102 2xl:py-0.75 flex cursor-pointer items-center rounded bg-red-400 px-1.5 py-px text-white hover:bg-red-500"
                                 type="submit"
                             >
                                 <IoMdSearch className="mr-px" size="1.5em" /> Search
                             </button>
+                            <button
+                                className="hover:scale-102 2xl:py-0.75 flex cursor-pointer items-center rounded bg-blue-400 px-1.5 py-px text-white hover:bg-blue-500"
+                                onClick={() => handleSearch()}
+                                type="button"
+                            >
+                                Browse All
+                            </button>
                         </form>
-                        <div className="p-px text-lg font-semibold">Search Presets</div>
+                        <div className="cursor-default p-px text-lg font-semibold xl:text-xl">
+                            Search Presets
+                        </div>
                     </div>
                     <div className="h-0 w-full self-center border-b border-neutral-600"></div>
 
                     <div className="rounded-xs col-start-1 cursor-pointer pt-2 text-center">
-                        <div className="rounded-xs 2xl:py-2.25 flex w-fit justify-around gap-4 border border-neutral-400 bg-neutral-300 px-4 py-2">
-                            <Link to={`/play-game?preset=${"REPLACE LATER"}`}>
-                                <CardLayout name={"test"} imgSrc={CustomGameImg}>
-                                    <p className="text-center text-xs italic text-gray-600 max-md:hidden">
-                                        Pepsi Cola
-                                    </p>
-                                </CardLayout>
-                            </Link>
-                            <Link to={`/play-game?preset=${"REPLACE LATER"}`}>
-                                <CardLayout name={"test"} imgSrc={CustomGameImg}>
-                                    <p className="text-center text-xs italic text-gray-600 max-md:hidden">
-                                        Pepsi Cola
-                                    </p>
-                                </CardLayout>
-                            </Link>
-                            <Link to={`/play-game?preset=${"REPLACE LATER"}`}>
-                                <CardLayout name={"test"} imgSrc={CustomGameImg}>
-                                    <p className="text-center text-xs italic text-gray-600 max-md:hidden">
-                                        Pepsi Cola
-                                    </p>
-                                </CardLayout>
-                            </Link>
+                        <div className="rounded-xs flex w-full justify-around gap-2.5 border border-neutral-400 bg-neutral-300 px-2.5 py-2 2xl:py-2">
+                            {isLoading ? (
+                                <LoadingSpinner />
+                            ) : (
+                                mostRecentGames.map(({ id, title, imageUrl, author }, i) => (
+                                    <Link key={i} to={`/play-game?preset=${id}`}>
+                                        <CardLayout name={title} imgSrc={imageUrl} key={i}>
+                                            <p className="text-sm italic text-gray-600 max-xl:text-xs">
+                                                {author ?? ""}
+                                            </p>
+                                        </CardLayout>
+                                    </Link>
+                                ))
+                            )}
                         </div>
-                        <div className="p-px text-lg font-semibold">Who's That Most Recent</div>
+                        <div className="p-px text-lg font-semibold hover:text-blue-400 xl:text-xl">
+                            Who's That Most Recent
+                        </div>
                     </div>
                     <div className="h-0 w-full self-center border-b border-neutral-600"></div>
                     <div className="rounded-xs col-start-1 cursor-pointer pt-2 text-center max-xl:hidden">
-                        <div className="rounded-xs 2xl:py-2.25 flex w-fit justify-around gap-4 border border-neutral-400 bg-neutral-300 px-4 py-2">
-                            <Link to={`/play-game?preset=${"REPLACE LATER"}`}>
-                                <CardLayout name={"test"} imgSrc={CustomGameImg}>
-                                    <p className="text-center text-xs italic text-gray-600">
-                                        Pepsi Cola
-                                    </p>
-                                </CardLayout>
-                            </Link>
-                            <Link to={`/play-game?preset=${"REPLACE LATER"}`}>
-                                <CardLayout name={"test"} imgSrc={CustomGameImg}>
-                                    <p className="text-center text-xs italic text-gray-600">
-                                        Pepsi Cola
-                                    </p>
-                                </CardLayout>
-                            </Link>
-                            <Link to={`/play-game?preset=${"REPLACE LATER"}`}>
-                                <CardLayout name={"test"} imgSrc={CustomGameImg}>
-                                    <p className="text-center text-xs italic text-gray-600">
-                                        Pepsi Cola
-                                    </p>
-                                </CardLayout>
-                            </Link>
+                        <div className="rounded-xs flex w-full justify-around gap-2.5 border border-neutral-400 bg-neutral-300 px-2.5 py-2 2xl:py-2">
+                            {isLoading ? (
+                                <LoadingSpinner />
+                            ) : (
+                                mostLikedGames.map(
+                                    (
+                                        { id, title, imageUrl, numLikes, author, userHasLiked },
+                                        i
+                                    ) => (
+                                        <Link key={i} to={`/play-game?preset=${id}`}>
+                                            <CardLayout name={title} imgSrc={imageUrl} key={i}>
+                                                <div className="relative flex items-center justify-center">
+                                                    <p className="relative right-5 text-sm italic text-gray-600 max-xl:text-xs">
+                                                        {author ?? ""}
+                                                    </p>
+                                                    <p className="absolute bottom-0.5 right-1.5 text-xs text-gray-700">
+                                                        <button
+                                                            className="flex cursor-pointer items-center whitespace-pre-wrap align-sub"
+                                                            //TODO: FIX
+                                                            onClick={() => {}}
+                                                            title={
+                                                                userHasLiked
+                                                                    ? "Unlike Game"
+                                                                    : "Like Game"
+                                                            }
+                                                        >
+                                                            <div className="text-sm">
+                                                                {numLikes}
+                                                            </div>
+
+                                                            <FaHeart
+                                                                size={"1.4em"}
+                                                                className={`${
+                                                                    userHasLiked
+                                                                        ? "text-red-600"
+                                                                        : "text-gray-500"
+                                                                } ml-0.5 rounded-[50%] transition-transform hover:text-red-300`}
+                                                            />
+                                                        </button>
+                                                    </p>
+                                                </div>
+                                            </CardLayout>
+                                        </Link>
+                                    )
+                                )
+                            )}
                         </div>
-                        <div className="p-px text-lg font-semibold">Who's That Most Wanted</div>
+                        <div className="p-px text-lg font-semibold hover:text-blue-400 xl:text-xl">
+                            Who's That Most Wanted
+                        </div>
                     </div>
                 </div>
 
@@ -132,7 +205,9 @@ const HomePage = () => {
                                 src={CustomGameImg}
                             ></img>
                         </div>
-                        Create Custom Set
+                        <div className="font-semib p-px text-lg hover:text-blue-400 xl:text-xl">
+                            Create Custom Set
+                        </div>
                     </button>
                     <div className="h-0 w-full self-center border-b border-neutral-600"></div>
                     {/* Form for joining room using code */}
@@ -145,7 +220,7 @@ const HomePage = () => {
                                 id="gameIdInput"
                                 name="gameIdInput"
                                 type="text"
-                                className="rounded-xs w-1/2 border border-neutral-400 bg-neutral-50 px-1 text-center font-medium placeholder:text-zinc-400 max-2xl:py-px 2xl:p-0.5"
+                                className="rounded-xs w-1/2 border border-neutral-400 bg-neutral-50 px-1 text-center font-medium placeholder:text-zinc-400 max-2xl:py-px xl:text-lg 2xl:p-0.5"
                                 required
                                 minLength={6}
                                 maxLength={6}
@@ -156,14 +231,16 @@ const HomePage = () => {
                                 }}
                             />
                             <button
-                                className="hover:scale-102 2xl:py-0.75 ml-5 flex cursor-pointer rounded bg-red-400 px-1.5 py-px font-medium text-white hover:bg-red-500"
+                                className="hover:scale-102 2xl:py-0.75 ml-5 flex cursor-pointer items-center rounded bg-red-400 px-1.5 py-px font-medium text-white hover:bg-red-500"
                                 type="submit"
                             >
-                                <GiExitDoor className="relative top-0.5 mr-0.5" size="1.25em" />{" "}
+                                <GiExitDoor className="relative bottom-px mr-0.5" size="1.25em" />{" "}
                                 Join Game
                             </button>
                         </form>
-                        <div className="p-px text-lg font-semibold">Join an Exisitng Game</div>
+                        <div className="cursor-default p-px text-lg font-semibold xl:text-xl">
+                            Join an Exisitng Game
+                        </div>
                     </div>
                 </div>
 

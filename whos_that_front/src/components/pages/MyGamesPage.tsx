@@ -137,7 +137,6 @@ const MyGamesPage = () => {
                     `Are you sure you want to delete ${title}? This action cannot be undone!`
                 );
                 if (confirmed) {
-                    // Optimistically remove from state/UI
                     setGamesList((prev) => prev.filter((game) => game.id !== gameId));
 
                     try {

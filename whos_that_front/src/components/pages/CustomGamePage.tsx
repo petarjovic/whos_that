@@ -287,7 +287,7 @@ const CreateCustomGamePage = () => {
                             className="border-groove lg:w-9/10 rounded border border-neutral-400 bg-neutral-50 p-1 text-center font-medium placeholder:text-gray-400 max-lg:w-full xl:text-lg 2xl:text-xl"
                             required
                             minLength={5}
-                            maxLength={20}
+                            maxLength={18}
                         ></input>
                     </div>
                     {/* Step 4: Privacy Settings */}

@@ -6,9 +6,9 @@ export const nanoId21Schema = z.string().regex(/^[\w-]{21}$/i);
 export const roomIdSchema = z.string().regex(/^[\w-]{6}$/i);
 
 export const searchQuerySchema = z.object({
-    page: z.number().int().min(1).default(1),
-    limit: z.number().int().min(1).max(50).default(20),
-    search: z.string().max(100).optional(),
+    q: z.string().max(100).optional(),
+    page: z.coerce.number().int().min(1).default(1),
+    limit: z.coerce.number().int().min(1).max(50).default(20),
     sort: z.enum(["likes", "newest"]),
 });
 
@@ -76,8 +76,8 @@ export const createRoomParamsSchema = z.object({
 
 export const PresetInfoSchema = z.array(
     z.object({
-        title: z.string(),
         id: z.string(),
+        title: z.string(),
         author: z.string().nullable(),
         imageUrl: z.string(),
         isPublic: z.boolean(),
@@ -86,12 +86,14 @@ export const PresetInfoSchema = z.array(
     })
 );
 
+export const PaginationInfoSchema = z.object({
+    page: z.number(),
+    limit: z.number(),
+    totalCount: z.number(),
+    totalPages: z.number(),
+});
+
 export const SearchResponseSchema = z.object({
     games: PresetInfoSchema,
-    pagination: z.object({
-        page: z.number(),
-        limit: z.number(),
-        totalCount: z.number(),
-        totalPages: z.number(),
-    }),
+    pagination: PaginationInfoSchema,
 });

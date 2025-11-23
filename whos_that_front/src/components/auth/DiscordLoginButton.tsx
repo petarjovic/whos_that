@@ -30,7 +30,7 @@ const DiscordLoginButton = ({
     return (
         <button
             type="button"
-            className="shadow-xs/20 hover:shadow-md/15 duration-25 active:shadow-2xs grayscale-10 flex h-12 cursor-pointer items-center rounded-lg border border-[#5865F2] bg-[#5865F2] px-3 py-1 text-base font-bold text-white transition-colors hover:border-slate-400 hover:bg-slate-100 hover:text-neutral-100 max-2xl:h-10 max-2xl:px-2 max-2xl:text-sm"
+            className="shadow-xs/20 hover:shadow-md/15 duration-25 active:shadow-2xs grayscale-10 flex h-12 cursor-pointer items-center rounded-lg border border-[#5865F2] bg-[#5865F2] px-3 py-1 text-base font-bold text-white transition-colors hover:border-slate-400 hover:bg-[#3845D2] hover:text-neutral-200 max-2xl:h-10 max-2xl:px-2 max-2xl:text-sm"
             onClick={handleDiscordButtonClick}
             disabled={disable}
         >

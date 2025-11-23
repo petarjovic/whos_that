@@ -126,19 +126,102 @@ export function setupApiRoutes(app: Express) {
         }
     });
 
+    app.get("/api/featuredGames", async (req, res) => {
+        try {
+            const session = await auth.api.getSession({
+                headers: fromNodeHeaders(req.headers),
+            });
+
+            const top3MostLikedGames = await db
+                .select({
+                    id: schema.games.id,
+                    title: schema.games.title,
+                    author: authSchema.user.displayUsername,
+                    coverImageId: schema.gameItems.id,
+                    numLikes: count(schema.gameLikes.id),
+                    userHasLiked: session
+                        ? sql<boolean>`BOOL_OR(${schema.gameLikes.userId} = ${session.user.id})`
+                        : sql<boolean>`FALSE`,
+                })
+                .from(schema.games)
+                .leftJoin(authSchema.user, eq(authSchema.user.id, schema.games.userId))
+                .leftJoin(
+                    schema.gameItems,
+                    and(
+                        eq(schema.gameItems.gameId, schema.games.id),
+                        eq(schema.gameItems.orderIndex, 0)
+                    )
+                )
+                .leftJoin(schema.gameLikes, eq(schema.gameLikes.gameId, schema.games.id))
+                .where(eq(schema.games.isPublic, true))
+                .groupBy(schema.games.id, authSchema.user.displayUsername, schema.gameItems.id)
+                .orderBy(desc(count(schema.gameLikes.id)))
+                .limit(3);
+
+            const top3MostRecentGames = await db
+                .select({
+                    id: schema.games.id,
+                    title: schema.games.title,
+                    author: authSchema.user.displayUsername,
+                    coverImageId: schema.gameItems.id,
+                    numLikes: count(schema.gameLikes.id),
+                    userHasLiked: session
+                        ? sql<boolean>`BOOL_OR(${schema.gameLikes.userId} = ${session.user.id})`
+                        : sql<boolean>`FALSE`,
+                })
+                .from(schema.games)
+                .leftJoin(authSchema.user, eq(authSchema.user.id, schema.games.userId))
+                .leftJoin(
+                    schema.gameItems,
+                    and(
+                        eq(schema.gameItems.gameId, schema.games.id),
+                        eq(schema.gameItems.orderIndex, 0)
+                    )
+                )
+                .leftJoin(schema.gameLikes, eq(schema.gameLikes.gameId, schema.games.id))
+                .where(eq(schema.games.isPublic, true))
+                .groupBy(schema.games.id, authSchema.user.displayUsername, schema.gameItems.id)
+                .orderBy(desc(schema.games.createdAt))
+                .limit(3);
+
+            const featuredGamesInfoUrl: PresetInfo = [...top3MostLikedGames, ...top3MostRecentGames]
+                .filter(({ coverImageId }) => coverImageId !== null)
+                .map(({ id, title, author, numLikes, coverImageId, userHasLiked }) => {
+                    return {
+                        id,
+                        title,
+                        author,
+                        isPublic: true,
+                        numLikes,
+                        userHasLiked,
+                        imageUrl: constructImageUrl(true, id, coverImageId ?? ""),
+                    };
+                });
+
+            res.status(200).send(featuredGamesInfoUrl);
+        } catch (error) {
+            console.error("Error while attempting to retrieve featured games:\n", error);
+            return res
+                .status(500)
+                .json({ message: "Internal Server Error. Failed to fetch featured games." });
+        }
+    });
+
     /**
-     * Retrieves all public games with metadata and like information
+     * Retrieves public games according to query and with metadata
      * @route GET /api/getAllPremadeGames
      * @returns List of public games with cover images and like counts
      */
     app.get("/api/search", async (req, res) => {
         try {
             //Validate query params
+            console.log(req.query);
             const validQuery = searchQuerySchema.safeParse(req.query);
             if (!validQuery.success) {
+                console.log(z.prettifyError(validQuery.error));
                 return res.status(400).json({ message: "Invalid query parameters." });
             }
-            const { page, limit, search, sort } = validQuery.data;
+            const { page, limit, q, sort } = validQuery.data;
 
             // Check if user is logged in to determine "liked" statuses
             const session = await auth.api.getSession({
@@ -147,7 +230,7 @@ export function setupApiRoutes(app: Express) {
 
             const whereConditions = and(
                 eq(schema.games.isPublic, true),
-                search ? ilike(schema.games.title, `%${search}%`) : undefined
+                q ? ilike(schema.games.title, `%${q}%`) : undefined
             );
 
             // Query public games with author, cover image, and like data according to search params

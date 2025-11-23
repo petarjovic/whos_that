@@ -1,8 +1,8 @@
 import { useEffect, useState } from "react";
 import env from "../../lib/zodEnvSchema.ts";
-import { PresetInfoSchema } from "@server/zodSchema";
+import { SearchResponseSchema } from "@server/zodSchema";
 import type { ServerResponse } from "src/lib/types";
-import type { PresetInfo } from "@server/types";
+import type { PresetInfo, PaginationInfo } from "@server/types";
 import { useBetterAuthSession } from "../../lib/LayoutContextProvider.ts";
 import LoadingSpinner from "../misc/LoadingSpinner";
 import { Link } from "react-router";
@@ -17,6 +17,7 @@ const SearchPage = () => {
 
     const [isLoading, setIsLoading] = useState(true);
     const [gamesList, setGamesList] = useState<PresetInfo>([]);
+    const [pageInfo, setPageInfo] = useState<PaginationInfo>();
     const [errorMsg, setErrorMsg] = useState("");
 
     const { session, isPending } = useBetterAuthSession();
@@ -27,7 +28,7 @@ const SearchPage = () => {
             setIsLoading(true);
             try {
                 const validPage = z.number().safeParse(searchParams.get("page"));
-                const validLimit = z.number().safeParse(searchParams.get("page"));
+                const validLimit = z.number().safeParse(searchParams.get("limit"));
 
                 const url = new URL(`${env.VITE_SERVER_URL}/api/search`);
                 url.searchParams.set("q", searchParams.get("q") ?? "");
@@ -47,17 +48,18 @@ const SearchPage = () => {
                 });
 
                 if (response.ok) {
-                    const validatePresetInfo = PresetInfoSchema.safeParse(await response.json());
-                    if (validatePresetInfo.success) setGamesList(validatePresetInfo.data);
-                    else {
+                    const validSearchRes = SearchResponseSchema.safeParse(await response.json());
+                    if (validSearchRes.success) {
+                        setGamesList(validSearchRes.data.games);
+                        setPageInfo(validSearchRes.data.pagination);
+                    } else {
                         setErrorMsg(
                             "Client did not understand server response while getting user's games."
                         );
                     }
                 } else {
                     const errorData = (await response.json()) as ServerResponse;
-
-                    setErrorMsg(errorData.message ?? "Failed to get user's games.");
+                    setErrorMsg(errorData.message ?? "Error: Failed to get user's games.");
                 }
             } catch (error) {
                 logError(error);
@@ -125,8 +127,9 @@ const SearchPage = () => {
                         to={"/create-game"}
                         className="text-blue-500 underline hover:italic hover:text-red-300"
                     >
-                        Make your own!
+                        Make your own
                     </Link>
+                    !
                 </p>
             )}
             {gamesList.map(({ id, title, imageUrl, numLikes, author, userHasLiked }, i) => (
