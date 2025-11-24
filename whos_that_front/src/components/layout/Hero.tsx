@@ -24,7 +24,7 @@ const Hero = ({ session, isPending, showUserInfo = true }: HeroProps) => {
     };
 
     return (
-        <div className="w-[90dvw]">
+        <div className="w-[92dvw]">
             <header className="py-2.25 relative flex flex-col items-center justify-center border-b border-zinc-900 sm:pb-5 sm:pt-1 lg:pt-2">
                 {/* Site title */}
                 <p className="z-1 text-sm leading-none text-neutral-700 sm:text-base">

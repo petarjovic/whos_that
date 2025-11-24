@@ -210,9 +210,9 @@ const MyGamesPage = () => {
     else if (isLoading || isPending) return <LoadingSpinner />;
     return (
         <>
-            <div className="mx-10 mt-3 flex flex-wrap items-center justify-evenly">
-                <h2 className="text-4xl font-semibold">Your Presets</h2>
-                {gamesList.length === 0 && (
+            <h2 className="my-2 text-4xl font-semibold">Your Presets</h2>
+            <div className="mx-10 mt-3 flex w-full flex-wrap items-center justify-evenly gap-4">
+                {gamesList.length === 0 ? (
                     <p className="mx-auto mt-[40%] text-center text-xl font-medium">
                         No games made yet!{" "}
                         <Link
@@ -222,59 +222,58 @@ const MyGamesPage = () => {
                             make new game
                         </Link>
                     </p>
-                )}
-                {gamesList.map(({ id, title, imageUrl, isPublic }, i) => (
-                    <Link key={i} to={`/play-game?preset=${id}`}>
-                        <CardLayout name={title} imgSrc={imageUrl} key={i}>
-                            {/* Own Games */}
-
-                            <div className="flex items-baseline justify-between">
-                                <button
-                                    type="button"
-                                    onClick={(e) => {
-                                        handleShareGame(e, id);
-                                    }}
-                                    className="ml-2 cursor-pointer text-xl text-gray-700 hover:scale-105 hover:text-blue-500 active:scale-125 max-lg:text-lg"
-                                    title="Share Link"
-                                >
-                                    <FaArrowUpRightFromSquare />
-                                </button>
-                                <p
-                                    className={`whitespace-pre text-center text-base font-semibold opacity-80 max-lg:text-sm ${isPublic ? "text-green-600" : "text-red-600"}`}
-                                >
-                                    {isPublic ? " Public" : " Private"}
-                                </p>
-                                <select
-                                    className="shadow-xs/15 xl:scale-133 scale-120 hover:shadow-sm/50 xl:hover:scale-140 xl:mb-1.75 relative mb-1 mr-1 w-fit cursor-pointer content-center rounded-[50%] border border-slate-400 bg-gray-300 p-px text-center text-base text-slate-400 transition-transform hover:scale-105 hover:text-blue-500 active:shadow-none xl:mr-2"
-                                    title="Settings"
-                                    onClick={(e) => {
-                                        e.preventDefault();
-                                        e.stopPropagation();
-                                    }}
-                                    onChange={(e) => {
-                                        e.stopPropagation();
-                                        void handleGameSettings(e, id, title);
-                                    }}
-                                >
+                ) : (
+                    gamesList.map(({ id, title, imageUrl, isPublic }, i) => (
+                        <Link key={i} to={`/play-game?preset=${id}`}>
+                            <CardLayout name={title} imgSrc={imageUrl} key={i}>
+                                <div className="flex items-baseline justify-between">
                                     <button
                                         type="button"
-                                        className="flex items-center justify-center text-2xl max-lg:text-xl"
+                                        onClick={(e) => {
+                                            handleShareGame(e, id);
+                                        }}
+                                        className="ml-2 cursor-pointer text-xl text-gray-700 hover:scale-105 hover:text-blue-500 active:scale-125 max-lg:text-lg"
+                                        title="Share Link"
                                     >
-                                        <FcSettings />
+                                        <FaArrowUpRightFromSquare />
                                     </button>
-                                    {/* Empty option is needed for functionality, keep it and keep hidden. */}
-                                    <option className="hidden"></option>
-                                    <option className="bg-slate-500 px-1 text-white hover:bg-slate-300 hover:text-black">
-                                        {isPublic ? "Make Private" : "Make Public"}
-                                    </option>
-                                    <option className="bg-slate-500 px-1 text-white hover:bg-red-400">
-                                        Delete Game
-                                    </option>
-                                </select>
-                            </div>
-                        </CardLayout>
-                    </Link>
-                ))}
+                                    <p
+                                        className={`whitespace-pre text-center text-base font-semibold opacity-80 max-lg:text-sm ${isPublic ? "text-green-600" : "text-red-600"}`}
+                                    >
+                                        {isPublic ? " Public" : " Private"}
+                                    </p>
+                                    <select
+                                        className="xl:scale-133 scale-120 hover:shadow-sm/50 xl:hover:scale-140 xl:mb-1.75 relative bottom-1 mb-1 mr-1 w-fit cursor-pointer content-center rounded-[50%] border border-slate-400 bg-gray-300 p-px text-center text-base text-slate-400 transition-transform hover:scale-105 hover:text-blue-500 active:shadow-none xl:mr-2"
+                                        title="Settings"
+                                        onClick={(e) => {
+                                            e.preventDefault();
+                                            e.stopPropagation();
+                                        }}
+                                        onChange={(e) => {
+                                            e.stopPropagation();
+                                            void handleGameSettings(e, id, title);
+                                        }}
+                                    >
+                                        <button
+                                            type="button"
+                                            className="flex items-center justify-center text-xl max-lg:text-lg"
+                                        >
+                                            <FcSettings />
+                                        </button>
+                                        {/* Empty option is needed for functionality, keep it and keep hidden. */}
+                                        <option className="hidden"></option>
+                                        <option className="bg-slate-500 px-1 text-white hover:bg-slate-300 hover:text-black">
+                                            {isPublic ? "Make Private" : "Make Public"}
+                                        </option>
+                                        <option className="bg-slate-500 px-1 text-white hover:bg-red-400">
+                                            Delete Game
+                                        </option>
+                                    </select>
+                                </div>
+                            </CardLayout>
+                        </Link>
+                    ))
+                )}
             </div>
             {/* Modal for sharing link to own games */}
             <ShareGameModal
