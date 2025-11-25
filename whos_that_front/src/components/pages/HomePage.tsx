@@ -79,17 +79,18 @@ const HomePage = () => {
     if (errorMsg) throw new Error(errorMsg);
     return (
         <>
-            <div className="h-full text-center text-neutral-700 max-2xl:mt-4 max-xl:flex max-xl:flex-col max-xl:gap-6 max-md:justify-end md:max-xl:justify-around xl:grid xl:grid-cols-2 xl:grid-rows-1 xl:gap-0 2xl:mt-3">
-                <div className="flex h-full flex-col gap-2 max-xl:justify-end xl:border-r xl:border-neutral-400 xl:pr-4">
+            <div className="mb-3 h-full text-center text-neutral-800 max-2xl:mt-4 max-xl:mt-20 max-xl:flex max-xl:flex-col max-xl:gap-6 max-md:justify-end max-sm:w-full max-sm:px-3 md:max-xl:justify-around xl:grid xl:grid-cols-2 xl:grid-rows-1 xl:gap-0 2xl:mt-3">
+                <div className="flex h-full flex-col gap-2 max-xl:justify-end xl:border-r xl:border-neutral-950 xl:pr-4">
+                    {/* Search Bar */}
                     <div className="px-1 pt-1 text-center">
                         <form
-                            className="flex items-center border border-neutral-500 bg-neutral-300 py-1.5 max-xl:justify-around max-sm:flex-col md:px-2 xl:justify-between 2xl:py-1.5"
+                            className="flex items-center border border-neutral-400 bg-neutral-300 py-1.5 max-xl:justify-around max-sm:flex-col md:px-2 xl:justify-between 2xl:py-1.5"
                             onSubmit={handleSearch}
                         >
                             <input
                                 id="searchBar"
                                 type="search"
-                                className="md:max-xl:w-5/10 max-sm:w-19/20 max-md:w-4/10 2xl:p-0.75 xl:w-6/10 border border-neutral-500 bg-neutral-50 px-1 text-left font-medium placeholder:text-zinc-400 max-2xl:py-px max-sm:mb-1.5 max-sm:mt-px xl:text-lg 2xl:pl-3"
+                                className="md:max-xl:w-5/10 max-sm:w-19/20 max-md:w-4/10 2xl:p-0.75 xl:w-6/10 border border-neutral-400 bg-neutral-50 px-1 text-left font-medium placeholder:text-zinc-400 max-2xl:py-px max-sm:mb-1.5 max-sm:mt-px xl:text-lg 2xl:pl-3"
                                 maxLength={20}
                                 placeholder="Search Preset Theme"
                                 value={inputQuery}
@@ -97,7 +98,7 @@ const HomePage = () => {
                                     setInputQuery(e.target.value);
                                 }}
                             />
-                            <div className="flex max-sm:gap-5 sm:gap-2">
+                            <div className="max-h-8/10 flex max-sm:gap-5 sm:gap-2">
                                 <button
                                     className="hover:scale-102 2xl:py-0.75 flex cursor-pointer items-center bg-red-400 px-1.5 py-px text-white hover:bg-red-500"
                                     type="submit"
@@ -117,17 +118,17 @@ const HomePage = () => {
                             Search Presets
                         </div>
                     </div>
-                    <div className="h-0 w-full self-center border-b border-neutral-400"></div>
-
+                    <div className="h-0 w-full self-center border-b border-neutral-950"></div>
+                    {/* Newest Games */}
                     <div className="col-start-1 cursor-pointer pt-2 text-center max-xl:hidden">
-                        <div className="flex items-center justify-center gap-3 border border-neutral-700 bg-neutral-300 px-3 py-2 max-xl:w-full xl:w-fit">
+                        <div className="flex items-center justify-center gap-3 border-neutral-700 bg-neutral-400 px-3 py-2 max-xl:w-full xl:w-fit">
                             {isLoading ? (
                                 <LoadingSpinner />
                             ) : (
                                 mostRecentGames.map(({ id, title, imageUrl, author }, i) => (
                                     <Link key={i} to={`/play-game?preset=${id}`}>
                                         <CardLayout name={title} imgSrc={imageUrl} key={i}>
-                                            <p className="text-sm italic text-gray-600 max-xl:text-xs">
+                                            <p className="mb-0.5 text-sm font-medium italic text-neutral-600 max-xl:text-xs">
                                                 {author ?? ""}
                                             </p>
                                         </CardLayout>
@@ -135,13 +136,17 @@ const HomePage = () => {
                                 ))
                             )}
                         </div>
-                        <div className="p-px text-lg font-semibold hover:text-blue-400 xl:text-xl">
+                        <Link
+                            to={"/search/?sort=newest"}
+                            className="p-px text-lg font-semibold hover:text-blue-400 xl:text-xl"
+                        >
                             Who's That Most Recent
-                        </div>
+                        </Link>
                     </div>
-                    <div className="h-0 w-full self-center border-b border-neutral-400 max-xl:hidden"></div>
+                    <div className="h-0 w-full self-center border-b border-neutral-950 max-xl:hidden"></div>
+                    {/* Most Liked Games */}
                     <div className="col-start-1 cursor-pointer pt-2 text-center max-xl:hidden">
-                        <div className="flex items-center justify-center gap-3 border border-neutral-700 bg-neutral-300 px-3 py-2 max-xl:w-full xl:w-fit">
+                        <div className="flex items-center justify-center gap-3 border-neutral-700 bg-neutral-400 px-3 py-2 max-xl:w-full xl:w-fit">
                             {isLoading ? (
                                 <LoadingSpinner />
                             ) : (
@@ -153,10 +158,10 @@ const HomePage = () => {
                                         <Link key={i} to={`/play-game?preset=${id}`}>
                                             <CardLayout name={title} imgSrc={imageUrl} key={i}>
                                                 <div className="relative flex items-center justify-center">
-                                                    <p className="relative right-5 p-px pb-0.5 text-sm italic text-gray-600 max-xl:text-xs">
+                                                    <p className="relative right-5 p-px pb-0.5 text-sm italic text-neutral-700 max-xl:text-xs">
                                                         {author ?? ""}
                                                     </p>
-                                                    <p className="absolute bottom-0.5 right-1.5 text-xs text-gray-700">
+                                                    <p className="bottom-0.75 right-2.25 absolute text-xs text-neutral-700">
                                                         <button
                                                             className="flex cursor-pointer items-center whitespace-pre-wrap align-sub"
                                                             disabled={true}
@@ -169,8 +174,8 @@ const HomePage = () => {
                                                                 size={"1.4em"}
                                                                 className={`${
                                                                     userHasLiked
-                                                                        ? "text-gray-900"
-                                                                        : "text-gray-500"
+                                                                        ? "text-neutral-900"
+                                                                        : "text-neutral-500"
                                                                 } ml-0.5`}
                                                             />
                                                         </button>
@@ -182,9 +187,12 @@ const HomePage = () => {
                                 )
                             )}
                         </div>
-                        <div className="p-px text-lg font-semibold hover:text-blue-400 xl:text-xl">
+                        <Link
+                            to={"/search/?sort=likes"}
+                            className="p-px text-lg font-semibold hover:text-blue-400 xl:text-xl"
+                        >
                             Who's That Most Wanted
-                        </div>
+                        </Link>
                     </div>
                 </div>
                 {/* Vertical Space on XL Screens */}
@@ -196,9 +204,9 @@ const HomePage = () => {
                             void nav(isPending ? "" : session ? "/create-game" : "/login");
                         }}
                     >
-                        <div className="border border-neutral-500 bg-neutral-300 py-1">
+                        <div className="border border-neutral-400 bg-neutral-300 py-1">
                             <img
-                                className="h-51 grayscale-25 2xl:h-55 max-xl:h-30 mx-auto object-fill text-center"
+                                className="h-51 neutralscale-25 2xl:h-55 max-xl:h-30 mx-auto object-fill text-center"
                                 src={CustomGameImg}
                             ></img>
                         </div>
@@ -206,7 +214,7 @@ const HomePage = () => {
                             {session ? "Create New Preset" : "Create Custom Set"}
                         </div>
                     </button>
-                    <div className="h-0 w-full self-center border-b border-neutral-400"></div>
+                    <div className="h-0 w-full self-center border-b border-neutral-950"></div>
                     {/* User's Games (if logged in) */}
                     {session ? (
                         <>
@@ -216,9 +224,9 @@ const HomePage = () => {
                                     void nav("/my-games");
                                 }}
                             >
-                                <div className="border border-neutral-500 bg-neutral-300 py-1">
+                                <div className="border border-neutral-400 bg-neutral-300 py-1">
                                     <img
-                                        className="max-xl:h-30 h-51 grayscale-25 2xl:h-55 mx-auto object-fill text-center"
+                                        className="max-xl:h-30 h-51 neutralscale-25 2xl:h-55 mx-auto object-fill text-center"
                                         src={UsersPresetsImage}
                                     ></img>
                                 </div>
@@ -226,22 +234,22 @@ const HomePage = () => {
                                     Your Presets
                                 </div>
                             </button>
-                            <div className="h-0 w-full self-center border-b border-neutral-400"></div>
+                            <div className="h-0 w-full self-center border-b border-neutral-950"></div>
                         </>
                     ) : (
                         <></>
                     )}
-                    {/* Form for joining room using code */}
+                    {/* Join Game */}
                     <div className="p-1 text-center xl:col-start-2">
                         <form
-                            className="flex items-center justify-around border border-neutral-500 bg-neutral-300 py-1.5 2xl:py-1.5"
+                            className="flex items-center justify-around border border-neutral-400 bg-neutral-300 py-1.5 2xl:py-1.5"
                             onSubmit={handleJoinExistingGame}
                         >
                             <input
                                 id="gameIdInput"
                                 name="gameIdInput"
                                 type="text"
-                                className="w-1/2 border border-neutral-500 bg-neutral-50 px-1 text-center font-medium placeholder:text-zinc-400 max-2xl:py-px xl:text-lg 2xl:p-0.5"
+                                className="w-1/2 border border-neutral-400 bg-neutral-50 px-1 text-center font-medium placeholder:text-zinc-400 max-2xl:py-px xl:text-lg 2xl:p-0.5"
                                 required
                                 minLength={6}
                                 maxLength={6}

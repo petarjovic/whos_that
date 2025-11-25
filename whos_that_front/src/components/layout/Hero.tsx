@@ -32,7 +32,7 @@ const Hero = ({ session, isPending, showUserInfo = true }: HeroProps) => {
                 </p>
                 <div className="w-9/10 z-1 h-0 border-t border-zinc-900"></div>
                 <div className="w-9/10 flex justify-between">
-                    <GiSherlockHolmes className="scale-420 sm:scale-600 sm:mt-7.25 lg:mt-7.5 float-left rotate-1 transform text-neutral-700 max-sm:mt-5" />
+                    <GiSherlockHolmes className="scale-420 sm:scale-600 sm:mt-7.25 lg:mt-7.5 float-left rotate-1 transform text-neutral-800 max-sm:mt-5" />
                     <h1 className="w-fit pt-5">
                         <Link
                             to={"/"}
@@ -59,7 +59,7 @@ const Hero = ({ session, isPending, showUserInfo = true }: HeroProps) => {
                             </>
                         </Link>
                     </h1>
-                    <GiSherlockHolmes className="scale-420 sm:scale-600 sm:mt-7.25 lg:mt-7.5 float-right -rotate-1 transform text-neutral-700 max-sm:mt-5 max-sm:scale-x-[-4.2] sm:scale-x-[-6]" />
+                    <GiSherlockHolmes className="scale-420 sm:scale-600 sm:mt-7.25 lg:mt-7.5 float-right -rotate-1 transform text-neutral-800 max-sm:mt-5 max-sm:scale-x-[-4.2] sm:scale-x-[-6]" />
                 </div>
                 {/* User authentication info and controls */}
             </header>

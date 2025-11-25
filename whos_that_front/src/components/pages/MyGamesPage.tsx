@@ -211,7 +211,7 @@ const MyGamesPage = () => {
     return (
         <>
             <h2 className="my-2 text-4xl font-semibold">Your Presets</h2>
-            <div className="mx-10 mt-3 flex w-full flex-wrap items-center justify-evenly gap-4">
+            <div className="flex w-full flex-wrap items-center justify-center gap-4 max-xl:mx-auto xl:mx-8">
                 {gamesList.length === 0 ? (
                     <p className="mx-auto mt-[40%] text-center text-xl font-medium">
                         No games made yet!{" "}
@@ -226,27 +226,33 @@ const MyGamesPage = () => {
                     gamesList.map(({ id, title, imageUrl, isPublic }, i) => (
                         <Link key={i} to={`/play-game?preset=${id}`}>
                             <CardLayout name={title} imgSrc={imageUrl} key={i}>
-                                <div className="flex items-baseline justify-between">
+                                <div className="flex items-center justify-between">
                                     <button
                                         type="button"
                                         onClick={(e) => {
                                             handleShareGame(e, id);
                                         }}
-                                        className="ml-2 cursor-pointer text-xl text-gray-700 hover:scale-105 hover:text-blue-500 active:scale-125 max-lg:text-lg"
+                                        className="relative bottom-1 ml-2 cursor-pointer text-xl text-gray-700 hover:scale-105 hover:text-blue-500 active:scale-125 max-lg:text-lg"
                                         title="Share Link"
                                     >
                                         <FaArrowUpRightFromSquare />
                                     </button>
                                     <p
-                                        className={`whitespace-pre text-center text-base font-semibold opacity-80 max-lg:text-sm ${isPublic ? "text-green-600" : "text-red-600"}`}
+                                        className={`bottom-0.75 relative whitespace-pre text-center text-base font-semibold opacity-80 max-lg:text-sm ${isPublic ? "text-green-600" : "text-red-600"}`}
                                     >
                                         {isPublic ? " Public" : " Private"}
                                     </p>
                                     <select
-                                        className="xl:scale-133 scale-120 hover:shadow-sm/50 xl:hover:scale-140 xl:mb-1.75 relative bottom-1 mb-1 mr-1 w-fit cursor-pointer content-center rounded-[50%] border border-slate-400 bg-gray-300 p-px text-center text-base text-slate-400 transition-transform hover:scale-105 hover:text-blue-500 active:shadow-none xl:mr-2"
+                                        className="relative bottom-1.5 right-1 cursor-pointer hover:scale-110"
                                         title="Settings"
                                         onClick={(e) => {
                                             e.preventDefault();
+                                            e.stopPropagation();
+                                        }}
+                                        onTouchStart={(e) => {
+                                            e.stopPropagation();
+                                        }}
+                                        onTouchEnd={(e) => {
                                             e.stopPropagation();
                                         }}
                                         onChange={(e) => {
@@ -256,9 +262,19 @@ const MyGamesPage = () => {
                                     >
                                         <button
                                             type="button"
-                                            className="flex items-center justify-center text-xl max-lg:text-lg"
+                                            className=""
+                                            onClick={(e) => {
+                                                e.preventDefault();
+                                                e.stopPropagation();
+                                            }}
+                                            onTouchStart={(e) => {
+                                                e.stopPropagation();
+                                            }}
+                                            onTouchEnd={(e) => {
+                                                e.stopPropagation();
+                                            }}
                                         >
-                                            <FcSettings />
+                                            <FcSettings size={"1.75rem"} />
                                         </button>
                                         {/* Empty option is needed for functionality, keep it and keep hidden. */}
                                         <option className="hidden"></option>

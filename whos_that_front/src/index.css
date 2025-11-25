@@ -54,7 +54,7 @@
     }
 
     &:before {
-        background: #fafafa;
+        background: #f1f1f1;
         box-shadow: 0 0 8px rgba(0, 0, 0, 0.2);
         left: -5px;
         top: 4px;
@@ -62,7 +62,7 @@
     }
 
     &::after {
-        background: #f6f6f6;
+        background: #e6e6e6;
         box-shadow: 0 0 3px rgba(0, 0, 0, 0.2);
         right: -3px;
         top: 1px;

@@ -20,6 +20,7 @@ type ConfirmGuessModalState = { isOpen: false } | { isOpen: true; isWinner: bool
 interface gridColsTailwind {
     [key: number]: string;
 }
+
 // Map of grid column counts to Tailwind classes (Tailwind requires this)
 const GridColsClasses: gridColsTailwind = {
     1: "xl:grid-cols-1",
@@ -53,8 +54,8 @@ const Game = ({
         isOpen: false,
     });
 
-    // Calc num grid cols for consistent layout ("+ 3" is a heuristic I found works)
-    let numGridCols = Math.ceil(Math.sqrt(cardData.length)) + 3;
+    // Calc num grid cols for consistent layout ("+ 4" is a heuristic)
+    let numGridCols = Math.ceil(Math.sqrt(cardData.length)) + 4;
     if (numGridCols > 12) numGridCols = 12;
 
     const handleConfirmGuessModalResult = (cofirmGuess: boolean) => {
@@ -93,22 +94,24 @@ const Game = ({
     return (
         <>
             {/* Game Title */}
-            <p className="my-1 text-4xl font-bold">{title}</p>
+            <p className="my-1.5 text-4xl font-bold">{title}</p>
             {/* Game Board */}
-            {/* Styled as grid on large screens, as flexbox on small screens */}
-            <div
-                id="gameboard"
-                className={`mx-auto mb-2.5 max-lg:px-1 lg:px-2.5 2xl:grid 2xl:px-5 ${GridColsClasses[numGridCols]} w-full place-items-center items-center justify-items-center max-2xl:flex max-2xl:flex-wrap max-2xl:justify-around max-md:gap-2 md:max-2xl:gap-2 2xl:justify-center 2xl:gap-5`}
-            >
-                {cardList}
-            </div>
-            {/* Last Row of Cards, is always flexbox for better visuals */}
-            <div className="mb-2.5 flex w-full flex-wrap justify-evenly px-10 max-2xl:px-4">
-                {lastRow}
-                <OpponentTargetCard
-                    name={oppTargetCardData.name}
-                    imgSrc={oppTargetCardData.imageUrl}
-                />
+            {/* grid on large screens, flexbox on small screens */}
+            <div className="mb-2 h-full w-[99%] rounded border bg-slate-400 pt-4">
+                <div
+                    id="gameboard"
+                    className={`mx-auto mb-2.5 max-lg:px-1 lg:px-2.5 2xl:grid 2xl:px-6 ${GridColsClasses[numGridCols]} 2xl:gap-y-4.5 w-full max-2xl:flex max-2xl:flex-wrap max-2xl:items-center max-2xl:justify-around max-md:gap-2 md:max-2xl:gap-2 2xl:auto-cols-min 2xl:place-items-center 2xl:justify-center 2xl:gap-x-0`}
+                >
+                    {cardList}
+                </div>
+                {/* Last Row of Cards, always flexbox */}
+                <div className="mb-2.5 flex w-full flex-wrap justify-evenly px-10 max-2xl:px-4">
+                    {lastRow}
+                    <OpponentTargetCard
+                        name={oppTargetCardData.name}
+                        imgSrc={oppTargetCardData.imageUrl}
+                    />
+                </div>
             </div>
             {/* Modals */}
             <div>

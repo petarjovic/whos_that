@@ -76,9 +76,8 @@ const SearchPage = () => {
                 if (error instanceof Error) {
                     setErrorMsg(error.message);
                 } else setErrorMsg("Error: Failed to get user's games.");
-            } finally {
-                setIsLoading(false);
             }
+            setIsLoading(false);
         };
         void getPremadeGames();
         return () => abortController.abort();
@@ -132,13 +131,13 @@ const SearchPage = () => {
         <>
             {/* Search Bar */}
             <form
-                className="max-sm:w-9/10 sm:w-7/10 md:w-6/10 rounded-xs flex items-center justify-around border border-neutral-500 bg-neutral-300 py-1.5 max-xl:my-1 lg:w-1/3 xl:mb-2 xl:mt-5"
+                className="max-sm:w-9/10 sm:w-7/10 md:w-6/10 rounded-xs flex items-center justify-around border border-neutral-500 bg-neutral-300 py-1.5 max-xl:mb-1 max-xl:mt-4 lg:w-1/3 xl:mb-2 xl:mt-5"
                 onSubmit={(e) => e.preventDefault()}
             >
                 <input
                     id="searchBar"
                     type="search"
-                    className="xl:w-9/10 rounded-xs border border-neutral-500 bg-neutral-50 px-1 text-left font-medium placeholder:text-zinc-400 max-2xl:py-px xl:text-lg 2xl:p-px 2xl:py-0.5 2xl:pl-3"
+                    className="xl:w-9/10 max-xl:w-8/10 rounded-xs border border-neutral-500 bg-gray-50 px-1 text-left font-medium placeholder:text-zinc-400 max-2xl:py-px xl:text-lg 2xl:p-px 2xl:py-0.5 2xl:pl-3"
                     maxLength={20}
                     placeholder="Search Presets"
                     value={searchInput}
@@ -148,14 +147,14 @@ const SearchPage = () => {
                     type="submit"
                     className="rounded-xs flex cursor-pointer items-center bg-red-400 px-1 py-px text-white 2xl:py-0.5"
                 >
-                    <IoMdSearch className="s mr-px" size="1.5em" />
+                    <IoMdSearch size="1.5em" />
                 </button>
             </form>
             {/* Search Results */}
             {isLoading ? (
                 <LoadingSpinner />
             ) : (
-                <div className="mx-10 mt-3 flex flex-wrap items-center justify-evenly gap-4">
+                <div className="mt-3 flex flex-wrap items-center justify-evenly gap-4 xl:mx-10">
                     {gamesList.length === 0 && (
                         <p className="mx-auto mt-[40%] text-center text-xl font-medium">
                             Sorry, no presets match your search!{" "}
@@ -200,13 +199,13 @@ const SearchPage = () => {
             )}
             {/* Page Controls */}
             {pageInfo && pageInfo.totalPages > 1 && (
-                <div className="mb-2 mt-4 flex items-center gap-1 text-neutral-500">
+                <div className="mb-2 mt-4 flex items-center gap-1 text-lg text-neutral-600">
                     <button
                         onClick={() =>
                             setSearchParams({ ...Object.fromEntries(searchParams), page: "1" })
                         }
                         disabled={pageInfo.page === 1}
-                        className="cursor-pointer py-1 text-lg hover:text-blue-500 disabled:cursor-default disabled:text-gray-300"
+                        className="tracking-tightest scale-130 mr-1 cursor-pointer py-1 hover:text-blue-500 disabled:cursor-default disabled:text-gray-300"
                     >
                         &lt;&lt;
                     </button>
@@ -218,7 +217,7 @@ const SearchPage = () => {
                             })
                         }
                         disabled={pageInfo.page === 1}
-                        className="cursor-pointer px-2 py-1 text-lg hover:text-blue-500 disabled:cursor-default disabled:text-gray-300"
+                        className="scale-120 cursor-pointer px-2 py-1 text-lg hover:text-blue-500 disabled:cursor-default disabled:text-gray-300"
                     >
                         &lt;
                     </button>
@@ -248,7 +247,7 @@ const SearchPage = () => {
                             })
                         }
                         disabled={pageInfo.page === pageInfo.totalPages}
-                        className="cursor-pointer px-1 py-1 text-lg hover:text-blue-500 disabled:cursor-default disabled:text-gray-300"
+                        className="scale-120 cursor-pointer px-1 py-1 text-lg hover:text-blue-500 disabled:cursor-default disabled:text-gray-300"
                     >
                         &gt;
                     </button>
@@ -260,11 +259,11 @@ const SearchPage = () => {
                             })
                         }
                         disabled={pageInfo.page === pageInfo.totalPages}
-                        className="cursor-pointer py-1 text-lg hover:text-blue-500 disabled:cursor-default disabled:text-gray-300"
+                        className="tracking-tightest scale-130 ml-1 cursor-pointer py-1 text-lg hover:text-blue-500 disabled:cursor-default disabled:text-gray-300"
                     >
                         &gt;&gt;
                     </button>
-                    <div className="ml-2 flex items-center gap-2 text-xs">
+                    <div className="ml-2 flex items-center gap-2 text-sm">
                         <label htmlFor="limit-select"># of Results:</label>
                         <select
                             id="limit-select"
@@ -276,7 +275,7 @@ const SearchPage = () => {
                                     page: "1",
                                 })
                             }
-                            className="rounded border border-gray-300 py-1 hover:cursor-pointer"
+                            className="content-center rounded border border-gray-500 bg-white py-1 hover:cursor-pointer"
                         >
                             <option value="10" className="cursor-pointer">
                                 10
