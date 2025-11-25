@@ -4,10 +4,8 @@ import { Link } from "react-router";
 import { useBetterAuthSession } from "../../lib/LayoutContextProvider";
 import { authClient } from "../../lib/auth/auth-client";
 import type { SocialSignInProviders } from "../../lib/types";
-import DiscordLoginButton from "../auth/DiscordLoginButton";
 import { socialSignInProvidersSchema } from "../../lib/zodSchema";
 import { z } from "zod";
-import GoogleLoginButton from "../auth/GoogleLoginButton";
 import LoadingSpinner from "../misc/LoadingSpinner";
 import { log } from "../../lib/logger";
 
