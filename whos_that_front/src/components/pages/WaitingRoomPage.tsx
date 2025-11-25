@@ -10,7 +10,7 @@ const WaitingRoom = ({ gameId }: { gameId: string }) => {
             <img className="max-2xl:mt-23 mt-32 text-center" src={loadingSpinner} alt="Your SVG" />
             <p className="mx-auto mt-auto text-center text-4xl font-medium text-zinc-800 max-2xl:text-3xl">
                 Waiting in room:{" "}
-                <span className="text-shadow-xs/50 align-sub text-6xl font-bold tracking-tight text-amber-500 max-2xl:text-5xl">
+                <span className="text-shadow-2xs/100 align-sub text-6xl font-bold tracking-tight text-amber-500 max-2xl:text-5xl">
                     {gameId || "..."}
                 </span>
             </p>

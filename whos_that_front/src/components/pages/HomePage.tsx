@@ -79,7 +79,7 @@ const HomePage = () => {
     if (errorMsg) throw new Error(errorMsg);
     return (
         <>
-            <div className="mb-3 h-full text-center text-neutral-800 max-2xl:mt-4 max-xl:mt-20 max-xl:flex max-xl:flex-col max-xl:gap-6 max-md:justify-end max-sm:w-full max-sm:px-3 md:max-xl:justify-around xl:grid xl:grid-cols-2 xl:grid-rows-1 xl:gap-0 2xl:mt-3">
+            <div className="mx-autp mb-3 h-full text-center text-neutral-800 max-2xl:mt-4 max-xl:mt-20 max-xl:flex max-xl:flex-col max-xl:gap-6 max-md:justify-end max-sm:w-full max-sm:px-3 md:max-xl:justify-around xl:grid xl:grid-cols-2 xl:grid-rows-1 xl:gap-0 2xl:mt-3">
                 <div className="flex h-full flex-col gap-2 max-xl:justify-end xl:border-r xl:border-neutral-950 xl:pr-4">
                     {/* Search Bar */}
                     <div className="px-1 pt-1 text-center">
@@ -285,4 +285,3 @@ const HomePage = () => {
 };
 
 export default HomePage;
-

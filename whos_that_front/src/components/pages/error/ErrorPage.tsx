@@ -34,20 +34,24 @@ const ErrorPage = ({ error }: { error?: unknown }) => {
     }
 
     return (
-        <div className="bg-linear-to-b flex min-h-screen w-full flex-col items-center justify-start from-cyan-400 to-cyan-600 to-90% bg-fixed">
+        <div className="flex min-h-screen w-full flex-col items-center justify-start bg-neutral-200 to-90% bg-fixed bg-repeat">
             <Hero session={null} isPending={false} showUserInfo={false} />
-            <div className="text-shadow-xs/100 mt-15 mx-auto text-center text-2xl text-white">
-                <img
-                    src={chalkOutline}
-                    alt="Error image"
-                    className="rotate-15 mb-15 mx-auto"
-                    width={325}
-                    height={300}
-                />
-                <h1 className="mb-5 text-5xl text-red-800">Something Went Wrong</h1>
+            <div className="text-shadow-2xs/100 mt-15 mx-auto text-center text-2xl">
+                <div className="max-sm:w-19/20 mx-auto mb-1 border border-neutral-400 bg-neutral-300 px-20 pb-3">
+                    <img
+                        src={chalkOutline}
+                        alt="Error image"
+                        className="rotate-15 mx-auto"
+                        width={325}
+                        height={300}
+                    />
+                </div>
+                <h1 className="mb-5 text-red-800 max-md:text-3xl md:text-4xl">
+                    Something Went Wrong
+                </h1>
                 <h2>Oh No! {errorMessage}</h2>
                 <Link to={"/"}>
-                    <button className="w-fill h-18 border-b-9 text-shadow-xs/40 active:shadow-2xs shadow-sm/20 hover:shadow-xs duration-15 mt-[2vh] cursor-pointer rounded-md border-x border-blue-600 bg-blue-500 px-4 py-1 text-2xl font-bold text-neutral-100 transition-all hover:border-blue-700 hover:bg-blue-600 active:translate-y-px active:border-none">
+                    <button className="w-fill border-b-9 text-shadow-xs/40 active:shadow-2xs shadow-sm/20 hover:shadow-xs duration-15 mt-[2vh] h-16 cursor-pointer rounded-md border-x border-blue-600 bg-blue-500 px-3 py-1 text-2xl font-bold text-neutral-100 transition-all hover:border-blue-700 hover:bg-blue-600 active:translate-y-px active:border-none">
                         Take Me Home
                     </button>
                 </Link>
