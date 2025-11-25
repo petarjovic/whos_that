@@ -2,14 +2,14 @@ import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
 import GameStateManager from "./components/game/GameStateManager.tsx";
 import { createBrowserRouter, RouterProvider } from "react-router";
-import ShowPremadeGamesPage from "./components/pages/ShowPremadeGamesPage.tsx";
+import MyGamesPage from "./components/pages/MyGamesPage.tsx";
 import ReactModal from "react-modal";
 import "./index.css";
 import HomePage from "./components/pages/HomePage.tsx";
 import NotFoundPage from "./components/pages/error/NotFoundPage.tsx";
 import Layout from "./components/layout/Layout.tsx";
 import ErrorPage from "./components/pages/error/ErrorPage.tsx";
-import GameTypePage from "./components/pages/GameTypePage.tsx";
+import SearchPage from "./components/pages/SearchPage.tsx";
 import CreateCustomGamePage from "./components/pages/CustomGamePage.tsx";
 import AccountPage from "./components/pages/AccountPage.tsx";
 import SetUsernamePage from "./components/pages/SetUsernamePage.tsx";
@@ -28,12 +28,12 @@ const router = createBrowserRouter([
                 path: "/",
                 element: <HomePage />,
             },
+            // {
+            //     path: "/create-game",
+            //     element: <GameTypePage />,
+            // },
             {
                 path: "/create-game",
-                element: <GameTypePage />,
-            },
-            {
-                path: "/create-game/new",
                 element: <CreateCustomGamePage />,
             },
             {
@@ -45,19 +45,19 @@ const router = createBrowserRouter([
                 element: <GameStateManager isNewGame={false} />,
             },
             {
-                path: "/premade-games",
-                element: <ShowPremadeGamesPage myGames={false} />,
+                path: "/search",
+                element: <SearchPage />,
             },
             {
                 path: "/my-games",
-                element: <ShowPremadeGamesPage myGames={true} />,
+                element: <MyGamesPage />,
             },
             {
                 path: "/account",
                 element: <AccountPage />,
             },
             {
-                path: "/log-in",
+                path: "/login",
                 element: <LogInPage />,
             },
             // {
@@ -88,4 +88,3 @@ createRoot(rootElement).render(
         <RouterProvider router={router} />
     </StrictMode>
 );
-

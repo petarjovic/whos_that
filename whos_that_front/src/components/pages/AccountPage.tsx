@@ -59,83 +59,58 @@ const AccountPage = () => {
         void getLinkedAccounts();
     }, []);
 
-    const handleResetPassword = () => {
-        //Not needed right now
-        return;
-    };
-
     if (errorMsg) throw new Error(errorMsg);
     else if (isPending || !session) return <LoadingSpinner />;
     else
         return (
-            <div className="shadow-2xl/30 bg-linear-to-b border-b-10 mt-30 mx-auto w-4/5 max-w-4xl rounded-lg border-x border-blue-700 from-blue-400 to-blue-600 p-8 text-white max-2xl:max-w-3xl">
-                <h2 className="text-shadow-xs/100 mb-7 text-center text-5xl font-bold max-2xl:text-4xl">
-                    Account Details
-                </h2>
-                <div className="flex items-center justify-between">
-                    <div className="w-1/2">
-                        <div className="text-shadow-xs/100 text-2xl max-2xl:text-xl">
-                            <div className="font-bold">
-                                Username:{" "}
-                                <span className="font-medium italic text-amber-400">
-                                    {session.user.displayUsername}
-                                </span>
-                            </div>
-                            <div className="my-5 font-bold">
-                                Email:{" "}
-                                <span
-                                    className="duration-15 cursor-pointer font-medium italic transition-colors hover:text-amber-200"
-                                    title={showEmail ? "Click to hide" : "Click to show"}
-                                    onClick={() => {
-                                        setShowEmail(!showEmail);
-                                    }}
-                                >
-                                    {showEmail ? session.user.email : maskEmail(session.user.email)}
-                                </span>
-                            </div>
-                            <div className="mb-2 font-semibold">
-                                Linked Accounts:{""}{" "}
-                                <span className="align-middle text-3xl capitalize text-green-500 max-2xl:text-2xl">
-                                    {linkedAccounts.toString()}
-                                </span>
-                            </div>
-                        </div>
-                        <div className="text-md mt-5 text-left">
-                            {linkedAccounts.includes("discord") ? (
-                                <></>
-                            ) : (
-                                <DiscordLoginButton
-                                    text="Link Discord Account"
-                                    linkAccount={true}
-                                />
-                            )}
-                            {linkedAccounts.includes("google") ? (
-                                <></>
-                            ) : (
-                                <GoogleLoginButton text="Link Google Account" linkAccount={true} />
-                            )}
-                        </div>
-                    </div>
-
-                    <Link to={"/my-games"}>
-                        <button
-                            className="border-b-9 text-shadow-xs/50 active:shadow-2xs duration-15 hover:shadow-xs mx-4 w-fit cursor-pointer rounded-md border-x border-amber-600 bg-amber-500 px-4 py-3 text-2xl font-bold tracking-normal text-slate-50 shadow-sm transition-all hover:border-amber-700 hover:bg-amber-600 hover:text-slate-200 active:-translate-y-px active:border-b max-2xl:px-3 max-2xl:py-2 max-2xl:text-xl"
-                            type="button"
-                        >
-                            My Games
-                        </button>
-                    </Link>
-                    <div className="hidden grow text-end">
-                        {" "}
-                        <button
-                            onClick={handleResetPassword}
-                            className="w-fill border-b-9 text-shadow-xs/30 active:shadow-2xs text-md shadow-sm/20 hover:shadow-xs duration-15 mx-4 mt-3 h-10 cursor-pointer rounded-md border-x border-red-700 bg-red-600 px-2 font-semibold text-white transition-all hover:border-red-800 hover:bg-red-700 active:-translate-y-px active:border-b"
-                            type="button"
-                        >
-                            Reset Password
-                        </button>
-                    </div>
+            <div className="border-7 w-9/10 shadow-xs m-auto flex max-w-2xl flex-col gap-3 border-double bg-neutral-50 px-3 pb-7 pt-6 text-xl">
+                <h2 className="mb-1 text-center text-4xl font-bold">Account Details</h2>
+                <div className="font-semibold">
+                    Username:{" "}
+                    <span className="font-medium italic text-orange-400">
+                        {session.user.displayUsername}
+                    </span>
                 </div>
+                <div className="my-5 font-semibold">
+                    Email:{" "}
+                    <span
+                        className="duration-15 cursor-pointer font-medium italic transition-colors hover:text-amber-200"
+                        title={showEmail ? "Click to hide" : "Click to show"}
+                        onClick={() => {
+                            setShowEmail(!showEmail);
+                        }}
+                    >
+                        {showEmail ? session.user.email : maskEmail(session.user.email)}
+                    </span>
+                </div>
+                <div className="mb-2 font-semibold">
+                    Linked Account:{""}{" "}
+                    <span className="align-middle text-3xl capitalize text-green-600 max-2xl:text-2xl">
+                        {linkedAccounts.toString()}
+                    </span>
+                    {/* Removed Account Linking for Now */}
+                    {/* <div className="text-base">
+                        {linkedAccounts.includes("discord") ? (
+                            <></>
+                        ) : (
+                            <DiscordLoginButton text="Link Discord Account" linkAccount={true} />
+                        )}
+                        {linkedAccounts.includes("google") ? (
+                            <></>
+                        ) : (
+                            <GoogleLoginButton text="Link Google Account" linkAccount={true} />
+                        )}
+                    </div> */}
+                </div>
+
+                <Link to={"/my-games"} className="text-center">
+                    <button
+                        className="border-b-9 text-shadow-xs/50 active:shadow-2xs duration-15 hover:shadow-xs mx-4 w-fit cursor-pointer rounded-md border-x border-amber-600 bg-amber-500 px-4 py-3 text-2xl font-bold tracking-normal text-slate-50 shadow-sm transition-all hover:border-amber-700 hover:bg-amber-600 hover:text-slate-200 active:-translate-y-px active:border-b max-2xl:px-3 max-2xl:py-2 max-2xl:text-xl"
+                        type="button"
+                    >
+                        My Games
+                    </button>
+                </Link>
             </div>
         );
 };

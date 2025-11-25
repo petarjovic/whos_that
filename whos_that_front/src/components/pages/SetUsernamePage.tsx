@@ -3,6 +3,7 @@ import { useNavigate } from "react-router";
 import { useBetterAuthSession } from "../../lib/LayoutContextProvider.ts";
 import { authClient } from "../../lib/auth/auth-client.ts";
 import { logError } from "../../lib/logger.ts";
+import { PiPenNibFill } from "react-icons/pi";
 
 /**
  * One-time username setup page shown after initial account creation
@@ -44,13 +45,11 @@ const SetUsernamePage = () => {
     };
 
     return (
-        <div className="shadow-2xl/40 my-35 bg-linear-to-b border-b-10 mx-auto w-2/5 max-w-xl rounded-lg border-x border-blue-600 from-blue-400 to-blue-500 to-50% p-8 text-white">
-            <h2 className="text-shadow-xs/100 mb-5 text-center text-4xl font-bold text-orange-300">
-                Choose Your <span className="text-orange-300">Username</span>
-            </h2>
-            <p className="text-shadow-xs/100 mb-6 text-center text-xl text-white">
+        <div className="border-7 w-9/10 shadow-xs/60 m-auto flex max-w-2xl flex-col gap-5 border-double bg-neutral-50 px-2 pb-7 pt-6 text-center text-4xl">
+            <h2 className="font-bold">Choose Username</h2>
+            <p className="text-center text-xl">
                 Please pick a username for yourself, note that your username{" "}
-                <span className="text-xl italic text-orange-300">cannot be changed</span> !
+                <span className="font-medium italic">cannot be changed</span> !
             </p>
             <form
                 className="text-center"
@@ -65,17 +64,23 @@ const SetUsernamePage = () => {
                 ) : (
                     <></>
                 )}
-                <div className="mx-auto mb-6 flex items-center justify-center">
+
+                <div className="rounded-xs w-9/10 mx-auto mb-2 flex flex-col items-center justify-around border border-neutral-800 bg-neutral-300 px-2 py-1 text-center">
                     <label
                         htmlFor="username"
-                        className="text-shadow-sm/33 mb-2 mr-5 mt-1 text-2xl font-semibold text-white"
+                        className="flex items-center p-px text-center text-lg font-semibold"
                     >
-                        Username:
+                        <PiPenNibFill
+                            className="relative bottom-px mr-1 scale-x-[-1]"
+                            size="1.25em"
+                        />
+                        <div>Username</div>
+                        <PiPenNibFill className="relative bottom-px ml-1" size="1.25em" />
                     </label>
                     <input
                         type="text"
                         id="username"
-                        className="inset-shadow-xs w-full rounded-lg border border-blue-500 bg-slate-50 px-3 py-1.5 text-center text-lg text-gray-800 placeholder:text-gray-500 hover:shadow-sm"
+                        className="border-groove w-full rounded border border-neutral-400 bg-neutral-50 p-1 text-center text-lg font-medium placeholder:text-gray-400"
                         placeholder="Enter a username"
                         value={username}
                         onChange={(e) => {
@@ -88,10 +93,9 @@ const SetUsernamePage = () => {
                         required
                     />
                 </div>
-
                 <button
                     type="submit"
-                    className="text-shadow-xs/100 active:shadow-2xs hover:shadow-xs/15 shadow-sm/20 duration-15 hover:font-gray-200 w-fit cursor-pointer rounded-md border-x border-b-8 border-amber-600 bg-amber-500 px-20 py-2 text-xl font-semibold text-white transition-all hover:border-amber-700 hover:bg-amber-600 active:translate-y-px active:border-none"
+                    className={`rounded-xs-xs mx-auto w-1/2 p-1 text-center text-lg font-medium text-white ${isSubmitting ? "border-gray-800 bg-gray-700" : "bg-red-400 hover:bg-red-500"}`}
                     disabled={isSubmitting}
                 >
                     {isSubmitting ? "Setting Username..." : "Continue"}

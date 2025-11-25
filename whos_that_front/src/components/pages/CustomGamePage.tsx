@@ -11,7 +11,10 @@ import LoadingSpinner from "../misc/LoadingSpinner.tsx";
 import env from "../../lib/zodEnvSchema.ts";
 import { logError, log } from "../../lib/logger.ts";
 import ReactModal from "react-modal";
-import { MdOutlineRemoveCircleOutline } from "react-icons/md";
+import { PiEraserFill, PiGavelFill, PiPenNibFill } from "react-icons/pi";
+import { FaCameraRetro } from "react-icons/fa";
+import { FaGears } from "react-icons/fa6";
+import { BsIncognito } from "react-icons/bs";
 
 const MAX_FILESIZE_BYTES = 5 * 1024 * 1024;
 const MIN_NUM_IMGS = 6;
@@ -258,44 +261,77 @@ const CreateCustomGamePage = () => {
     return (
         <>
             <form
-                className="max-sm:items-center-safe m-auto flex h-fit w-full justify-evenly max-sm:mt-5 max-sm:flex-col max-sm:px-1 sm:px-5"
+                className="w-9/10 py-3 text-neutral-800 max-lg:mt-7 max-lg:flex max-lg:flex-col max-lg:justify-center max-lg:gap-4 lg:mt-1 lg:grid lg:grid-flow-row-dense lg:grid-cols-2 lg:grid-rows-1 lg:justify-items-center lg:gap-6 2xl:gap-x-0 2xl:gap-y-4"
                 onSubmit={(e) => {
                     void handleSubmit(e);
                 }}
             >
-                <div className="mr-5 w-[45%] max-w-3xl max-sm:w-full">
+                <div className="2xl:w-9/10 flex flex-col gap-4 max-2xl:w-full lg:col-start-1">
                     {/* Step 1: Title */}
-                    <div className="shadow-lg/25 bg-linear-to-b mb-3 rounded-lg border-x border-b-8 border-blue-600 from-blue-400 to-blue-500 to-75% p-4">
+                    <div className="rounded-xs flex h-fit w-full flex-col items-center justify-around border border-neutral-800 bg-neutral-300 px-2 py-1 text-center">
                         <label
                             htmlFor="title"
-                            className="text-shadow-xs/75 m-auto block text-4xl font-medium text-white max-2xl:text-3xl max-md:text-center"
+                            className="xl:p-1.25 flex items-center p-px text-center text-lg font-semibold xl:text-xl 2xl:text-2xl"
                         >
-                            <div className="mr-3 inline-block h-11 w-11 content-center rounded-[50%] text-center align-middle font-bold text-amber-500">
-                                <span className="font-digitag bottom-4.5 text-shadow-xs/50 relative right-1.5 text-7xl font-medium max-sm:text-6xl">
-                                    1
-                                </span>
-                            </div>
-                            Game Title:
+                            <PiPenNibFill
+                                className="relative bottom-px mr-1 scale-x-[-1]"
+                                size="1.25em"
+                            />
+                            <div>Title/Theme</div>
+                            <PiPenNibFill className="relative bottom-px ml-1" size="1.25em" />
                         </label>
                         <input
                             type="text"
                             name="title"
                             placeholder="(E.g. Superheros, Famous Actors)"
-                            className="sm:ml-13 inset-shadow-sm/15 block w-5/6 rounded-lg bg-white px-3 py-2 text-xl font-medium text-gray-900 max-sm:mx-auto"
+                            className="border-groove lg:w-9/10 rounded border border-neutral-400 bg-neutral-50 p-1 text-center font-medium placeholder:text-gray-400 max-lg:w-full xl:text-lg 2xl:text-xl"
                             required
                             minLength={5}
-                            maxLength={20}
+                            maxLength={18}
                         ></input>
                     </div>
+                    {/* Step 4: Privacy Settings */}
+                    <div className="rounded-xs flex h-fit w-full flex-col items-center justify-around border border-neutral-800 bg-neutral-300 px-2 py-1 text-center">
+                        <div className="flex p-px text-lg font-semibold xl:text-xl 2xl:text-2xl">
+                            <FaGears size="1.5em" className="mr-1 scale-y-[-1]" />
+                            <div>Game Options</div>
+                            <FaGears size="1.5em" className="ml-1 scale-x-[-1] scale-y-[-1]" />
+                        </div>
+                        <div className="mb-0.5 mt-1 xl:text-lg 2xl:text-xl">
+                            <input
+                                type="radio"
+                                id="public"
+                                value="public"
+                                className="mr-1 h-4 w-4 cursor-pointer appearance-auto border align-text-top transition-all"
+                                name="privacy"
+                                required
+                                checked={isPublic}
+                                onChange={handlePrivacyChange}
+                            ></input>
+                            <label htmlFor="public" className="mr-5 font-medium">
+                                Public
+                            </label>
+                            <input
+                                type="radio"
+                                id="private"
+                                value="private"
+                                className="mr-1 h-4 w-4 cursor-pointer appearance-auto border align-text-top transition-all"
+                                name="privacy"
+                                required
+                                checked={!isPublic}
+                                onChange={handlePrivacyChange}
+                            ></input>
+                            <label htmlFor="private" className="font-medium">
+                                Private
+                            </label>
+                        </div>
+                    </div>
                     {/* Step 2: Image Uploads */}
-                    <div className="shadow-lg/25 bg-linear-to-b my-5 rounded-lg border-x border-b-8 border-blue-600 from-blue-400 to-blue-500 to-75% p-4 max-2xl:my-3">
-                        <label className="text-shadow-xs/75 m-auto block text-4xl font-medium text-white max-2xl:text-3xl max-md:text-center">
-                            <div className="mr-3 inline-block h-11 w-11 content-center rounded-[50%] text-center align-middle font-bold text-amber-500">
-                                <span className="font-digitag text-shadow-xs/50 relative bottom-4 right-1 text-7xl font-medium max-sm:bottom-2 max-sm:text-6xl">
-                                    2
-                                </span>
-                            </div>
-                            Upload Images:
+                    <div className="rounded-xs flex h-fit w-full flex-col items-center justify-around border border-neutral-800 bg-neutral-300 py-1 text-center max-lg:px-2 lg:px-4">
+                        <label className="flex p-px text-lg font-semibold xl:p-2 xl:text-xl 2xl:text-2xl">
+                            <FaCameraRetro size="1.18em" className="relative top-px mr-1" />
+                            <div>Upload Custom Images</div>
+                            <FaCameraRetro size="1.18em" className="relative top-px ml-1" />
                         </label>
                         <Dropzone
                             fileHandler={(files) => {
@@ -304,7 +340,7 @@ const CreateCustomGamePage = () => {
                         />
                         {/* Image upload errors */}
                         {imageErrors.length > 0 && (
-                            <div className="shadow-xs max-h-23 mb-1 overflow-y-auto rounded-md border border-red-200 bg-red-50 p-2 shadow-red-50">
+                            <div className="max-h-23 mb-1 overflow-y-auto rounded-md border border-red-200 bg-red-50 p-2 shadow-red-50">
                                 {imageErrors.map((error, index) => (
                                     <p key={index} className="text-sm text-red-600">
                                         {"Error: " + error}
@@ -313,197 +349,156 @@ const CreateCustomGamePage = () => {
                             </div>
                         )}
                         {/* Character names as file names toggle */}
-                        <input
-                            type="checkbox"
-                            name="image-names"
-                            className="ml-3 h-5 w-5 cursor-pointer appearance-auto border align-text-bottom accent-amber-500 shadow transition-all hover:shadow-md"
-                            checked={useFileNames}
-                            onChange={handleUseImageFilenames}
-                        ></input>
-                        <label
-                            htmlFor="image-names"
-                            className="text-shadow-xs/50 align-middle text-lg text-white max-2xl:text-base"
-                        >
-                            {" "}
-                            Use File Names as Character Names
-                        </label>
-                    </div>
-                    {/* Step 4: Privacy Settings */}
-                    <div className="shadow-lg/25 bg-linear-to-b flex items-center justify-between whitespace-pre-wrap rounded-lg border-x border-b-8 border-blue-600 from-blue-400 to-blue-500 to-75% p-4 text-lg font-medium text-gray-900 max-sm:flex-col">
-                        <div className="text-shadow-xs/75 ml-1 block text-4xl font-medium text-white max-2xl:text-3xl">
-                            <div className="mr-3 inline-block h-11 w-11 content-center rounded-[50%] text-center align-middle font-bold text-amber-500">
-                                <span className="font-digitag text-shadow-xs/50 relative bottom-0.5 right-2 text-7xl font-medium max-sm:text-6xl">
-                                    4
-                                </span>
-                            </div>
-                            Game Options:
-                        </div>
-                        <div>
+                        <div className="items-baseline-last mb-1.25 mt-2.25 flex justify-between gap-1">
                             <input
-                                type="radio"
-                                id="public"
-                                value="public"
-                                className="h-5 w-5 cursor-pointer appearance-auto border align-text-top transition-all"
-                                name="privacy"
-                                required
-                                checked={isPublic}
-                                onChange={handlePrivacyChange}
+                                type="checkbox"
+                                name="image-names"
+                                className="inset-shadow-xs border-groove xl:h-4.5 xl:w-4.5 2xl:top-0.75 relative h-4 w-4 cursor-pointer appearance-auto rounded border accent-red-500 max-2xl:top-0.5 2xl:h-5 2xl:w-5"
+                                checked={useFileNames}
+                                onChange={handleUseImageFilenames}
                             ></input>
                             <label
-                                htmlFor="public"
-                                className="text-shadow-xs/50 mr-5 align-middle text-xl text-white max-2xl:text-lg"
+                                htmlFor="image-names"
+                                className="text-sm font-medium text-neutral-600 2xl:text-base"
                             >
-                                {" "}
-                                Public
-                            </label>
-                            <input
-                                type="radio"
-                                id="private"
-                                value="private"
-                                className="h-5 w-5 cursor-pointer appearance-auto border align-text-top transition-all"
-                                name="privacy"
-                                required
-                                checked={!isPublic}
-                                onChange={handlePrivacyChange}
-                            ></input>
-                            <label
-                                htmlFor="private"
-                                className="text-shadow-xs/50 align-middle text-xl text-white max-2xl:text-lg"
-                            >
-                                {" "}
-                                Private
+                                Use File Names as Character Names
                             </label>
                         </div>
                     </div>
                 </div>
-                <div className="max-w-4xl flex-1 max-sm:flex max-sm:flex-col">
-                    {/* Step 3: Character Names */}
-                    <div className="shadow-lg/25 bg-linear-to-b mb-3 rounded-lg border-x border-b-8 border-blue-600 from-blue-400 to-blue-500 to-75% max-sm:mt-3 max-sm:p-3 sm:p-4">
-                        <h3 className="text-shadow-xs/75 m-auto block text-4xl font-medium text-white max-2xl:text-3xl max-md:text-center">
-                            <div className="mr-3 inline-block h-11 w-11 content-center rounded-[50%] text-center align-middle text-[4rem] font-bold leading-none text-amber-500">
-                                <span className="font-digitag text-shadow-xs/50 relative bottom-3.5 text-7xl font-medium max-sm:bottom-5 max-sm:text-6xl">
-                                    3
-                                </span>
+
+                {/* Step 3: Character Names */}
+                <div className="rounded-xs 2xl:w-9/10 flex h-fit flex-col justify-around border border-neutral-800 bg-neutral-300 px-2 py-1 text-center max-2xl:w-full lg:col-start-2">
+                    <h3 className="mb-0.5 flex items-center justify-end py-1">
+                        <div className="mx-auto flex p-px text-lg font-semibold xl:text-xl 2xl:text-2xl">
+                            <BsIncognito size="1.33em" className="relative top-px mr-1" />
+                            <div>
+                                {selectedFiles.length > 0
+                                    ? "Character List "
+                                    : "Characters Will Appear Here  "}
                             </div>
-                            {selectedFiles.length > 0
-                                ? "Character List: "
-                                : "Your Characters Will Appear Here:  "}
-                            {/* Clear list button */}
-                            {selectedFiles.length > 0 ? (
-                                <button
-                                    className="text-shadow-xs/40 active:shadow-2xs hover:shadow-sm/20 duration-15 hover:font-gray-200 shadow-md/20 mr-5 h-11 w-fit cursor-pointer rounded-md border-x border-b-8 border-amber-700 bg-amber-600 px-2 text-xl font-semibold text-white transition-all hover:border-amber-800 hover:bg-amber-700 active:-translate-y-px active:border-none sm:float-right"
-                                    disabled={isLoading}
-                                    type="button"
-                                    onClick={handleClearCharacterList}
+                            <BsIncognito size="1.33em" className="relative top-px ml-1" />
+                        </div>
+
+                        {/* Clear list button */}
+                        {selectedFiles.length > 0 ? (
+                            <button
+                                className="rounded-xs lg:px-1.75 lg:py-0.75 ml-6 flex cursor-pointer items-center bg-red-400 font-medium text-white hover:bg-red-500 max-lg:px-1 max-lg:py-px lg:mr-4"
+                                disabled={isLoading}
+                                type="button"
+                                onClick={handleClearCharacterList}
+                            >
+                                Clear List
+                            </button>
+                        ) : (
+                            <></>
+                        )}
+                    </h3>
+                    <div className="max-lg:max-h-120 lg:max-h-154 border-groove rounded-xs overflow-y-auto border border-neutral-600 bg-zinc-50 2xl:grid 2xl:grid-cols-2">
+                        {/* Dynamic list of characters */}
+                        {selectedFiles.length > 0 ? (
+                            selectedFiles.map((file, index) => (
+                                <div
+                                    key={index}
+                                    className={`flex items-center border-b border-zinc-400 py-1.5 ${
+                                        index % 4 === 0 || index % 4 === 3
+                                            ? "bg-zinc-200"
+                                            : "bg-zinc-50"
+                                    } ${index % 2 === 0 ? "border-r" : ""}`}
                                 >
-                                    Clear List
-                                </button>
-                            ) : (
-                                <></>
-                            )}
-                        </h3>
-                        <div className="sm:max-h-143 inset-shadow-xs mt-3 overflow-y-auto rounded-md bg-gray-50 shadow-sm">
-                            {/* Dynamic list of characters */}
-                            {selectedFiles.length > 0 ? (
-                                selectedFiles.map((file, index) => (
-                                    <div
-                                        key={index}
-                                        className={`flex items-center py-1.5 ${
-                                            index % 2 === 0 ? "bg-gray-300" : "bg-gray-100"
-                                        }`}
-                                    >
-                                        <button
-                                            className="text-shadow-sm ml-5 cursor-pointer text-3xl text-red-900 hover:scale-110 hover:text-red-600 max-sm:ml-1"
+                                    <div className="mx-1 flex flex-col items-center justify-between">
+                                        <PiEraserFill
+                                            className="mb-1 scale-x-[-1] cursor-pointer text-red-300 hover:scale-110 hover:text-red-900"
+                                            size="1.5em"
                                             onClick={() => {
                                                 handleRemoveImage(index);
                                             }}
-                                            type="button"
-                                        >
-                                            <MdOutlineRemoveCircleOutline />
-                                        </button>
-                                        <div className="text-3xl max-sm:mx-1 sm:mx-5">
+                                        />
+                                        <div className="text-xl font-medium max-sm:mx-1 sm:mx-5">
                                             {index + 1}
                                         </div>
-                                        <img
-                                            src={imageUrls[index]}
-                                            alt={file.name}
-                                            className="h-34 max-sm:h-30 w-24 shrink-0 rounded border-2 object-cover max-sm:mr-1 max-sm:w-20 sm:mr-6"
-                                        />
-                                        <div className="min-w-0 flex-1">
-                                            <input
-                                                type="text"
-                                                value={charNames[index] || ""}
-                                                onChange={(e) => {
-                                                    const names = [...charNames];
-                                                    names[index] = e.target.value;
-                                                    setCharNames(names);
-                                                }}
-                                                minLength={3}
-                                                maxLength={20}
-                                                className="w-1/2 rounded-md border-none bg-transparent px-1 py-0.5 align-sub text-2xl focus:border-2 focus:border-black focus:bg-white max-sm:mr-1 max-sm:w-full max-sm:text-lg"
-                                                placeholder="(Enter character name)"
-                                                required
-                                            />
-                                        </div>
                                     </div>
-                                ))
-                            ) : isLoading ? (
-                                <LoadingSpinner />
-                            ) : (
-                                <p className="p-10 text-lg italic text-gray-500">
-                                    No images uploaded
-                                </p>
-                            )}
-                        </div>
-                        {/* Character/image min and max warnings */}
-                        {selectedFiles.length > MAX_NUM_IMGS ? (
-                            <p className="mt-2 rounded-md border border-red-400 bg-red-100 p-2 text-red-500">
-                                You have too many characters! There is a maximum of {MAX_NUM_IMGS}.
-                            </p>
+
+                                    <img
+                                        src={imageUrls[index]}
+                                        alt={file.name}
+                                        className="h-34 max-sm:h-30 w-24 shrink-0 rounded border object-cover"
+                                    />
+                                    <div className="min-w-0">
+                                        <input
+                                            type="text"
+                                            value={charNames[index] || ""}
+                                            onChange={(e) => {
+                                                const names = [...charNames];
+                                                names[index] = e.target.value;
+                                                setCharNames(names);
+                                            }}
+                                            minLength={3}
+                                            maxLength={20}
+                                            className="max-w-9/10 rounded border-2 border-neutral-400 bg-neutral-100 px-1 py-px text-center font-medium placeholder:text-zinc-400"
+                                            placeholder={`[Insert #${index + 1}'s Name]`}
+                                            required
+                                        />
+                                    </div>
+                                </div>
+                            ))
+                        ) : isLoading ? (
+                            <LoadingSpinner />
                         ) : (
-                            <></>
-                        )}
-                        {selectedFiles.length < MIN_NUM_IMGS ? (
-                            <p className="mt-2 rounded-md border border-amber-300 bg-amber-100 p-2 text-gray-500">
-                                Need at least {MIN_NUM_IMGS} characters!
-                            </p>
-                        ) : (
-                            <></>
+                            <p className="p-10 italic text-gray-500">No images uploaded</p>
                         )}
                     </div>
-                    {/* Submit Button */}
-                    <button
-                        className={`border-b-9 text-shadow-xs/100 active:shadow-2xs duration-15 shadow-md/15 float-right mb-2 mr-5 w-fit cursor-pointer rounded-md border-x px-4 text-3xl font-bold text-white transition-all active:translate-y-[3px] active:border-none ${isLoading ? "border-gray-800 bg-gray-700" : "border-amber-700 bg-amber-600 hover:border-amber-800 hover:bg-amber-700 hover:text-gray-200"} py-4 max-2xl:py-3 max-2xl:text-2xl max-sm:mx-auto`}
-                        type="submit"
-                        disabled={isLoading}
-                    >
-                        {isLoading ? "Loading..." : "Save Game"}
-                    </button>
+                    {/* Character/image min and max warnings */}
+                    {selectedFiles.length > MAX_NUM_IMGS ? (
+                        <p className="mb-0.5 mt-2 rounded-md border border-red-200 bg-red-100 py-1 text-gray-500">
+                            You have too many characters! There is a maximum of {MAX_NUM_IMGS}.
+                        </p>
+                    ) : (
+                        <></>
+                    )}
+                    {selectedFiles.length < MIN_NUM_IMGS ? (
+                        <p className="mb-0.5 mt-2 rounded-md border border-amber-200 bg-amber-100 py-1 text-gray-500">
+                            Need at least {MIN_NUM_IMGS} characters!
+                        </p>
+                    ) : (
+                        <></>
+                    )}
                 </div>
+
+                {/* Submit Button */}
+                <button
+                    className={`rounded-xs-xs mx-auto w-1/2 p-1 text-center text-lg font-medium text-white ${isLoading ? "border-gray-800 bg-gray-700" : "bg-red-400 hover:bg-red-500"} h-fit cursor-pointer lg:col-start-2`}
+                    type="submit"
+                    disabled={isLoading}
+                >
+                    {isLoading ? "Loading..." : "Save Game"}
+                </button>
             </form>
             {/* Rules Modal */}
             <ReactModal
                 isOpen={showRulesModal}
                 onRequestClose={() => setShowRulesModal(false)}
-                className="shadow-2xl/50 border-b-12 text-shadow-xs/100 bg-linear-to-b absolute left-1/2 top-1/2 mx-auto w-full max-w-4xl -translate-x-1/2 -translate-y-1/2 rounded-lg border-x border-blue-600 from-blue-400 to-blue-500 p-8 text-center font-medium text-neutral-100 max-2xl:max-w-3xl"
-                overlayClassName="fixed inset-0 bg-gray-700/75"
+                className="absolute left-1/2 top-1/2 mx-auto flex h-fit w-[97%] max-w-4xl -translate-x-1/2 -translate-y-1/2 flex-col gap-4 border-2 border-neutral-800 bg-neutral-200 px-2 text-center shadow-lg max-lg:py-5 lg:py-8"
+                overlayClassName="fixed inset-0 bg-zinc-900/70"
                 shouldCloseOnOverlayClick={false}
                 shouldCloseOnEsc={false}
             >
-                <h2 className="mb-4 text-6xl font-bold text-orange-300">Rules</h2>
-                <ul className="w-9/10 mx-auto mb-4 list-inside list-decimal space-y-2 whitespace-nowrap text-left text-2xl tracking-wide max-2xl:text-xl">
-                    <li>
-                        <span className="text-4xl font-bold text-orange-300 max-2xl:text-3xl">
-                            Image content must be appropriate!
+                <div className="flex items-center justify-center gap-1 text-xl max-lg:mb-1 lg:mb-2">
+                    <PiGavelFill size="2.5em" className="" />
+                    <h2 className="text-center text-5xl font-bold">Rules</h2>
+                    <PiGavelFill size="2.5em" className="scale-x-[-1]" />
+                </div>
+                <ul className="mx-auto mb-2 list-inside list-decimal space-y-2 text-center text-xl font-medium">
+                    <li className="text-xl">
+                        <span className="text-shadow-2xs/20 text-xl font-semibold text-orange-500">
+                            Image content must be appropriate.
                         </span>
                         <br></br>
-                        <span className="pl-10 text-lg text-orange-300 max-2xl:text-base">
-                            No violence, nudity, controlled substances, or hate speech of any
-                            kind.{" "}
+                        <span className="text-base font-normal">
+                            No violence, nudity, controlled substances, hate speech, etc.{" "}
                         </span>
-                        <br></br>
-                        <span className="pl-10 text-lg italic max-2xl:text-base">
-                            Your content can be removed for any reason at moderator's discrection.
+                        <span className="text-base font-medium italic">
+                            Your preset can be removed for any reason at moderator's discrection.
                         </span>
                     </li>
                     {/* <li>
@@ -516,29 +511,25 @@ const CreateCustomGamePage = () => {
                         </span>
                     </li> */}
                     <li>
-                        <span className="font-bold text-orange-300">
-                            Images of real people must be public figures.
+                        <span className="text-shadow-2xs/20 text-xl font-semibold text-orange-500">
+                            Images of real people must be notable figures (in public presets).
                         </span>
                         <br></br>
-                        <span className="pl-10 text-lg max-2xl:text-base">
-                            No public games made with images of family, friends etc.
+                        <span className="text-base font-normal">
+                            No public presets can contain images of friends, family, classmates,
+                            coworkers, etc.
                         </span>
                     </li>
-                    <li>Images can be a maximum of 5MB.</li>
-                    <li>Game titles are between 5-20 characters.</li>
-                    <li>Character names are between 3-20 characters.</li>
-                    <li>Each character should have a unique name.</li>
                 </ul>
-                <p className="w-9/10 mx-auto whitespace-pre-wrap text-center text-xl italic max-2xl:text-lg">
-                    Note: images will work better if they feature the character in the center.{"\n"}
-                    Vertical images also may work better than horizontal ones but try it out.
-                </p>
                 <button
                     onClick={() => setShowRulesModal(false)}
-                    className="border-b-9 text-shadow-xs/100 active:shadow-2xs duration-15 hover:shadow-xs mt-4 w-2/5 cursor-pointer rounded-md border-x border-green-700 bg-green-600 py-4 text-3xl font-bold text-white shadow-sm transition-all hover:border-green-800 hover:bg-green-700 hover:text-gray-200 active:-translate-y-px active:border-none max-2xl:w-1/2 max-2xl:py-3 max-2xl:text-2xl"
+                    className={`rounded-xs md:w-4/10 mx-auto w-1/2 p-1 text-center text-lg font-medium text-white lg:w-1/3 ${isLoading ? "border-gray-800 bg-gray-700" : "bg-red-400 hover:bg-red-500"} cursor-pointer`}
                 >
                     I Agree
                 </button>
+                <p className="w-9/10 mx-auto text-base italic text-neutral-700">
+                    Tip: images will look best when they feature the "character" near the center.
+                </p>
             </ReactModal>
         </>
     );

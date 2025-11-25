@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import type { EndStateType } from "../../lib/types.ts";
 import type { PropsWithChildren } from "react";
+import { FaQuestion } from "react-icons/fa";
 
 interface CardLayoutProps {
     name: string;
@@ -22,22 +23,19 @@ export const CardLayout = ({
 }: PropsWithChildren<CardLayoutProps>) => {
     return (
         <figure
-            className={`border-3 shadow-xs/15 ${isGame || isOppCard ? "my-0.75 h-72 w-48 max-xl:h-60 max-xl:w-40" : "h-91 w-59 my-2 max-xl:h-72 max-xl:w-48"} mx-1 flex flex-col justify-between overflow-hidden rounded-lg ${isOppCard ? "animate-[flash-attention_2s_ease-in-out_1] border-orange-300 bg-orange-300" : "hover:shadow-xl/25 border-gray-200 bg-gray-200 hover:-translate-y-px"} text-center transition-shadow`}
+            className={`border ${isGame || isOppCard ? "max-xl:h-66.75 max-xl:w-39 w-45.75 h-72.5" : "max-xl:h-63.75 w-40.5 h-63.75 max-xl:w-40.5"} hover:scale-106 rounded-xs flex flex-col justify-between overflow-hidden ${isOppCard ? "animate-[flash-attention_2s_ease-in-out_1] border-orange-300 bg-orange-300" : "border-neutral-600 bg-neutral-50"} text-center`}
         >
-            {/* Image takes up 84.5% of card height */}
             <img
-                className="rounded-xs h-[84.5%] max-h-[85%] bg-gray-300 object-fill"
+                className={`max-h-8/10 h-8/10 mx-1 mt-1 border border-neutral-400 bg-gray-300 object-fill ${isOppCard ? "grayscale-100" : ""}`}
                 src={imgSrc}
                 alt={name}
             />
-            {/* This is used for character names and game names, height is 4.5%  */}
             <figcaption
-                className={` ${isGame || isOppCard ? "bottom-0 text-base" : "bottom-0 text-xl hover:text-blue-500 max-lg:text-lg"} relative m-auto h-[4.5%] w-full text-center font-semibold leading-none text-gray-800`}
+                className={` ${isGame || isOppCard ? "cursor-default items-center text-lg max-md:text-base" : "items-center text-base hover:text-blue-500"} max-h-1/10 m-auto flex text-center font-semibold leading-none text-black`}
             >
                 {name}
             </figcaption>
-            {/* Children slot (11% height remaining) for in-game controls or metadata */}
-            {children}
+            <div className="max-h-1/10">{children}</div>
         </figure>
     );
 };
@@ -76,10 +74,10 @@ export const Card = ({
                 isGame={isGame}
             >
                 {/* In game controls for hiding and guessing characters */}
-                <div className="border-t-3 h-1/10 box-content flex justify-between border-gray-200">
+                <div className="mx-1 mb-1 box-content flex items-center justify-between">
                     {/* Guess Button */}
                     <button
-                        className={`border-r-3 text-shadow-xs text-md h-full w-[35%] cursor-pointer rounded-sm border-gray-200 bg-green-600 px-1 text-center font-semibold text-neutral-100 transition-all hover:bg-green-800 max-2xl:text-sm ${flipped ? "hidden" : ""}`}
+                        className={`text-shadow-xs/40 text-shadow-green-900 w-[34%] cursor-pointer rounded bg-green-600 px-0.5 py-px text-center font-semibold text-neutral-100 transition-all hover:bg-green-700 max-2xl:text-sm max-sm:font-medium ${flipped ? "hidden" : ""}`}
                         onClick={() => {
                             openConfirmModal(winner, name);
                         }}
@@ -88,12 +86,12 @@ export const Card = ({
                         Guess
                     </button>
                     {/* Visual separator */}
-                    <div className="relative top-0.5 m-auto text-center align-sub text-lg max-2xl:text-sm">
-                        ❓
+                    <div className="relative top-px m-auto text-center text-lg text-red-600 max-2xl:text-sm">
+                        <FaQuestion />
                     </div>
                     {/* Hide/Unhide Button */}
                     <button
-                        className="border-l-3 text-md h-full w-[35%] cursor-pointer rounded-md border-gray-200 bg-red-600 px-1 text-center font-semibold text-neutral-100 hover:bg-red-800 max-2xl:text-sm"
+                        className="text-shadow-xs/40 text-shadow-red-900 w-[34%] cursor-pointer rounded bg-red-600 px-0.5 py-px text-center font-semibold text-neutral-100 transition-all hover:bg-red-700 max-2xl:text-sm max-sm:font-medium"
                         onClick={() => {
                             setFlipped(!flipped);
                         }}
@@ -112,8 +110,8 @@ export const Card = ({
 export const OpponentTargetCard = ({ name, imgSrc }: { name: string; imgSrc: string }) => {
     return (
         <CardLayout name={name} imgSrc={imgSrc} isOppCard={true}>
-            <p className="mx-auto mt-0.5 w-full bg-orange-300 text-center text-sm font-bold">
-                Opponent's Card
+            <p className="mx-auto mb-1 w-full bg-orange-300 text-center text-base font-medium text-neutral-700">
+                Opponent to Guess
             </p>
         </CardLayout>
     );

@@ -15,7 +15,7 @@ import { logError, log } from "../../lib/logger.ts";
  * Handles both creating new games and joining existing ones
  */
 const GameStateManager = ({ isNewGame }: { isNewGame: boolean }) => {
-    const navigate = useNavigate();
+    const nav = useNavigate();
     let { joinGameId = "" } = useParams();
     // Filter out invalid route param that shouldn't be treated as game ID
     if (joinGameId === "getImageAction") joinGameId = "";
@@ -127,13 +127,13 @@ const GameStateManager = ({ isNewGame }: { isNewGame: boolean }) => {
                 if (response.success) {
                     log(response.msg);
                     setGameId(id);
-                    void navigate(`/play-game/${id}`);
+                    void nav(`/play-game/${id}`, { replace: true });
                 } else {
                     setErrorMsg(response.msg);
                 }
             });
         }
-    }, [isNewGame, cardData.length, navigate, gameState.preset]);
+    }, [isNewGame, cardData.length, nav, gameState.preset]);
 
     // Join existing game using room ID from URL
     useEffect(() => {
@@ -141,12 +141,12 @@ const GameStateManager = ({ isNewGame }: { isNewGame: boolean }) => {
             socket.emit("joinGame", gameId, (gameData, response) => {
                 setGameState(gameData);
                 if (!response.success) {
-                    void navigate("/"); //flesh this out, pop-up upon returning to home page?
+                    void nav("/"); //flesh this out, pop-up upon returning to home page?
                 }
                 log(response.msg);
             });
         }
-    }, [gameId, isNewGame, navigate]);
+    }, [gameId, isNewGame, nav]);
 
     const emitGuess = (guessCorrectly: boolean) => {
         socket.emit("guess", gameId, guessCorrectly);
