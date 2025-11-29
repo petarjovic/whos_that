@@ -155,7 +155,7 @@ export function setupApiRoutes(app: Express) {
                 .leftJoin(schema.gameLikes, eq(schema.gameLikes.gameId, schema.games.id))
                 .where(eq(schema.games.isPublic, true))
                 .groupBy(schema.games.id, authSchema.user.displayUsername, schema.gameItems.id)
-                .orderBy(desc(count(schema.gameLikes.id)))
+                .orderBy(desc(count(schema.gameLikes.id)), desc(schema.games.createdAt))
                 .limit(3);
 
             const top3MostRecentGames = await db
@@ -184,6 +184,7 @@ export function setupApiRoutes(app: Express) {
                 .orderBy(desc(schema.games.createdAt))
                 .limit(3);
 
+            //Merge lists and convert db information to image URLs
             const featuredGamesInfoUrl: PresetInfo = [...top3MostLikedGames, ...top3MostRecentGames]
                 .filter(({ coverImageId }) => coverImageId !== null)
                 .map(({ id, title, author, numLikes, coverImageId, userHasLiked }) => {
@@ -259,7 +260,7 @@ export function setupApiRoutes(app: Express) {
                 .groupBy(schema.games.id, authSchema.user.displayUsername, schema.gameItems.id)
                 .orderBy(
                     sort === "likes"
-                        ? desc(count(schema.gameLikes.id))
+                        ? (desc(count(schema.gameLikes.id)), desc(schema.games.createdAt))
                         : desc(schema.games.createdAt)
                 )
                 .limit(limit)
@@ -273,7 +274,7 @@ export function setupApiRoutes(app: Express) {
             const totalCount = totalCountResult[0].count;
             const totalPages = Math.ceil(totalCount / limit);
 
-            // Populate then send response object
+            // Convert db info to image url, populate and send response object
             const premadeGamesInfoUrl: PresetInfo = premadeGamesInfo
                 .filter(({ coverImageId }) => coverImageId !== null)
                 .map(({ id, title, author, numLikes, coverImageId, userHasLiked }) => {
