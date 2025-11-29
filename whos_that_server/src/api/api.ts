@@ -259,9 +259,9 @@ export function setupApiRoutes(app: Express) {
                 .where(whereConditions)
                 .groupBy(schema.games.id, authSchema.user.displayUsername, schema.gameItems.id)
                 .orderBy(
-                    sort === "likes"
-                        ? (desc(count(schema.gameLikes.id)), desc(schema.games.createdAt))
-                        : desc(schema.games.createdAt)
+                    ...(sort === "likes"
+                        ? [desc(count(schema.gameLikes.id)), desc(schema.games.createdAt)]
+                        : [desc(schema.games.createdAt)])
                 )
                 .limit(limit)
                 .offset((page - 1) * limit);
