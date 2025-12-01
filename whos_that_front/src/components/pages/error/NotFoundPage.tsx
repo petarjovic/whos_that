@@ -8,7 +8,7 @@ const NotFoundPage = () => {
     return (
         <div className="flex w-full flex-col items-center justify-start from-cyan-400 to-cyan-600 to-90% bg-fixed pb-5">
             <div className="mx-auto mt-10 text-center text-2xl text-white">
-                <div className="max-sm:w-19/20 border border-neutral-400 bg-neutral-300 px-20 py-1">
+                <div className="max-sm:w-19/20 border border-neutral-400 bg-neutral-300 px-20 max-md:py-1 md:py-3">
                     <img src={whiteHatSpy} alt="Not Found Image" className="mx-auto" />
                 </div>
                 <h1 className="my-5 font-semibold text-red-800 max-md:text-3xl md:text-4xl">
