@@ -168,7 +168,29 @@ const CreateCustomGamePage = () => {
             return;
         }
 
-        const compressedFiles = await resizeImages(selectedFiles);
+        const compressImagesResults = await resizeImages(selectedFiles);
+        const compressedFiles: File[] = [];
+        const failedFiles: string[] = [];
+
+        for (const [i, result] of compressImagesResults.entries()) {
+            if (result.status === "fulfilled") {
+                compressedFiles.push(result.value);
+            } else {
+                failedFiles.push(selectedFiles[i].name);
+            }
+        }
+
+        if (failedFiles.length > 0) {
+            setImageErrors([
+                ...imageErrors,
+                ...failedFiles.map((name) => `${name} failed during compression`),
+            ]);
+            const successNames = new Set(compressedFiles.map((f) => f.name));
+            setSelectedFiles(selectedFiles.filter((f) => successNames.has(f.name)));
+            setCharNames(charNames.filter((_, i) => successNames.has(selectedFiles[i].name)));
+            setIsLoading(false);
+            return;
+        }
 
         const requestBody = {
             title: formData.get("title") as string,

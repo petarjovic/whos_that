@@ -88,7 +88,9 @@ export const resizeImages = async (
     files: File[],
     maxWidth = 450,
     maxHeight = 600
-): Promise<File[]> => {
-    const results = await Promise.all(files.map((file) => resizeImage(file, maxWidth, maxHeight)));
+): Promise<PromiseSettledResult<File>[]> => {
+    const results = await Promise.allSettled(
+        files.map((file) => resizeImage(file, maxWidth, maxHeight))
+    );
     return results;
 };
