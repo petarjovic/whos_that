@@ -117,12 +117,48 @@ const Game = ({
             <div>
                 <GameEndModal endState={endState} handlePlayAgain={handlePlayAgain} />
                 <ConfirmGuessModalState
-                    isOpen={confirmGuessModal.isOpen}
+                    isOpen={confirmGuessModal.isOpen && !endState}
                     confirmGuess={handleConfirmGuessModalResult}
                     name={confirmGuessModal.isOpen ? confirmGuessModal.name : ""}
                 />
             </div>
         </>
+    );
+};
+
+/**
+ * Confirmation modal before submitting a guess
+ * Prevents accidental wrong guesses that end the game
+ */
+const ConfirmGuessModalState = ({ isOpen, confirmGuess, name }: ConfirmGuessModalProps) => {
+    return (
+        <ReactModal
+            isOpen={isOpen}
+            className="w-9/10 absolute left-1/2 top-1/2 mx-auto flex h-fit -translate-x-1/2 -translate-y-1/2 flex-col gap-4 border-2 border-neutral-800 bg-neutral-200 px-2 text-center max-lg:max-w-2xl max-md:py-5 md:max-lg:py-8 lg:max-w-3xl lg:py-8 2xl:pb-10 2xl:pt-12"
+            overlayClassName="fixed inset-0 bg-zinc-900/70"
+        >
+            <p className="mx-auto mb-1 whitespace-pre-wrap font-medium leading-none text-neutral-800 max-lg:text-3xl lg:text-4xl 2xl:text-[42px]">
+                Are you sure it&apos;s <span className="font-bold text-orange-600">{name}</span>?
+            </p>
+            <div className="mx-auto flex max-lg:gap-5 lg:mt-5 lg:gap-10 2xl:gap-20">
+                <button
+                    className="rounded-xs md:max-lg:px-4.5 cursor-pointer bg-green-600 text-center font-medium text-neutral-50 hover:bg-green-700 max-lg:text-xl max-md:px-3.5 max-md:py-1.5 md:max-lg:py-2 lg:px-5 lg:py-3 lg:text-2xl"
+                    onClick={() => {
+                        confirmGuess(true);
+                    }}
+                >
+                    Yes I&apos;m sure
+                </button>
+                <button
+                    className="rounded-xs md:max-lg:px-4.5 grayscale-10 cursor-pointer bg-amber-500 text-center font-medium text-neutral-50 hover:bg-amber-600 max-lg:text-xl max-md:px-3.5 max-md:py-1.5 md:max-lg:py-2 lg:px-5 lg:py-3 lg:text-2xl"
+                    onClick={() => {
+                        confirmGuess(false);
+                    }}
+                >
+                    Actually...
+                </button>
+            </div>
+        </ReactModal>
     );
 };
 
@@ -172,20 +208,20 @@ const GameEndModal = ({ endState, handlePlayAgain }: GameEndModalProps) => {
     return (
         <ReactModal
             isOpen={Boolean(endState)}
-            className="w-9/10 absolute left-1/2 top-1/2 mx-auto flex h-fit max-w-4xl -translate-x-1/2 -translate-y-1/2 flex-col gap-4 border-2 border-neutral-800 bg-neutral-200 px-2 text-center shadow-lg max-lg:py-5 lg:py-8"
+            className="w-9/10 absolute left-1/2 top-1/2 mx-auto flex h-fit -translate-x-1/2 -translate-y-1/2 flex-col gap-4 border-2 border-neutral-800 bg-neutral-200 px-2 text-center max-lg:max-w-2xl max-md:py-5 md:max-lg:py-8 lg:max-w-3xl lg:py-8 2xl:pb-10 2xl:pt-12"
             overlayClassName="fixed inset-0 bg-zinc-900/70"
         >
             <h2
-                className={`font-digitag mx-auto leading-none max-sm:text-[6rem] xl:text-[9rem] ${headingText === "You Win!" ? "text-green-600" : "text-red-600"} `}
+                className={`text-shadow-2xs/100 font-digitag md:leading-27 mx-auto max-lg:leading-none max-md:text-[6rem] md:max-xl:text-[7.5rem] xl:text-[9.5rem] ${headingText === "You Win!" ? "text-green-600" : "text-red-600"} max-2xl:mb-4 max-lg:mb-0 2xl:mb-5`}
             >
                 {headingText}
             </h2>
-            <p className="mx-auto mb-2 whitespace-pre-wrap text-4xl font-medium text-neutral-800 max-sm:text-2xl">
+            <p className="mx-auto whitespace-pre-wrap text-4xl font-medium text-neutral-800 max-2xl:mb-2 max-sm:text-2xl 2xl:mb-3">
                 {paraText}
             </p>
-            <div className="mx-auto flex flex-row gap-4">
+            <div className="lg:gap-25 1 sm:max-lg:gap-13 mx-auto mt-3 flex flex-row max-sm:gap-4">
                 <button
-                    className={`rounded-xs cursor-pointer px-2 py-1 text-center text-lg font-medium text-neutral-50 ${playAgainSent ? "bg-gray-700" : "bg-green-600 hover:bg-green-700"}`}
+                    className={`rounded-xs md:max-lg:px-4.5 cursor-pointer text-center font-medium text-neutral-50 max-lg:text-xl max-md:px-3.5 max-md:py-1.5 md:max-lg:py-2 lg:px-5 lg:py-3 lg:text-2xl ${playAgainSent ? "bg-gray-700" : "bg-green-600 hover:bg-green-700"}`}
                     onClick={() => {
                         setPlayAgainSent(true);
                         handlePlayAgain();
@@ -198,7 +234,7 @@ const GameEndModal = ({ endState, handlePlayAgain }: GameEndModalProps) => {
                     onClick={() => {
                         void navigate("/");
                     }}
-                    className="rounded-xs cursor-pointer bg-red-400 px-7 py-1 text-center text-lg font-medium text-neutral-50 hover:bg-red-500"
+                    className="rounded-xs lg:px-15.5 scale-95 cursor-pointer bg-red-400 text-center font-medium text-neutral-50 hover:bg-red-500 max-lg:px-10 max-lg:py-1 max-lg:text-xl lg:py-3 lg:text-2xl"
                 >
                     Exit
                 </button>
@@ -212,42 +248,5 @@ interface ConfirmGuessModalProps {
     confirmGuess: (confirmed: boolean) => void;
     name: string;
 }
-
-/**
- * Confirmation modal before submitting a guess
- * Prevents accidental wrong guesses that end the game
- */
-const ConfirmGuessModalState = ({ isOpen, confirmGuess, name }: ConfirmGuessModalProps) => {
-    return (
-        <ReactModal
-            isOpen={isOpen}
-            className="w-9/10 absolute left-1/2 top-1/2 mx-auto flex h-fit max-w-xl -translate-x-1/2 -translate-y-1/2 flex-col gap-4 border-2 border-neutral-800 bg-neutral-200 px-2 text-center shadow-lg max-lg:py-5 lg:py-8"
-            overlayClassName="fixed inset-0 bg-zinc-900/70"
-        >
-            <p className="mx-auto mb-2 whitespace-pre-wrap text-3xl font-medium text-neutral-800 lg:text-4xl">
-                Are you sure it&apos;s <span className="font-semibold text-orange-600">{name}</span>
-                ?
-            </p>
-            <div className="mx-auto flex max-lg:gap-2 lg:gap-7">
-                <button
-                    className="rounded-xs cursor-pointer bg-green-600 px-1.5 py-1 text-center text-lg font-medium text-white hover:bg-green-700 lg:text-xl"
-                    onClick={() => {
-                        confirmGuess(true);
-                    }}
-                >
-                    Yes I&apos;m sure
-                </button>
-                <button
-                    className="rounded-xs cursor-pointer bg-amber-500 px-1.5 py-1 text-center text-lg font-medium text-white hover:bg-amber-600 lg:text-xl"
-                    onClick={() => {
-                        confirmGuess(false);
-                    }}
-                >
-                    ...On Second Thought
-                </button>
-            </div>
-        </ReactModal>
-    );
-};
 
 export default Game;
