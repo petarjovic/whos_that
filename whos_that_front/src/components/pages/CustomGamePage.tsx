@@ -79,6 +79,11 @@ const CreateCustomGamePage = () => {
         setCharNames([]);
     };
 
+    // Handles dismissing image error messages
+    const handleRemoveError = (index: number) => {
+        setImageErrors(imageErrors.filter((_, i) => i !== index));
+    };
+
     /**
      * Validates images as user uploads them to browser
      * Checks file sizes and types, converts HEIC to JPEG
@@ -106,7 +111,7 @@ const CreateCustomGamePage = () => {
                             lastModified: Date.now(),
                         });
                     } else if (file.size > MAX_FILESIZE_BYTES) {
-                        throw new Error(`${file.name} too large`);
+                        throw new Error(`${file.name} is too large (max 5MB).`);
                     } else if (!acceptedImageTypesSchema.safeParse(file.type).success) {
                         // This type validation doesn't work on HEIC, keep isHeic check early
                         throw new Error(`${file.name} is of an invalid file type.`);
@@ -114,8 +119,11 @@ const CreateCustomGamePage = () => {
                         return file;
                     }
                 } catch (error) {
-                    log(error);
-                    throw new Error(`${file.name} had error with HEIC conversion.`);
+                    logError(error);
+                    if (error instanceof Error) {
+                        throw error;
+                    }
+                    throw new Error(`${file.name} had validation error.`);
                 }
             })
         );
@@ -360,12 +368,19 @@ const CreateCustomGamePage = () => {
                                 void handleFiles(files);
                             }}
                         />
-                        {/* Image upload errors */}
+                        {/* Image errors during upload or compression */}
                         {imageErrors.length > 0 && (
-                            <div className="max-h-23 mb-1 overflow-y-auto rounded-md border border-red-200 bg-red-50 p-2 shadow-red-50">
+                            <div className="max-h-23 2xl:w-6/10 mt-1 overflow-y-auto rounded-md border border-red-200 bg-red-50 px-2.5 py-1.5 shadow-red-50">
                                 {imageErrors.map((error, index) => (
-                                    <p key={index} className="text-sm text-red-600">
-                                        {"Error: " + error}
+                                    <p key={index} className="text-sm font-medium text-red-600">
+                                        <span className="sm:pl-1">{"Error: " + error}</span>
+                                        <button
+                                            type="button"
+                                            onClick={() => handleRemoveError(index)}
+                                            className="float-right ml-2 cursor-pointer text-black hover:text-red-800"
+                                        >
+                                            ✕
+                                        </button>
                                     </p>
                                 ))}
                             </div>
@@ -472,14 +487,14 @@ const CreateCustomGamePage = () => {
                     </div>
                     {/* Character/image min and max warnings */}
                     {selectedFiles.length > MAX_NUM_IMGS ? (
-                        <p className="mb-0.5 mt-2 rounded-md border border-red-200 bg-red-100 py-1 text-gray-500">
+                        <p className="min-w-9/10 mx-auto mb-0.5 mt-2 rounded-md border border-red-200 bg-red-100 py-1 text-gray-500">
                             You have too many characters! There is a maximum of {MAX_NUM_IMGS}.
                         </p>
                     ) : (
                         <></>
                     )}
                     {selectedFiles.length < MIN_NUM_IMGS ? (
-                        <p className="mb-0.5 mt-2 rounded-md border border-amber-200 bg-amber-100 py-1 text-gray-500">
+                        <p className="min-w-9/10 py-0.75 mx-auto mb-0.5 mt-2 rounded-md border border-amber-200 bg-amber-100 text-neutral-500">
                             Need at least {MIN_NUM_IMGS} characters!
                         </p>
                     ) : (
