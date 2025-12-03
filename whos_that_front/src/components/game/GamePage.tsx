@@ -4,6 +4,7 @@ import { Card, OpponentTargetCard } from "../misc/Cards.tsx";
 import type { CardDataUrlType } from "@server/types";
 import type { EndStateType } from "../../lib/types.ts";
 import { useEffect, useState } from "react";
+import { FaHeart } from "react-icons/fa6";
 
 interface GameProps {
     emitPlayAgain: () => void;
@@ -13,6 +14,8 @@ interface GameProps {
     oppWinningKey: number; // Character index opponent needs to guess
     cardData: CardDataUrlType[];
     title: string;
+    playerHasLiked: boolean | null;
+    handleLikeGame: () => Promise<void>;
 }
 
 type ConfirmGuessModalState = { isOpen: false } | { isOpen: true; isWinner: boolean; name: string };
@@ -49,6 +52,8 @@ const Game = ({
     oppWinningKey,
     cardData,
     title,
+    playerHasLiked,
+    handleLikeGame,
 }: GameProps) => {
     const [confirmGuessModal, setConfirmGuessModal] = useState<ConfirmGuessModalState>({
         isOpen: false,
@@ -115,7 +120,12 @@ const Game = ({
             </div>
             {/* Modals */}
             <div>
-                <GameEndModal endState={endState} handlePlayAgain={handlePlayAgain} />
+                <GameEndModal
+                    endState={endState}
+                    handlePlayAgain={handlePlayAgain}
+                    playerHasLiked={playerHasLiked}
+                    handleLikeGame={handleLikeGame}
+                />
                 <ConfirmGuessModalState
                     isOpen={confirmGuessModal.isOpen && !endState}
                     confirmGuess={handleConfirmGuessModalResult}
@@ -165,13 +175,20 @@ const ConfirmGuessModalState = ({ isOpen, confirmGuess, name }: ConfirmGuessModa
 interface GameEndModalProps {
     endState: EndStateType;
     handlePlayAgain: () => void;
+    playerHasLiked: boolean | null;
+    handleLikeGame: () => Promise<void>;
 }
 
 /**
  * Modal shown when game ends with win/loss message
  * Allows play again or exit to home
  */
-const GameEndModal = ({ endState, handlePlayAgain }: GameEndModalProps) => {
+const GameEndModal = ({
+    endState,
+    handlePlayAgain,
+    playerHasLiked,
+    handleLikeGame,
+}: GameEndModalProps) => {
     let paraText = "";
     let headingText = "";
     const navigate = useNavigate();
@@ -216,10 +233,10 @@ const GameEndModal = ({ endState, handlePlayAgain }: GameEndModalProps) => {
             >
                 {headingText}
             </h2>
-            <p className="mx-auto whitespace-pre-wrap text-4xl font-medium text-neutral-800 max-2xl:mb-2 max-sm:text-2xl 2xl:mb-3">
+            <p className="mx-auto whitespace-pre-wrap text-4xl font-medium text-neutral-800 max-2xl:mb-1 max-sm:text-2xl 2xl:mb-2.5">
                 {paraText}
             </p>
-            <div className="lg:gap-25 1 sm:max-lg:gap-13 mx-auto mt-3 flex flex-row max-sm:gap-4">
+            <div className="sm:max-lg:gap-13 mx-auto mt-3 flex flex-row max-sm:gap-4 lg:gap-20">
                 <button
                     className={`rounded-xs md:max-lg:px-4.5 cursor-pointer text-center font-medium text-neutral-50 max-lg:text-xl max-md:px-3.5 max-md:py-1.5 md:max-lg:py-2 lg:px-5 lg:py-3 lg:text-2xl ${playAgainSent ? "bg-gray-700" : "bg-green-600 hover:bg-green-700"}`}
                     onClick={() => {
@@ -234,10 +251,62 @@ const GameEndModal = ({ endState, handlePlayAgain }: GameEndModalProps) => {
                     onClick={() => {
                         void navigate("/");
                     }}
-                    className="rounded-xs lg:px-15.5 scale-95 cursor-pointer bg-red-400 text-center font-medium text-neutral-50 hover:bg-red-500 max-lg:px-10 max-lg:py-1 max-lg:text-xl lg:py-3 lg:text-2xl"
+                    className="rounded-xs max-lg:py-1.25 scale-95 cursor-pointer bg-amber-600 text-center font-medium text-neutral-50 hover:bg-amber-700 max-lg:px-3 max-lg:text-xl lg:px-5 lg:py-3 lg:text-2xl"
                 >
-                    Exit
+                    Home Page
                 </button>
+            </div>
+            <div>
+                {playerHasLiked !== null ? (
+                    playerHasLiked ? (
+                        <div className="flex items-center justify-center">
+                            <span className="mr-2 text-xl font-medium italic">
+                                Thank you for your support!
+                            </span>
+                            <FaHeart
+                                size={"1.25em"}
+                                className="inline text-xl text-red-600 transition-transform"
+                            />
+                        </div>
+                    ) : (
+                        <>
+                            <p className="text-2xl font-semibold">Did you enjoy this preset?</p>
+                            <div>
+                                <span className="mr-2 text-xl font-medium italic">
+                                    Give it a like:
+                                </span>
+                                <button
+                                    type="button"
+                                    onClick={() => {
+                                        void handleLikeGame();
+                                    }}
+                                >
+                                    <FaHeart
+                                        size={"2em"}
+                                        className="hover:scale-107 active:scale-111 relative top-2 mb-px cursor-pointer align-middle text-zinc-500 transition-transform hover:text-red-600 max-md:text-xl"
+                                    />
+                                </button>
+                            </div>
+                        </>
+                    )
+                ) : (
+                    <div className="mt-2">
+                        <p className="text-2xl font-semibold">Did you enjoy this preset?</p>
+                        <button
+                            type="button"
+                            className="py-1.25 mt-1 cursor-pointer bg-red-400 px-2 font-medium text-white hover:bg-red-600 lg:px-2.5 lg:py-1.5 lg:text-base xl:text-base"
+                            onClick={() => {
+                                void navigate("/login");
+                            }}
+                        >
+                            {"Sign Up / Log In"}
+                        </button>
+                        <span className="text-lg italic">
+                            {" "}
+                            to give it a like and save it for later!
+                        </span>
+                    </div>
+                )}
             </div>
         </ReactModal>
     );

@@ -377,6 +377,33 @@ export function setupApiRoutes(app: Express) {
         }
     });
 
+    app.get("/api/userHasLiked/:gameId", validateGameId, checkGameExists, async (req, res) => {
+        const gameId = req.params.gameId;
+        try {
+            const session = await auth.api.getSession({
+                headers: fromNodeHeaders(req.headers),
+            });
+            if (!session) return res.status(401).json({ message: "Unauthorized." });
+
+            const [likeStatus] = await db
+                .select({ likeId: schema.gameLikes.id })
+                .from(schema.gameLikes)
+                .where(
+                    and(
+                        eq(schema.gameLikes.gameId, gameId),
+                        eq(schema.gameLikes.userId, session.user.id)
+                    )
+                );
+
+            return res.status(200).json({ userHasLiked: Boolean(likeStatus) });
+        } catch (error) {
+            console.error("Error while attempting to retrieve if user has liked game:\n", error);
+            return res
+                .status(500)
+                .json({ message: "Internal Server Error. Failed to check liked status." });
+        }
+    });
+
     /**
      * Retrieves complete game data including all character cards
      * @route GET /api/gameData/:gameId

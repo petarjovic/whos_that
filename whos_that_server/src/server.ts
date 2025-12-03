@@ -32,6 +32,7 @@ const io = new Server<ClientToServerEvents, ServerToClientEvents>(server, {
         origin: env.NODE_ENV === "production" ? env.PROD_CLIENT_URL : env.DEV_CLIENT_URL,
         methods: ["GET", "POST"],
     },
+    pingTimeout: 60000,
 });
 
 //Set up all api routes and event handlers

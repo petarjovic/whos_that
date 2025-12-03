@@ -8,9 +8,10 @@ import LoadingSpinner from "../misc/LoadingSpinner";
 import { Link } from "react-router";
 import { CardLayout } from "../misc/Cards";
 import { logError } from "../../lib/logger.ts";
-import { FaHeart } from "react-icons/fa";
+import { FaHeart } from "react-icons/fa6";
 import { useSearchParams } from "react-router";
 import { IoMdSearch } from "react-icons/io";
+import { likeGame } from "../../lib/apiHelpers.ts";
 
 const SearchPage = () => {
     const [searchParams, setSearchParams] = useSearchParams();
@@ -91,7 +92,7 @@ const SearchPage = () => {
         e.stopPropagation();
         if (!session) return;
 
-        // Optimistically update UI via state
+        //Update UI
         setGamesList((prev) =>
             prev.map((game) =>
                 game.id === gameId
@@ -104,12 +105,9 @@ const SearchPage = () => {
             )
         );
 
+        //Like game and catch errors
         try {
-            //Request to like game on server
-            const response = await fetch(`${env.VITE_SERVER_URL}/api/likeGame/${gameId}`, {
-                credentials: "include",
-                method: "PUT",
-            });
+            const response = await likeGame(gameId);
 
             if (response.ok) {
                 return;
@@ -184,10 +182,10 @@ const SearchPage = () => {
                                         >
                                             {numLikes}{" "}
                                             <FaHeart
-                                                size={"1.25em"}
+                                                size={"1.3em"}
                                                 className={`${
                                                     userHasLiked ? "text-red-500" : "text-zinc-500"
-                                                } transition-transform hover:text-red-600 max-md:text-xl`}
+                                                } mb-px align-middle transition-transform hover:text-red-600 max-md:text-xl`}
                                             />
                                         </button>
                                     </p>

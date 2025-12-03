@@ -41,7 +41,7 @@ const router = createBrowserRouter([
                 element: <GameStateManager isNewGame={true} />,
             },
             {
-                path: "/play-game/:joinGameId",
+                path: "/play-game/:joinRoomId",
                 element: <GameStateManager isNewGame={false} />,
             },
             {

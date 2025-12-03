@@ -97,3 +97,7 @@ export const SearchResponseSchema = z.object({
     games: PresetInfoSchema,
     pagination: PaginationInfoSchema,
 });
+
+export const userHasLikedSchema = z.object({
+    userHasLiked: z.boolean().nullable(),
+});
