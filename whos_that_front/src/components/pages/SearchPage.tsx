@@ -27,7 +27,6 @@ const SearchPage = () => {
     // Debounce search input
     useEffect(() => {
         const currentQuery = searchParams.get("q") ?? "";
-
         const timer = setTimeout(() => {
             if (searchInput.length < 3 || searchInput === currentQuery) return;
             setSearchParams((prev) => ({ ...Object.fromEntries(prev), q: searchInput, page: "1" }));
