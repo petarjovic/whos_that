@@ -26,12 +26,13 @@ const SearchPage = () => {
 
     // Debounce search input
     useEffect(() => {
-        if (searchInput.length < 3) return;
+        const currentQuery = searchParams.get("q") ?? "";
+        if (searchInput.length < 3 || searchInput === currentQuery) return;
         const timer = setTimeout(() => {
-            setSearchParams({ ...Object.fromEntries(searchParams), q: searchInput, page: "1" });
-        }, 700);
+            setSearchParams((prev) => ({ ...Object.fromEntries(prev), q: searchInput, page: "1" }));
+        }, 500);
         return () => clearTimeout(timer);
-    }, [searchInput]);
+    }, [searchInput, setSearchParams]);
 
     //Fetch games being searched for
     useEffect(() => {
