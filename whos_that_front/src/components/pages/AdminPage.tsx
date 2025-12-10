@@ -21,6 +21,7 @@ const AdminPage = () => {
     const [isLoading, setIsLoading] = useState(true);
 
     const { session, isPending } = useBetterAuthSession();
+    const [openDropdownId, setOpenDropdownId] = useState<string | null>(null);
 
     // Verify admin access and fetch all games
     useEffect(() => {
@@ -64,17 +65,10 @@ const AdminPage = () => {
      * Handles admin actions on games (delete and change privacy)
      * Nearly the same as handleGameSettings func in ShowPremadeGames.tsx
      */
-    const handleGameSettings = async (
-        e: React.ChangeEvent<HTMLSelectElement>,
-        gameId: string,
-        title: string
-    ) => {
-        e.preventDefault();
-        e.stopPropagation();
+    const handleGameSettings = async (action: string, gameId: string, title: string) => {
         setIsLoading(true);
-        const opt = e.target.value;
 
-        switch (opt) {
+        switch (action) {
             case "Delete Game": {
                 // TODO: replace confirmation with custom modal
                 const confirmed = confirm(
@@ -162,30 +156,38 @@ const AdminPage = () => {
                             >
                                 {isPublic ? "Public" : "Private"}
                             </p>
-                            <select
-                                className="text-md shadow-xs relative w-fit cursor-pointer content-center rounded-[50%] bg-transparent p-px text-center shadow-white"
-                                title="Settings"
-                                onClick={(e) => {
-                                    e.preventDefault();
-                                    e.stopPropagation();
-                                }}
-                                onChange={(e) => {
-                                    e.stopPropagation();
-                                    void handleGameSettings(e, id, title);
-                                }}
-                            >
-                                <button className="text-2xl" type="button">
-                                    ⚙️
-                                </button>
-                                {/* Extra option is needed for functionality, keep it and keep hidden. */}
-                                <option className="hidden"></option>
-                                <option className="bg-slate-500 px-1 text-white hover:bg-slate-300 hover:text-black">
-                                    {isPublic ? "Make Private" : "Make Public"}
-                                </option>
-                                <option className="bg-slate-500 px-1 text-white hover:bg-red-400">
-                                    Delete Game
-                                </option>
-                            </select>
+                            {openDropdownId === id && (
+                                <div className="z-1 shadow-md/10 absolute right-0 top-7 min-w-32 border border-black bg-neutral-400 font-medium">
+                                    <button
+                                        type="button"
+                                        className="flex w-full cursor-pointer items-center justify-around p-px pt-0.5 text-white hover:bg-slate-200 hover:text-black"
+                                        onClick={(e) => {
+                                            e.preventDefault();
+                                            e.stopPropagation();
+                                            void handleGameSettings(
+                                                isPublic ? "Make Private" : "Make Public",
+                                                id,
+                                                title
+                                            );
+                                            setOpenDropdownId(null);
+                                        }}
+                                    >
+                                        {isPublic ? "Make Private" : "Make Public"}
+                                    </button>
+                                    <button
+                                        type="button"
+                                        className="items-ceneter flex w-full cursor-pointer justify-around p-px pb-0.5 font-medium text-red-700 hover:bg-red-300 hover:text-red-950"
+                                        onClick={(e) => {
+                                            e.preventDefault();
+                                            e.stopPropagation();
+                                            void handleGameSettings("Delete Game", id, title);
+                                            setOpenDropdownId(null);
+                                        }}
+                                    >
+                                        Delete Game
+                                    </button>
+                                </div>
+                            )}
                         </div>
                     </CardLayout>
                 </Link>

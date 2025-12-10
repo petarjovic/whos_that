@@ -11,7 +11,6 @@ import { logError } from "../../lib/logger.ts";
 import LoadingSpinner from "../misc/LoadingSpinner.tsx";
 import { FaArrowUpRightFromSquare } from "react-icons/fa6";
 import { FcSettings } from "react-icons/fc";
-
 import ReactModal from "react-modal";
 
 /**
@@ -65,6 +64,7 @@ const MyGamesPage = () => {
     const [isLoading, setIsLoading] = useState(true);
     const [shareModalGameId, setShareModalGameId] = useState("");
     const [errorMsg, setErrorMsg] = useState(""); //For throwing error if set to non-empty string
+    const [openDropdownId, setOpenDropdownId] = useState<string | null>(null);
 
     const { session, isPending } = useBetterAuthSession();
 
@@ -122,15 +122,8 @@ const MyGamesPage = () => {
     /**
      * Handles game management actions for user's own games (delete, privacy toggle)
      */
-    const handleGameSettings = async (
-        e: React.ChangeEvent<HTMLSelectElement>,
-        gameId: string,
-        title: string
-    ) => {
-        e.preventDefault();
-        e.stopPropagation();
-
-        switch (e.target.value) {
+    const handleGameSettings = async (action: string, gameId: string, title: string) => {
+        switch (action) {
             case "Delete Game": {
                 // TODO: replace confirmation with custom modal
                 const confirmed = confirm(
@@ -203,7 +196,6 @@ const MyGamesPage = () => {
                 break;
             }
         }
-        e.target.value = ""; //Reset html select (required)
     };
 
     if (errorMsg) throw new Error(errorMsg);
@@ -211,7 +203,7 @@ const MyGamesPage = () => {
     return (
         <>
             <h2 className="my-2 text-4xl font-semibold">Your Presets</h2>
-            <div className="flex w-full flex-wrap items-center justify-center gap-4 max-xl:mx-auto xl:mx-8">
+            <div className="mt-2 flex w-fit flex-wrap items-center justify-center gap-4 border border-black bg-neutral-300 px-2 py-2.5 max-xl:mx-auto xl:mx-8">
                 {gamesList.length === 0 ? (
                     <p className="mx-auto mt-[40%] text-center text-xl font-medium">
                         No games made yet!{" "}
@@ -232,59 +224,76 @@ const MyGamesPage = () => {
                                         onClick={(e) => {
                                             handleShareGame(e, id);
                                         }}
-                                        className="relative bottom-1 ml-2 cursor-pointer text-xl text-gray-700 hover:scale-105 hover:text-blue-500 active:scale-125 max-lg:text-lg"
+                                        className="relative bottom-1.5 ml-2 cursor-pointer text-xl text-gray-700 hover:scale-105 hover:text-blue-500 active:scale-125 max-lg:text-lg"
                                         title="Share Link"
                                     >
                                         <FaArrowUpRightFromSquare />
                                     </button>
                                     <p
-                                        className={`bottom-0.75 relative whitespace-pre text-center text-base font-semibold opacity-80 max-lg:text-sm ${isPublic ? "text-green-600" : "text-red-600"}`}
+                                        className={`relative bottom-1 whitespace-pre text-center text-base font-semibold max-sm:font-medium ${isPublic ? "text-green-700" : "text-red-700"}`}
                                     >
                                         {isPublic ? " Public" : " Private"}
                                     </p>
-                                    <select
-                                        className="relative bottom-1.5 right-1 cursor-pointer hover:scale-110"
-                                        title="Settings"
-                                        onClick={(e) => {
-                                            e.preventDefault();
-                                            e.stopPropagation();
-                                        }}
-                                        onTouchStart={(e) => {
-                                            e.stopPropagation();
-                                        }}
-                                        onTouchEnd={(e) => {
-                                            e.stopPropagation();
-                                        }}
-                                        onChange={(e) => {
-                                            e.stopPropagation();
-                                            void handleGameSettings(e, id, title);
-                                        }}
+                                    <div
+                                        className="relative"
+                                        onMouseLeave={() => setOpenDropdownId(null)}
                                     >
                                         <button
                                             type="button"
-                                            className=""
+                                            className="relative bottom-1.5 right-1 cursor-pointer hover:scale-110"
+                                            title="Settings"
                                             onClick={(e) => {
                                                 e.preventDefault();
                                                 e.stopPropagation();
+                                                setOpenDropdownId(id);
                                             }}
-                                            onTouchStart={(e) => {
+                                            onMouseEnter={(e) => {
+                                                e.preventDefault();
                                                 e.stopPropagation();
-                                            }}
-                                            onTouchEnd={(e) => {
-                                                e.stopPropagation();
+                                                setOpenDropdownId(id);
                                             }}
                                         >
                                             <FcSettings size={"1.75rem"} />
                                         </button>
-                                        {/* Empty option is needed for functionality, keep it and keep hidden. */}
-                                        <option className="hidden"></option>
-                                        <option className="bg-slate-500 px-1 text-white hover:bg-slate-300 hover:text-black">
-                                            {isPublic ? "Make Private" : "Make Public"}
-                                        </option>
-                                        <option className="bg-slate-500 px-1 text-white hover:bg-red-400">
-                                            Delete Game
-                                        </option>
-                                    </select>
+                                        {openDropdownId === id && (
+                                            <div className="z-1 shadow-md/10 absolute right-0 top-7 min-w-32 border border-black bg-neutral-400 font-medium">
+                                                <button
+                                                    type="button"
+                                                    className="flex w-full cursor-pointer items-center justify-around p-px pt-0.5 text-white hover:bg-slate-200 hover:text-black"
+                                                    onClick={(e) => {
+                                                        e.preventDefault();
+                                                        e.stopPropagation();
+                                                        void handleGameSettings(
+                                                            isPublic
+                                                                ? "Make Private"
+                                                                : "Make Public",
+                                                            id,
+                                                            title
+                                                        );
+                                                        setOpenDropdownId(null);
+                                                    }}
+                                                >
+                                                    {isPublic ? "Make Private" : "Make Public"}
+                                                </button>
+                                                <button
+                                                    type="button"
+                                                    className="items-ceneter flex w-full cursor-pointer justify-around p-px pb-0.5 font-medium text-red-700 hover:bg-red-300 hover:text-red-950"
+                                                    onClick={(e) => {
+                                                        e.preventDefault();
+                                                        e.stopPropagation();
+                                                        void handleGameSettings(
+                                                            "Delete Game",
+                                                            id,
+                                                            title
+                                                        );
+                                                        setOpenDropdownId(null);
+                                                    }}
+                                                >
+                                                    Delete Game
+                                                </button>
+                                            </div>
+                                        )}
+                                    </div>
                                 </div>
                             </CardLayout>
                         </Link>

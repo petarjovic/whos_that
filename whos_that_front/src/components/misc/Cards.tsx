@@ -23,7 +23,7 @@ export const CardLayout = ({
 }: PropsWithChildren<CardLayoutProps>) => {
     return (
         <figure
-            className={`border ${isGame || isOppCard ? "max-xl:h-66.75 max-xl:w-39 w-45.75 h-72.5" : "w-40.5 h-63.75"} hover:scale-106 rounded-xs flex flex-col justify-between overflow-hidden ${isOppCard ? "animate-[flash-attention_2s_ease-in-out_1] border-orange-300 bg-orange-300" : "border-neutral-600 bg-neutral-50"} text-center`}
+            className={`border ${isGame || isOppCard ? "max-xl:h-66.75 max-xl:w-39 w-45.75 h-72.5" : "w-40.5 h-63.75"} hover:scale-106 rounded-xs flex flex-col justify-between ${isOppCard ? "animate-[flash-attention_2s_ease-in-out_1] border-orange-300 bg-orange-300" : "border-neutral-600 bg-neutral-50"} text-center`}
         >
             <img
                 className={`max-h-8/10 h-8/10 mx-1 mt-1 border border-neutral-400 bg-gray-300 object-fill ${isOppCard ? "grayscale-100" : ""}`}

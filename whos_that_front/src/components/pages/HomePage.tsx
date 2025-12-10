@@ -81,18 +81,18 @@ const HomePage = () => {
     if (errorMsg) throw new Error(errorMsg);
     return (
         <>
-            <div className="mx-autp mb-3 h-full text-center text-neutral-800 max-2xl:mt-4 max-xl:mt-20 max-xl:flex max-xl:flex-col max-xl:gap-6 max-md:justify-end max-sm:w-full max-sm:px-3 md:max-xl:justify-around xl:grid xl:grid-cols-2 xl:grid-rows-1 xl:gap-0 2xl:mt-3">
+            <div className="mx-auto mb-3 h-full text-center text-neutral-800 max-2xl:mt-4 max-xl:mt-20 max-xl:flex max-xl:flex-col max-xl:gap-6 max-md:justify-end max-sm:px-3 md:max-xl:justify-around xl:grid xl:grid-cols-2 xl:grid-rows-1 xl:gap-0 2xl:mt-3">
                 <div className="flex h-full flex-col gap-2 max-xl:justify-end xl:border-r xl:border-neutral-950 xl:pr-4">
                     {/* Search Bar */}
                     <div className="px-1 pt-1 text-center">
                         <form
-                            className="flex items-center border border-neutral-400 bg-neutral-300 py-1.5 max-xl:justify-around max-sm:flex-col md:px-2 xl:justify-between 2xl:py-1.5"
+                            className="flex items-center border border-neutral-400 bg-neutral-300 py-1.5 max-xl:justify-around max-sm:flex-col md:px-2 xl:justify-between"
                             onSubmit={handleSearch}
                         >
                             <input
                                 id="searchBar"
                                 type="search"
-                                className="md:max-xl:w-5/10 max-sm:w-19/20 max-md:w-4/10 2xl:p-0.75 xl:w-6/10 border border-neutral-400 bg-neutral-50 px-1 text-left font-medium placeholder:text-zinc-400 max-2xl:py-px max-sm:mb-1.5 max-sm:mt-px xl:text-lg 2xl:pl-3"
+                                className="md:max-xl:w-5/10 max-sm:w-19/20 max-md:w-4/10 2xl:p-0.75 xl:w-6/10 max-2xl:py-0.75 border border-neutral-400 bg-neutral-50 px-1 text-left text-lg font-medium placeholder:text-zinc-400 max-sm:mb-1.5 max-sm:mt-px 2xl:pl-3"
                                 maxLength={20}
                                 placeholder="Search Preset Theme"
                                 value={inputQuery}
@@ -100,15 +100,15 @@ const HomePage = () => {
                                     setInputQuery(e.target.value);
                                 }}
                             />
-                            <div className="max-h-8/10 flex max-sm:gap-5 sm:gap-2">
+                            <div className="max-h-8/10 flex max-sm:mt-0.5 max-sm:gap-5 sm:gap-2">
                                 <button
-                                    className="hover:scale-102 2xl:py-0.75 flex cursor-pointer items-center bg-red-400 px-1.5 py-px text-white hover:bg-red-500"
+                                    className="hover:scale-102 sm:py-0.75 flex cursor-pointer items-center bg-red-400 px-1.5 text-white hover:bg-red-500 max-sm:py-0.5"
                                     type="submit"
                                 >
                                     <IoMdSearch className="mr-px" size="1.5em" /> Search
                                 </button>
                                 <button
-                                    className="hover:scale-102 2xl:py-0.75 flex cursor-pointer items-center bg-blue-400 px-1.5 py-px text-white hover:bg-blue-500"
+                                    className="hover:scale-102 sm:py-0.75 flex cursor-pointer items-center bg-blue-400 px-1.5 text-white hover:bg-blue-500 max-sm:py-0.5"
                                     onClick={() => handleSearch()}
                                     type="button"
                                 >
@@ -251,7 +251,7 @@ const HomePage = () => {
                                 id="gameIdInput"
                                 name="gameIdInput"
                                 type="text"
-                                className="w-1/2 border border-neutral-400 bg-neutral-50 px-1 text-center font-medium placeholder:text-zinc-400 max-2xl:py-px xl:text-lg 2xl:p-0.5"
+                                className="w-1/2 border border-neutral-400 bg-neutral-50 px-1 py-0.5 text-center font-medium placeholder:text-zinc-400 xl:text-lg"
                                 required
                                 minLength={6}
                                 maxLength={6}
@@ -262,10 +262,13 @@ const HomePage = () => {
                                 }}
                             />
                             <button
-                                className="hover:scale-102 2xl:py-0.75 ml-5 flex cursor-pointer items-center bg-red-400 px-1.5 py-px font-medium text-white hover:bg-red-500"
+                                className="hover:scale-102 py-0.75 2xl:py-1.25 ml-5 flex cursor-pointer items-center bg-red-400 px-1.5 font-medium text-white hover:bg-red-500"
                                 type="submit"
                             >
-                                <GiExitDoor className="relative bottom-px mr-0.5" size="1.25em" />{" "}
+                                <GiExitDoor
+                                    className="relative bottom-px mr-0.5 2xl:mr-1"
+                                    size="1.25em"
+                                />{" "}
                                 Join Game
                             </button>
                         </form>

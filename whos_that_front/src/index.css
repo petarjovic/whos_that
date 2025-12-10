@@ -10,16 +10,6 @@
         background: url("./assets/BulletinBoard.jpg") repeat;
         background-size: 100dvw 100dvh;
     }
-    select,
-    ::picker(select) {
-        appearance: base-select;
-    }
-    select::picker-icon {
-        display: none;
-    }
-    option::checkmark {
-        display: none;
-    }
 }
 
 @layer utilities {
@@ -179,4 +169,3 @@
     --font-sedgwick: "Sedgwick Ave", Arial, sans-serif;
     --font-times: "Times New Roman", serif;
 }
-

@@ -153,7 +153,7 @@ const SearchPage = () => {
             {isLoading ? (
                 <LoadingSpinner />
             ) : (
-                <div className="mt-3 flex flex-wrap items-center justify-evenly gap-4 xl:mx-10">
+                <div className="mt-3 flex flex-wrap items-center justify-evenly gap-4 border border-black bg-neutral-300 px-2 py-3 xl:mx-5">
                     {gamesList.length === 0 && (
                         <p className="mx-auto mt-[40%] text-center text-xl font-medium">
                             Sorry, no presets match your search!{" "}
