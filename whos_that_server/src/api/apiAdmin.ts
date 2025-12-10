@@ -12,8 +12,9 @@ import {
 } from "./apiHelpers.ts";
 import { getSignedUrl as getSignedCFUrl } from "@aws-sdk/cloudfront-signer";
 import { checkGameExists, validateGameId } from "../middleware/validatorMw.ts";
-import type { PresetInfo } from "../config/types.ts";
+import type { UrlPresetInfo } from "../config/types.ts";
 import env from "../config/zod/zodEnvSchema.ts";
+import { delGameDataCache } from "./cache.ts";
 
 /**
  * Sets up admin-only API routes for the Express application
@@ -47,7 +48,7 @@ export function setupAdminRoutes(app: Express) {
                 );
 
             // Populate response object with data for all games
-            const allGamesInfoUrl: PresetInfo = allGamesInfo.map(
+            const allGamesInfoUrl: UrlPresetInfo[] = allGamesInfo.map(
                 ({ id, title, isPublic, author, coverImageId }) => {
                     const imageUrl = constructImageUrl(isPublic, id, coverImageId!);
                     const signedUrlParams = {
@@ -111,6 +112,9 @@ export function setupAdminRoutes(app: Express) {
 
                 void switchPrivacySettings(gameId, isPublic, newIsPublic, imageIds);
 
+                //del cache
+                delGameDataCache(gameId);
+
                 console.log(`Admin switched privacy setting of game:`, gameId);
                 return res.status(200).send();
                 //Error handling ↓
@@ -144,12 +148,15 @@ export function setupAdminRoutes(app: Express) {
                 // Delete game from db
                 await db.delete(schema.games).where(eq(schema.games.id, gameId));
 
-                console.log(`Admin deleted game:`, gameId);
-                res.status(200).json({ message: `Deleted game: ${gameId}` });
-
                 // Delete images from S3 and CloudFront
                 const [{ isPublic, imageIds }] = gameWithItems;
                 await deleteImagesFromBucketAndCF(gameId, isPublic, imageIds);
+
+                //del cache
+                delGameDataCache(gameId);
+
+                console.log(`Admin deleted game:`, gameId);
+                res.status(200).json({ message: `Deleted game: ${gameId}` });
                 //Error handling ↓
             } catch (error) {
                 console.error(`Error when admin attemped to delete game: ${gameId}:\n`, error);

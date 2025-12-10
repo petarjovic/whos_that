@@ -4,8 +4,8 @@ import { CardLayout } from "../misc/Cards.tsx";
 import type { ServerResponse } from "../../lib/types.ts";
 import { useBetterAuthSession } from "../../lib/LayoutContextProvider.ts";
 import { serverResponseSchema } from "../../lib/zodSchema.ts";
-import { PresetInfoSchema } from "@server/zodSchema";
-import type { PresetInfo } from "@server/types";
+import { UrlPresetInfoListSchema } from "@server/zodSchema";
+import type { UrlPresetInfo } from "@server/types";
 import env from "../../lib/zodEnvSchema.ts";
 import { logError } from "../../lib/logger.ts";
 import LoadingSpinner from "../misc/LoadingSpinner.tsx";
@@ -61,7 +61,7 @@ const ShareGameModal = ({
  */
 const MyGamesPage = () => {
     const navigate = useNavigate();
-    const [gamesList, setGamesList] = useState<PresetInfo>([]);
+    const [gamesList, setGamesList] = useState<UrlPresetInfo[]>([]);
     const [isLoading, setIsLoading] = useState(true);
     const [shareModalGameId, setShareModalGameId] = useState("");
     const [errorMsg, setErrorMsg] = useState(""); //For throwing error if set to non-empty string
@@ -82,7 +82,7 @@ const MyGamesPage = () => {
                     });
 
                     if (response.ok) {
-                        const validatePresetInfo = PresetInfoSchema.safeParse(
+                        const validatePresetInfo = UrlPresetInfoListSchema.safeParse(
                             await response.json()
                         );
                         if (validatePresetInfo.success) setGamesList(validatePresetInfo.data);

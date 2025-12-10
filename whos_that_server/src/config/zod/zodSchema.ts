@@ -36,7 +36,7 @@ export const cardDataIdTypeSchema = cardDataTypeSchema.extend({
 });
 
 export const cardDataUrlTypeSchema = cardDataTypeSchema.extend({
-    imageUrl: z.string(),
+    imageUrl: z.url(),
 });
 
 export const gameDataTypeSchema = z.object({
@@ -74,17 +74,24 @@ export const createRoomParamsSchema = z.object({
     numOfChars: z.number().int().min(6).max(50),
 });
 
-export const PresetInfoSchema = z.array(
-    z.object({
-        id: z.string(),
-        title: z.string(),
-        author: z.string().nullable(),
-        imageUrl: z.string(),
-        isPublic: z.boolean(),
-        numLikes: z.number(),
-        userHasLiked: z.boolean().nullable(),
-    })
-);
+const PresetInfoSchema = z.object({
+    id: z.string(),
+    title: z.string(),
+    author: z.string().nullable(),
+    isPublic: z.boolean(),
+    numLikes: z.number(),
+    userHasLiked: z.boolean().nullable(),
+});
+
+export const IdPresetInfoSchema = PresetInfoSchema.extend({
+    imageId: nanoId21Schema,
+});
+
+export const UrlPresetInfoSchema = PresetInfoSchema.extend({
+    imageUrl: z.url(),
+});
+
+export const UrlPresetInfoListSchema = z.array(UrlPresetInfoSchema);
 
 export const PaginationInfoSchema = z.object({
     page: z.number(),
@@ -94,7 +101,7 @@ export const PaginationInfoSchema = z.object({
 });
 
 export const SearchResponseSchema = z.object({
-    games: PresetInfoSchema,
+    games: UrlPresetInfoListSchema,
     pagination: PaginationInfoSchema,
 });
 

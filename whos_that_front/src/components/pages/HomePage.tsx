@@ -8,8 +8,8 @@ import { IoMdSearch } from "react-icons/io";
 import { GiExitDoor } from "react-icons/gi";
 import { CardLayout } from "../misc/Cards.tsx";
 import { Link } from "react-router";
-import type { PresetInfo } from "@server/types";
-import { PresetInfoSchema } from "@server/zodSchema";
+import type { UrlPresetInfo } from "@server/types";
+import { UrlPresetInfoListSchema } from "@server/zodSchema";
 import env from "../../lib/zodEnvSchema.ts";
 import { FaHeart } from "react-icons/fa";
 import type { ServerResponse } from "../../lib/types.ts";
@@ -24,8 +24,8 @@ const HomePage = () => {
     const [errorMsg, setErrorMsg] = useState("");
     const [isLoading, setIsLoading] = useState(true);
 
-    const [mostLikedGames, setMostLikedGames] = useState<PresetInfo>([]);
-    const [mostRecentGames, setMostRecentGames] = useState<PresetInfo>([]);
+    const [mostLikedGames, setMostLikedGames] = useState<UrlPresetInfo[]>([]);
+    const [mostRecentGames, setMostRecentGames] = useState<UrlPresetInfo[]>([]);
     const [inputQuery, setInputQuery] = useState("");
     const [gameIdToJoin, setGameIdToJoin] = useState("");
     const { session, isPending } = useBetterAuthSession();
@@ -41,7 +41,9 @@ const HomePage = () => {
                         method: "GET",
                     });
                     if (response.ok) {
-                        const validPresetInfo = PresetInfoSchema.safeParse(await response.json());
+                        const validPresetInfo = UrlPresetInfoListSchema.safeParse(
+                            await response.json()
+                        );
                         if (validPresetInfo.success) {
                             setMostLikedGames(validPresetInfo.data.slice(0, 3));
                             setMostRecentGames(validPresetInfo.data.slice(3, 6));

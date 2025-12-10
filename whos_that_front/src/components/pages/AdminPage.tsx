@@ -4,8 +4,8 @@ import { CardLayout } from "../misc/Cards.tsx";
 import type { ServerResponse } from "../../lib/types.ts";
 import { useBetterAuthSession } from "../../lib/LayoutContextProvider.ts";
 import { serverResponseSchema } from "../../lib/zodSchema.ts";
-import { PresetInfoSchema } from "@server/zodSchema";
-import type { PresetInfo } from "@server/types";
+import { UrlPresetInfoListSchema } from "@server/zodSchema";
+import type { UrlPresetInfo } from "@server/types";
 import env from "../../lib/zodEnvSchema.ts";
 import { logError, log } from "../../lib/logger.ts";
 import LoadingSpinner from "../misc/LoadingSpinner.tsx";
@@ -16,7 +16,7 @@ import LoadingSpinner from "../misc/LoadingSpinner.tsx";
  */
 const AdminPage = () => {
     const navigate = useNavigate();
-    const [premadeGamesList, setPremadeGamesList] = useState<PresetInfo>([]);
+    const [premadeGamesList, setPremadeGamesList] = useState<UrlPresetInfo[]>([]);
     const [errorMsg, setErrorMsg] = useState(""); //Used to throw error if set to non-empty string
     const [isLoading, setIsLoading] = useState(true);
 
@@ -37,7 +37,7 @@ const AdminPage = () => {
                     });
 
                     if (response.ok) {
-                        const validatePresetInfo = PresetInfoSchema.safeParse(
+                        const validatePresetInfo = UrlPresetInfoListSchema.safeParse(
                             await response.json()
                         );
                         if (validatePresetInfo.success)

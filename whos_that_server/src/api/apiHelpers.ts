@@ -6,8 +6,6 @@ import type { CardDataIdType, CardDataUrlType } from "../config/types.ts";
 import * as schema from "../db/schema.ts";
 import { nanoid } from "nanoid";
 import env from "../config/zod/zodEnvSchema.ts";
-import { asc, desc, count } from "drizzle-orm";
-import type { SQL } from "drizzle-orm";
 
 /**
  * Constructs the S3 object key for a game image

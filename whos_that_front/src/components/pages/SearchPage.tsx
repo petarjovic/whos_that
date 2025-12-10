@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import env from "../../lib/zodEnvSchema.ts";
 import { SearchResponseSchema } from "@server/zodSchema";
 import type { ServerResponse } from "src/lib/types";
-import type { PresetInfo, PaginationInfo } from "@server/types";
+import type { UrlPresetInfo, PaginationInfo } from "@server/types";
 import { useBetterAuthSession } from "../../lib/LayoutContextProvider.ts";
 import LoadingSpinner from "../misc/LoadingSpinner";
 import { Link } from "react-router";
@@ -17,7 +17,7 @@ const SearchPage = () => {
     const [searchParams, setSearchParams] = useSearchParams();
 
     const [isLoading, setIsLoading] = useState(true);
-    const [gamesList, setGamesList] = useState<PresetInfo>([]);
+    const [gamesList, setGamesList] = useState<UrlPresetInfo[]>([]);
     const [pageInfo, setPageInfo] = useState<PaginationInfo>();
     const [errorMsg, setErrorMsg] = useState("");
     const [searchInput, setSearchInput] = useState(searchParams.get("q") ?? "");
