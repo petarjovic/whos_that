@@ -549,11 +549,11 @@ const CreateCustomGamePage = () => {
                     </li> */}
                     <li>
                         <span className="text-shadow-2xs/20 text-xl font-semibold text-orange-500 2xl:text-2xl">
-                            Images of real people must be notable figures, in public presets.
+                            In public presets: Images of real people must be notable figures.
                         </span>
                         <br></br>
                         <span className="text-base font-normal 2xl:text-lg">
-                            No public presets can contain images of friends, family, classmates,
+                            Public presets cannot contain images of friends, family, classmates,
                             coworkers, etc.
                         </span>
                     </li>
