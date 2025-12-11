@@ -106,21 +106,12 @@ const SearchPage = () => {
             )
         );
 
-        //Like game and catch errors
+        //Like/unlike game
         try {
-            const response = await likeGame(gameId);
-
-            if (response.ok) {
-                return;
-            } else {
-                const errorData = (await response.json()) as ServerResponse;
-                setErrorMsg(errorData.message ?? "Failed to like game.");
-            }
+            void likeGame(gameId);
         } catch (error) {
             logError(error);
-            if (error instanceof Error) {
-                setErrorMsg(error.message);
-            } else setErrorMsg("Failed to like game.");
+            setErrorMsg("Failed to like game.");
         }
     };
 

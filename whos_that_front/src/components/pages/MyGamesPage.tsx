@@ -12,6 +12,9 @@ import LoadingSpinner from "../misc/LoadingSpinner.tsx";
 import { FaArrowUpRightFromSquare } from "react-icons/fa6";
 import { FcSettings } from "react-icons/fc";
 import ReactModal from "react-modal";
+import { FaHeart } from "react-icons/fa";
+import { likeGame } from "../../lib/apiHelpers.ts";
+import { RiSafe3Fill } from "react-icons/ri";
 
 /**
  * Modal for displaying shareable link for a game/preset
@@ -61,6 +64,7 @@ const ShareGameModal = ({
 const MyGamesPage = () => {
     const navigate = useNavigate();
     const [gamesList, setGamesList] = useState<UrlPresetInfo[]>([]);
+    const [likedGamesList, setLikedGamesList] = useState<UrlPresetInfo[]>([]);
     const [isLoading, setIsLoading] = useState(true);
     const [shareModalGameId, setShareModalGameId] = useState("");
     const [errorMsg, setErrorMsg] = useState(""); //For throwing error if set to non-empty string
@@ -73,7 +77,8 @@ const MyGamesPage = () => {
         // Redirect if trying to access "my games" without auth
         if (!isPending && !session) void navigate("/");
         else if (!isPending) {
-            const getPremadeGames = async () => {
+            //get games user made
+            const getMyGames = async () => {
                 setIsLoading(true);
                 try {
                     const response = await fetch(`${env.VITE_SERVER_URL}/api/getMyGames`, {
@@ -105,7 +110,41 @@ const MyGamesPage = () => {
                     setIsLoading(false);
                 }
             };
-            void getPremadeGames();
+            //get games user has liked
+            const getMyLikedGames = async () => {
+                setIsLoading(true);
+                try {
+                    const response = await fetch(`${env.VITE_SERVER_URL}/api/getMyLikedGames`, {
+                        credentials: "include",
+                        method: "GET",
+                    });
+
+                    if (response.ok) {
+                        const validatePresetInfo = UrlPresetInfoListSchema.safeParse(
+                            await response.json()
+                        );
+                        if (validatePresetInfo.success) setLikedGamesList(validatePresetInfo.data);
+                        else {
+                            logError(validatePresetInfo.error);
+                            setErrorMsg(
+                                "Client did not understand server response while getting user's liked games."
+                            );
+                        }
+                    } else {
+                        const errorData = (await response.json()) as ServerResponse;
+                        setErrorMsg(errorData.message ?? "Failed to get user's liked games.");
+                    }
+                } catch (error) {
+                    logError(error);
+                    if (error instanceof Error) {
+                        setErrorMsg(error.message);
+                    } else setErrorMsg("Failed to get user's liked games.");
+                } finally {
+                    setIsLoading(false);
+                }
+            };
+            void getMyGames();
+            void getMyLikedGames();
         }
     }, [session, isPending, navigate]);
 
@@ -117,6 +156,36 @@ const MyGamesPage = () => {
         e.stopPropagation();
 
         setShareModalGameId(gameId);
+    };
+
+    /**
+     * Handles user liking and unliking games
+     */
+    const handleLikeGame = async (e: React.MouseEvent<HTMLButtonElement>, gameId: string) => {
+        e.preventDefault();
+        e.stopPropagation();
+        if (!session) return;
+
+        //Update UI
+        setLikedGamesList((prev) =>
+            prev.map((game) =>
+                game.id === gameId
+                    ? {
+                          ...game,
+                          userHasLiked: !game.userHasLiked,
+                          numLikes: game.userHasLiked ? game.numLikes - 1 : game.numLikes + 1,
+                      }
+                    : game
+            )
+        );
+
+        //Like/unlike game
+        try {
+            void likeGame(gameId);
+        } catch (error) {
+            logError(error);
+            setErrorMsg("Failed to like game.");
+        }
     };
 
     /**
@@ -202,8 +271,11 @@ const MyGamesPage = () => {
     else if (isLoading || isPending) return <LoadingSpinner />;
     return (
         <>
-            <h2 className="my-2 text-4xl font-semibold">Your Presets</h2>
-            <div className="mt-2 flex w-fit flex-wrap items-center justify-center gap-4 border border-black bg-neutral-300 px-2 py-2.5 max-xl:mx-auto xl:mx-8">
+            <h2 className="my-2 flex items-center gap-1 text-center text-[2rem] font-semibold leading-none">
+                <RiSafe3Fill size={"0.9em"} className="scale-x-[-1]" /> Your Presets{" "}
+                <RiSafe3Fill size={"0.9em"} />
+            </h2>
+            <div className="flex w-fit flex-wrap items-center justify-center gap-4 border border-black bg-neutral-300 px-2 py-2.5 max-xl:mx-auto xl:mx-8">
                 {gamesList.length === 0 ? (
                     <p className="text-center text-xl font-medium max-sm:m-auto sm:m-5 2xl:m-10">
                         No presets made yet.{" "}
@@ -211,8 +283,9 @@ const MyGamesPage = () => {
                             to={"/create-game"}
                             className="text-blue-500 underline hover:italic hover:text-red-300"
                         >
-                            Make a new one here!
+                            Make a new one here
                         </Link>
+                        !
                     </p>
                 ) : (
                     gamesList.map(({ id, title, imageUrl, isPublic }, i) => (
@@ -300,6 +373,48 @@ const MyGamesPage = () => {
                     ))
                 )}
             </div>
+            {likedGamesList.length === 0 ? (
+                <></>
+            ) : (
+                <>
+                    <h3 className="mt-5 flex items-center gap-2 text-center text-3xl font-semibold">
+                        <FaHeart size={"0.9em"} /> Liked Games <FaHeart size={"0.9em"} />
+                    </h3>
+                    <div className="mb-4 mt-2 flex flex-wrap items-center justify-evenly gap-4 border border-black bg-neutral-300 px-2 py-3 xl:mx-5">
+                        {likedGamesList.map(
+                            ({ id, title, imageUrl, numLikes, author, userHasLiked }, i) => (
+                                <Link key={i} to={`/play-game?preset=${id}`}>
+                                    <CardLayout name={title} imgSrc={imageUrl} key={i}>
+                                        <div className="mb-0.75 relative flex items-center justify-center max-xl:mb-px">
+                                            <p className="relative right-5 text-center text-sm italic text-gray-600 max-xl:text-xs">
+                                                {author ?? ""}{" "}
+                                            </p>
+                                            <p className="absolute -bottom-px right-2 text-base text-gray-700">
+                                                <button
+                                                    className="flex cursor-pointer items-center whitespace-pre-wrap align-sub"
+                                                    onClick={(e) => {
+                                                        handleLikeGame(e, id);
+                                                    }}
+                                                >
+                                                    {numLikes}{" "}
+                                                    <FaHeart
+                                                        size={"1.3em"}
+                                                        className={`${
+                                                            userHasLiked
+                                                                ? "text-red-500"
+                                                                : "text-zinc-500"
+                                                        } mb-px align-middle transition-transform hover:text-red-600 max-md:text-xl`}
+                                                    />
+                                                </button>
+                                            </p>
+                                        </div>
+                                    </CardLayout>
+                                </Link>
+                            )
+                        )}
+                    </div>
+                </>
+            )}
             {/* Modal for sharing link to own games */}
             <ShareGameModal
                 showShareModal={Boolean(shareModalGameId)}

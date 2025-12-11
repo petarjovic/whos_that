@@ -397,6 +397,77 @@ export function setupApiRoutes(app: Express) {
                 .json({ message: "Internal Server Error. Failed to fetch user's games." });
         }
     });
+    /**
+     * Retrieves all games liked by the authenticated user
+     * @returns List of user's games with signed URLs for cover images
+     */
+    app.get("/api/getMyLikedGames", async (req, res) => {
+        try {
+            const session = await auth.api.getSession({
+                headers: fromNodeHeaders(req.headers),
+            });
+
+            if (!session) return res.status(401).json({ message: "Unauthorized." });
+
+            // Query user's liked games
+            const likedGamesInfo: IdPresetInfo[] = await db
+                .select({
+                    id: schema.games.id,
+                    title: schema.games.title,
+                    author: authSchema.user.displayUsername,
+                    isPublic: schema.games.isPublic,
+                    imageId: schema.gameItems.id,
+                    numLikes: sql<number>`CAST((SELECT COUNT(*) FROM ${schema.gameLikes} WHERE game_id = ${schema.games.id}) AS INTEGER)`,
+                    userHasLiked: sql<boolean>`TRUE`,
+                })
+                .from(schema.games)
+                .leftJoin(authSchema.user, eq(authSchema.user.id, schema.games.userId))
+                .innerJoin(
+                    schema.gameLikes,
+                    and(
+                        eq(schema.gameLikes.gameId, schema.games.id),
+                        eq(schema.gameLikes.userId, session.user.id)
+                    )
+                )
+                .innerJoin(
+                    schema.gameItems,
+                    and(
+                        eq(schema.gameItems.gameId, schema.games.id),
+                        eq(schema.gameItems.orderIndex, 0)
+                    )
+                )
+                .groupBy(schema.games.id, schema.gameItems.id, authSchema.user.id);
+
+            // Convert image ids to image urls
+            const getMyGamesRes: UrlPresetInfo[] = likedGamesInfo.map(
+                ({ imageId, ...presetInfo }) => {
+                    let imageUrl = constructImageUrl(presetInfo.isPublic, presetInfo.id, imageId);
+
+                    if (!presetInfo.isPublic && USE_CLOUDFRONT) {
+                        imageUrl = getSignedCFUrl({
+                            url: imageUrl,
+                            dateLessThan: new Date(Date.now() + 1000 * 60 * 60 * 25),
+                            privateKey: env.AWS_CF_PRIV_KEY,
+                            keyPairId: env.AWS_CF_KEY_PAIR_ID,
+                        });
+                    }
+
+                    return {
+                        ...presetInfo,
+                        imageUrl,
+                    };
+                }
+            );
+
+            return res.status(200).send(getMyGamesRes);
+            //Error handling ↓
+        } catch (error) {
+            console.error("Error while attempting to get user's games: \n", error);
+            return res
+                .status(500)
+                .json({ message: "Internal Server Error. Failed to fetch user's games." });
+        }
+    });
 
     /**
      * Checks if user has liked this game already
