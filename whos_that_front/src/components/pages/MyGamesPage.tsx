@@ -205,13 +205,13 @@ const MyGamesPage = () => {
             <h2 className="my-2 text-4xl font-semibold">Your Presets</h2>
             <div className="mt-2 flex w-fit flex-wrap items-center justify-center gap-4 border border-black bg-neutral-300 px-2 py-2.5 max-xl:mx-auto xl:mx-8">
                 {gamesList.length === 0 ? (
-                    <p className="mx-auto mt-[40%] text-center text-xl font-medium">
-                        No games made yet!{" "}
+                    <p className="text-center text-xl font-medium max-sm:m-auto sm:m-5 2xl:m-10">
+                        No presets made yet.{" "}
                         <Link
                             to={"/create-game"}
                             className="text-blue-500 underline hover:italic hover:text-red-300"
                         >
-                            make new game
+                            Make a new one here!
                         </Link>
                     </p>
                 ) : (

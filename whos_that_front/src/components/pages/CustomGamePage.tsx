@@ -520,21 +520,21 @@ const CreateCustomGamePage = () => {
                 shouldCloseOnOverlayClick={false}
                 shouldCloseOnEsc={false}
             >
-                <div className="flex items-center justify-center gap-1 text-xl max-lg:mb-1 lg:mb-2">
+                <div className="flex items-center justify-center gap-2 text-xl max-lg:mb-1 lg:mb-2">
                     <PiGavelFill size="2.5em" className="" />
                     <h2 className="text-center text-5xl font-bold">Rules</h2>
                     <PiGavelFill size="2.5em" className="scale-x-[-1]" />
                 </div>
                 <ul className="mx-auto mb-2 list-inside list-decimal space-y-2 text-center text-xl font-medium">
                     <li className="text-xl">
-                        <span className="text-shadow-2xs/20 text-xl font-semibold text-orange-500">
+                        <span className="text-shadow-2xs/20 text-xl font-semibold text-orange-500 2xl:text-2xl">
                             Image content must be appropriate.
                         </span>
                         <br></br>
-                        <span className="text-base font-normal">
+                        <span className="text-base font-normal 2xl:text-lg">
                             No violence, nudity, controlled substances, hate speech, etc.{" "}
                         </span>
-                        <span className="text-base font-medium italic">
+                        <span className="text-base font-medium italic 2xl:text-lg">
                             Your preset can be removed for any reason at moderator's discrection.
                         </span>
                     </li>
@@ -548,11 +548,11 @@ const CreateCustomGamePage = () => {
                         </span>
                     </li> */}
                     <li>
-                        <span className="text-shadow-2xs/20 text-xl font-semibold text-orange-500">
-                            Images of real people must be notable figures (in public presets).
+                        <span className="text-shadow-2xs/20 text-xl font-semibold text-orange-500 2xl:text-2xl">
+                            Images of real people must be notable figures, in public presets.
                         </span>
                         <br></br>
-                        <span className="text-base font-normal">
+                        <span className="text-base font-normal 2xl:text-lg">
                             No public presets can contain images of friends, family, classmates,
                             coworkers, etc.
                         </span>
@@ -560,7 +560,7 @@ const CreateCustomGamePage = () => {
                 </ul>
                 <button
                     onClick={() => setShowRulesModal(false)}
-                    className={`rounded-xs md:w-4/10 mx-auto w-1/2 p-1 text-center text-lg font-medium text-white lg:w-1/3 ${isLoading ? "border-gray-800 bg-gray-700" : "bg-red-400 hover:bg-red-500"} cursor-pointer`}
+                    className={`rounded-xs lg:w-3/10 mx-auto w-1/2 p-1 text-center text-lg font-medium text-white md:w-1/3 ${isLoading ? "border-gray-800 bg-gray-700" : "bg-red-400 hover:bg-red-500"} cursor-pointer`}
                 >
                     I Agree
                 </button>
