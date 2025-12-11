@@ -1,6 +1,6 @@
 //Zod validation for various types, shared with front-end code
 //Types are determined by inferring from this schema (except for Socket.IO event types)
-import { z } from "zod";
+import { z } from "zod/v4";
 
 export const nanoId21Schema = z.string().regex(/^[\w-]{21}$/i);
 export const roomIdSchema = z.string().regex(/^[\w-]{6}$/i);

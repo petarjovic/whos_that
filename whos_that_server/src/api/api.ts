@@ -17,7 +17,7 @@ import { getSignedUrl as getSignedS3Url } from "@aws-sdk/s3-request-presigner";
 import { getSignedUrl as getSignedCFUrl } from "@aws-sdk/cloudfront-signer";
 import env from "../config/zod/zodEnvSchema.ts";
 import { createGameRequestSchema, searchQuerySchema } from "../config/zod/zodSchema.ts";
-import z from "zod";
+import z from "zod/v4";
 import { auth } from "../config/auth.ts";
 import { fromNodeHeaders } from "better-auth/node";
 import {

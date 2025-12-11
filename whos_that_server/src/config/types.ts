@@ -1,6 +1,6 @@
 //File of custom types, many shared with front-end
 import * as zod from "./zod/zodSchema";
-import { z } from "zod";
+import { z } from "zod/v4";
 
 // SocketIO event interfaces could not be inferred from Zod schema because SocketIO would break
 export interface ServerToClientEvents {

@@ -1,5 +1,5 @@
 //Zod validation for environment variables, this is where backend env object is exported from
-import { z } from "zod";
+import { z } from "zod/v4";
 
 const envSchema = z.object({
     PORT: z.coerce.number().min(1000),
