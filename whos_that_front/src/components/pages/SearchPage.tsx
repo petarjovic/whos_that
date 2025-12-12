@@ -121,7 +121,7 @@ const SearchPage = () => {
         <>
             {/* Search Bar */}
             <form
-                className="max-sm:w-9/10 sm:w-7/10 md:w-6/10 rounded-xs flex items-center justify-around border border-neutral-500 bg-neutral-300 py-1.5 max-xl:mb-1 max-xl:mt-4 lg:w-1/3 xl:mb-2 xl:mt-5"
+                className="max-sm:w-9/10 sm:w-7/10 md:w-6/10 rounded-xs flex items-center justify-around gap-2 border border-neutral-500 bg-neutral-300 px-1 py-1.5 max-xl:mb-1 max-xl:mt-4 lg:w-1/3 xl:mb-2 xl:mt-5"
                 onSubmit={(e) => e.preventDefault()}
             >
                 <input
@@ -139,6 +139,20 @@ const SearchPage = () => {
                 >
                     <IoMdSearch size="1.5em" />
                 </button>
+                <select
+                    className="rounded-xs flex cursor-pointer items-center bg-blue-400 px-px text-center text-white 2xl:py-0.5"
+                    value={searchParams.get("sort") ?? "likes"}
+                    onChange={(e) =>
+                        setSearchParams({
+                            ...Object.fromEntries(searchParams),
+                            sort: e.target.value,
+                            page: "1",
+                        })
+                    }
+                >
+                    <option value="likes">Most Liked</option>
+                    <option value="newest">Newest</option>
+                </select>
             </form>
             {/* Search Results */}
             {isLoading ? (

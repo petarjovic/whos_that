@@ -271,11 +271,11 @@ const MyGamesPage = () => {
     else if (isLoading || isPending) return <LoadingSpinner />;
     return (
         <>
-            <h2 className="my-2 flex items-center gap-1 text-center text-[2rem] font-semibold leading-none">
+            <h2 className="mb-2 mt-3 flex items-center gap-1 text-center text-[2rem] font-semibold leading-none">
                 <RiSafe3Fill size={"0.9em"} className="scale-x-[-1]" /> Your Presets{" "}
                 <RiSafe3Fill size={"0.9em"} />
             </h2>
-            <div className="flex w-fit flex-wrap items-center justify-center gap-4 border border-black bg-neutral-300 px-2 py-2.5 max-xl:mx-auto xl:mx-8">
+            <div className="flex w-fit flex-wrap items-center justify-center gap-4 border border-black bg-neutral-300 px-2 py-2.5 text-center max-xl:mx-auto xl:mx-8">
                 {gamesList.length === 0 ? (
                     <p className="text-center text-xl font-medium max-sm:m-auto sm:m-5 2xl:m-10">
                         No presets made yet.{" "}
@@ -415,6 +415,7 @@ const MyGamesPage = () => {
                     </div>
                 </>
             )}
+
             {/* Modal for sharing link to own games */}
             <ShareGameModal
                 showShareModal={Boolean(shareModalGameId)}
