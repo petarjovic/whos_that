@@ -121,7 +121,7 @@ const SearchPage = () => {
         <>
             {/* Search Bar */}
             <form
-                className="max-sm:w-9/10 sm:w-7/10 md:w-6/10 rounded-xs flex items-center justify-around gap-2 border border-neutral-500 bg-neutral-300 px-1 py-1.5 max-xl:mb-1 max-xl:mt-4 lg:w-1/3 xl:mb-2 xl:mt-5"
+                className="max-sm:w-9/10 sm:w-7/10 md:w-6/10 rounded-xs py-1.75 flex items-center justify-around gap-2 border border-neutral-500 bg-neutral-300 px-1.5 max-xl:mb-1 max-xl:mt-4 lg:w-1/3 xl:mb-2 xl:mt-5"
                 onSubmit={(e) => e.preventDefault()}
             >
                 <input

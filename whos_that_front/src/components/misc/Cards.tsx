@@ -7,8 +7,18 @@ interface CardLayoutProps {
     name: string;
     imgSrc: string | undefined;
     isOppCard?: boolean;
-    isGame?: boolean;
+    size?: "S" | "M" | "L";
 }
+
+type sizeTailwind = {
+    [key in "S" | "M" | "L"]: string;
+};
+
+const sizeMap: sizeTailwind = {
+    S: "w-26.75 h-42",
+    M: "w-40.5 h-63.75",
+    L: "max-xl:h-66.75 max-xl:w-39 w-45.75 h-72.5",
+};
 
 /**
  * Reused card layout component
@@ -19,11 +29,11 @@ export const CardLayout = ({
     name,
     imgSrc,
     isOppCard = false,
-    isGame = false,
+    size = "M",
 }: PropsWithChildren<CardLayoutProps>) => {
     return (
         <figure
-            className={`border ${isGame || isOppCard ? "max-xl:h-66.75 max-xl:w-39 w-45.75 h-72.5" : "w-40.5 h-63.75"} hover:scale-106 rounded-xs flex flex-col justify-between ${isOppCard ? "animate-[flash-attention_2s_ease-in-out_1] border-orange-300 bg-orange-300" : "border-neutral-600 bg-neutral-50"} text-center`}
+            className={`border ${sizeMap[size]} hover:scale-106 rounded-xs flex flex-col justify-between ${isOppCard ? "animate-[flash-attention_2s_ease-in-out_1] border-orange-300 bg-orange-300" : "border-neutral-600 bg-neutral-50"} text-center`}
         >
             <img
                 className={`max-h-8/10 h-8/10 mx-1 mt-1 border border-neutral-400 bg-gray-300 object-fill ${isOppCard ? "grayscale-100" : ""}`}
@@ -31,7 +41,7 @@ export const CardLayout = ({
                 alt={name}
             />
             <figcaption
-                className={` ${isGame || isOppCard ? "cursor-default items-center text-lg max-md:text-base" : "items-center text-base hover:text-blue-500"} max-h-1/10 m-auto flex text-center font-semibold leading-none text-black`}
+                className={`${size === "L" ? "cursor-default items-center text-lg max-md:text-base" : "items-center text-base"} ${size === "M" ? "hover:text-blue-500" : ""} max-h-1/10 m-auto flex text-center font-semibold leading-none text-black`}
             >
                 {name}
             </figcaption>
@@ -51,14 +61,7 @@ interface CardProps {
 /**
  * Interactive game card with hide/unhide (flip) and "guess" functionality
  */
-export const Card = ({
-    name,
-    imgSrc,
-    winner,
-    openConfirmModal,
-    resetOnNewGame,
-    isGame = false,
-}: CardProps) => {
+export const Card = ({ name, imgSrc, winner, openConfirmModal, resetOnNewGame }: CardProps) => {
     const [flipped, setFlipped] = useState(false);
 
     // Reset card visibility when new game starts (empty string = no end state)
@@ -68,11 +71,7 @@ export const Card = ({
 
     return (
         <>
-            <CardLayout
-                name={flipped ? "" : name}
-                imgSrc={flipped ? undefined : imgSrc}
-                isGame={isGame}
-            >
+            <CardLayout name={flipped ? "" : name} imgSrc={flipped ? undefined : imgSrc}>
                 {/* In game controls for hiding and guessing characters */}
                 <div className="mx-1 mb-1 box-content flex items-center justify-between">
                     {/* Guess Button */}

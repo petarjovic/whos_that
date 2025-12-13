@@ -67,18 +67,10 @@ const GameStateManager = ({ isNewGame }: { isNewGame: boolean }) => {
     const handleLikeGame = async () => {
         if (session && !isPending && gameState.preset) {
             try {
-                const response: Response = await likeGame(gameState.preset);
-
-                if (!response.ok) {
-                    const errorData = serverResponseSchema.parse(await response.json());
-                    throw new Error(errorData.message || "Error liking game.");
-                } else {
-                    setPlayerHasLiked(true);
-                }
+                await likeGame(gameState.preset);
             } catch (error) {
                 logError(error);
-                if (error instanceof Error) setErrorMsg(error.message);
-                else setErrorMsg("Getting images failed.");
+                setErrorMsg(error instanceof Error ? error.message : "Getting images failed.");
             }
         }
     };
@@ -216,8 +208,8 @@ const GameStateManager = ({ isNewGame }: { isNewGame: boolean }) => {
 
     if (errorMsg) throw new Error(errorMsg);
     // Show waiting room until both players connected and data loaded
-    else if (gameState.players.includes("") || cardData.length === 0)
-        return <WaitingRoom gameId={roomId} />;
+    else if (gameState.players.includes(""))
+        return <WaitingRoom gameId={roomId} cardData={cardData} />;
     else {
         const playerIndex = getPlayerIndex();
         if (playerIndex === -1) {
