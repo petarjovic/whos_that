@@ -89,8 +89,11 @@ const Game = ({
         />
     )); // Separate last row of list for layout purposes
     const lastRow = cardList.splice(cardList.length - (cardData.length % numGridCols));
+    console.log(oppWinningKey);
+    console.log(cardData);
 
     const oppTargetCardData = cardData.find((card) => card.orderIndex === oppWinningKey);
+    console.log(cardList);
     if (!oppTargetCardData) {
         //Sanity check
         throw new Error("Cannot find opponent's card data.");

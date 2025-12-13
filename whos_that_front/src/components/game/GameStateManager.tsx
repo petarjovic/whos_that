@@ -208,7 +208,7 @@ const GameStateManager = ({ isNewGame }: { isNewGame: boolean }) => {
 
     if (errorMsg) throw new Error(errorMsg);
     // Show waiting room until both players connected and data loaded
-    else if (gameState.players.includes(""))
+    else if (gameState.players.includes("") || cardData.length === 0)
         return <WaitingRoom gameId={roomId} cardData={cardData} />;
     else {
         const playerIndex = getPlayerIndex();
