@@ -123,7 +123,7 @@ const GameStateManager = ({ isNewGame }: { isNewGame: boolean }) => {
             socket.off("connect_error");
             socket.off("errorMessage");
             socket.off("updateRoomState");
-            socket.off("opponentDisconnted");
+            socket.off("opponentDisconnected");
             socket.disconnect();
         };
     }, []);
