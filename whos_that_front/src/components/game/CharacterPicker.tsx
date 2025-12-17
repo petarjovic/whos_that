@@ -6,7 +6,7 @@ import GameBoard from "./GameBoard";
 import dice from "../../assets/dice.jpg";
 
 const CharacterPicker = ({ cardData, roomId }: { cardData: CardDataUrlType[]; roomId: string }) => {
-    const [title, setTitle] = useState("Select a character for your opponent to guess!");
+    const [title, setTitle] = useState("Select a character for your opponent to guess:");
 
     const cardSelectorList: JSX.Element[] = [];
 

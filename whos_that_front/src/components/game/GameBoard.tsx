@@ -37,7 +37,7 @@ const GameBoard = ({
 
     return (
         <>
-            <p className="my-1.5 text-4xl font-bold">{title}</p>
+            <p className="my-2.5 text-4xl font-bold text-neutral-700">{title}</p>
             <div className="mb-2 h-full w-[99%] rounded border bg-slate-400 pt-4">
                 {/* grid on large screens, flexbox on small screens */}
                 <div
