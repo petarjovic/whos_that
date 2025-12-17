@@ -1,5 +1,5 @@
 import { useNavigate } from "react-router";
-import { useBetterAuthSession } from "../../lib/LayoutContextProvider.ts";
+import { useBetterAuthSession } from "../../lib/hooks.ts";
 import { useState, useEffect } from "react";
 import Dropzone from "../misc/Dropzone.tsx";
 import { serverResponseSchema, acceptedImageTypesSchema } from "../../lib/zodSchema.ts";

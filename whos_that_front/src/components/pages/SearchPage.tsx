@@ -3,15 +3,13 @@ import env from "../../lib/zodEnvSchema.ts";
 import { SearchResponseSchema } from "@server/zodSchema";
 import type { ServerResponse } from "src/lib/types";
 import type { UrlPresetInfo, PaginationInfo } from "@server/types";
-import { useBetterAuthSession } from "../../lib/LayoutContextProvider.ts";
 import LoadingSpinner from "../misc/LoadingSpinner";
 import { Link } from "react-router";
 import { CardLayout } from "../misc/Cards";
 import { logError } from "../../lib/logger.ts";
-import { FaHeart } from "react-icons/fa6";
 import { useSearchParams } from "react-router";
 import { IoMdSearch } from "react-icons/io";
-import { likeGame } from "../../lib/apiHelpers.ts";
+import LikeButton from "../misc/LikeButton.tsx";
 
 const SearchPage = () => {
     const [searchParams, setSearchParams] = useSearchParams();
@@ -21,8 +19,6 @@ const SearchPage = () => {
     const [pageInfo, setPageInfo] = useState<PaginationInfo>();
     const [errorMsg, setErrorMsg] = useState("");
     const [searchInput, setSearchInput] = useState(searchParams.get("q") ?? "");
-
-    const { session, isPending } = useBetterAuthSession();
 
     // Debounce search input
     useEffect(() => {
@@ -85,38 +81,7 @@ const SearchPage = () => {
         return () => abortController.abort();
     }, [searchParams]);
 
-    /**
-     * Handles user liking and unliking games
-     */
-    const handleLikeGame = async (e: React.MouseEvent<HTMLButtonElement>, gameId: string) => {
-        e.preventDefault();
-        e.stopPropagation();
-        if (!session) return;
-
-        //Update UI
-        setGamesList((prev) =>
-            prev.map((game) =>
-                game.id === gameId
-                    ? {
-                          ...game,
-                          userHasLiked: !game.userHasLiked,
-                          numLikes: game.userHasLiked ? game.numLikes - 1 : game.numLikes + 1,
-                      }
-                    : game
-            )
-        );
-
-        //Like/unlike game
-        try {
-            void likeGame(gameId);
-        } catch (error) {
-            logError(error);
-            setErrorMsg("Failed to like game.");
-        }
-    };
-
     if (errorMsg) throw new Error(errorMsg);
-    if (isPending) return <LoadingSpinner />;
     return (
         <>
             {/* Search Bar */}
@@ -179,21 +144,11 @@ const SearchPage = () => {
                                         {author ?? ""}{" "}
                                     </p>
                                     <p className="absolute -bottom-px right-2 text-base text-gray-700">
-                                        <button
-                                            className="flex cursor-pointer items-center whitespace-pre-wrap align-sub"
-                                            onClick={(e) => {
-                                                handleLikeGame(e, id);
-                                            }}
-                                            title={userHasLiked ? "Unlike Game" : "Like Game"}
-                                        >
-                                            {numLikes}{" "}
-                                            <FaHeart
-                                                size={"1.3em"}
-                                                className={`${
-                                                    userHasLiked ? "text-red-500" : "text-zinc-500"
-                                                } mb-px align-middle transition-transform hover:text-red-600 max-md:text-xl`}
-                                            />
-                                        </button>
+                                        <LikeButton
+                                            id={id}
+                                            userHasLiked={userHasLiked}
+                                            numLikes={numLikes}
+                                        />
                                     </p>
                                 </div>
                             </CardLayout>

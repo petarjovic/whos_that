@@ -18,12 +18,17 @@ export const responseTypeSchema = z.object({
     msg: z.string(),
 });
 
-export const gameStateTypeSchema = z.object({
+//used to signal player win/loss and reason
+export const endStateSchema = z.tuple([z.boolean().nullable(), z.boolean().nullable()]);
+
+export const roomStateSchema = z.object({
+    id: roomIdSchema,
     players: z.tuple([z.string(), z.string()]),
     cardIdsToGuess: z.tuple([z.number(), z.number()]),
     playAgainReqs: z.tuple([z.boolean(), z.boolean()]),
     preset: nanoId21Schema,
     numOfChars: z.number(),
+    endState: endStateSchema,
 });
 
 const cardDataTypeSchema = z.object({

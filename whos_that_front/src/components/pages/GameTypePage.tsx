@@ -3,7 +3,7 @@ import PublicGamesImg from "@client/assets/PublicGames.svg";
 import PrivateGamesImg from "@client/assets/PrivateGames.webp";
 import CustomGameImg from "@client/assets/CustomGame.svg";
 import { Link } from "react-router";
-import { useBetterAuthSession } from "../../lib/LayoutContextProvider.ts";
+import { useBetterAuthSession } from "../../lib/hooks.ts";
 
 /**
  * Page showing options to go to public games, or user's games, or custom game creation

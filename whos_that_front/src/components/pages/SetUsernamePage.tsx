@@ -1,6 +1,6 @@
 import { useState, useEffect, type FormEvent } from "react";
 import { useNavigate } from "react-router";
-import { useBetterAuthSession } from "../../lib/LayoutContextProvider.ts";
+import { useBetterAuthSession } from "../../lib/hooks.ts";
 import { authClient } from "../../lib/auth/auth-client.ts";
 import { logError } from "../../lib/logger.ts";
 import { PiPenNibFill } from "react-icons/pi";

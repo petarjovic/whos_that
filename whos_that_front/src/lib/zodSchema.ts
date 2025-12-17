@@ -3,14 +3,6 @@ import { z } from "zod";
 
 export const winLoseFlagTypeSchema = z.boolean().nullable();
 
-export const endStateTypeSchema = z.enum([
-    "",
-    "correctGuess",
-    "wrongGuess",
-    "oppCorrectGuess",
-    "oppWrongGuess",
-]);
-
 export const serverResponseSchema = z.object({
     message: z.string(),
 });

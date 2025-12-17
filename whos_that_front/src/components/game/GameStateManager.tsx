@@ -3,14 +3,12 @@ import { useParams, useNavigate, useSearchParams } from "react-router";
 import { socket } from "../../lib/socket.ts";
 import Game from "./GamePage.tsx";
 import WaitingRoom from "../pages/WaitingRoomPage.tsx";
-import type { GameStateType, CardDataUrlType } from "@server/types";
-import type { EndStateType } from "../../lib/types.ts";
+import type { RoomState, CardDataUrlType } from "@server/types";
 import { gameDataTypeSchema, userHasLikedSchema } from "@server/zodSchema";
 import { serverResponseSchema } from "../../lib/zodSchema.ts";
 import env from "../../lib/zodEnvSchema.ts";
 import { logError, log } from "../../lib/logger.ts";
-import { useBetterAuthSession } from "../../lib/LayoutContextProvider.ts";
-import { likeGame } from "../../lib/apiHelpers.ts";
+import { useBetterAuthSession } from "../../lib/hooks.ts";
 
 /**
  * Manages game state and Socket.IO connection lifecycle
@@ -23,75 +21,28 @@ const GameStateManager = ({ isNewGame }: { isNewGame: boolean }) => {
     const [title, setTitle] = useState("");
     const [searchParams] = useSearchParams();
     // Initialize with preset from URL query param if present
-    const [gameState, setGameState] = useState<GameStateType>({
+    const [roomState, setRoomState] = useState<RoomState>({
+        id: roomId,
         players: ["", ""],
         playAgainReqs: [false, false],
         cardIdsToGuess: [-1, -1],
         preset: searchParams.get("preset") ?? "",
         numOfChars: 0,
+        endState: [null, null],
     });
-    const [endState, setEndState] = useState<EndStateType>("");
     const [errorMsg, setErrorMsg] = useState("");
     const [cardData, setCardData] = useState<CardDataUrlType[]>([]);
     const [playerHasLiked, setPlayerHasLiked] = useState<boolean | null>(null);
 
     const { session, isPending } = useBetterAuthSession();
 
-    //If player is logged in check if they've liked the game
-    useEffect(() => {
-        const fetchLikeInfo = async () => {
-            if (session && !isPending && gameState.preset) {
-                try {
-                    const response: Response = await fetch(
-                        `${env.VITE_SERVER_URL}/api/userHasLiked/${gameState.preset}`,
-                        { method: "GET", credentials: "include" }
-                    );
-
-                    if (!response.ok) {
-                        const errorData = serverResponseSchema.parse(await response.json());
-                        throw new Error(errorData.message || "Getting userHasLiked data failed.");
-                    } else {
-                        const { userHasLiked } = userHasLikedSchema.parse(await response.json());
-                        setPlayerHasLiked(userHasLiked);
-                    }
-                } catch (error) {
-                    logError(error);
-                    if (error instanceof Error) setErrorMsg(error.message);
-                    else setErrorMsg("Getting images failed.");
-                }
-            }
-        };
-        void fetchLikeInfo();
-    }, [session, isPending, gameState.preset]);
-
-    const handleLikeGame = async () => {
-        if (session && !isPending && gameState.preset) {
-            try {
-                await likeGame(gameState.preset);
-            } catch (error) {
-                logError(error);
-                setErrorMsg(error instanceof Error ? error.message : "Getting images failed.");
-            }
-        }
-    };
-
-    /**
-     * Determines which player slot this client occupies (0 or 1)
-     * Returns -1 if socket not connected or player not in game
-     */
-    const getPlayerIndex = (): number => {
-        if (!socket.id) return -1;
-        const index = gameState.players.indexOf(socket.id);
-        return index;
-    };
-
     // Fetch game data (images and metadata) when preset is available
     useEffect(() => {
         const fetchImages = async () => {
-            if (gameState.preset) {
+            if (roomState.preset) {
                 try {
                     const response: Response = await fetch(
-                        `${env.VITE_SERVER_URL}/api/gameData/${gameState.preset}`,
+                        `${env.VITE_SERVER_URL}/api/gameData/${roomState.preset}`,
                         { method: "GET" }
                     );
 
@@ -111,39 +62,57 @@ const GameStateManager = ({ isNewGame }: { isNewGame: boolean }) => {
             }
         };
         void fetchImages();
-    }, [gameState.preset]);
+    }, [roomState.preset]);
+
+    //If player is logged in check if they've liked the game
+    useEffect(() => {
+        const fetchLikeInfo = async () => {
+            if (session && !isPending && roomState.preset) {
+                try {
+                    const response: Response = await fetch(
+                        `${env.VITE_SERVER_URL}/api/userHasLiked/${roomState.preset}`,
+                        { method: "GET", credentials: "include" }
+                    );
+
+                    if (!response.ok) {
+                        const errorData = serverResponseSchema.parse(await response.json());
+                        throw new Error(errorData.message || "Getting userHasLiked data failed.");
+                    } else {
+                        const { userHasLiked } = userHasLikedSchema.parse(await response.json());
+                        setPlayerHasLiked(userHasLiked);
+                    }
+                } catch (error) {
+                    logError(error);
+                    if (error instanceof Error) setErrorMsg(error.message);
+                    else setErrorMsg("Getting images failed.");
+                }
+            }
+        };
+        void fetchLikeInfo();
+    }, [session, isPending, roomState.preset]);
 
     // Set up Socket.IO connection and event listeners
     useEffect(() => {
+        //connect and connect error handler
         socket.connect();
-
         socket.on("connect_error", (err) => {
             logError(err);
             setErrorMsg(`Could not connect to server, server responded with:\n${err.message}`);
         });
 
-        socket.on("receiveOppGuess", (oppGuess) => {
-            if (oppGuess) setEndState("oppCorrectGuess");
-            else setEndState("oppWrongGuess");
+        //this event synchronizes data with the server
+        socket.on("updateRoomState", (newGameState) => {
+            log(`Received new game state: ${JSON.stringify(newGameState)}`);
+            setRoomState(newGameState);
         });
 
-        socket.on("playerJoined", (gameData) => {
-            log(`Player joined: ${gameData.players.toString()}`);
-            setGameState(gameData);
-            setEndState("");
-        });
-
-        socket.on("playAgainConfirmed", (gameData) => {
-            setGameState(gameData);
-            setEndState("");
-        });
-
-        socket.on("opponentDisconnted", (gameData) => {
+        //event on oppontent disconnection
+        socket.on("opponentDisconnected", (newGameState) => {
             log("Opponent Disconnected");
-            setGameState(gameData);
-            setEndState("");
+            setRoomState(newGameState);
         });
 
+        //error event
         socket.on("errorMessage", ({ message }) => {
             logError(message);
             setErrorMsg(message);
@@ -152,19 +121,17 @@ const GameStateManager = ({ isNewGame }: { isNewGame: boolean }) => {
         // Cleanup: remove listeners and disconnect on unmount
         return () => {
             socket.off("connect_error");
-            socket.off("receiveOppGuess");
-            socket.off("playerJoined");
-            socket.off("playAgainConfirmed");
             socket.off("errorMessage");
+            socket.off("updateRoomState");
             socket.off("opponentDisconnted");
             socket.disconnect();
         };
     }, []);
 
-    // Create new game once card data is loaded
+    // Create new room once card data is loaded
     useEffect(() => {
         if (isNewGame && cardData.length > 0) {
-            socket.emit("createGame", gameState.preset, cardData.length, (id, response) => {
+            socket.emit("createRoom", roomState.preset, cardData.length, (id, response) => {
                 if (response.success) {
                     log(response.msg);
                     setRoomId(id);
@@ -174,41 +141,34 @@ const GameStateManager = ({ isNewGame }: { isNewGame: boolean }) => {
                 }
             });
         }
-    }, [isNewGame, cardData.length, nav, gameState.preset]);
+    }, [isNewGame, cardData.length, nav, roomState.preset]);
 
     // Join existing game using room ID from URL
     useEffect(() => {
         if (!isNewGame) {
-            socket.emit("joinGame", roomId, (gameData, response) => {
-                setGameState(gameData);
+            socket.emit("joinRoom", roomId, (joinedRoomState, response) => {
                 if (!response.success) {
                     void nav("/"); //flesh this out, pop-up upon returning to home page?
                 }
+                setRoomState(joinedRoomState);
                 log(response.msg);
             });
         }
     }, [roomId, isNewGame, nav]);
 
-    const emitGuess = (guessCorrectly: boolean) => {
-        socket.emit("guess", roomId, guessCorrectly);
-        log(
-            `Player ${String(socket.id)} emitted guess: ${guessCorrectly.toString()} in game ${roomId}`
-        );
-        if (guessCorrectly) {
-            setEndState("correctGuess");
-        } else {
-            setEndState("wrongGuess");
-        }
-    };
-
-    const emitPlayAgain = () => {
-        socket.emit("playAgain", roomId);
-        log(`Player ${String(socket.id)} requested to play again in room ${roomId}`);
+    /**
+     * Determines which player slot this client occupies (0 or 1)
+     * Returns -1 if socket not connected or player not in game
+     */
+    const getPlayerIndex = (): number => {
+        if (!socket.id) return -1;
+        const index = roomState.players.indexOf(socket.id);
+        return index;
     };
 
     if (errorMsg) throw new Error(errorMsg);
     // Show waiting room until both players connected and data loaded
-    else if (gameState.players.includes("") || cardData.length === 0)
+    else if (roomState.players.includes("") || cardData.length === 0)
         return <WaitingRoom gameId={roomId} cardData={cardData} />;
     else {
         const playerIndex = getPlayerIndex();
@@ -218,15 +178,11 @@ const GameStateManager = ({ isNewGame }: { isNewGame: boolean }) => {
         // Pass opponent's target as oppWinningKey, player's own target as winningKey
         return (
             <Game
-                emitPlayAgain={emitPlayAgain}
-                emitGuess={emitGuess}
-                endState={endState}
-                oppWinningKey={gameState.cardIdsToGuess[playerIndex]}
-                winningKey={gameState.cardIdsToGuess[1 - playerIndex]}
+                roomState={roomState}
+                playerIndex={playerIndex}
                 cardData={cardData}
                 title={title}
                 playerHasLiked={playerHasLiked}
-                handleLikeGame={handleLikeGame}
             />
         );
     }

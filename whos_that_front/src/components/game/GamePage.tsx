@@ -1,21 +1,18 @@
 import ReactModal from "react-modal";
 import { useNavigate } from "react-router";
 import { Card, OpponentTargetCard } from "../misc/Cards.tsx";
-import type { CardDataUrlType } from "@server/types";
-import type { EndStateType } from "../../lib/types.ts";
+import type { CardDataUrlType, RoomState } from "@server/types";
 import { useEffect, useState } from "react";
 import { FaHeart } from "react-icons/fa6";
+import LikeButton from "../misc/LikeButton.tsx";
+import { emitPlayAgain, emitGuess } from "../../lib/socket.ts";
 
 interface GameProps {
-    emitPlayAgain: () => void;
-    emitGuess: (guessCorrectness: boolean) => void;
-    endState: EndStateType;
-    winningKey: number; // Character index this player needs to guess
-    oppWinningKey: number; // Character index opponent needs to guess
+    roomState: RoomState;
+    playerIndex: number; //player 1 or 2, used to calculate winner
     cardData: CardDataUrlType[];
     title: string;
     playerHasLiked: boolean | null;
-    handleLikeGame: () => Promise<void>;
 }
 
 type ConfirmGuessModalState = { isOpen: false } | { isOpen: true; isWinner: boolean; name: string };
@@ -44,17 +41,7 @@ const GridColsClasses: gridColsTailwind = {
  * Main game component displaying character grid and opponent's target
  * Handles guess confirmation and play again requests
  */
-const Game = ({
-    emitPlayAgain,
-    emitGuess,
-    endState,
-    winningKey,
-    oppWinningKey,
-    cardData,
-    title,
-    playerHasLiked,
-    handleLikeGame,
-}: GameProps) => {
+const Game = ({ roomState, playerIndex, cardData, title, playerHasLiked }: GameProps) => {
     const [confirmGuessModal, setConfirmGuessModal] = useState<ConfirmGuessModalState>({
         isOpen: false,
     });
@@ -64,7 +51,8 @@ const Game = ({
     if (numGridCols > 12) numGridCols = 12;
 
     const handleConfirmGuessModalResult = (cofirmGuess: boolean) => {
-        if (cofirmGuess && confirmGuessModal.isOpen) emitGuess(confirmGuessModal.isWinner);
+        if (cofirmGuess && confirmGuessModal.isOpen)
+            emitGuess(roomState.id, confirmGuessModal.isWinner);
         setConfirmGuessModal({ isOpen: false });
     };
 
@@ -72,9 +60,9 @@ const Game = ({
         setConfirmGuessModal({ isOpen: true, isWinner: winner, name: name });
     };
 
-    const handlePlayAgain = () => {
-        emitPlayAgain();
-    };
+    //get winning keys based on if player 1 or player 2
+    const oppWinningKey = roomState.cardIdsToGuess[playerIndex];
+    const winningKey = roomState.cardIdsToGuess[1 - playerIndex];
 
     // Create list of character card components
     const cardList = cardData.map(({ imageUrl, name, orderIndex }) => (
@@ -84,7 +72,7 @@ const Game = ({
             winner={winningKey === orderIndex}
             key={orderIndex}
             openConfirmModal={handleOpenConfirmModal}
-            resetOnNewGame={endState}
+            resetOnNewGame={roomState.endState}
             isGame={true}
         />
     )); // Separate last row of list for layout purposes
@@ -113,7 +101,7 @@ const Game = ({
                     {cardList}
                 </div>
                 {/* Last Row of Cards, always flexbox */}
-                <div className="mb-2.5 flex w-full flex-wrap justify-evenly px-10 max-2xl:px-4">
+                <div className="mb-2.5 flex w-full flex-wrap justify-evenly px-10 max-2xl:px-4 max-sm:gap-x-8 max-sm:gap-y-3">
                     {lastRow}
                     <OpponentTargetCard
                         name={oppTargetCardData.name}
@@ -124,13 +112,12 @@ const Game = ({
             {/* Modals */}
             <div>
                 <GameEndModal
-                    endState={endState}
-                    handlePlayAgain={handlePlayAgain}
+                    roomState={roomState}
+                    playerIndex={playerIndex}
                     playerHasLiked={playerHasLiked}
-                    handleLikeGame={handleLikeGame}
                 />
                 <ConfirmGuessModalState
-                    isOpen={confirmGuessModal.isOpen && !endState}
+                    isOpen={confirmGuessModal.isOpen && !roomState.endState.some((e) => e !== null)}
                     confirmGuess={handleConfirmGuessModalResult}
                     name={confirmGuessModal.isOpen ? confirmGuessModal.name : ""}
                 />
@@ -176,22 +163,16 @@ const ConfirmGuessModalState = ({ isOpen, confirmGuess, name }: ConfirmGuessModa
 };
 
 interface GameEndModalProps {
-    endState: EndStateType;
-    handlePlayAgain: () => void;
+    roomState: RoomState;
+    playerIndex: number;
     playerHasLiked: boolean | null;
-    handleLikeGame: () => Promise<void>;
 }
 
 /**
  * Modal shown when game ends with win/loss message
  * Allows play again or exit to home
  */
-const GameEndModal = ({
-    endState,
-    handlePlayAgain,
-    playerHasLiked,
-    handleLikeGame,
-}: GameEndModalProps) => {
+const GameEndModal = ({ roomState, playerIndex, playerHasLiked }: GameEndModalProps) => {
     let paraText = "";
     let headingText = "";
     const navigate = useNavigate();
@@ -200,35 +181,28 @@ const GameEndModal = ({
     // Reset button state when new game starts
     useEffect(() => {
         setPlayAgainSent(false);
-    }, [endState]);
+    }, [roomState]);
 
-    switch (endState) {
-        case "correctGuess": {
+    if (roomState.endState.some((e) => e !== null)) {
+        if (roomState.endState[playerIndex] === true) {
             headingText = "You Win!";
             paraText = "Good guessing!";
-            break;
-        }
-        case "wrongGuess": {
+        } else if (roomState.endState[playerIndex] === false) {
             headingText = "You Lose!";
             paraText = "Oh no, wrong guess :(";
-            break;
-        }
-        case "oppCorrectGuess": {
+        } else if (roomState.endState[1 - playerIndex] === true) {
             headingText = "You Lose!";
             paraText = "Dang, you opponent guessed correctly!";
-            break;
-        }
-        case "oppWrongGuess": {
+        } else {
             headingText = "You Win!";
             paraText = "Your opponent guessed wrong! \n A lucky break!";
-            break;
         }
     }
 
     return (
         <ReactModal
-            isOpen={Boolean(endState)}
-            className="w-9/10 absolute left-1/2 top-1/2 mx-auto flex h-fit -translate-x-1/2 -translate-y-1/2 flex-col gap-4 border-2 border-neutral-800 bg-neutral-200 px-2 text-center max-lg:max-w-2xl max-md:py-5 md:max-lg:py-8 lg:max-w-3xl lg:py-8 2xl:pb-10 2xl:pt-12"
+            isOpen={Boolean(roomState.endState.some((e) => e !== null))}
+            className="w-9/10 absolute left-1/2 top-1/2 mx-auto flex h-fit -translate-x-1/2 -translate-y-1/2 flex-col gap-4 border-2 border-neutral-800 bg-neutral-200 px-2 text-center max-lg:max-w-2xl max-md:py-5 md:max-lg:py-8 lg:max-w-3xl lg:py-8 2xl:pb-8 2xl:pt-12"
             overlayClassName="fixed inset-0 bg-zinc-900/70"
         >
             <h2
@@ -239,12 +213,12 @@ const GameEndModal = ({
             <p className="mx-auto whitespace-pre-wrap text-4xl font-medium text-neutral-800 max-2xl:mb-1 max-sm:text-2xl 2xl:mb-2.5">
                 {paraText}
             </p>
-            <div className="sm:max-lg:gap-13 mx-auto mt-3 flex flex-row max-sm:gap-4 lg:gap-20">
+            <div className="sm:max-lg:gap-13 mx-auto mt-2.5 flex flex-row max-sm:gap-4 lg:gap-20">
                 <button
                     className={`rounded-xs md:max-lg:px-4.5 cursor-pointer text-center font-medium text-neutral-50 max-lg:text-xl max-md:px-3.5 max-md:py-1.5 md:max-lg:py-2 lg:px-5 lg:py-3 lg:text-2xl ${playAgainSent ? "bg-gray-700" : "bg-green-600 hover:bg-green-700"}`}
                     onClick={() => {
                         setPlayAgainSent(true);
-                        handlePlayAgain();
+                        emitPlayAgain(roomState.id);
                     }}
                     disabled={playAgainSent}
                 >
@@ -267,28 +241,23 @@ const GameEndModal = ({
                                 Thank you for your support!
                             </span>
                             <FaHeart
-                                size={"1.25em"}
+                                size={"1.75em"}
                                 className="inline text-xl text-red-600 transition-transform"
                             />
                         </div>
                     ) : (
                         <>
                             <p className="text-2xl font-semibold">Did you enjoy this preset?</p>
-                            <div>
+                            <div className="flex items-center justify-center">
                                 <span className="mr-2 text-xl font-medium italic">
-                                    Give it a like:
+                                    Click to give it a like:
                                 </span>
-                                <button
-                                    type="button"
-                                    onClick={() => {
-                                        void handleLikeGame();
-                                    }}
-                                >
-                                    <FaHeart
-                                        size={"2em"}
-                                        className="hover:scale-107 active:scale-111 relative top-2 mb-px cursor-pointer align-middle text-zinc-500 transition-transform hover:text-red-600 max-md:text-xl"
-                                    />
-                                </button>
+                                <LikeButton
+                                    size={"L"}
+                                    id={roomState.preset}
+                                    userHasLiked={playerHasLiked}
+                                    numLikes={-1}
+                                />
                             </div>
                         </>
                     )

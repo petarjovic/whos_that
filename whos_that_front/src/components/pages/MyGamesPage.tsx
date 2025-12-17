@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router";
 import { CardLayout } from "../misc/Cards.tsx";
 import type { ServerResponse } from "../../lib/types.ts";
-import { useBetterAuthSession } from "../../lib/LayoutContextProvider.ts";
+import { useBetterAuthSession } from "../../lib/hooks.ts";
 import { serverResponseSchema } from "../../lib/zodSchema.ts";
 import { UrlPresetInfoListSchema } from "@server/zodSchema";
 import type { UrlPresetInfo } from "@server/types";
@@ -13,8 +13,8 @@ import { FaArrowUpRightFromSquare } from "react-icons/fa6";
 import { FcSettings } from "react-icons/fc";
 import ReactModal from "react-modal";
 import { FaHeart } from "react-icons/fa";
-import { likeGame } from "../../lib/apiHelpers.ts";
 import { RiSafe3Fill } from "react-icons/ri";
+import LikeButton from "../misc/LikeButton.tsx";
 
 /**
  * Modal for displaying shareable link for a game/preset
@@ -156,36 +156,6 @@ const MyGamesPage = () => {
         e.stopPropagation();
 
         setShareModalGameId(gameId);
-    };
-
-    /**
-     * Handles user liking and unliking games
-     */
-    const handleLikeGame = async (e: React.MouseEvent<HTMLButtonElement>, gameId: string) => {
-        e.preventDefault();
-        e.stopPropagation();
-        if (!session) return;
-
-        //Update UI
-        setLikedGamesList((prev) =>
-            prev.map((game) =>
-                game.id === gameId
-                    ? {
-                          ...game,
-                          userHasLiked: !game.userHasLiked,
-                          numLikes: game.userHasLiked ? game.numLikes - 1 : game.numLikes + 1,
-                      }
-                    : game
-            )
-        );
-
-        //Like/unlike game
-        try {
-            void likeGame(gameId);
-        } catch (error) {
-            logError(error);
-            setErrorMsg("Failed to like game.");
-        }
     };
 
     /**
@@ -387,25 +357,14 @@ const MyGamesPage = () => {
                                     <CardLayout name={title} imgSrc={imageUrl} key={i}>
                                         <div className="mb-0.75 relative flex items-center justify-center max-xl:mb-px">
                                             <p className="relative right-5 text-center text-sm italic text-gray-600 max-xl:text-xs">
-                                                {author ?? ""}{" "}
+                                                {author ?? ""}
                                             </p>
                                             <p className="absolute -bottom-px right-2 text-base text-gray-700">
-                                                <button
-                                                    className="flex cursor-pointer items-center whitespace-pre-wrap align-sub"
-                                                    onClick={(e) => {
-                                                        handleLikeGame(e, id);
-                                                    }}
-                                                >
-                                                    {numLikes}{" "}
-                                                    <FaHeart
-                                                        size={"1.3em"}
-                                                        className={`${
-                                                            userHasLiked
-                                                                ? "text-red-500"
-                                                                : "text-zinc-500"
-                                                        } mb-px align-middle transition-transform hover:text-red-600 max-md:text-xl`}
-                                                    />
-                                                </button>
+                                                <LikeButton
+                                                    id={id}
+                                                    userHasLiked={userHasLiked}
+                                                    numLikes={numLikes}
+                                                />
                                             </p>
                                         </div>
                                     </CardLayout>

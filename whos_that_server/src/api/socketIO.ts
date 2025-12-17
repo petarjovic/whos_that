@@ -1,5 +1,5 @@
 import { nanoid } from "nanoid";
-import type { GameStateType, ClientToServerEvents, ServerToClientEvents } from "../config/types.ts";
+import type { RoomState, ClientToServerEvents, ServerToClientEvents } from "../config/types.ts";
 import type { Server } from "socket.io";
 import { roomIdSchema, createRoomParamsSchema } from "../config/zod/zodSchema.ts";
 
@@ -14,15 +14,17 @@ function winningKeyGenerator(max: number): [number, number] {
     return [winningKeyOne, winningKeyTwo];
 }
 
-const ActiveRoomIdsMap = new Map<string, GameStateType>();
+const ActiveRoomIdsMap = new Map<string, RoomState>();
 
-const EmptyGameState: GameStateType = {
+const createEmptyGameState = (): RoomState => ({
+    id: "",
     players: ["", ""],
     playAgainReqs: [false, false],
     cardIdsToGuess: [-1, -1],
     preset: "",
     numOfChars: 0,
-} as const;
+    endState: [null, null],
+});
 
 /**
  * Sets up Socket.IO event handlers for game functionality
@@ -46,20 +48,20 @@ export function setupSocketEventHandlers(io: Server<ClientToServerEvents, Server
 
         /**
          * Creates a new game room with specified preset and character count
-         * @event createGame
          */
-        socket.on("createGame", (preset, numOfChars, ack) => {
+        socket.on("createRoom", (preset, numOfChars, ack) => {
+            //parse params
             const validateCreateRoomParams = createRoomParamsSchema.safeParse({
                 preset,
                 numOfChars,
             });
             if (validateCreateRoomParams.success) {
-                // Generate unique room ID
+                // Generate unique room ID + set initial room state
                 let roomId = nanoid(6);
                 while (ActiveRoomIdsMap.has(roomId)) roomId = nanoid(6);
                 ActiveRoomIdsMap.set(roomId, {
-                    players: ["", ""],
-                    playAgainReqs: [false, false],
+                    ...createEmptyGameState(),
+                    id: roomId,
                     cardIdsToGuess: winningKeyGenerator(numOfChars),
                     preset,
                     numOfChars,
@@ -67,6 +69,7 @@ export function setupSocketEventHandlers(io: Server<ClientToServerEvents, Server
 
                 ack(roomId, { success: true, msg: `Created room: ${roomId} successfully.` });
                 console.log(`Player ${socket.id} created room: ${roomId}`);
+                //Error and invalid request handling ↓
             } else {
                 ack("", { success: false, msg: `Invalid parameters for creating a room.` });
                 console.error(
@@ -77,9 +80,8 @@ export function setupSocketEventHandlers(io: Server<ClientToServerEvents, Server
 
         /**
          * Joins an existing game room
-         * @event joinGame
          */
-        socket.on("joinGame", (roomId, ack) => {
+        socket.on("joinRoom", (roomId, ack) => {
             if (validateRoomId(roomId, socket.id)) {
                 const gameState = ActiveRoomIdsMap.get(roomId);
                 if (gameState) {
@@ -90,7 +92,7 @@ export function setupSocketEventHandlers(io: Server<ClientToServerEvents, Server
                         players[players.indexOf("")] = socket.id;
 
                         void socket.join(roomId);
-                        socket.to(roomId).emit("playerJoined", gameState);
+                        socket.to(roomId).emit("updateRoomState", gameState);
 
                         console.log(
                             `Player ${socket.id} joined game ${roomId}. Current game state:`,
@@ -110,11 +112,14 @@ export function setupSocketEventHandlers(io: Server<ClientToServerEvents, Server
                     }
                 } else {
                     console.error(`Game ${roomId} not found!`);
-                    ack(EmptyGameState, { success: false, msg: `Game ${roomId} not found!` });
+                    ack(createEmptyGameState(), {
+                        success: false,
+                        msg: `Game ${roomId} not found!`,
+                    });
                 }
             } else {
                 console.error(`${socket.id} requested to join an invalid roomId.`);
-                ack(EmptyGameState, { success: false, msg: `Invalid roomId provided.` });
+                ack(createEmptyGameState(), { success: false, msg: `Invalid roomId provided.` });
             }
         });
 
@@ -124,13 +129,20 @@ export function setupSocketEventHandlers(io: Server<ClientToServerEvents, Server
          */
         socket.on("guess", (roomId, guessCorrectness) => {
             if (validateRoomId(roomId, socket.id)) {
-                console.log(
-                    `Recieved correctness of guess by player: ${
-                        socket.id
-                    } in game: ${roomId}, ${guessCorrectness.toString()}`
-                );
+                const gameState = ActiveRoomIdsMap.get(roomId);
 
-                socket.to(roomId).emit("receiveOppGuess", guessCorrectness);
+                if (gameState) {
+                    console.log(
+                        `Recieved correctness of guess by player: ${
+                            socket.id
+                        } in game: ${roomId}, ${guessCorrectness.toString()}`
+                    );
+
+                    const playerIndex = gameState.players.indexOf(socket.id);
+                    gameState.endState[playerIndex] = guessCorrectness;
+
+                    io.to(roomId).emit("updateRoomState", gameState);
+                }
             }
         });
 
@@ -148,6 +160,7 @@ export function setupSocketEventHandlers(io: Server<ClientToServerEvents, Server
                     const players = gameState.players;
                     players[players.indexOf(socket.id)] = "";
                     gameState.playAgainReqs = [false, false];
+                    gameState.endState = [null, null];
                     gameState.cardIdsToGuess = winningKeyGenerator(gameState.numOfChars);
                     console.log([players]);
                     // Delete room if empty
@@ -156,7 +169,7 @@ export function setupSocketEventHandlers(io: Server<ClientToServerEvents, Server
                         console.log("Deleted room:", roomId);
                     } else {
                         console.log(`Player ${socket.id} disconnected from ${roomId}.`);
-                        socket.to(roomId).emit("opponentDisconnted", gameState);
+                        socket.to(roomId).emit("opponentDisconnected", gameState);
                     }
                 }
             }
@@ -180,7 +193,8 @@ export function setupSocketEventHandlers(io: Server<ClientToServerEvents, Server
                         if (gameState.playAgainReqs.every(Boolean)) {
                             gameState.cardIdsToGuess = winningKeyGenerator(gameState.numOfChars);
                             gameState.playAgainReqs = [false, false];
-                            io.to(roomId).emit("playAgainConfirmed", gameState);
+                            gameState.endState = [null, null];
+                            io.to(roomId).emit("updateRoomState", gameState);
                         }
                         //Error and invalid request handling ↓
                     } else {

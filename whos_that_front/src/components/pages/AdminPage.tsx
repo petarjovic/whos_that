@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router";
 import { CardLayout } from "../misc/Cards.tsx";
 import type { ServerResponse } from "../../lib/types.ts";
-import { useBetterAuthSession } from "../../lib/LayoutContextProvider.ts";
+import { useBetterAuthSession } from "../../lib/hooks.ts";
 import { serverResponseSchema } from "../../lib/zodSchema.ts";
 import { UrlPresetInfoListSchema } from "@server/zodSchema";
 import type { UrlPresetInfo } from "@server/types";

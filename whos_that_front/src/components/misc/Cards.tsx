@@ -1,5 +1,5 @@
+import type { EndState } from "@server/types";
 import { useState, useEffect } from "react";
-import type { EndStateType } from "../../lib/types.ts";
 import type { PropsWithChildren } from "react";
 import { FaQuestion } from "react-icons/fa";
 
@@ -17,7 +17,7 @@ type sizeTailwind = {
 const sizeMap: sizeTailwind = {
     S: "w-26.75 h-42",
     M: "w-40.5 h-63.75",
-    L: "max-xl:h-66.75 max-xl:w-39 w-45.75 h-72.5",
+    L: "max-xl:h-66.75 max-xl:w-39 w-45.75 h-72.5 ",
 };
 
 /**
@@ -55,7 +55,7 @@ interface CardProps {
     imgSrc: string;
     winner: boolean;
     openConfirmModal: (win: boolean, name: string) => void;
-    resetOnNewGame: EndStateType; // Triggers card reset when game ends
+    resetOnNewGame: EndState; // Triggers card reset when game ends
     isGame?: boolean;
 }
 /**
@@ -64,14 +64,14 @@ interface CardProps {
 export const Card = ({ name, imgSrc, winner, openConfirmModal, resetOnNewGame }: CardProps) => {
     const [flipped, setFlipped] = useState(false);
 
-    // Reset card visibility when new game starts (empty string = no end state)
+    // Reset card visibility when new game starts
     useEffect(() => {
-        if (resetOnNewGame.length === 0) setFlipped(false);
+        if (resetOnNewGame.every((e) => e === null)) setFlipped(false);
     }, [resetOnNewGame]);
 
     return (
         <>
-            <CardLayout name={flipped ? "" : name} imgSrc={flipped ? undefined : imgSrc}>
+            <CardLayout name={flipped ? "" : name} imgSrc={flipped ? undefined : imgSrc} size="L">
                 {/* In game controls for hiding and guessing characters */}
                 <div className="mx-1 mb-1 box-content flex items-center justify-between">
                     {/* Guess Button */}
@@ -108,7 +108,7 @@ export const Card = ({ name, imgSrc, winner, openConfirmModal, resetOnNewGame }:
  */
 export const OpponentTargetCard = ({ name, imgSrc }: { name: string; imgSrc: string }) => {
     return (
-        <CardLayout name={name} imgSrc={imgSrc} isOppCard={true}>
+        <CardLayout name={name} imgSrc={imgSrc} isOppCard={true} size={"L"}>
             <p className="mx-auto mb-1 w-full bg-orange-300 text-center text-base font-medium text-neutral-700">
                 Opponent to Guess
             </p>

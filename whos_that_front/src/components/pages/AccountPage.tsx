@@ -1,7 +1,7 @@
 import { useNavigate } from "react-router";
 import { useEffect, useState } from "react";
 import { Link } from "react-router";
-import { useBetterAuthSession } from "../../lib/LayoutContextProvider";
+import { useBetterAuthSession } from "../../lib/hooks.ts";
 import { authClient } from "../../lib/auth/auth-client";
 import type { SocialSignInProviders } from "../../lib/types";
 import { socialSignInProvidersSchema } from "../../lib/zodSchema";
