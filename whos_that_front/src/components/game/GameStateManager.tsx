@@ -18,12 +18,11 @@ import CharacterPicker from "./CharacterPicker.tsx";
 const GameStateManager = ({ isNewGame }: { isNewGame: boolean }) => {
     const nav = useNavigate();
     const { joinRoomId = "" } = useParams();
-    const [roomId, setRoomId] = useState(joinRoomId);
     const [title, setTitle] = useState("");
     const [searchParams] = useSearchParams();
     // Initialize with preset from URL query param if present
     const [roomState, setRoomState] = useState<RoomState>({
-        id: roomId,
+        id: joinRoomId,
         players: ["", ""],
         playAgainReqs: [false, false],
         cardIdsToGuess: [-1, -1],
@@ -33,11 +32,11 @@ const GameStateManager = ({ isNewGame }: { isNewGame: boolean }) => {
     });
     const [errorMsg, setErrorMsg] = useState("");
     const [cardData, setCardData] = useState<CardDataUrlType[]>([]);
-    const [playerHasLiked, setPlayerHasLiked] = useState<boolean | null>(null);
+    const [playerHasLiked, setPlayerHasLiked] = useState<boolean | null>(null); //has user liked this preset
 
     const { session, isPending } = useBetterAuthSession();
 
-    // Fetch game data (images and metadata) when preset is available
+    // Fetch game data (images and metadata) when preset id is available
     useEffect(() => {
         const fetchImages = async () => {
             if (roomState.preset) {
@@ -77,15 +76,16 @@ const GameStateManager = ({ isNewGame }: { isNewGame: boolean }) => {
 
                     if (!response.ok) {
                         const errorData = serverResponseSchema.parse(await response.json());
-                        throw new Error(errorData.message || "Getting userHasLiked data failed.");
+                        throw new Error(errorData.message || "Getting like data failed.");
                     } else {
                         const { userHasLiked } = userHasLikedSchema.parse(await response.json());
                         setPlayerHasLiked(userHasLiked);
                     }
                 } catch (error) {
                     logError(error);
-                    if (error instanceof Error) setErrorMsg(error.message);
-                    else setErrorMsg("Getting images failed.");
+                    setErrorMsg(
+                        error instanceof Error ? error.message : "Getting like data failed."
+                    );
                 }
             }
         };
@@ -98,7 +98,7 @@ const GameStateManager = ({ isNewGame }: { isNewGame: boolean }) => {
         socket.connect();
         socket.on("connect_error", (err) => {
             logError(err);
-            setErrorMsg(`Could not connect to server, server responded with:\n${err.message}`);
+            setErrorMsg("Error connecting websocket to server.");
         });
 
         //this event synchronizes data with the server
@@ -135,7 +135,7 @@ const GameStateManager = ({ isNewGame }: { isNewGame: boolean }) => {
             socket.emit("createRoom", roomState.preset, cardData.length, (id, response) => {
                 if (response.success) {
                     log(response.msg);
-                    setRoomId(id);
+                    setRoomState((prev) => ({ ...prev, id: id }));
                     void nav(`/play-game/${id}`, { replace: true });
                 } else {
                     setErrorMsg(response.msg);
@@ -147,7 +147,7 @@ const GameStateManager = ({ isNewGame }: { isNewGame: boolean }) => {
     // Join existing game using room ID from URL
     useEffect(() => {
         if (!isNewGame) {
-            socket.emit("joinRoom", roomId, (joinedRoomState, response) => {
+            socket.emit("joinRoom", roomState.id, (joinedRoomState, response) => {
                 if (!response.success) {
                     void nav("/"); //flesh this out, pop-up upon returning to home page?
                 }
@@ -155,7 +155,7 @@ const GameStateManager = ({ isNewGame }: { isNewGame: boolean }) => {
                 log(response.msg);
             });
         }
-    }, [roomId, isNewGame, nav]);
+    }, [roomState.id, isNewGame, nav]);
 
     /**
      * Determines which player slot this client occupies (0 or 1)
@@ -170,10 +170,10 @@ const GameStateManager = ({ isNewGame }: { isNewGame: boolean }) => {
     if (errorMsg) throw new Error(errorMsg);
     // Show waiting room until both players connected and data loaded
     else if (roomState.players.includes("") || cardData.length === 0)
-        return <WaitingRoom gameId={roomId} cardData={cardData} />;
+        return <WaitingRoom gameId={roomState.id} cardData={cardData} />;
     //Show character picker until both players have selected a character
     else if (roomState.cardIdsToGuess.includes(-1))
-        return <CharacterPicker roomId={roomId} cardData={cardData} />;
+        return <CharacterPicker roomId={roomState.id} cardData={cardData} />;
     else {
         const playerIndex = getPlayerIndex();
         if (playerIndex === -1) {
