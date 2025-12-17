@@ -17,6 +17,7 @@ export interface ClientToServerEvents {
     ) => void;
     joinRoom: (roomId: string, ack: (gameData: RoomState, response: ResponseType) => void) => void;
     guess: (roomId: string, guessCorrectness: boolean) => void;
+    chooseCharacter: (roomId: string, indexNum: number) => void;
     playAgain: (roomId: string) => void;
 }
 

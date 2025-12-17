@@ -6,6 +6,9 @@ import { useEffect, useState } from "react";
 import { FaHeart } from "react-icons/fa6";
 import LikeButton from "../misc/LikeButton.tsx";
 import { emitPlayAgain, emitGuess } from "../../lib/socket.ts";
+import GameBoard from "./GameBoard.tsx";
+
+type ConfirmGuessModalState = { isOpen: false } | { isOpen: true; isWinner: boolean; name: string };
 
 interface GameProps {
     roomState: RoomState;
@@ -15,28 +18,6 @@ interface GameProps {
     playerHasLiked: boolean | null;
 }
 
-type ConfirmGuessModalState = { isOpen: false } | { isOpen: true; isWinner: boolean; name: string };
-
-interface gridColsTailwind {
-    [key: number]: string;
-}
-
-// Map of grid column counts to Tailwind classes (Tailwind requires this)
-const GridColsClasses: gridColsTailwind = {
-    1: "xl:grid-cols-1",
-    2: "xl:grid-cols-2",
-    3: "xl:grid-cols-3",
-    4: "xl:grid-cols-4",
-    5: "xl:grid-cols-5",
-    6: "xl:grid-cols-6",
-    7: "xl:grid-cols-7",
-    8: "xl:grid-cols-8",
-    9: "xl:grid-cols-9",
-    10: "xl:grid-cols-10",
-    11: "xl:grid-cols-11",
-    12: "xl:grid-cols-12",
-} as const;
-
 /**
  * Main game component displaying character grid and opponent's target
  * Handles guess confirmation and play again requests
@@ -45,10 +26,6 @@ const Game = ({ roomState, playerIndex, cardData, title, playerHasLiked }: GameP
     const [confirmGuessModal, setConfirmGuessModal] = useState<ConfirmGuessModalState>({
         isOpen: false,
     });
-
-    // Calc num grid cols for consistent layout ("+ 4" is a heuristic)
-    let numGridCols = Math.ceil(Math.sqrt(cardData.length)) + 4;
-    if (numGridCols > 12) numGridCols = 12;
 
     const handleConfirmGuessModalResult = (cofirmGuess: boolean) => {
         if (cofirmGuess && confirmGuessModal.isOpen)
@@ -75,40 +52,20 @@ const Game = ({ roomState, playerIndex, cardData, title, playerHasLiked }: GameP
             resetOnNewGame={roomState.endState}
             isGame={true}
         />
-    )); // Separate last row of list for layout purposes
-    const lastRow = cardList.splice(cardList.length - (cardData.length % numGridCols));
-    console.log(oppWinningKey);
-    console.log(cardData);
+    ));
 
+    //Generate card which indicates what char opponent is guessing
     const oppTargetCardData = cardData.find((card) => card.orderIndex === oppWinningKey);
-    console.log(cardList);
     if (!oppTargetCardData) {
-        //Sanity check
-        throw new Error("Cannot find opponent's card data.");
+        throw new Error("Cannot find opponent's card data."); //sanity check
     }
+    const oppTargetCard = (
+        <OpponentTargetCard name={oppTargetCardData.name} imgSrc={oppTargetCardData.imageUrl} />
+    );
 
     return (
         <>
-            {/* Game Title */}
-            <p className="my-1.5 text-4xl font-bold">{title}</p>
-            {/* Game Board */}
-            {/* grid on large screens, flexbox on small screens */}
-            <div className="mb-2 h-full w-[99%] rounded border bg-slate-400 pt-4">
-                <div
-                    id="gameboard"
-                    className={`mx-auto mb-2.5 max-lg:px-1 lg:px-2.5 2xl:grid 2xl:px-6 ${GridColsClasses[numGridCols]} 2xl:gap-y-4.5 w-full max-2xl:flex max-2xl:flex-wrap max-2xl:items-center max-2xl:justify-around max-md:gap-2 md:max-2xl:gap-2 2xl:auto-cols-min 2xl:place-items-center 2xl:justify-center 2xl:gap-x-0`}
-                >
-                    {cardList}
-                </div>
-                {/* Last Row of Cards, always flexbox */}
-                <div className="mb-2.5 flex w-full flex-wrap justify-evenly px-10 max-2xl:px-4 max-sm:gap-x-8 max-sm:gap-y-3">
-                    {lastRow}
-                    <OpponentTargetCard
-                        name={oppTargetCardData.name}
-                        imgSrc={oppTargetCardData.imageUrl}
-                    />
-                </div>
-            </div>
+            <GameBoard title={title} cardList={cardList} targetCard={oppTargetCard} />
             {/* Modals */}
             <div>
                 <GameEndModal

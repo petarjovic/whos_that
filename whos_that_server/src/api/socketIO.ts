@@ -3,17 +3,6 @@ import type { RoomState, ClientToServerEvents, ServerToClientEvents } from "../c
 import type { Server } from "socket.io";
 import { roomIdSchema, createRoomParamsSchema } from "../config/zod/zodSchema.ts";
 
-/**
- * Generates two random character indices for players to guess
- * @param max - Maximum number of characters in the game
- * @returns Tuple of two random indices
- */
-function winningKeyGenerator(max: number): [number, number] {
-    const winningKeyOne = Math.floor(Math.random() * max);
-    const winningKeyTwo = Math.floor(Math.random() * max);
-    return [winningKeyOne, winningKeyTwo];
-}
-
 const ActiveRoomIdsMap = new Map<string, RoomState>();
 
 const createEmptyGameState = (): RoomState => ({
@@ -62,7 +51,6 @@ export function setupSocketEventHandlers(io: Server<ClientToServerEvents, Server
                 ActiveRoomIdsMap.set(roomId, {
                     ...createEmptyGameState(),
                     id: roomId,
-                    cardIdsToGuess: winningKeyGenerator(numOfChars),
                     preset,
                     numOfChars,
                 });
@@ -124,24 +112,71 @@ export function setupSocketEventHandlers(io: Server<ClientToServerEvents, Server
         });
 
         /**
-         * Broadcasts player's guess result to opponent
-         * @event guess
+         * Sets player's character choice
          */
-        socket.on("guess", (roomId, guessCorrectness) => {
+        socket.on("chooseCharacter", (roomId, indexNum) => {
+            //validate room exists
             if (validateRoomId(roomId, socket.id)) {
                 const gameState = ActiveRoomIdsMap.get(roomId);
 
                 if (gameState) {
-                    console.log(
-                        `Recieved correctness of guess by player: ${
-                            socket.id
-                        } in game: ${roomId}, ${guessCorrectness.toString()}`
-                    );
-
                     const playerIndex = gameState.players.indexOf(socket.id);
-                    gameState.endState[playerIndex] = guessCorrectness;
+                    //validate socket is part of room
+                    if (playerIndex !== -1) {
+                        console.log(
+                            `Recieved character choice of player: ${socket.id} in game: ${roomId}`
+                        );
+                        if (indexNum > 0 && indexNum < gameState.numOfChars) {
+                            gameState.cardIdsToGuess[playerIndex] = indexNum;
+                        } else {
+                            gameState.cardIdsToGuess[playerIndex] = Math.floor(
+                                Math.random() * gameState.numOfChars
+                            );
+                        }
+                        io.to(roomId).emit("updateRoomState", gameState);
+                        //Error and invalid request handling ↓
+                    } else {
+                        const playerNotInRoom = `Player ${socket.id} choosing character was not found in game ${roomId} .`;
+                        console.warn(playerNotInRoom);
+                        io.to(roomId).emit("errorMessage", {
+                            message: playerNotInRoom,
+                        });
+                    }
+                } else {
+                    const roomDoesNotExist = `Player: ${socket.id} sent character choice to room: ${roomId} which does not exist.`;
+                    console.warn(roomDoesNotExist);
+                }
+            }
+        });
 
-                    io.to(roomId).emit("updateRoomState", gameState);
+        /**
+         * Broadcasts player's guess result (i.e. is it correct) to opponent
+         */
+        socket.on("guess", (roomId, guessCorrectness) => {
+            //validate room exists
+            if (validateRoomId(roomId, socket.id)) {
+                const gameState = ActiveRoomIdsMap.get(roomId);
+
+                if (gameState) {
+                    const playerIndex = gameState.players.indexOf(socket.id);
+                    //validate socket is part of room
+                    if (playerIndex !== -1) {
+                        console.log(
+                            `Recieved correctness of guess by player: ${socket.id} in game: ${roomId}, ${guessCorrectness.toString()}`
+                        );
+                        gameState.endState[playerIndex] = guessCorrectness;
+                        io.to(roomId).emit("updateRoomState", gameState);
+                        //Error and invalid request handling ↓
+                    } else {
+                        const playerNotInRoom = `Player ${socket.id} making guess was not found in game ${roomId} .`;
+                        console.warn(playerNotInRoom);
+                        io.to(roomId).emit("errorMessage", {
+                            message: playerNotInRoom,
+                        });
+                    }
+                } else {
+                    const roomDoesNotExist = `Player: ${socket.id} sent guess to room: ${roomId} which does not exist.`;
+                    console.warn(roomDoesNotExist);
                 }
             }
         });
@@ -151,7 +186,7 @@ export function setupSocketEventHandlers(io: Server<ClientToServerEvents, Server
          * @event disconnecting
          */
         socket.on("disconnecting", () => {
-            //For each room this player socket is in (should only be one room)
+            //For each room this player socket is in (usually only one room)
             for (const roomId of socket.rooms) {
                 const gameState = ActiveRoomIdsMap.get(roomId);
 
@@ -161,7 +196,7 @@ export function setupSocketEventHandlers(io: Server<ClientToServerEvents, Server
                     players[players.indexOf(socket.id)] = "";
                     gameState.playAgainReqs = [false, false];
                     gameState.endState = [null, null];
-                    gameState.cardIdsToGuess = winningKeyGenerator(gameState.numOfChars);
+                    gameState.cardIdsToGuess = [-1, -1];
                     console.log([players]);
                     // Delete room if empty
                     if (players.every((p) => p === "")) {
@@ -191,7 +226,7 @@ export function setupSocketEventHandlers(io: Server<ClientToServerEvents, Server
                         gameState.playAgainReqs[playerIndex] = true;
                         // Reset game when both players agree
                         if (gameState.playAgainReqs.every(Boolean)) {
-                            gameState.cardIdsToGuess = winningKeyGenerator(gameState.numOfChars);
+                            gameState.cardIdsToGuess = [-1, -1];
                             gameState.playAgainReqs = [false, false];
                             gameState.endState = [null, null];
                             io.to(roomId).emit("updateRoomState", gameState);

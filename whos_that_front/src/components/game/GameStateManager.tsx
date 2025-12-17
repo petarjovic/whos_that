@@ -9,6 +9,7 @@ import { serverResponseSchema } from "../../lib/zodSchema.ts";
 import env from "../../lib/zodEnvSchema.ts";
 import { logError, log } from "../../lib/logger.ts";
 import { useBetterAuthSession } from "../../lib/hooks.ts";
+import CharacterPicker from "./CharacterPicker.tsx";
 
 /**
  * Manages game state and Socket.IO connection lifecycle
@@ -170,6 +171,9 @@ const GameStateManager = ({ isNewGame }: { isNewGame: boolean }) => {
     // Show waiting room until both players connected and data loaded
     else if (roomState.players.includes("") || cardData.length === 0)
         return <WaitingRoom gameId={roomId} cardData={cardData} />;
+    //Show character picker until both players have selected a character
+    else if (roomState.cardIdsToGuess.includes(-1))
+        return <CharacterPicker roomId={roomId} cardData={cardData} />;
     else {
         const playerIndex = getPlayerIndex();
         if (playerIndex === -1) {

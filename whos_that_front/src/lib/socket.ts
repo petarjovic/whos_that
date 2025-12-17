@@ -18,3 +18,8 @@ export const emitPlayAgain = (roomId: string) => {
     socket.emit("playAgain", roomId);
     log(`Player ${String(socket.id)} requested to play again in room ${roomId}`);
 };
+
+export const emitChooseCharacter = (roomId: string, indexNum: number) => {
+    socket.emit("chooseCharacter", roomId, indexNum);
+    log(`Player ${String(socket.id)} sent character choice to room ${roomId}`);
+};
