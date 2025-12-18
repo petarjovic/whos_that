@@ -256,8 +256,10 @@ export function setupApiRoutes(app: Express) {
                 headers: fromNodeHeaders(req.headers),
             });
 
+            //includes private games if user is an admin, otherwise only public
+            const isAdmin = session?.user.role === "admin";
             const whereConditions = and(
-                eq(schema.games.isPublic, true),
+                isAdmin ? undefined : eq(schema.games.isPublic, true),
                 q ? ilike(schema.games.title, `%${q}%`) : undefined
             );
 
@@ -305,9 +307,19 @@ export function setupApiRoutes(app: Express) {
             // Convert image id to image url
             const premadeGamesInfoUrl: UrlPresetInfo[] = premadeGamesInfo.map(
                 ({ imageId, ...presetInfo }) => {
+                    let imageUrl = constructImageUrl(presetInfo.isPublic, presetInfo.id, imageId);
+
+                    if (!presetInfo.isPublic && USE_CLOUDFRONT) {
+                        imageUrl = getSignedCFUrl({
+                            url: imageUrl,
+                            dateLessThan: new Date(Date.now() + 1000 * 60 * 60 * 24),
+                            privateKey: env.AWS_CF_PRIV_KEY,
+                            keyPairId: env.AWS_CF_KEY_PAIR_ID,
+                        });
+                    }
                     return {
                         ...presetInfo,
-                        imageUrl: constructImageUrl(true, presetInfo.id, imageId),
+                        imageUrl,
                     };
                 }
             );

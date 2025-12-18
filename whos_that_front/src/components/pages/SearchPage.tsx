@@ -61,19 +61,19 @@ const SearchPage = () => {
                         setPageInfo(validSearchRes.data.pagination);
                     } else {
                         setErrorMsg(
-                            "Client did not understand server response while getting user's games."
+                            "Client did not understand server response while searching games."
                         );
                     }
                 } else {
                     const errorData = (await response.json()) as ServerResponse;
-                    setErrorMsg(errorData.message ?? "Error: Failed to get user's games.");
+                    setErrorMsg(errorData.message ?? "Error: Failed to search for games.");
                 }
             } catch (error) {
                 if (error instanceof Error && error.name === "AbortError") return;
                 logError(error);
                 if (error instanceof Error) {
                     setErrorMsg(error.message);
-                } else setErrorMsg("Error: Failed to get user's games.");
+                } else setErrorMsg("Error: Failed to get search for games.");
             }
             setIsLoading(false);
         };

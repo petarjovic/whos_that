@@ -1,19 +1,14 @@
 import { requireAdmin } from "../middleware/authMw.ts";
 import type { Express } from "express";
-import { db, USE_CLOUDFRONT } from "../config/connections.ts";
-import { eq, not, and } from "drizzle-orm";
+import { db } from "../config/connections.ts";
+import { eq, not } from "drizzle-orm";
 import * as schema from "../db/schema.ts";
-import * as authSchema from "../db/auth-schema.ts";
 import {
     getPrivacySettingAndImageIds,
     deleteImagesFromBucketAndCF,
     switchPrivacySettings,
-    constructImageUrl,
 } from "./apiHelpers.ts";
-import { getSignedUrl as getSignedCFUrl } from "@aws-sdk/cloudfront-signer";
 import { checkGameExists, validateGameId } from "../middleware/validatorMw.ts";
-import type { UrlPresetInfo } from "../config/types.ts";
-import env from "../config/zod/zodEnvSchema.ts";
 import { delGameDataCache } from "./cache.ts";
 
 /**
@@ -22,69 +17,7 @@ import { delGameDataCache } from "./cache.ts";
  */
 export function setupAdminRoutes(app: Express) {
     /**
-     * Retrieves all games (public and private) for admin review
-     * @route GET /api/admin/listAllGames
-     * @returns List of all games with cover images and metadata
-     */
-    app.get("/api/admin/listAllGames", requireAdmin, async (req, res) => {
-        try {
-            // Query all games with author and cover image
-            const allGamesInfo = await db
-                .select({
-                    id: schema.games.id,
-                    title: schema.games.title,
-                    isPublic: schema.games.isPublic,
-                    author: authSchema.user.displayUsername,
-                    coverImageId: schema.gameItems.id,
-                })
-                .from(schema.games)
-                .leftJoin(authSchema.user, eq(authSchema.user.id, schema.games.userId))
-                .leftJoin(
-                    schema.gameItems,
-                    and(
-                        eq(schema.gameItems.gameId, schema.games.id),
-                        eq(schema.gameItems.orderIndex, 0)
-                    )
-                );
-
-            // Populate response object with data for all games
-            const allGamesInfoUrl: UrlPresetInfo[] = allGamesInfo.map(
-                ({ id, title, isPublic, author, coverImageId }) => {
-                    const imageUrl = constructImageUrl(isPublic, id, coverImageId!);
-                    const signedUrlParams = {
-                        url: imageUrl,
-                        dateLessThan: new Date(Date.now() + 1000 * 60 * 60 * 24),
-                        privateKey: env.AWS_CF_PRIV_KEY,
-                        keyPairId: env.AWS_CF_KEY_PAIR_ID,
-                    };
-                    return {
-                        id,
-                        title,
-                        author,
-                        isPublic,
-                        numLikes: -1,
-                        userHasLiked: null,
-                        imageUrl:
-                            isPublic || !USE_CLOUDFRONT
-                                ? imageUrl
-                                : getSignedCFUrl(signedUrlParams),
-                    };
-                }
-            );
-
-            return res.status(200).send(allGamesInfoUrl);
-            //Error handling ↓
-        } catch (error) {
-            console.error("Error when admin attempted to list all games:\n", error);
-            return res.status(500).json({
-                message: "Internal Server Error while attempting to list all games.",
-            });
-        }
-    });
-
-    /**
      * Switches game privacy between public and private (admin override)
-     * @route PUT /api/admin/switchPrivacy/:gameId
      * @returns Success status
      */
     app.put(
@@ -132,7 +65,6 @@ export function setupAdminRoutes(app: Express) {
 
     /**
      * Deletes a game and all associated images from S3 (admin override)
-     * @route DELETE /api/admin/deleteGame/:gameId
      * @returns Success message
      */
     app.delete(
