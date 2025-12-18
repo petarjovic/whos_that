@@ -97,7 +97,7 @@ const Game = ({
     ) : (
         <div className="my-auto border border-neutral-700">
             <div className="text-shadow-xs/50 border-5 flex h-40 w-40 flex-col items-center justify-center border-neutral-100 bg-slate-500 text-neutral-50">
-                <span className="text-xl font-medium">Opponents Turn To Ask A Question</span>
+                <span className="text-xl font-medium">Opponent's Turn To Ask A Question</span>
             </div>
         </div>
     );

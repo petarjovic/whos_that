@@ -40,6 +40,8 @@ const CreateCustomGamePage = () => {
 
     const [errorMsg, setErrorMsg] = useState(""); //Used to throw error if set to non-empty string
 
+    const [draggedIndex, setDraggedIndex] = useState<number | null>(null);
+
     const { session, isPending } = useBetterAuthSession();
     //Redirect user if not logged in
     useEffect(() => {
@@ -156,6 +158,17 @@ const CreateCustomGamePage = () => {
             setCharNames([...charNames, ...emptyFileNames]);
         }
         setIsLoading(false);
+    };
+
+    const handleReorder = (fromIndex: number, toIndex: number) => {
+        const newFiles = [...selectedFiles];
+        const newNames = [...charNames];
+        const [movedFile] = newFiles.splice(fromIndex, 1);
+        const [movedName] = newNames.splice(fromIndex, 1);
+        newFiles.splice(toIndex, 0, movedFile);
+        newNames.splice(toIndex, 0, movedName);
+        setSelectedFiles(newFiles);
+        setCharNames(newNames);
     };
 
     /**
@@ -437,11 +450,23 @@ const CreateCustomGamePage = () => {
                             selectedFiles.map((file, index) => (
                                 <div
                                     key={index}
+                                    draggable
+                                    onDragStart={() => setDraggedIndex(index)}
+                                    onDragEnd={() => setDraggedIndex(null)}
+                                    onDragOver={(e) => {
+                                        e.preventDefault();
+                                        if (draggedIndex !== null && draggedIndex !== index) {
+                                            handleReorder(draggedIndex, index);
+                                            setDraggedIndex(index);
+                                        }
+                                    }}
                                     className={`flex items-center border-b border-zinc-400 py-1.5 ${
+                                        draggedIndex === index ? "opacity-50" : ""
+                                    } ${
                                         index % 4 === 0 || index % 4 === 3
                                             ? "bg-zinc-200"
                                             : "bg-zinc-50"
-                                    } ${index % 2 === 0 ? "border-r" : ""}`}
+                                    } ${index % 2 === 0 ? "border-r" : ""} cursor-grab`}
                                 >
                                     <div className="mx-1 flex flex-col items-center justify-between">
                                         <PiEraserFill
