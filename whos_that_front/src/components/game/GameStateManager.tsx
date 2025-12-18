@@ -106,6 +106,7 @@ const GameStateManager = ({ isNewGame }: { isNewGame: boolean }) => {
         socket.on("updateRoomState", (newGameState) => {
             log(`Received new game state: ${JSON.stringify(newGameState)}`);
             setRoomState(newGameState);
+            setIsMyTurn(false);
         });
 
         //this event synchronizes player turns
