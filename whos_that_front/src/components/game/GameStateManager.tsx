@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useParams, useNavigate, useSearchParams } from "react-router";
-import { socket } from "../../lib/socket.ts";
+import { emitPassTurn, socket } from "../../lib/socket.ts";
 import Game from "./GamePage.tsx";
 import WaitingRoom from "../pages/WaitingRoomPage.tsx";
 import type { RoomState, CardDataUrlType } from "@server/types";
@@ -20,6 +20,7 @@ const GameStateManager = ({ isNewGame }: { isNewGame: boolean }) => {
     const { joinRoomId = "" } = useParams();
     const [title, setTitle] = useState("");
     const [searchParams] = useSearchParams();
+    const [isMyTurn, setIsMyTurn] = useState(false);
     // Initialize with preset from URL query param if present
     const [roomState, setRoomState] = useState<RoomState>({
         id: joinRoomId,
@@ -101,10 +102,15 @@ const GameStateManager = ({ isNewGame }: { isNewGame: boolean }) => {
             setErrorMsg("Error connecting websocket to server.");
         });
 
-        //this event synchronizes data with the server
+        //this event synchronizes game state with the server
         socket.on("updateRoomState", (newGameState) => {
             log(`Received new game state: ${JSON.stringify(newGameState)}`);
             setRoomState(newGameState);
+        });
+
+        //this event synchronizes player turns
+        socket.on("yourTurn", () => {
+            setIsMyTurn(true);
         });
 
         //event on oppontent disconnection
@@ -123,6 +129,7 @@ const GameStateManager = ({ isNewGame }: { isNewGame: boolean }) => {
         return () => {
             socket.off("connect_error");
             socket.off("errorMessage");
+            socket.off("yourTurn");
             socket.off("updateRoomState");
             socket.off("opponentDisconnected");
             socket.disconnect();
@@ -157,6 +164,25 @@ const GameStateManager = ({ isNewGame }: { isNewGame: boolean }) => {
         }
     }, [roomState.id, isNewGame, nav]);
 
+    // Ends this players turn
+    const passTurn = (): void => {
+        setIsMyTurn(false);
+        emitPassTurn(roomState.id);
+    };
+
+    // Set first turn when game starts
+    useEffect(() => {
+        const playerIndex = socket.id ? roomState.players.indexOf(socket.id) : -1;
+        if (
+            playerIndex === 0 &&
+            !roomState.cardIdsToGuess.includes(-1) &&
+            !roomState.endState.some((e) => e !== null)
+        ) {
+            if (Math.random() < 0.5) setIsMyTurn(true);
+            else passTurn();
+        }
+    }, [roomState.cardIdsToGuess, roomState.endState]);
+
     /**
      * Determines which player slot this client occupies (0 or 1)
      * Returns -1 if socket not connected or player not in game
@@ -177,9 +203,8 @@ const GameStateManager = ({ isNewGame }: { isNewGame: boolean }) => {
     else {
         const playerIndex = getPlayerIndex();
         if (playerIndex === -1) {
-            throw new Error("Socket not connected or this player is somehow not in room.");
+            throw new Error("Socket not connected or this player is somehow not in this room.");
         }
-        // Pass opponent's target as oppWinningKey, player's own target as winningKey
         return (
             <Game
                 roomState={roomState}
@@ -187,6 +212,8 @@ const GameStateManager = ({ isNewGame }: { isNewGame: boolean }) => {
                 cardData={cardData}
                 title={title}
                 playerHasLiked={playerHasLiked}
+                isMyTurn={isMyTurn}
+                passTurn={passTurn}
             />
         );
     }

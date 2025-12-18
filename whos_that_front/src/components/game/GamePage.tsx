@@ -16,16 +16,32 @@ interface GameProps {
     cardData: CardDataUrlType[];
     title: string;
     playerHasLiked: boolean | null;
+    isMyTurn: boolean;
+    passTurn: () => void;
 }
 
 /**
  * Main game component displaying character grid and opponent's target
  * Handles guess confirmation and play again requests
  */
-const Game = ({ roomState, playerIndex, cardData, title, playerHasLiked }: GameProps) => {
+const Game = ({
+    roomState,
+    playerIndex,
+    cardData,
+    title,
+    playerHasLiked,
+    isMyTurn,
+    passTurn,
+}: GameProps) => {
     const [confirmGuessModal, setConfirmGuessModal] = useState<ConfirmGuessModalState>({
         isOpen: false,
     });
+    //Shows player if they're going first or second
+    const [showTurnModal, setShowTurnModal] = useState(true);
+    useEffect(() => {
+        const timer = setTimeout(() => setShowTurnModal(false), 4000);
+        return () => clearTimeout(timer);
+    }, []);
 
     const handleConfirmGuessModalResult = (cofirmGuess: boolean) => {
         if (cofirmGuess && confirmGuessModal.isOpen)
@@ -50,7 +66,7 @@ const Game = ({ roomState, playerIndex, cardData, title, playerHasLiked }: GameP
             key={orderIndex}
             openConfirmModal={handleOpenConfirmModal}
             resetOnNewGame={roomState.endState}
-            isGame={true}
+            guessingDisabled={!isMyTurn}
         />
     ));
 
@@ -62,6 +78,30 @@ const Game = ({ roomState, playerIndex, cardData, title, playerHasLiked }: GameP
     const oppTargetCard = (
         <OpponentTargetCard name={oppTargetCardData.name} imgSrc={oppTargetCardData.imageUrl} />
     );
+
+    const passTurnButton = isMyTurn ? (
+        <div className="my-auto border border-neutral-700 hover:scale-105">
+            <button
+                type="button"
+                className="text-shadow-xs/50 border-5 flex h-40 w-40 cursor-pointer flex-col items-center justify-center border-neutral-100 bg-red-400 text-neutral-50 hover:bg-red-500"
+                onClick={(e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    passTurn();
+                }}
+            >
+                <span className="text-xl font-medium">End Turn</span>
+                <span>Without Guessing</span>
+            </button>
+        </div>
+    ) : (
+        <div className="my-auto border border-neutral-700">
+            <div className="text-shadow-xs/50 border-5 flex h-40 w-40 flex-col items-center justify-center border-neutral-100 bg-slate-500 text-neutral-50">
+                <span className="text-xl font-medium">Opponents Turn To Ask A Question</span>
+            </div>
+        </div>
+    );
+    cardList.push(passTurnButton);
 
     return (
         <>
@@ -78,10 +118,27 @@ const Game = ({ roomState, playerIndex, cardData, title, playerHasLiked }: GameP
                     confirmGuess={handleConfirmGuessModalResult}
                     name={confirmGuessModal.isOpen ? confirmGuessModal.name : ""}
                 />
+                <TurnOrderModal isOpen={showTurnModal} isMyTurn={isMyTurn} />
             </div>
         </>
     );
 };
+
+/*
+ * Pops up for 5 seconds at start of game to tell player if they're first or second
+ */
+const TurnOrderModal = ({ isOpen, isMyTurn }: { isOpen: boolean; isMyTurn: boolean }) => (
+    <ReactModal
+        isOpen={isOpen}
+        className="w-9/10 absolute left-1/2 top-1/2 mx-auto flex h-fit -translate-x-1/2 -translate-y-1/2 flex-col gap-4 border-2 border-neutral-800 bg-neutral-200 px-2 text-center max-lg:max-w-2xl max-md:py-5 md:max-lg:py-8 lg:max-w-3xl lg:py-8 2xl:pb-10 2xl:pt-12"
+        overlayClassName="fixed inset-0 bg-zinc-900/70"
+    >
+        <p className="text-shadow-xs/50 text-4xl font-bold text-amber-600">
+            {isMyTurn ? "It's your turn to ask a question first!" : "You're going second!"}
+        </p>
+        <p className="text-xl italic">Remember: you can only guess on your own turn!</p>
+    </ReactModal>
+);
 
 /**
  * Confirmation modal before submitting a guess

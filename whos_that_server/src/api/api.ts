@@ -599,13 +599,8 @@ export function setupApiRoutes(app: Express) {
                 )
                 .where(eq(schema.games.id, gameId));
 
-            // Prevent self-liking
-            if (gameAuthorandLikeStatus.authorId === session.user.id) {
-                return res.status(400).json({ message: "Cannot like your own game." });
-            }
-
             //invalidate top3mostlikedgames cache if game in cache
-            //this needs to be redone later if scaling becomes issue
+            //this maybe needs to be redone later if scaling becomes issue
             const top3MostLiked: IdPresetInfo[] | null = getCachedTop3MostLiked();
             if (top3MostLiked?.some((game) => game.id === gameId)) {
                 delTop3MostLikedCache();

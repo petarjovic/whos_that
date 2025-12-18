@@ -23,3 +23,8 @@ export const emitChooseCharacter = (roomId: string, indexNum: number) => {
     socket.emit("chooseCharacter", roomId, indexNum);
     log(`Player ${String(socket.id)} sent character choice to room ${roomId}`);
 };
+
+export const emitPassTurn = (roomId: string) => {
+    socket.emit("passTurn", roomId);
+    log(`Player ${String(socket.id)} passed their turn in ${roomId}`);
+};

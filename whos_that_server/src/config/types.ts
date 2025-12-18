@@ -7,6 +7,7 @@ export interface ServerToClientEvents {
     updateRoomState: (gameState: RoomState) => void;
     opponentDisconnected: (gameState: RoomState) => void;
     errorMessage: (data: { message: string }) => void;
+    yourTurn: () => void;
 }
 
 export interface ClientToServerEvents {
@@ -16,6 +17,7 @@ export interface ClientToServerEvents {
         ack: (id: string, response: ResponseType) => void
     ) => void;
     joinRoom: (roomId: string, ack: (gameData: RoomState, response: ResponseType) => void) => void;
+    passTurn: (roomId: string) => void;
     guess: (roomId: string, guessCorrectness: boolean) => void;
     chooseCharacter: (roomId: string, indexNum: number) => void;
     playAgain: (roomId: string) => void;

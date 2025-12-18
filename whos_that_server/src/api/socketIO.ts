@@ -150,7 +150,24 @@ export function setupSocketEventHandlers(io: Server<ClientToServerEvents, Server
         });
 
         /**
-         * Broadcasts player's guess result (i.e. is it correct) to opponent
+         * Sends other player notice that it is their turn
+         */
+        socket.on("passTurn", (roomId) => {
+            if (validateRoomId(roomId, socket.id)) {
+                const gameState = ActiveRoomIdsMap.get(roomId);
+
+                if (gameState) {
+                    const playerIndex = gameState.players.indexOf(socket.id);
+
+                    if (playerIndex !== -1) {
+                        socket.to(roomId).emit("yourTurn");
+                    }
+                }
+            }
+        });
+
+        /**
+         * Recieves guess from player and updates endState accordingly
          */
         socket.on("guess", (roomId, guessCorrectness) => {
             //validate room exists

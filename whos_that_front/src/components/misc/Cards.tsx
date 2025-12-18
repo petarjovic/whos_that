@@ -56,12 +56,19 @@ interface CardProps {
     winner: boolean;
     openConfirmModal: (win: boolean, name: string) => void;
     resetOnNewGame: EndState; // Triggers card reset when game ends
-    isGame?: boolean;
+    guessingDisabled: boolean;
 }
 /**
  * Interactive game card with hide/unhide (flip) and "guess" functionality
  */
-export const Card = ({ name, imgSrc, winner, openConfirmModal, resetOnNewGame }: CardProps) => {
+export const Card = ({
+    name,
+    imgSrc,
+    winner,
+    openConfirmModal,
+    resetOnNewGame,
+    guessingDisabled,
+}: CardProps) => {
     const [flipped, setFlipped] = useState(false);
 
     // Reset card visibility when new game starts
@@ -76,11 +83,11 @@ export const Card = ({ name, imgSrc, winner, openConfirmModal, resetOnNewGame }:
                 <div className="mx-1 mb-1 box-content flex items-center justify-between">
                     {/* Guess Button */}
                     <button
-                        className={`text-shadow-xs/40 text-shadow-green-900 w-[34%] cursor-pointer rounded bg-green-600 px-0.5 py-px text-center font-semibold text-neutral-100 transition-all hover:bg-green-700 max-2xl:text-sm max-sm:font-medium ${flipped ? "hidden" : ""}`}
+                        className={`text-shadow-xs/40 w-[34%] rounded px-0.5 py-px text-center font-semibold text-neutral-100 transition-all max-2xl:text-sm max-sm:font-medium ${flipped ? "hidden" : ""} ${guessingDisabled ? "bg-neutral-700" : "text-shadow-green-900 cursor-pointer bg-green-600 hover:bg-green-700"}`}
                         onClick={() => {
                             openConfirmModal(winner, name);
                         }}
-                        disabled={flipped}
+                        disabled={flipped || guessingDisabled}
                     >
                         Guess
                     </button>
