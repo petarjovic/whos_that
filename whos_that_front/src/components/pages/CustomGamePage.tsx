@@ -41,6 +41,7 @@ const CreateCustomGamePage = () => {
     const [errorMsg, setErrorMsg] = useState(""); //Used to throw error if set to non-empty string
 
     const [draggedIndex, setDraggedIndex] = useState<number | null>(null);
+    const [editingOrderIndex, setEditingOrderIndex] = useState<number | null>(null);
 
     const { session, isPending } = useBetterAuthSession();
     //Redirect user if not logged in
@@ -160,6 +161,9 @@ const CreateCustomGamePage = () => {
         setIsLoading(false);
     };
 
+    /**
+     * Moves image/file within array (i.e. edits character order)
+     */
     const handleReorder = (fromIndex: number, toIndex: number) => {
         const newFiles = [...selectedFiles];
         const newNames = [...charNames];
@@ -169,6 +173,22 @@ const CreateCustomGamePage = () => {
         newNames.splice(toIndex, 0, movedName);
         setSelectedFiles(newFiles);
         setCharNames(newNames);
+    };
+
+    /**
+     * Handles order change when order number is edited by user manually
+     */
+    const handleOrderInput = (currentIndex: number, newOrder: string) => {
+        const newPos = parseInt(newOrder) - 1;
+        if (
+            !isNaN(newPos) &&
+            newPos >= 0 &&
+            newPos < selectedFiles.length &&
+            newPos !== currentIndex
+        ) {
+            handleReorder(currentIndex, newPos);
+        }
+        setEditingOrderIndex(null);
     };
 
     /**
@@ -325,6 +345,7 @@ const CreateCustomGamePage = () => {
                         </label>
                         <input
                             type="text"
+                            id="title"
                             name="title"
                             placeholder="(E.g. Superheros, Famous Actors)"
                             className="border-groove lg:w-9/10 rounded border border-neutral-400 bg-neutral-50 p-1 text-center font-medium placeholder:text-gray-400 max-lg:w-full xl:text-lg 2xl:text-xl"
@@ -346,7 +367,7 @@ const CreateCustomGamePage = () => {
                                 id="public"
                                 value="public"
                                 className="mr-1 h-4 w-4 cursor-pointer appearance-auto border align-text-top transition-all"
-                                name="privacy"
+                                name="public"
                                 required
                                 checked={isPublic}
                                 onChange={handlePrivacyChange}
@@ -359,7 +380,7 @@ const CreateCustomGamePage = () => {
                                 id="private"
                                 value="private"
                                 className="mr-1 h-4 w-4 cursor-pointer appearance-auto border align-text-top transition-all"
-                                name="privacy"
+                                name="private"
                                 required
                                 checked={!isPublic}
                                 onChange={handlePrivacyChange}
@@ -402,6 +423,7 @@ const CreateCustomGamePage = () => {
                         <div className="items-baseline-last mb-1.25 mt-2.25 flex justify-between gap-1">
                             <input
                                 type="checkbox"
+                                id="image-names"
                                 name="image-names"
                                 className="inset-shadow-xs border-groove xl:h-4.5 xl:w-4.5 2xl:top-0.75 relative h-4 w-4 cursor-pointer appearance-auto rounded border accent-red-500 max-2xl:top-0.5 2xl:h-5 2xl:w-5"
                                 checked={useFileNames}
@@ -444,7 +466,21 @@ const CreateCustomGamePage = () => {
                             <></>
                         )}
                     </h3>
-                    <div className="max-lg:max-h-120 lg:max-h-154 border-groove rounded-xs overflow-y-auto border border-neutral-600 bg-zinc-50 2xl:grid 2xl:grid-cols-2">
+                    {selectedFiles.length > 0 ? (
+                        <>
+                            <p className="mb-px italic text-neutral-700 max-2xl:hidden">
+                                Drag and drop characters to reorder them, the first character will
+                                be the one in the thumbnail!
+                            </p>
+                            <p className="mb-1 text-sm italic text-neutral-700 2xl:hidden">
+                                Click on an order number to edit it, the first character will be the
+                                one in the thumbnail!
+                            </p>
+                        </>
+                    ) : (
+                        <></>
+                    )}
+                    <div className="max-lg:max-h-120 lg:max-h-151 border-groove rounded-xs overflow-y-auto border border-neutral-600 bg-zinc-50 2xl:grid 2xl:grid-cols-2">
                         {/* Dynamic list of characters */}
                         {selectedFiles.length > 0 ? (
                             selectedFiles.map((file, index) => (
@@ -476,9 +512,34 @@ const CreateCustomGamePage = () => {
                                                 handleRemoveImage(index);
                                             }}
                                         />
-                                        <div className="text-xl font-medium max-sm:mx-1 sm:mx-5">
-                                            {index + 1}
-                                        </div>
+                                        {editingOrderIndex === index ? (
+                                            <input
+                                                type="number"
+                                                autoFocus
+                                                min={1}
+                                                max={selectedFiles.length}
+                                                defaultValue={index + 1}
+                                                onBlur={(e) =>
+                                                    handleOrderInput(index, e.target.value)
+                                                }
+                                                onKeyDown={(e) => {
+                                                    if (e.key === "Enter") {
+                                                        handleOrderInput(
+                                                            index,
+                                                            e.currentTarget.value
+                                                        );
+                                                    }
+                                                }}
+                                                className="text-center text-xl font-medium max-sm:mx-1 sm:mx-5"
+                                            />
+                                        ) : (
+                                            <div
+                                                className="text-center text-xl font-medium max-sm:mx-1 sm:mx-5"
+                                                onClick={() => setEditingOrderIndex(index)}
+                                            >
+                                                {index + 1}
+                                            </div>
+                                        )}
                                     </div>
 
                                     <img
