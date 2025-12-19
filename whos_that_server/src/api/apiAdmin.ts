@@ -9,7 +9,7 @@ import {
     switchPrivacySettings,
 } from "./apiHelpers.ts";
 import { checkGameExists, validateGameId } from "../middleware/validatorMw.ts";
-import { delGameDataCache } from "./cache.ts";
+import { invalidateInAllCaches } from "./cache.ts";
 
 /**
  * Sets up admin-only API routes for the Express application
@@ -46,7 +46,7 @@ export function setupAdminRoutes(app: Express) {
                 void switchPrivacySettings(gameId, isPublic, newIsPublic, imageIds);
 
                 //del cache
-                delGameDataCache(gameId);
+                invalidateInAllCaches(gameId);
 
                 console.log(`Admin switched privacy setting of game:`, gameId);
                 return res.status(200).send();
@@ -85,7 +85,7 @@ export function setupAdminRoutes(app: Express) {
                 await deleteImagesFromBucketAndCF(gameId, isPublic, imageIds);
 
                 //del cache
-                delGameDataCache(gameId);
+                invalidateInAllCaches(gameId);
 
                 console.log(`Admin deleted game:`, gameId);
                 res.status(200).json({ message: `Deleted game: ${gameId}` });
