@@ -14,6 +14,7 @@ const CharacterPicker = ({ cardData, roomId }: { cardData: CardDataUrlType[]; ro
     for (const char of cardData) {
         cardSelectorList.push(
             <button
+                key={char.orderIndex}
                 onClick={(e) => {
                     e.preventDefault();
                     e.stopPropagation();
