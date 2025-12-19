@@ -11,6 +11,7 @@ import LoadingSpinner from "../misc/LoadingSpinner.tsx";
 import env from "../../lib/zodEnvSchema.ts";
 import { logError, log } from "../../lib/logger.ts";
 import ReactModal from "react-modal";
+ReactModal.setAppElement("#root");
 import { PiEraserFill, PiGavelFill, PiPenNibFill } from "react-icons/pi";
 import { FaCameraRetro } from "react-icons/fa";
 import { FaGears } from "react-icons/fa6";
@@ -367,7 +368,7 @@ const CreateCustomGamePage = () => {
                                 id="public"
                                 value="public"
                                 className="mr-1 h-4 w-4 cursor-pointer appearance-auto border align-text-top transition-all"
-                                name="public"
+                                name="privacy"
                                 required
                                 checked={isPublic}
                                 onChange={handlePrivacyChange}
@@ -380,7 +381,7 @@ const CreateCustomGamePage = () => {
                                 id="private"
                                 value="private"
                                 className="mr-1 h-4 w-4 cursor-pointer appearance-auto border align-text-top transition-all"
-                                name="private"
+                                name="privacy"
                                 required
                                 checked={!isPublic}
                                 onChange={handlePrivacyChange}
