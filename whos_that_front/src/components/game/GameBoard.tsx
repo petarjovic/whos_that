@@ -1,4 +1,4 @@
-import { useState, type JSX } from "react";
+import { type JSX } from "react";
 
 interface gridColsTailwind {
     [key: number]: string;
