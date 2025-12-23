@@ -15,26 +15,26 @@
     "author": "Petar Jovic",
     "license": "ISC",
     "dependencies": {
-        "@aws-sdk/client-cloudfront": "^3.948.0",
-        "@aws-sdk/client-s3": "^3.948.0",
-        "@aws-sdk/cloudfront-signer": "^3.946.0",
-        "@aws-sdk/credential-providers": "^3.948.0",
-        "@aws-sdk/s3-request-presigner": "^3.948.0",
+        "@aws-sdk/client-cloudfront": "^3.957.0",
+        "@aws-sdk/client-s3": "^3.957.0",
+        "@aws-sdk/cloudfront-signer": "^3.957.0",
+        "@aws-sdk/credential-providers": "^3.957.0",
+        "@aws-sdk/s3-request-presigner": "^3.957.0",
         "@neondatabase/serverless": "^1.0.2",
-        "better-auth": "^1.4.6",
+        "better-auth": "^1.4.9",
         "cors": "^2.8.5",
         "drizzle-orm": "^0.45.1",
         "express": "^5.2.1",
         "multer": "^2.0.2",
         "nanoid": "^5.1.6",
         "sharp": "^0.34.5",
-        "socket.io": "^4.8.1",
-        "zod": "^4.1.13"
+        "socket.io": "^4.8.3",
+        "zod": "^4.2.1"
     },
     "devDependencies": {
         "@types/express": "^5.0.6",
         "@types/multer": "^2.0.0",
-        "@types/node": "^25.0.1",
+        "@types/node": "^25.0.3",
         "drizzle-kit": "^0.31.8"
     },
     "overrides": {
