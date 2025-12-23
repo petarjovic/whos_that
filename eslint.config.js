@@ -7,7 +7,6 @@ import reactCompiler from "eslint-plugin-react-compiler";
 import tseslint from "typescript-eslint";
 import { globalIgnores } from "eslint/config";
 import configPrettier from "eslint-config-prettier/flat";
-import unicorn from "eslint-plugin-unicorn";
 import { defineConfig } from "eslint/config";
 
 export default defineConfig([
@@ -15,20 +14,15 @@ export default defineConfig([
     //Base rules
     {
         files: ["**/*.{js,jsx,ts,tsx}"],
+        ignores: ["eslint.config.js"],
         extends: [
             js.configs.recommended,
             tseslint.configs.strictTypeChecked,
             tseslint.configs.stylisticTypeChecked,
-            unicorn.configs.all,
             configPrettier,
         ],
         rules: {
-            "unicorn/filename-case": "off",
-            "unicorn/prevent-abbreviations": "off",
-            "unicorn/no-array-for-each": "off",
-            "unicorn/no-negated-condition": "off",
             "@typescript-eslint/consistent-indexed-object-style": ["error", "index-signature"],
-            "unicorn/prefer-ternary": "warn",
         },
         languageOptions: {
             ecmaVersion: 2020,
@@ -66,4 +60,3 @@ export default defineConfig([
         },
     },
 ]);
-
