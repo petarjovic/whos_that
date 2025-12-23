@@ -92,7 +92,7 @@ const HomePage = () => {
                             <input
                                 id="searchBar"
                                 type="search"
-                                className="md:max-xl:w-5/10 max-sm:w-19/20 max-md:w-4/10 2xl:p-0.75 xl:w-6/10 max-2xl:py-0.75 border border-neutral-400 bg-neutral-50 px-1 text-left text-lg font-medium placeholder:text-zinc-400 max-sm:mb-1.5 max-sm:mt-px 2xl:pl-3"
+                                className="border border-neutral-400 bg-neutral-50 px-1 text-left text-lg font-medium placeholder:text-zinc-400 max-2xl:py-0.75 max-md:w-4/10 max-sm:mt-px max-sm:mb-1.5 max-sm:w-19/20 md:max-xl:w-5/10 xl:w-6/10 2xl:p-0.75 2xl:pl-3"
                                 maxLength={20}
                                 placeholder="Search Preset Theme"
                                 value={inputQuery}
@@ -100,15 +100,15 @@ const HomePage = () => {
                                     setInputQuery(e.target.value);
                                 }}
                             />
-                            <div className="max-h-8/10 flex max-sm:mt-0.5 max-sm:gap-5 sm:gap-2">
+                            <div className="flex max-h-8/10 max-sm:mt-0.5 max-sm:gap-5 sm:gap-2">
                                 <button
-                                    className="hover:scale-102 sm:py-0.75 flex cursor-pointer items-center bg-red-400 px-1.5 text-white hover:bg-red-500 max-sm:py-0.5"
+                                    className="flex cursor-pointer items-center bg-red-400 px-1.5 text-white hover:scale-102 hover:bg-red-500 max-sm:py-0.5 sm:py-0.75"
                                     type="submit"
                                 >
                                     <IoMdSearch className="mr-px" size="1.5em" /> Search
                                 </button>
                                 <button
-                                    className="hover:scale-102 sm:py-0.75 flex cursor-pointer items-center bg-blue-400 px-1.5 text-white hover:bg-blue-500 max-sm:py-0.5"
+                                    className="flex cursor-pointer items-center bg-blue-400 px-1.5 text-white hover:scale-102 hover:bg-blue-500 max-sm:py-0.5 sm:py-0.75"
                                     onClick={() => handleSearch()}
                                     type="button"
                                 >
@@ -130,7 +130,7 @@ const HomePage = () => {
                                 mostRecentGames.map(({ id, title, imageUrl, author }, i) => (
                                     <Link key={i} to={`/play-game?preset=${id}`}>
                                         <CardLayout name={title} imgSrc={imageUrl} key={i}>
-                                            <p className="mb-0.5 text-sm font-medium italic text-neutral-600 max-xl:text-xs">
+                                            <p className="mb-0.5 text-sm font-medium text-neutral-600 italic max-xl:text-xs">
                                                 {author ?? ""}
                                             </p>
                                         </CardLayout>
@@ -160,12 +160,12 @@ const HomePage = () => {
                                         <Link key={i} to={`/play-game?preset=${id}`}>
                                             <CardLayout name={title} imgSrc={imageUrl} key={i}>
                                                 <div className="relative flex items-center justify-center">
-                                                    <p className="relative right-5 p-px pb-0.5 text-sm italic text-neutral-700 max-xl:text-xs">
+                                                    <p className="relative right-5 p-px pb-0.5 text-sm text-neutral-700 italic max-xl:text-xs">
                                                         {author ?? ""}
                                                     </p>
-                                                    <p className="bottom-0.75 right-2.25 absolute text-xs text-neutral-700">
+                                                    <p className="absolute right-2.25 bottom-0.75 text-xs text-neutral-700">
                                                         <button
-                                                            className="flex cursor-pointer items-center whitespace-pre-wrap align-sub"
+                                                            className="flex cursor-pointer items-center align-sub whitespace-pre-wrap"
                                                             disabled={true}
                                                         >
                                                             <div className="text-sm">
@@ -201,14 +201,14 @@ const HomePage = () => {
                 <div className="flex flex-col gap-3 max-xl:justify-start xl:ml-4 xl:justify-center">
                     {/* Create New Preset */}
                     <button
-                        className="hover:scale-102 col-start-2 cursor-pointer text-center text-lg font-semibold"
+                        className="col-start-2 cursor-pointer text-center text-lg font-semibold hover:scale-102"
                         onClick={() => {
                             void nav(isPending ? "" : session ? "/create-game" : "/login");
                         }}
                     >
                         <div className="border border-neutral-400 bg-neutral-300 py-1">
                             <img
-                                className="h-51 neutralscale-25 2xl:h-55 max-xl:h-30 mx-auto object-fill text-center"
+                                className="neutralscale-25 mx-auto h-51 object-fill text-center max-xl:h-30 2xl:h-55"
                                 src={CustomGameImg}
                             ></img>
                         </div>
@@ -221,14 +221,14 @@ const HomePage = () => {
                     {session ? (
                         <>
                             <button
-                                className="hover:scale-102 col-start-2 cursor-pointer text-center text-lg font-semibold"
+                                className="col-start-2 cursor-pointer text-center text-lg font-semibold hover:scale-102"
                                 onClick={() => {
                                     void nav("/my-games");
                                 }}
                             >
                                 <div className="border border-neutral-400 bg-neutral-300 py-1">
                                     <img
-                                        className="max-xl:h-30 h-51 neutralscale-25 2xl:h-55 mx-auto object-fill text-center"
+                                        className="neutralscale-25 mx-auto h-51 object-fill text-center max-xl:h-30 2xl:h-55"
                                         src={UsersPresetsImage}
                                     ></img>
                                 </div>
@@ -262,7 +262,7 @@ const HomePage = () => {
                                 }}
                             />
                             <button
-                                className="hover:scale-102 py-0.75 2xl:py-1.25 ml-5 flex cursor-pointer items-center bg-red-400 px-1.5 font-medium text-white hover:bg-red-500"
+                                className="ml-5 flex cursor-pointer items-center bg-red-400 px-1.5 py-0.75 font-medium text-white hover:scale-102 hover:bg-red-500 2xl:py-1.25"
                                 type="submit"
                             >
                                 <GiExitDoor

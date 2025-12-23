@@ -40,7 +40,7 @@ const Dropzone = ({ fileHandler }: { fileHandler: (files: FileList) => void }) =
 
     return (
         <div
-            className="border-groove rounded-xs flex w-full items-center justify-center border border-neutral-500"
+            className="border-groove flex w-full items-center justify-center rounded-xs border border-neutral-500"
             onDrop={handleFileDrop}
             onDragOver={handleDragOverAndEnter}
             onDragEnter={handleDragOverAndEnter}
@@ -48,13 +48,13 @@ const Dropzone = ({ fileHandler }: { fileHandler: (files: FileList) => void }) =
         >
             <label
                 htmlFor="file-upload"
-                className={`max-xl:h-50 h-90 max-sm:h-30 flex w-full cursor-pointer flex-col items-center justify-center transition-all duration-200 ${
+                className={`flex h-90 w-full cursor-pointer flex-col items-center justify-center transition-all duration-200 max-xl:h-50 max-sm:h-30 ${
                     isDragOver ? "bg-blue-100" : "bg-gray-50 hover:bg-blue-50"
                 }`}
             >
-                <div className="flex flex-col items-center justify-center pb-6 pt-5">
+                <div className="flex flex-col items-center justify-center pt-5 pb-6">
                     <svg
-                        className={`h-17 max-2xl:h-13 max-2xl:w-13 w-20 transition-colors duration-200 max-sm:mb-1 max-sm:h-10 max-sm:w-10 sm:mb-4 ${
+                        className={`h-17 w-20 transition-colors duration-200 max-2xl:h-13 max-2xl:w-13 max-sm:mb-1 max-sm:h-10 max-sm:w-10 sm:mb-4 ${
                             isDragOver ? "text-blue-400" : "text-gray-300"
                         }`}
                         aria-hidden="true"

@@ -69,7 +69,6 @@ export const resizeImage = async (
         });
     } catch (error) {
         logError(error);
-        // eslint-disable-next-line unicorn/prefer-ternary
         if (error instanceof Error) throw error;
         else throw new Error("Image processing error.");
     } finally {

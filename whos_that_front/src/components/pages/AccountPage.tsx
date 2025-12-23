@@ -61,18 +61,18 @@ const AccountPage = () => {
     else if (isPending || !session) return <LoadingSpinner />;
     else
         return (
-            <div className="border-7 w-9/10 shadow-xs m-auto flex max-w-2xl flex-col gap-3 border-double bg-neutral-50 px-3 pb-7 pt-6 text-xl">
+            <div className="m-auto flex w-9/10 max-w-2xl flex-col gap-3 border-7 border-double bg-neutral-50 px-3 pt-6 pb-7 text-xl shadow-xs">
                 <h2 className="mb-1 text-center text-4xl font-bold">Account Details</h2>
                 <div className="font-semibold">
                     Username:{" "}
-                    <span className="font-medium italic text-orange-400">
+                    <span className="font-medium text-orange-400 italic">
                         {session.user.displayUsername}
                     </span>
                 </div>
                 <div className="my-5 font-semibold">
                     Email:{" "}
                     <span
-                        className="duration-15 cursor-pointer font-medium italic transition-colors hover:text-amber-200"
+                        className="cursor-pointer font-medium italic transition-colors duration-15 hover:text-amber-200"
                         title={showEmail ? "Click to hide" : "Click to show"}
                         onClick={() => {
                             setShowEmail(!showEmail);
@@ -83,7 +83,7 @@ const AccountPage = () => {
                 </div>
                 <div className="mb-2 font-semibold">
                     Linked Account:{""}{" "}
-                    <span className="align-middle text-3xl capitalize text-green-600 max-2xl:text-2xl">
+                    <span className="align-middle text-3xl text-green-600 capitalize max-2xl:text-2xl">
                         {linkedAccounts.toString()}
                     </span>
                     {/* Removed Account Linking for Now */}
@@ -103,7 +103,7 @@ const AccountPage = () => {
 
                 <Link to={"/my-games"} className="text-center">
                     <button
-                        className="border-b-9 text-shadow-xs/50 active:shadow-2xs duration-15 hover:shadow-xs mx-4 w-fit cursor-pointer rounded-md border-x border-amber-600 bg-amber-500 px-4 py-3 text-2xl font-bold tracking-normal text-slate-50 shadow-sm transition-all hover:border-amber-700 hover:bg-amber-600 hover:text-slate-200 active:-translate-y-px active:border-b max-2xl:px-3 max-2xl:py-2 max-2xl:text-xl"
+                        className="mx-4 w-fit cursor-pointer rounded-md border-x border-b-9 border-amber-600 bg-amber-500 px-4 py-3 text-2xl font-bold tracking-normal text-slate-50 shadow-sm transition-all duration-15 text-shadow-xs/50 hover:border-amber-700 hover:bg-amber-600 hover:text-slate-200 hover:shadow-xs active:-translate-y-px active:border-b active:shadow-2xs max-2xl:px-3 max-2xl:py-2 max-2xl:text-xl"
                         type="button"
                     >
                         My Games

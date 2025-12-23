@@ -50,7 +50,7 @@ const LikeButton = ({
     if (errorMsg) throw new Error(errorMsg);
     return (
         <button
-            className="flex cursor-pointer items-center whitespace-pre-wrap align-sub"
+            className="flex cursor-pointer items-center align-sub whitespace-pre-wrap"
             onClick={(e) => {
                 e.preventDefault();
                 e.stopPropagation();

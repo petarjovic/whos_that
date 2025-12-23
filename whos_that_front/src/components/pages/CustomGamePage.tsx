@@ -330,12 +330,12 @@ const CreateCustomGamePage = () => {
                     void handleSubmit(e);
                 }}
             >
-                <div className="2xl:w-9/10 flex flex-col gap-4 max-2xl:w-full lg:col-start-1">
+                <div className="flex flex-col gap-4 max-2xl:w-full lg:col-start-1 2xl:w-9/10">
                     {/* Step 1: Title */}
-                    <div className="rounded-xs flex h-fit w-full flex-col items-center justify-around border border-neutral-800 bg-neutral-300 px-2 py-1 text-center">
+                    <div className="flex h-fit w-full flex-col items-center justify-around rounded-xs border border-neutral-800 bg-neutral-300 px-2 py-1 text-center">
                         <label
                             htmlFor="title"
-                            className="xl:p-1.25 flex items-center p-px text-center text-lg font-semibold xl:text-xl 2xl:text-2xl"
+                            className="flex items-center p-px text-center text-lg font-semibold xl:p-1.25 xl:text-xl 2xl:text-2xl"
                         >
                             <PiPenNibFill
                                 className="relative bottom-px mr-1 scale-x-[-1]"
@@ -349,20 +349,20 @@ const CreateCustomGamePage = () => {
                             id="title"
                             name="title"
                             placeholder="(E.g. Superheros, Famous Actors)"
-                            className="border-groove lg:w-9/10 rounded border border-neutral-400 bg-neutral-50 p-1 text-center font-medium placeholder:text-gray-400 max-lg:w-full xl:text-lg 2xl:text-xl"
+                            className="border-groove rounded border border-neutral-400 bg-neutral-50 p-1 text-center font-medium placeholder:text-gray-400 max-lg:w-full lg:w-9/10 xl:text-lg 2xl:text-xl"
                             required
                             minLength={5}
                             maxLength={18}
                         ></input>
                     </div>
                     {/* Step 4: Privacy Settings */}
-                    <div className="rounded-xs flex h-fit w-full flex-col items-center justify-around border border-neutral-800 bg-neutral-300 px-2 py-1 text-center">
+                    <div className="flex h-fit w-full flex-col items-center justify-around rounded-xs border border-neutral-800 bg-neutral-300 px-2 py-1 text-center">
                         <div className="flex p-px text-lg font-semibold xl:text-xl 2xl:text-2xl">
                             <FaGears size="1.5em" className="mr-1 scale-y-[-1]" />
                             <div>Game Options</div>
                             <FaGears size="1.5em" className="ml-1 scale-x-[-1] scale-y-[-1]" />
                         </div>
-                        <div className="mb-0.5 mt-1 xl:text-lg 2xl:text-xl">
+                        <div className="mt-1 mb-0.5 xl:text-lg 2xl:text-xl">
                             <input
                                 type="radio"
                                 id="public"
@@ -392,7 +392,7 @@ const CreateCustomGamePage = () => {
                         </div>
                     </div>
                     {/* Step 2: Image Uploads */}
-                    <div className="rounded-xs flex h-fit w-full flex-col items-center justify-around border border-neutral-800 bg-neutral-300 py-1 text-center max-lg:px-2 lg:px-4">
+                    <div className="flex h-fit w-full flex-col items-center justify-around rounded-xs border border-neutral-800 bg-neutral-300 py-1 text-center max-lg:px-2 lg:px-4">
                         <label className="flex p-px text-lg font-semibold xl:p-2 xl:text-xl 2xl:text-2xl">
                             <FaCameraRetro size="1.18em" className="relative top-px mr-1" />
                             <div>Upload Custom Images</div>
@@ -405,7 +405,7 @@ const CreateCustomGamePage = () => {
                         />
                         {/* Image errors during upload or compression */}
                         {imageErrors.length > 0 && (
-                            <div className="max-h-23 2xl:w-6/10 mt-1 overflow-y-auto rounded-md border border-red-200 bg-red-50 px-2.5 py-1.5 shadow-red-50">
+                            <div className="mt-1 max-h-23 overflow-y-auto rounded-md border border-red-200 bg-red-50 px-2.5 py-1.5 shadow-red-50 2xl:w-6/10">
                                 {imageErrors.map((error, index) => (
                                     <p key={index} className="text-sm font-medium text-red-600">
                                         <span className="sm:pl-1">{"Error: " + error}</span>
@@ -421,12 +421,12 @@ const CreateCustomGamePage = () => {
                             </div>
                         )}
                         {/* Character names as file names toggle */}
-                        <div className="items-baseline-last mb-1.25 mt-2.25 flex justify-between gap-1">
+                        <div className="mt-2.25 mb-1.25 flex items-baseline-last justify-between gap-1">
                             <input
                                 type="checkbox"
                                 id="image-names"
                                 name="image-names"
-                                className="inset-shadow-xs border-groove xl:h-4.5 xl:w-4.5 2xl:top-0.75 relative h-4 w-4 cursor-pointer appearance-auto rounded border accent-red-500 max-2xl:top-0.5 2xl:h-5 2xl:w-5"
+                                className="border-groove relative h-4 w-4 cursor-pointer appearance-auto rounded border accent-red-500 inset-shadow-xs max-2xl:top-0.5 xl:h-4.5 xl:w-4.5 2xl:top-0.75 2xl:h-5 2xl:w-5"
                                 checked={useFileNames}
                                 onChange={handleUseImageFilenames}
                             ></input>
@@ -441,7 +441,7 @@ const CreateCustomGamePage = () => {
                 </div>
 
                 {/* Step 3: Character Names */}
-                <div className="rounded-xs 2xl:w-9/10 flex h-fit flex-col justify-around border border-neutral-800 bg-neutral-300 px-2 py-1 text-center max-2xl:w-full lg:col-start-2">
+                <div className="flex h-fit flex-col justify-around rounded-xs border border-neutral-800 bg-neutral-300 px-2 py-1 text-center max-2xl:w-full lg:col-start-2 2xl:w-9/10">
                     <h3 className="mb-0.5 flex items-center justify-end py-1">
                         <div className="mx-auto flex p-px text-lg font-semibold xl:text-xl 2xl:text-2xl">
                             <BsIncognito size="1.33em" className="relative top-px mr-1" />
@@ -456,7 +456,7 @@ const CreateCustomGamePage = () => {
                         {/* Clear list button */}
                         {selectedFiles.length > 0 ? (
                             <button
-                                className="rounded-xs lg:px-1.75 lg:py-0.75 ml-6 flex cursor-pointer items-center bg-red-400 font-medium text-white hover:bg-red-500 max-lg:px-1 max-lg:py-px lg:mr-4"
+                                className="ml-6 flex cursor-pointer items-center rounded-xs bg-red-400 font-medium text-white hover:bg-red-500 max-lg:px-1 max-lg:py-px lg:mr-4 lg:px-1.75 lg:py-0.75"
                                 disabled={isLoading}
                                 type="button"
                                 onClick={handleClearCharacterList}
@@ -469,11 +469,11 @@ const CreateCustomGamePage = () => {
                     </h3>
                     {selectedFiles.length > 0 ? (
                         <>
-                            <p className="mb-px italic text-neutral-700 max-2xl:hidden">
+                            <p className="mb-px text-neutral-700 italic max-2xl:hidden">
                                 Drag and drop characters to reorder them, the first character will
                                 be the one in the thumbnail!
                             </p>
-                            <p className="mb-1 text-sm italic text-neutral-700 2xl:hidden">
+                            <p className="mb-1 text-sm text-neutral-700 italic 2xl:hidden">
                                 Click on an order number to edit it, the first character will be the
                                 one in the thumbnail!
                             </p>
@@ -481,7 +481,7 @@ const CreateCustomGamePage = () => {
                     ) : (
                         <></>
                     )}
-                    <div className="max-lg:max-h-120 lg:max-h-151 border-groove rounded-xs overflow-y-auto border border-neutral-600 bg-zinc-50 2xl:grid 2xl:grid-cols-2">
+                    <div className="border-groove overflow-y-auto rounded-xs border border-neutral-600 bg-zinc-50 max-lg:max-h-120 lg:max-h-151 2xl:grid 2xl:grid-cols-2">
                         {/* Dynamic list of characters */}
                         {selectedFiles.length > 0 ? (
                             selectedFiles.map((file, index) => (
@@ -546,7 +546,7 @@ const CreateCustomGamePage = () => {
                                     <img
                                         src={imageUrls[index]}
                                         alt={file.name}
-                                        className="h-34 max-sm:h-30 w-24 shrink-0 rounded border object-cover"
+                                        className="h-34 w-24 shrink-0 rounded border object-cover max-sm:h-30"
                                     />
                                     <div className="min-w-0">
                                         <input
@@ -569,19 +569,19 @@ const CreateCustomGamePage = () => {
                         ) : isLoading ? (
                             <LoadingSpinner />
                         ) : (
-                            <p className="p-10 italic text-gray-500">No images uploaded</p>
+                            <p className="p-10 text-gray-500 italic">No images uploaded</p>
                         )}
                     </div>
                     {/* Character/image min and max warnings */}
                     {selectedFiles.length > MAX_NUM_IMGS ? (
-                        <p className="min-w-9/10 mx-auto mb-0.5 mt-2 rounded-md border border-red-200 bg-red-100 py-1 text-gray-500">
+                        <p className="mx-auto mt-2 mb-0.5 min-w-9/10 rounded-md border border-red-200 bg-red-100 py-1 text-gray-500">
                             You have too many characters! There is a maximum of {MAX_NUM_IMGS}.
                         </p>
                     ) : (
                         <></>
                     )}
                     {selectedFiles.length < MIN_NUM_IMGS ? (
-                        <p className="min-w-9/10 py-0.75 mx-auto mb-0.5 mt-2 rounded-md border border-amber-200 bg-amber-100 text-neutral-500">
+                        <p className="mx-auto mt-2 mb-0.5 min-w-9/10 rounded-md border border-amber-200 bg-amber-100 py-0.75 text-neutral-500">
                             Need at least {MIN_NUM_IMGS} characters!
                         </p>
                     ) : (
@@ -602,7 +602,7 @@ const CreateCustomGamePage = () => {
             <ReactModal
                 isOpen={showRulesModal}
                 onRequestClose={() => setShowRulesModal(false)}
-                className="absolute left-1/2 top-1/2 mx-auto flex h-fit w-[97%] max-w-4xl -translate-x-1/2 -translate-y-1/2 flex-col gap-4 border-2 border-neutral-800 bg-neutral-200 px-2 text-center shadow-lg max-lg:py-5 lg:py-8"
+                className="absolute top-1/2 left-1/2 mx-auto flex h-fit w-[97%] max-w-4xl -translate-x-1/2 -translate-y-1/2 flex-col gap-4 border-2 border-neutral-800 bg-neutral-200 px-2 text-center shadow-lg max-lg:py-5 lg:py-8"
                 overlayClassName="fixed inset-0 bg-zinc-900/70"
                 shouldCloseOnOverlayClick={false}
                 shouldCloseOnEsc={false}
@@ -614,7 +614,7 @@ const CreateCustomGamePage = () => {
                 </div>
                 <ul className="mx-auto mb-2 list-inside list-decimal space-y-2 text-center text-xl font-medium">
                     <li className="text-xl">
-                        <span className="text-shadow-2xs/20 text-xl font-semibold text-orange-500 2xl:text-2xl">
+                        <span className="text-xl font-semibold text-orange-500 text-shadow-2xs/20 2xl:text-2xl">
                             Image content must be appropriate.
                         </span>
                         <br></br>
@@ -635,7 +635,7 @@ const CreateCustomGamePage = () => {
                         </span>
                     </li> */}
                     <li>
-                        <span className="text-shadow-2xs/20 text-xl font-semibold text-orange-500 2xl:text-2xl">
+                        <span className="text-xl font-semibold text-orange-500 text-shadow-2xs/20 2xl:text-2xl">
                             In public presets: Images of real people must be notable figures.
                         </span>
                         <br></br>
@@ -647,11 +647,11 @@ const CreateCustomGamePage = () => {
                 </ul>
                 <button
                     onClick={() => setShowRulesModal(false)}
-                    className={`rounded-xs lg:w-3/10 mx-auto w-1/2 p-1 text-center text-lg font-medium text-white md:w-1/3 ${isLoading ? "border-gray-800 bg-gray-700" : "bg-red-400 hover:bg-red-500"} cursor-pointer`}
+                    className={`mx-auto w-1/2 rounded-xs p-1 text-center text-lg font-medium text-white md:w-1/3 lg:w-3/10 ${isLoading ? "border-gray-800 bg-gray-700" : "bg-red-400 hover:bg-red-500"} cursor-pointer`}
                 >
                     I Agree
                 </button>
-                <p className="w-9/10 mx-auto text-base italic text-neutral-700">
+                <p className="mx-auto w-9/10 text-base text-neutral-700 italic">
                     Tip: images will look best when they feature the "character" near the center.
                 </p>
             </ReactModal>

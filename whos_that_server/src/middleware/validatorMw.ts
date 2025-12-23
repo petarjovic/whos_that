@@ -10,11 +10,7 @@ import * as schema from "../db/schema.ts";
  * @param res - Express response object
  * @param next - Express next function
  */
-export const validateGameId = async (
-    req: Request,
-    res: Response,
-    next: NextFunction
-): Promise<void> => {
+export const validateGameId = (req: Request, res: Response, next: NextFunction): void => {
     const gameId = req.params.gameId;
     // Check if game ID exists in params
     if (!gameId) {

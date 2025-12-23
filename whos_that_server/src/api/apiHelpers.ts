@@ -183,7 +183,7 @@ export async function switchPrivacySettings(
             throw new Error("Not all copy operations succeeded, rollback was attempted.");
         } else {
             // Delete old images after successful copy
-            deleteImagesFromBucketAndCF(gameId, oldIsPublic, imageIds);
+            await deleteImagesFromBucketAndCF(gameId, oldIsPublic, imageIds);
         }
     }
 }

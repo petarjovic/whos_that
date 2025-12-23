@@ -33,15 +33,15 @@ export const CardLayout = ({
 }: PropsWithChildren<CardLayoutProps>) => {
     return (
         <figure
-            className={`border ${sizeMap[size]} hover:scale-106 rounded-xs flex flex-col justify-between ${isOppCard ? "animate-[flash-attention_2s_ease-in-out_1] border-orange-300 bg-orange-300" : "border-neutral-600 bg-neutral-50"} text-center`}
+            className={`border ${sizeMap[size]} flex flex-col justify-between rounded-xs hover:scale-106 ${isOppCard ? "animate-[flash-attention_2s_ease-in-out_1] border-orange-300 bg-orange-300" : "border-neutral-600 bg-neutral-50"} text-center`}
         >
             <img
-                className={`max-h-8/10 h-8/10 mx-1 mt-1 border border-neutral-400 bg-gray-300 object-fill ${isOppCard ? "grayscale-100" : ""}`}
+                className={`mx-1 mt-1 h-8/10 max-h-8/10 border border-neutral-400 bg-gray-300 object-fill ${isOppCard ? "grayscale-100" : ""}`}
                 src={imgSrc}
                 alt={name}
             />
             <figcaption
-                className={`${size === "L" ? "cursor-default items-center text-lg max-md:text-base" : "items-center text-base"} ${size === "M" ? "hover:text-blue-500" : ""} max-h-1/10 m-auto flex text-center font-semibold leading-none text-black`}
+                className={`${size === "L" ? "cursor-default items-center text-lg max-md:text-base" : "items-center text-base"} ${size === "M" ? "hover:text-blue-500" : ""} m-auto flex max-h-1/10 text-center leading-none font-semibold text-black`}
             >
                 {name}
             </figcaption>
@@ -83,7 +83,7 @@ export const Card = ({
                 <div className="mx-1 mb-1 box-content flex items-center justify-between">
                     {/* Guess Button */}
                     <button
-                        className={`text-shadow-xs/40 w-[34%] rounded px-0.5 py-px text-center font-semibold text-neutral-100 transition-all max-2xl:text-sm max-sm:font-medium ${flipped ? "hidden" : ""} ${guessingDisabled ? "bg-neutral-700" : "text-shadow-green-900 cursor-pointer bg-green-600 hover:bg-green-700"}`}
+                        className={`w-[34%] rounded px-0.5 py-px text-center font-semibold text-neutral-100 transition-all text-shadow-xs/40 max-2xl:text-sm max-sm:font-medium ${flipped ? "hidden" : ""} ${guessingDisabled ? "bg-neutral-700" : "cursor-pointer bg-green-600 text-shadow-green-900 hover:bg-green-700"}`}
                         onClick={() => {
                             openConfirmModal(winner, name);
                         }}
@@ -97,7 +97,7 @@ export const Card = ({
                     </div>
                     {/* Hide/Unhide Button */}
                     <button
-                        className="text-shadow-xs/40 text-shadow-red-900 w-[34%] cursor-pointer rounded bg-red-600 px-0.5 py-px text-center font-semibold text-neutral-100 transition-all hover:bg-red-700 max-2xl:text-sm max-sm:font-medium"
+                        className="w-[34%] cursor-pointer rounded bg-red-600 px-0.5 py-px text-center font-semibold text-neutral-100 transition-all text-shadow-xs/40 text-shadow-red-900 hover:bg-red-700 max-2xl:text-sm max-sm:font-medium"
                         onClick={() => {
                             setFlipped(!flipped);
                         }}

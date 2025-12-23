@@ -380,7 +380,7 @@ export function setupApiRoutes(app: Express) {
 
             // Convert image ids to image urls
             const getMyGamesRes: UrlPresetInfo[] = gameInfoList.map(
-                ({ imageId, author, ...presetInfo }) => {
+                ({ imageId, ...presetInfo }) => {
                     let imageUrl = constructImageUrl(presetInfo.isPublic, presetInfo.id, imageId);
 
                     if (!presetInfo.isPublic && USE_CLOUDFRONT) {
@@ -514,7 +514,7 @@ export function setupApiRoutes(app: Express) {
 
     /**
      * Retrieves complete game data including all character cards
-     * @returns Game title + array of character data including image URLs
+     * @returns GameDataType Game title + array of character data including image URLs
      */
     app.get("/api/gameData/:gameId", validateGameId, checkGameExists, async (req, res) => {
         const gameId = req.params.gameId;
@@ -544,15 +544,15 @@ export function setupApiRoutes(app: Express) {
                 .from(schema.gameItems)
                 .where(eq(schema.gameItems.gameId, gameId));
 
+            //cache and send direct image urls for public games
             if (isPublic || !USE_CLOUDFRONT) {
-                //cache and send direct image urls for public games
                 const cardDataUrlList = cardDataIdToUrl(gameId, isPublic, cardDataIdList);
+
                 const resData = { title: title, cardData: cardDataUrlList };
                 setGameDataCache(gameId, resData);
-
                 return res.status(200).send(resData);
-            } else {
                 //cache and send presigned image urls for private games
+            } else {
                 const cardDataPresignedUrlList: CardDataUrlType[] = cardDataIdList.map(
                     (cardData) => {
                         const signedUrlParams = {
@@ -676,7 +676,7 @@ export function setupApiRoutes(app: Express) {
                 .where(and(eq(schema.games.id, gameId), eq(schema.games.userId, session.user.id)));
 
             //if db updated then move images in S3
-            if (dbUpdate.rowCount !== null && dbUpdate.rowCount >= 1) {
+            if (dbUpdate.rowCount >= 1) {
                 const [{ isPublic, imageIds }] = gameWithItems;
                 const newIsPublic = !isPublic;
 
@@ -726,7 +726,7 @@ export function setupApiRoutes(app: Express) {
                 .where(and(eq(schema.games.id, gameId), eq(schema.games.userId, session.user.id)));
 
             // If deleted in db then del cache data and del image files in S3 and CloudFront
-            if (dbDelRes.rowCount !== null && dbDelRes.rowCount >= 1) {
+            if (dbDelRes.rowCount >= 1) {
                 //del image files in S3 and CloudFront
                 const [{ isPublic, imageIds }] = gameWithItems;
                 void deleteImagesFromBucketAndCF(gameId, isPublic, imageIds);

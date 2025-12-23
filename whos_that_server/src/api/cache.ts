@@ -1,6 +1,6 @@
-import type { IdPresetInfo } from "../config/types.ts";
+import type { GameDataType, IdPresetInfo } from "../config/types.ts";
 
-const GAMEDATA_CACHE = new Map<string, { data: any; timestamp: number }>();
+const GAMEDATA_CACHE = new Map<string, { data: GameDataType; timestamp: number }>();
 let TOP3MOSTLIKED_CACHE: { data: IdPresetInfo[]; timestamp: number } | null = null;
 let TOP3MOSTRECENT_CACHE: { data: IdPresetInfo[]; timestamp: number } | null = null;
 
@@ -32,7 +32,7 @@ setInterval(() => {
 }, 21600000);
 
 //GAMEDATA_CACHE helpers
-export function getCachedGameData(gameId: string): any | null {
+export function getCachedGameData(gameId: string): GameDataType | null {
     const cached = GAMEDATA_CACHE.get(gameId);
     if (cached && Date.now() - cached.timestamp < GAMEDATA_CACHE_DUR) {
         return cached.data;
@@ -40,7 +40,7 @@ export function getCachedGameData(gameId: string): any | null {
     return null;
 }
 
-export function setGameDataCache(gameId: string, data: any): void {
+export function setGameDataCache(gameId: string, data: GameDataType): void {
     // Delete and re-add to move to end (most recent)
     GAMEDATA_CACHE.delete(gameId);
     GAMEDATA_CACHE.set(gameId, { data, timestamp: Date.now() });
@@ -74,7 +74,7 @@ export function insertTop3MostRecentCache(newGame: IdPresetInfo): void {
     TOP3MOSTRECENT_CACHE = { data: updatedData, timestamp: Date.now() };
 }
 
-export function setTop3MostLikedCache(data: any): void {
+export function setTop3MostLikedCache(data: IdPresetInfo[]): void {
     TOP3MOSTLIKED_CACHE = { data, timestamp: Date.now() };
 }
 
@@ -93,7 +93,7 @@ export function getCachedTop3MostRecent(): IdPresetInfo[] | null {
     return null;
 }
 
-export function setTop3MostRecentCache(data: any): void {
+export function setTop3MostRecentCache(data: IdPresetInfo[]): void {
     TOP3MOSTRECENT_CACHE = { data, timestamp: Date.now() };
 }
 

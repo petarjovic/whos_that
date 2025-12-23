@@ -45,7 +45,7 @@ const SetUsernamePage = () => {
     };
 
     return (
-        <div className="border-7 w-9/10 shadow-xs/60 m-auto flex max-w-2xl flex-col gap-5 border-double bg-neutral-50 px-2 pb-7 pt-6 text-center text-4xl">
+        <div className="m-auto flex w-9/10 max-w-2xl flex-col gap-5 border-7 border-double bg-neutral-50 px-2 pt-6 pb-7 text-center text-4xl shadow-xs/60">
             <h2 className="font-bold">Choose Username</h2>
             <p className="text-center text-xl">
                 Please pick a username for yourself, note that your username{" "}
@@ -65,7 +65,7 @@ const SetUsernamePage = () => {
                     <></>
                 )}
 
-                <div className="rounded-xs w-9/10 mx-auto mb-2 flex flex-col items-center justify-around border border-neutral-800 bg-neutral-300 px-2 py-1 text-center">
+                <div className="mx-auto mb-2 flex w-9/10 flex-col items-center justify-around rounded-xs border border-neutral-800 bg-neutral-300 px-2 py-1 text-center">
                     <label
                         htmlFor="username"
                         className="flex items-center p-px text-center text-lg font-semibold"

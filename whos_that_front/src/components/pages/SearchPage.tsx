@@ -86,13 +86,13 @@ const SearchPage = () => {
         <>
             {/* Search Bar */}
             <form
-                className="max-sm:w-9/10 sm:w-7/10 md:w-6/10 rounded-xs py-1.75 flex items-center justify-around gap-2 border border-neutral-500 bg-neutral-300 px-1.5 max-xl:mb-1 max-xl:mt-4 lg:w-1/3 xl:mb-2 xl:mt-5"
+                className="flex items-center justify-around gap-2 rounded-xs border border-neutral-500 bg-neutral-300 px-1.5 py-1.75 max-xl:mt-4 max-xl:mb-1 max-sm:w-9/10 sm:w-7/10 md:w-6/10 lg:w-1/3 xl:mt-5 xl:mb-2"
                 onSubmit={(e) => e.preventDefault()}
             >
                 <input
                     id="searchBar"
                     type="search"
-                    className="xl:w-9/10 max-xl:w-8/10 rounded-xs border border-neutral-500 bg-gray-50 px-1 text-left font-medium placeholder:text-zinc-400 max-2xl:py-px xl:text-lg 2xl:p-px 2xl:py-0.5 2xl:pl-3"
+                    className="rounded-xs border border-neutral-500 bg-gray-50 px-1 text-left font-medium placeholder:text-zinc-400 max-2xl:py-px max-xl:w-8/10 xl:w-9/10 xl:text-lg 2xl:p-px 2xl:py-0.5 2xl:pl-3"
                     maxLength={20}
                     placeholder="Search Presets"
                     value={searchInput}
@@ -100,12 +100,12 @@ const SearchPage = () => {
                 />
                 <button
                     type="submit"
-                    className="rounded-xs flex cursor-pointer items-center bg-red-400 px-1 py-px text-white 2xl:py-0.5"
+                    className="flex cursor-pointer items-center rounded-xs bg-red-400 px-1 py-px text-white 2xl:py-0.5"
                 >
                     <IoMdSearch size="1.5em" />
                 </button>
                 <select
-                    className="rounded-xs flex cursor-pointer items-center bg-blue-400 px-px text-center text-white 2xl:py-0.5"
+                    className="flex cursor-pointer items-center rounded-xs bg-blue-400 px-px text-center text-white 2xl:py-0.5"
                     value={searchParams.get("sort") ?? "likes"}
                     onChange={(e) =>
                         setSearchParams({
@@ -129,7 +129,7 @@ const SearchPage = () => {
                             Sorry, no presets match your search!{" "}
                             <Link
                                 to={"/create-game"}
-                                className="text-blue-500 underline hover:italic hover:text-red-300"
+                                className="text-blue-500 underline hover:text-red-300 hover:italic"
                             >
                                 Make your own
                             </Link>
@@ -139,11 +139,11 @@ const SearchPage = () => {
                     {gamesList.map(({ id, title, imageUrl, numLikes, author, userHasLiked }, i) => (
                         <Link key={i} to={`/play-game?preset=${id}`}>
                             <CardLayout name={title} imgSrc={imageUrl} key={i}>
-                                <div className="mb-0.75 relative flex items-center justify-center max-xl:mb-px">
-                                    <p className="relative right-5 text-center text-sm italic text-gray-600 max-xl:text-xs">
+                                <div className="relative mb-0.75 flex items-center justify-center max-xl:mb-px">
+                                    <p className="relative right-5 text-center text-sm text-gray-600 italic max-xl:text-xs">
                                         {author ?? ""}{" "}
                                     </p>
-                                    <p className="absolute -bottom-px right-2 text-base text-gray-700">
+                                    <p className="absolute right-2 -bottom-px text-base text-gray-700">
                                         <LikeButton
                                             id={id}
                                             userHasLiked={userHasLiked}
@@ -158,13 +158,13 @@ const SearchPage = () => {
             )}
             {/* Page Controls */}
             {pageInfo && pageInfo.totalPages > 1 && (
-                <div className="mb-2 mt-4 flex items-center gap-1 text-lg text-neutral-600">
+                <div className="mt-4 mb-2 flex items-center gap-1 text-lg text-neutral-600">
                     <button
                         onClick={() =>
                             setSearchParams({ ...Object.fromEntries(searchParams), page: "1" })
                         }
                         disabled={pageInfo.page === 1}
-                        className="tracking-tightest scale-130 mr-1 cursor-pointer py-1 hover:text-blue-500 disabled:cursor-default disabled:text-gray-300"
+                        className="tracking-tightest mr-1 scale-130 cursor-pointer py-1 hover:text-blue-500 disabled:cursor-default disabled:text-gray-300"
                     >
                         &lt;&lt;
                     </button>
@@ -218,7 +218,7 @@ const SearchPage = () => {
                             })
                         }
                         disabled={pageInfo.page === pageInfo.totalPages}
-                        className="tracking-tightest scale-130 ml-1 cursor-pointer py-1 text-lg hover:text-blue-500 disabled:cursor-default disabled:text-gray-300"
+                        className="tracking-tightest ml-1 scale-130 cursor-pointer py-1 text-lg hover:text-blue-500 disabled:cursor-default disabled:text-gray-300"
                     >
                         &gt;&gt;
                     </button>

@@ -44,7 +44,7 @@ const GameBoard = ({
                 {/* grid on large screens, flexbox on small screens */}
                 <div
                     id="gameboard"
-                    className={`mx-auto mb-2.5 max-lg:px-1 lg:px-2.5 2xl:grid 2xl:px-6 ${GridColsClasses[numGridCols]} 2xl:gap-y-4.5 w-full max-2xl:flex max-2xl:flex-wrap max-2xl:items-center max-2xl:justify-around max-md:gap-2 md:max-2xl:gap-2 2xl:auto-cols-min 2xl:place-items-center 2xl:justify-center 2xl:gap-x-0`}
+                    className={`mx-auto mb-2.5 max-lg:px-1 lg:px-2.5 2xl:grid 2xl:px-6 ${GridColsClasses[numGridCols]} w-full max-2xl:flex max-2xl:flex-wrap max-2xl:items-center max-2xl:justify-around max-md:gap-2 md:max-2xl:gap-2 2xl:auto-cols-min 2xl:place-items-center 2xl:justify-center 2xl:gap-x-0 2xl:gap-y-4.5`}
                 >
                     {mainCards}
                 </div>

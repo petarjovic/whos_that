@@ -15,9 +15,9 @@ const WaitingRoom = ({ gameId, cardData }: { gameId: string; cardData: CardDataU
     return (
         <>
             <img className="max-h-40 text-center" src={loadingSpinner} alt="loading icon" />
-            <p className="mx-auto mb-px mt-5 text-center text-4xl font-medium text-zinc-800 max-2xl:text-3xl">
+            <p className="mx-auto mt-5 mb-px text-center text-4xl font-medium text-zinc-800 max-2xl:text-3xl">
                 Waiting in room:{" "}
-                <span className="text-shadow-2xs/100 align-sub text-6xl font-bold tracking-tight text-amber-500 max-2xl:text-5xl">
+                <span className="align-sub text-6xl font-bold tracking-tight text-amber-500 text-shadow-2xs/100 max-2xl:text-5xl">
                     {gameId || "..."}
                 </span>
             </p>
@@ -27,7 +27,7 @@ const WaitingRoom = ({ gameId, cardData }: { gameId: string; cardData: CardDataU
                 <span className="text-sm">(or send them the link to this page)</span>
             </p>
             {/* Character Preview */}
-            <div className="w-9/10 mx-auto mb-8 mt-5 border border-black bg-neutral-300 px-3 pb-3 pt-2 max-sm:mb-5">
+            <div className="mx-auto mt-5 mb-8 w-9/10 border border-black bg-neutral-300 px-3 pt-2 pb-3 max-sm:mb-5">
                 <p className="mb-1 text-2xl font-medium">Characters Preview</p>
                 {cardData.length === 0 ? (
                     <LoadingSpinner />

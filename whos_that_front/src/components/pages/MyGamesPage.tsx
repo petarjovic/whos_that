@@ -31,7 +31,7 @@ const ShareGameModal = ({
     return (
         <ReactModal
             isOpen={showShareModal}
-            className="shadow-2xl/30 bg-linear-to-b border-b-13 text-shadow-xs/100 absolute left-1/2 top-1/2 mx-auto max-h-[90vh] w-fit max-w-6xl -translate-x-1/2 -translate-y-1/2 overflow-y-auto rounded-lg border-x border-blue-600 from-blue-400 to-blue-500 p-8 text-center text-neutral-100 shadow-2xl"
+            className="absolute top-1/2 left-1/2 mx-auto max-h-[90vh] w-fit max-w-6xl -translate-x-1/2 -translate-y-1/2 overflow-y-auto rounded-lg border-x border-b-13 border-blue-600 bg-linear-to-b from-blue-400 to-blue-500 p-8 text-center text-neutral-100 shadow-2xl/30 shadow-2xl text-shadow-xs/100"
         >
             <p className="mb-3 text-center text-5xl font-semibold text-orange-300 max-2xl:text-4xl max-sm:text-3xl">
                 Share Link
@@ -39,11 +39,11 @@ const ShareGameModal = ({
             <p className="text-3xl font-medium max-sm:text-2xl">
                 Anyone with this link can create a room using these characters:
             </p>
-            <p className="text-shadow-xs/50 my-5 rounded-2xl border-2 border-blue-500 bg-white px-1 py-3 text-2xl text-orange-400 max-sm:my-3 max-sm:py-2 max-sm:text-xl">
+            <p className="my-5 rounded-2xl border-2 border-blue-500 bg-white px-1 py-3 text-2xl text-orange-400 text-shadow-xs/50 max-sm:my-3 max-sm:py-2 max-sm:text-xl">
                 https://whos-that.com/play-game?preset={id}
             </p>
             <button
-                className="border-b-9 text-shadow-xs/100 active:shadow-2xs hover:shadow-sm/20 duration-15 shadow-sm/20 hover:shadow-xs mx-auto h-16 w-fit cursor-pointer rounded-md border-x border-amber-600 bg-amber-500 px-8 text-2xl font-bold text-white transition-all hover:border-amber-700 hover:bg-amber-600 active:-translate-y-px active:border-none"
+                className="mx-auto h-16 w-fit cursor-pointer rounded-md border-x border-b-9 border-amber-600 bg-amber-500 px-8 text-2xl font-bold text-white shadow-sm/20 transition-all duration-15 text-shadow-xs/100 hover:border-amber-700 hover:bg-amber-600 hover:shadow-sm/20 hover:shadow-xs active:-translate-y-px active:border-none active:shadow-2xs"
                 onClick={(e) => {
                     e.preventDefault();
                     e.stopPropagation();
@@ -241,7 +241,7 @@ const MyGamesPage = () => {
     else if (isLoading || isPending) return <LoadingSpinner />;
     return (
         <>
-            <h2 className="mb-2 mt-3 flex items-center gap-1 text-center text-[2rem] font-semibold leading-none">
+            <h2 className="mt-3 mb-2 flex items-center gap-1 text-center text-[2rem] leading-none font-semibold">
                 <RiSafe3Fill size={"0.9em"} className="scale-x-[-1]" /> Your Presets{" "}
                 <RiSafe3Fill size={"0.9em"} />
             </h2>
@@ -251,7 +251,7 @@ const MyGamesPage = () => {
                         No presets made yet.{" "}
                         <Link
                             to={"/create-game"}
-                            className="text-blue-500 underline hover:italic hover:text-red-300"
+                            className="text-blue-500 underline hover:text-red-300 hover:italic"
                         >
                             Make a new one here
                         </Link>
@@ -273,7 +273,7 @@ const MyGamesPage = () => {
                                         <FaArrowUpRightFromSquare />
                                     </button>
                                     <p
-                                        className={`relative bottom-1 whitespace-pre text-center text-base font-semibold max-sm:font-medium ${isPublic ? "text-green-700" : "text-red-700"}`}
+                                        className={`relative bottom-1 text-center text-base font-semibold whitespace-pre max-sm:font-medium ${isPublic ? "text-green-700" : "text-red-700"}`}
                                     >
                                         {isPublic ? " Public" : " Private"}
                                     </p>
@@ -283,7 +283,7 @@ const MyGamesPage = () => {
                                     >
                                         <button
                                             type="button"
-                                            className="relative bottom-1.5 right-1 cursor-pointer hover:scale-110"
+                                            className="relative right-1 bottom-1.5 cursor-pointer hover:scale-110"
                                             title="Settings"
                                             onClick={(e) => {
                                                 e.preventDefault();
@@ -299,7 +299,7 @@ const MyGamesPage = () => {
                                             <FcSettings size={"1.75rem"} />
                                         </button>
                                         {openDropdownId === id && (
-                                            <div className="z-1 shadow-md/10 absolute right-0 top-7 min-w-32 border border-black bg-neutral-400 font-medium">
+                                            <div className="absolute top-7 right-0 z-1 min-w-32 border border-black bg-neutral-400 font-medium shadow-md/10">
                                                 <button
                                                     type="button"
                                                     className="flex w-full cursor-pointer items-center justify-around p-px pt-0.5 text-white hover:bg-slate-200 hover:text-black"
@@ -350,16 +350,16 @@ const MyGamesPage = () => {
                     <h3 className="mt-5 flex items-center gap-2 text-center text-3xl font-semibold">
                         <FaHeart size={"0.9em"} /> Liked Games <FaHeart size={"0.9em"} />
                     </h3>
-                    <div className="mb-4 mt-2 flex flex-wrap items-center justify-evenly gap-4 border border-black bg-neutral-300 px-2 py-3 xl:mx-5">
+                    <div className="mt-2 mb-4 flex flex-wrap items-center justify-evenly gap-4 border border-black bg-neutral-300 px-2 py-3 xl:mx-5">
                         {likedGamesList.map(
                             ({ id, title, imageUrl, numLikes, author, userHasLiked }, i) => (
                                 <Link key={i} to={`/play-game?preset=${id}`}>
                                     <CardLayout name={title} imgSrc={imageUrl} key={i}>
-                                        <div className="mb-0.75 relative flex items-center justify-center max-xl:mb-px">
-                                            <p className="relative right-5 text-center text-sm italic text-gray-600 max-xl:text-xs">
+                                        <div className="relative mb-0.75 flex items-center justify-center max-xl:mb-px">
+                                            <p className="relative right-5 text-center text-sm text-gray-600 italic max-xl:text-xs">
                                                 {author ?? ""}
                                             </p>
-                                            <p className="absolute -bottom-px right-2 text-base text-gray-700">
+                                            <p className="absolute right-2 -bottom-px text-base text-gray-700">
                                                 <LikeButton
                                                     id={id}
                                                     userHasLiked={userHasLiked}
