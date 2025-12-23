@@ -1,4 +1,5 @@
 {
+    "type": "module",
     "scripts": {
         "dev": "concurrently -n \"client,server\" -c \"cyan,yellow\" \"npm run dev --prefix whos_that_front\" \"npm run dev --prefix whos_that_server\""
     },
@@ -18,3 +19,4 @@
         "typescript-eslint": "^8.49.0"
     }
 }
+
