@@ -17,7 +17,6 @@ import { getSignedUrl as getSignedS3Url } from "@aws-sdk/s3-request-presigner";
 import { getSignedUrl as getSignedCFUrl } from "@aws-sdk/cloudfront-signer";
 import env from "../config/zod/zodEnvSchema.ts";
 import { createGameRequestSchema, searchQuerySchema } from "../config/zod/zodSchema.ts";
-import z from "zod/v4";
 import { auth } from "../config/auth.ts";
 import { fromNodeHeaders } from "better-auth/node";
 import {
@@ -40,6 +39,7 @@ import {
     insertTop3MostRecentCache,
     delTop3MostLikedCache,
 } from "./cache.ts";
+import { logger } from "../config/logger.ts";
 
 /**
  * Sets up all API routes for the Express application
@@ -53,105 +53,112 @@ export function setupApiRoutes(app: Express) {
     app.post("/api/createNewGame", async (req: Request, res: Response) => {
         const validRequest = createGameRequestSchema.safeParse(req.body);
 
-        if (validRequest.success) {
-            const gameId = nanoid();
-            const body: CreateGameRequest = validRequest.data;
-            const response: CreateGameResponse = { gameId: gameId, gameItems: {} };
-
-            try {
-                // Generate short-lived presigned upload URLS
-                const S3PresignedUrlPromises = body.namesAndFileTypes.map(
-                    async ({ type, name }) => {
-                        const itemId = nanoid();
-                        const command = new PutObjectCommand({
-                            Bucket: S3_BUCKET_NAME,
-                            Key: constructS3ImageKey(body.privacy === "public", gameId, itemId),
-                            ContentType: type,
-                        });
-
-                        const signedUrl = await getSignedS3Url(s3, command, { expiresIn: 120 });
-                        return { name, itemId, signedUrl };
-                    }
-                );
-
-                const S3PresignedUrls = await Promise.all(S3PresignedUrlPromises);
-
-                // Populate response object with URLs
-                for (const { name, itemId, signedUrl } of S3PresignedUrls) {
-                    response.gameItems[name] = { signedUrl, itemId };
-                }
-            } catch (error) {
-                console.error(
-                    "Error generating presigned s3 upload urls during game creation:\n",
-                    error
-                );
-                return res.status(500).json({
-                    message:
-                        "Internal Server Error while creating new game, please try again later.",
-                });
-            }
-
-            try {
-                // Verify user is authenticated
-                const session = await auth.api.getSession({
-                    headers: fromNodeHeaders(req.headers),
-                });
-
-                if (!session) return res.status(401).json({ message: "Unauthorized." });
-
-                // Insert game data in database then send response
-                await db.batch([
-                    db.insert(schema.games).values({
-                        id: gameId,
-                        title: body.title,
-                        description: "",
-                        isPublic: body.privacy === "public",
-                        userId: session.user.id,
-                    }),
-
-                    db.insert(schema.gameItems).values(
-                        Object.entries(response.gameItems).map(([name, { itemId }], i) => ({
-                            id: itemId,
-                            gameId: gameId,
-                            name: name,
-                            orderIndex: i,
-                        }))
-                    ),
-                ]);
-
-                //if the new game is public, add it to the recent games cache
-                if (body.privacy === "public") {
-                    const newGameInfo: IdPresetInfo = {
-                        id: gameId,
-                        title: body.title,
-                        author: session.user.displayUsername ?? "",
-                        isPublic: true,
-                        imageId: Object.values(response.gameItems)[0].itemId,
-                        numLikes: 0,
-                        userHasLiked: null,
-                    };
-                    insertTop3MostRecentCache(newGameInfo);
-                }
-
-                return res.status(200).json(response);
-
-                //Error handling ↓
-            } catch (error) {
-                console.error("Error while creating new game:\n", error);
-                return res.status(500).json({
-                    message:
-                        "Internal Server Error while creating new game, please try again later.",
-                });
-            }
-        } else {
-            console.error("Error creating new game:\n" + z.prettifyError(validRequest.error));
+        if (!validRequest.success) {
+            logger.error(
+                { error: validRequest.error },
+                "api/createNewGame: Invalid request paramters."
+            );
             return res.status(422).json({
                 message: "Invalid create game request.",
             });
         }
+
+        const gameId = nanoid();
+        const body: CreateGameRequest = validRequest.data;
+        const response: CreateGameResponse = { gameId: gameId, gameItems: {} };
+
+        try {
+            // Generate short-lived presigned upload URLS
+            const S3PresignedUrlPromises = body.namesAndFileTypes.map(async ({ type, name }) => {
+                const itemId = nanoid();
+                const command = new PutObjectCommand({
+                    Bucket: S3_BUCKET_NAME,
+                    Key: constructS3ImageKey(body.privacy === "public", gameId, itemId),
+                    ContentType: type,
+                });
+
+                const signedUrl = await getSignedS3Url(s3, command, { expiresIn: 120 });
+                return { name, itemId, signedUrl };
+            });
+
+            const S3PresignedUrls = await Promise.all(S3PresignedUrlPromises);
+
+            // Populate response object with URLs
+            for (const { name, itemId, signedUrl } of S3PresignedUrls) {
+                response.gameItems[name] = { signedUrl, itemId };
+            }
+        } catch (error) {
+            logger.error(
+                { error },
+                "api/createNewGame: Error attempting to generate S3 upload urls."
+            );
+            return res.status(500).json({
+                message: "Internal Server Error while creating new game, please try again later.",
+            });
+        }
+
+        try {
+            // Verify user is authenticated
+            const session = await auth.api.getSession({
+                headers: fromNodeHeaders(req.headers),
+            });
+
+            if (!session) {
+                logger.error(
+                    "api/createNewGame: Error, unauthenticated user attempted to create a game."
+                );
+                return res.status(401).json({ message: "Unauthorized." });
+            }
+
+            // Insert game data in database then send response
+            await db.batch([
+                db.insert(schema.games).values({
+                    id: gameId,
+                    title: body.title,
+                    description: "",
+                    isPublic: body.privacy === "public",
+                    userId: session.user.id,
+                }),
+
+                db.insert(schema.gameItems).values(
+                    Object.entries(response.gameItems).map(([name, { itemId }], i) => ({
+                        id: itemId,
+                        gameId: gameId,
+                        name: name,
+                        orderIndex: i,
+                    }))
+                ),
+            ]);
+
+            //if the new game is public, add it to the recent games cache
+            if (body.privacy === "public") {
+                const newGameInfo: IdPresetInfo = {
+                    id: gameId,
+                    title: body.title,
+                    author: session.user.displayUsername ?? "",
+                    isPublic: true,
+                    imageId: Object.values(response.gameItems)[0].itemId,
+                    numLikes: 0,
+                    userHasLiked: null,
+                };
+                insertTop3MostRecentCache(newGameInfo);
+            }
+
+            return res.status(200).json(response);
+
+            //Error handling ↓
+        } catch (error) {
+            logger.error(
+                { error },
+                "api/createNewGame: Error with session verificiation, database, or recent games cache."
+            );
+            return res.status(500).json({
+                message: "Internal Server Error while creating new game, please try again later.",
+            });
+        }
     });
 
-    app.get("/api/featuredGames", async (req, res) => {
+    app.get("/api/featuredGames", async (_req, res) => {
         try {
             //get top 3 most liked games, check cache first
             let top3MostLikedGames: IdPresetInfo[] | null = getCachedTop3MostLiked();
@@ -229,7 +236,10 @@ export function setupApiRoutes(app: Express) {
             res.status(200).send(featuredGamesInfoUrl);
             //Error handling ↓
         } catch (error) {
-            console.error("Error while attempting to retrieve featured games:\n", error);
+            logger.error(
+                { error },
+                "api/featuredGames: Error attempting to retrieve featured games."
+            );
             return res
                 .status(500)
                 .json({ message: "Internal Server Error. Failed to fetch featured games." });
@@ -243,10 +253,9 @@ export function setupApiRoutes(app: Express) {
     app.get("/api/search", async (req, res) => {
         try {
             //Validate query params
-            console.log(req.query);
             const validQuery = searchQuerySchema.safeParse(req.query);
             if (!validQuery.success) {
-                console.log(z.prettifyError(validQuery.error));
+                logger.error({ error: validQuery.error }, "api/search: Invalid query paramters.");
                 return res.status(400).json({ message: "Invalid query parameters." });
             }
             const { page, limit, q, sort } = validQuery.data;
@@ -336,7 +345,7 @@ export function setupApiRoutes(app: Express) {
             });
             //Error handling ↓
         } catch (error) {
-            console.error("Error while attempting to retrieve public games:\n", error);
+            logger.error({ error }, "api/search: Error while attempting to search games.");
             return res
                 .status(500)
                 .json({ message: "Internal Server Error. Failed to fetch public games." });
@@ -353,7 +362,12 @@ export function setupApiRoutes(app: Express) {
                 headers: fromNodeHeaders(req.headers),
             });
 
-            if (!session) return res.status(401).json({ message: "Unauthorized." });
+            if (!session) {
+                logger.error(
+                    "api/getMyGames: Error, unauthenticated user attempted to fetch their own games."
+                );
+                return res.status(401).json({ message: "Unauthorized." });
+            }
 
             // Query user's games (metadata)
             const gameInfoList: IdPresetInfo[] = await db
@@ -403,7 +417,7 @@ export function setupApiRoutes(app: Express) {
             return res.status(200).send(getMyGamesRes);
             //Error handling ↓
         } catch (error) {
-            console.error("Error while attempting to get user's games: \n", error);
+            logger.error({ error }, "api/getMyGames: Error while attempting to get user's games.");
             return res
                 .status(500)
                 .json({ message: "Internal Server Error. Failed to fetch user's games." });
@@ -419,7 +433,12 @@ export function setupApiRoutes(app: Express) {
                 headers: fromNodeHeaders(req.headers),
             });
 
-            if (!session) return res.status(401).json({ message: "Unauthorized." });
+            if (!session) {
+                logger.error(
+                    "api/getMyLikedGames: Error, unauthenticated user attempted to fetch their liked games."
+                );
+                return res.status(401).json({ message: "Unauthorized." });
+            }
 
             // Query user's liked games
             const likedGamesInfo: IdPresetInfo[] = await db
@@ -474,7 +493,10 @@ export function setupApiRoutes(app: Express) {
             return res.status(200).send(getMyGamesRes);
             //Error handling ↓
         } catch (error) {
-            console.error("Error while attempting to get user's games: \n", error);
+            logger.error(
+                { error },
+                "api/getMyLikedGames: Error while attempting to get user's liked games."
+            );
             return res
                 .status(500)
                 .json({ message: "Internal Server Error. Failed to fetch user's games." });
@@ -505,7 +527,10 @@ export function setupApiRoutes(app: Express) {
 
             return res.status(200).send(Boolean(likeStatus));
         } catch (error) {
-            console.error("Error while attempting to retrieve if user has liked game:\n", error);
+            logger.error(
+                { error },
+                `api/userHasLiked: Error while attempting to retrieve if user has liked game ${gameId} .`
+            );
             return res
                 .status(500)
                 .json({ message: "Internal Server Error. Failed to check liked status." });
@@ -572,7 +597,10 @@ export function setupApiRoutes(app: Express) {
                 return res.status(200).send(resData);
             }
         } catch (error) {
-            console.error("Error while attempting to retrieve game data:\n", error);
+            logger.error(
+                { error },
+                `api/gameData: Error while attempting to retrieve game data for game ${gameId} .`
+            );
             return res.status(500).json({ message: "Internal Server Error. Failed to get game." });
         }
     });
@@ -591,7 +619,12 @@ export function setupApiRoutes(app: Express) {
             const session = await auth.api.getSession({
                 headers: fromNodeHeaders(headers),
             });
-            if (!session) return res.status(401).json({ message: "Unauthorized." });
+            if (!session) {
+                logger.error(
+                    `api/likeGame: Error, unauthenticated user requested to like game ${gameId} .`
+                );
+                return res.status(401).json({ message: "Unauthorized." });
+            }
 
             // Check if user is game author and current like status
             const [gameAuthorandLikeStatus] = await db
@@ -639,7 +672,10 @@ export function setupApiRoutes(app: Express) {
             }
             //Error handling ↓
         } catch (error) {
-            console.error("Error while attempting to like game: \n", error);
+            logger.error(
+                { error },
+                `api/likeGame: Error while attempting to like or unlike game ${gameId} .`
+            );
             return res
                 .status(500)
                 .json({ message: "Internal Server Error. Failed to like or unlike game." });
@@ -661,7 +697,12 @@ export function setupApiRoutes(app: Express) {
             const session = await auth.api.getSession({
                 headers: fromNodeHeaders(headers),
             });
-            if (!session) return res.status(401).json({ message: "Unauthorized." });
+            if (!session) {
+                logger.error(
+                    `api/switchPrivacy: Error, user without an account attempted to switch privacy of game ${gameId} .`
+                );
+                return res.status(401).json({ message: "Unauthorized." });
+            }
 
             const gameWithItems = await getPrivacySettingAndImageIds(gameId);
 
@@ -683,19 +724,21 @@ export function setupApiRoutes(app: Express) {
                 }
                 invalidateInAllCaches(gameId); //metadata changed so invalidate cache
 
-                console.log("Switched privacy setting of game:", gameId);
                 return res.status(200).send();
             } else {
-                //if user doesn't own game
-                return res.status(403).json({ message: "Fordbideen" });
+                //if user doesn't own game, shouldn't be possible
+                logger.error(
+                    `api/switchPrivacy: Error, user ${session.user.username ?? "(no username)"} (id: ${session.user.id}) is not an admin and attempted to switch privacy setting of game ${gameId} which they don't own.`
+                );
+                return res.status(403).json({ message: "Forbidden." });
             }
             //Error handling ↓
         } catch (error) {
-            console.error(
-                `Error while attempting to switch privacy setting of game: ${gameId}:\n`,
-                error
+            logger.error(
+                { error },
+                `api/switchPrivacy: Error while attempting to switch privacy setting of game ${gameId} .`
             );
-            return res.status(500).json({ message: "Interal Server Error." });
+            return res.status(500).json({ message: "Internal Server Error." });
         }
     });
 
@@ -714,7 +757,12 @@ export function setupApiRoutes(app: Express) {
             const session = await auth.api.getSession({
                 headers: fromNodeHeaders(headers),
             });
-            if (!session) return res.status(401).json({ message: "Unauthorized." });
+            if (!session) {
+                logger.error(
+                    `api/deleteGame: Error, user without an account attempted to delete game ${gameId} .`
+                );
+                return res.status(401).json({ message: "Unauthorized." });
+            }
 
             const gameWithItems = await getPrivacySettingAndImageIds(gameId);
 
@@ -733,15 +781,14 @@ export function setupApiRoutes(app: Express) {
                 invalidateInAllCaches(gameId);
 
                 //response
-                const resMsg = `User: ${session.user.id} deleted game: ${gameId}`;
-                console.log(resMsg);
+                const resMsg = `Deleted game: ${gameId} .`;
                 return res.status(200).json({
                     message: resMsg,
                 });
             } else {
                 //if user doesn't own game
-                console.warn(
-                    `User: ${session.user.id} requested to delete game: ${gameId} but is not the owner of that game.`
+                logger.error(
+                    `api/deleteGame: Error, user: ${session.user.username ?? "(no username)"} (id: ${session.user.id}) requested to delete game: ${gameId} but is not the owner of that game.`
                 );
                 return res.status(403).json({
                     message: "Forbidden.",
@@ -749,7 +796,10 @@ export function setupApiRoutes(app: Express) {
             }
             //Error Handling ↓
         } catch (error) {
-            console.error(`Error while attempting to delete game: ${gameId}:\n`, error);
+            logger.error(
+                { error },
+                `api/deleteGame: Error while attempting to delete game: ${gameId} .`
+            );
             return res.status(500).json({ message: "Internal Server Error" });
         }
     });
