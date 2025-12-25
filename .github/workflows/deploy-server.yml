@@ -74,6 +74,7 @@ jobs:
                         --restart unless-stopped \
                         -p 127.0.0.1:3001:3001 \
                         --env-file /opt/whos-that-server/.env \
+                        -v /var/log/whos-that:/app/logs \
                         --init \
                         ghcr.io/${{ github.repository }}/server:main
 

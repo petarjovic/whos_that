@@ -25,7 +25,6 @@ export default defineConfig([
             "@typescript-eslint/consistent-indexed-object-style": ["error", "index-signature"],
             "@typescript-eslint/no-confusing-void-expression": [
                 "error",
-                { ignoreArrowShorthand: true },
                 { ignoreVoidReturningFunctions: true },
             ],
         },
