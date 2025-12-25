@@ -5,8 +5,8 @@ import * as schema from "../db/schema.ts";
 import * as authSchema from "../db/auth-schema.ts";
 import { eq, and, not, count, desc, ilike, sql } from "drizzle-orm";
 import type {
-    CardDataIdType,
-    CardDataUrlType,
+    CardDataId,
+    CardDataUrl,
     CreateGameRequest,
     CreateGameResponse,
     IdPresetInfo,
@@ -483,7 +483,7 @@ export function setupApiRoutes(app: Express) {
 
     /**
      * Checks if user has liked this game already
-     * @returns { userHasLiked: Boolean }
+     * @returns { userHasLiked: boolean }
      */
     app.get("/api/userHasLiked/:gameId", validateGameId, checkGameExists, async (req, res) => {
         const gameId = req.params.gameId;
@@ -503,7 +503,7 @@ export function setupApiRoutes(app: Express) {
                     )
                 );
 
-            return res.status(200).json({ userHasLiked: Boolean(likeStatus) });
+            return res.status(200).send(Boolean(likeStatus));
         } catch (error) {
             console.error("Error while attempting to retrieve if user has liked game:\n", error);
             return res
@@ -535,7 +535,7 @@ export function setupApiRoutes(app: Express) {
             const [{ isPublic, title }] = gameTitleAndPrivacy;
 
             // Get game items (images)
-            const cardDataIdList: CardDataIdType[] = await db
+            const cardDataIdList: CardDataId[] = await db
                 .select({
                     gameItemId: schema.gameItems.id,
                     name: schema.gameItems.name,
@@ -553,21 +553,19 @@ export function setupApiRoutes(app: Express) {
                 return res.status(200).send(resData);
                 //cache and send presigned image urls for private games
             } else {
-                const cardDataPresignedUrlList: CardDataUrlType[] = cardDataIdList.map(
-                    (cardData) => {
-                        const signedUrlParams = {
-                            url: constructImageUrl(false, gameId, cardData.gameItemId),
-                            dateLessThan: new Date(Date.now() + 1000 * 60 * 60 * 25),
-                            privateKey: env.AWS_CF_PRIV_KEY,
-                            keyPairId: env.AWS_CF_KEY_PAIR_ID,
-                        };
-                        return {
-                            name: cardData.name,
-                            imageUrl: getSignedCFUrl(signedUrlParams),
-                            orderIndex: cardData.orderIndex,
-                        };
-                    }
-                );
+                const cardDataPresignedUrlList: CardDataUrl[] = cardDataIdList.map((cardData) => {
+                    const signedUrlParams = {
+                        url: constructImageUrl(false, gameId, cardData.gameItemId),
+                        dateLessThan: new Date(Date.now() + 1000 * 60 * 60 * 25),
+                        privateKey: env.AWS_CF_PRIV_KEY,
+                        keyPairId: env.AWS_CF_KEY_PAIR_ID,
+                    };
+                    return {
+                        name: cardData.name,
+                        imageUrl: getSignedCFUrl(signedUrlParams),
+                        orderIndex: cardData.orderIndex,
+                    };
+                });
 
                 const resData = { title: title, cardData: cardDataPresignedUrlList };
                 setGameDataCache(gameId, resData);

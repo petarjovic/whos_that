@@ -7,6 +7,10 @@ export const socket: Socket<ServerToClientEvents, ClientToServerEvents> = io(env
     autoConnect: false,
 });
 
+export const getSocketId = (): string => {
+    return socket.id ?? "";
+};
+
 export const emitGuess = (roomId: string, guessCorrectly: boolean) => {
     socket.emit("guess", roomId, guessCorrectly);
     log(

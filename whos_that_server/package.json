@@ -1,13 +1,12 @@
 {
     "name": "whos_that_server",
-    "version": "0.0.1",
+    "version": "0.0.2",
     "description": "server for who's that game",
     "main": "server.ts",
     "engines": {
         "node": ">=22.20.0"
     },
     "scripts": {
-        "test": "echo \"Error: no test specified\" && exit 1",
         "dev": "node --watch --env-file=.env ./src/server.ts",
         "start": "node ./src/server.ts"
     },

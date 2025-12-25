@@ -5,14 +5,15 @@ import { roomIdSchema, createRoomParamsSchema } from "../config/zod/zodSchema.ts
 
 const ActiveRoomIdsMap = new Map<string, RoomState>();
 
-const createEmptyGameState = (): RoomState => ({
+const createEmptyRoomState = (): RoomState => ({
     id: "",
-    players: ["", ""],
-    playAgainReqs: [false, false],
-    cardIdsToGuess: [-1, -1],
-    preset: "",
+    gameId: "",
     numOfChars: 0,
-    endState: [null, null],
+    players: [],
+    curTurn: "",
+    playAgainReqs: {},
+    cardIdsToGuess: {},
+    endState: {},
 });
 
 /**
@@ -23,13 +24,12 @@ export function setupSocketEventHandlers(io: Server<ClientToServerEvents, Server
     // Validates room ID format and emits error if invalid
     const validateRoomId = (roomId: string, socketId: string): boolean => {
         const roomIdValid = roomIdSchema.safeParse(roomId);
-        if (roomIdValid.success) return roomIdValid.success;
-        else {
+        if (!roomIdValid.success) {
             io.to(socketId).emit("errorMessage", {
                 message: "Invalid room id.",
             });
             return false;
-        }
+        } else return true;
     };
 
     io.on("connection", (socket) => {
@@ -38,164 +38,165 @@ export function setupSocketEventHandlers(io: Server<ClientToServerEvents, Server
         /**
          * Creates a new game room with specified preset and character count
          */
-        socket.on("createRoom", (preset, numOfChars, ack) => {
-            //parse params
+        socket.on("createRoom", (gameId, numOfChars, ack) => {
+            //Validate params from client
             const validateCreateRoomParams = createRoomParamsSchema.safeParse({
-                preset,
+                gameId,
                 numOfChars,
             });
-            if (validateCreateRoomParams.success) {
-                // Generate unique room ID + set initial room state
-                let roomId = nanoid(6);
-                while (ActiveRoomIdsMap.has(roomId)) roomId = nanoid(6);
-                ActiveRoomIdsMap.set(roomId, {
-                    ...createEmptyGameState(),
-                    id: roomId,
-                    preset,
-                    numOfChars,
-                });
-
-                ack(roomId, { success: true, msg: `Created room: ${roomId} successfully.` });
-                console.log(`Player ${socket.id} created room: ${roomId}`);
-                //Error and invalid request handling ↓
-            } else {
+            if (!validateCreateRoomParams.success) {
+                console.warn(`Socket ${socket.id} tried to create room with invalid parameters.`);
                 ack("", { success: false, msg: `Invalid parameters for creating a room.` });
-                console.error(
-                    `Socket ${socket.id} request to create a room with invalid parameters.`
-                );
+                return;
             }
+
+            //Success, generate room id
+            let roomId = nanoid(6);
+            while (ActiveRoomIdsMap.has(roomId)) roomId = nanoid(6);
+            ActiveRoomIdsMap.set(roomId, {
+                ...createEmptyRoomState(),
+                id: roomId,
+                gameId,
+                numOfChars,
+            });
+
+            ack(roomId, { success: true, msg: `Created room: ${roomId} successfully.` });
+            console.log(`Player ${socket.id} created room: ${roomId}`);
         });
 
         /**
-         * Joins an existing game room
+         * Player joins an existing game room
          */
         socket.on("joinRoom", (roomId, ack) => {
-            if (validateRoomId(roomId, socket.id)) {
-                const gameState = ActiveRoomIdsMap.get(roomId);
-                if (gameState) {
-                    const players = gameState.players;
-
-                    // Add player to first available slot
-                    if (!players.includes(socket.id) && players.includes("")) {
-                        players[players.indexOf("")] = socket.id;
-
-                        void socket.join(roomId);
-                        socket.to(roomId).emit("updateRoomState", gameState);
-
-                        console.log(
-                            `Player ${socket.id} joined game ${roomId}. Current game state:`,
-                            gameState
-                        );
-                        ack(gameState, {
-                            success: true,
-                            msg: `Joined game ${roomId} successfuly.`,
-                        });
-                        //Error and invalid request handling ↓
-                    } else if (players.includes(socket.id)) {
-                        console.log(`Player ${socket.id} is already in ${roomId}.`);
-                        ack(gameState, { success: true, msg: `Already in game: ${roomId}` });
-                    } else {
-                        console.log(`Game ${roomId} is full!`);
-                        ack(gameState, { success: false, msg: `Game ${roomId} is full!` });
-                    }
-                } else {
-                    console.error(`Game ${roomId} not found!`);
-                    ack(createEmptyGameState(), {
-                        success: false,
-                        msg: `Game ${roomId} not found!`,
-                    });
-                }
-            } else {
+            //Validate room id format
+            if (!validateRoomId(roomId, socket.id)) {
                 console.error(`${socket.id} requested to join an invalid roomId.`);
-                ack(createEmptyGameState(), { success: false, msg: `Invalid roomId provided.` });
+                return ack(createEmptyRoomState(), {
+                    success: false,
+                    msg: `Invalid roomId provided.`,
+                });
             }
+            //Check room is active
+            const roomState = ActiveRoomIdsMap.get(roomId);
+            if (!roomState) {
+                console.error(`Room ${roomId} not found!`);
+                return ack(createEmptyRoomState(), {
+                    success: false,
+                    msg: `Room ${roomId} not found!`,
+                });
+            }
+
+            //Player already in room (still success = true)
+            if (Object.values(roomState.players).includes(socket.id)) {
+                console.log(`Player ${socket.id} is already in ${roomId}.`);
+                return ack(roomState, { success: true, msg: `Already in game: ${roomId}` });
+            }
+
+            //Fail: room is full
+            if (roomState.players.length >= 2) {
+                console.log(`Room ${roomId} is full!`);
+                return ack(roomState, { success: false, msg: `Room ${roomId} is full!` });
+            }
+
+            //Sucess: room has space
+            roomState.players.push(socket.id);
+            roomState.cardIdsToGuess[socket.id] = -1;
+            roomState.playAgainReqs[socket.id] = false;
+            roomState.endState[socket.id] = null;
+            void socket.join(roomId);
+
+            //If there is now two players in the room, randomly set one to have it be their turn
+            if (roomState.players.length === 2) {
+                const randI = Math.floor(Math.random() * 2);
+                roomState.curTurn = roomState.players[randI];
+            }
+
+            socket.to(roomId).emit("updateRoomState", roomState);
+            return ack(roomState, {
+                //Maybe doesn't need to be ack ?
+                success: true,
+                msg: `Joined room ${roomId} successfuly.`,
+            });
         });
 
         /**
          * Sets player's character choice
          */
         socket.on("chooseCharacter", (roomId, indexNum) => {
-            //validate room exists
-            if (validateRoomId(roomId, socket.id)) {
-                const gameState = ActiveRoomIdsMap.get(roomId);
-
-                if (gameState) {
-                    const playerIndex = gameState.players.indexOf(socket.id);
-                    //validate socket is part of room
-                    if (playerIndex !== -1) {
-                        console.log(
-                            `Recieved character choice of player: ${socket.id} in game: ${roomId}`
-                        );
-                        if (indexNum > 0 && indexNum < gameState.numOfChars) {
-                            gameState.cardIdsToGuess[playerIndex] = indexNum;
-                        } else {
-                            gameState.cardIdsToGuess[playerIndex] = Math.floor(
-                                Math.random() * gameState.numOfChars
-                            );
-                        }
-                        io.to(roomId).emit("updateRoomState", gameState);
-                        //Error and invalid request handling ↓
-                    } else {
-                        const playerNotInRoom = `Player ${socket.id} choosing character was not found in game ${roomId} .`;
-                        console.warn(playerNotInRoom);
-                        io.to(roomId).emit("errorMessage", {
-                            message: playerNotInRoom,
-                        });
-                    }
-                } else {
-                    const roomDoesNotExist = `Player: ${socket.id} sent character choice to room: ${roomId} which does not exist.`;
-                    console.warn(roomDoesNotExist);
-                }
+            //Validate room id and that it is active
+            if (!validateRoomId(roomId, socket.id)) return;
+            const roomState = ActiveRoomIdsMap.get(roomId);
+            if (!roomState) {
+                return void console.warn(
+                    `Player: ${socket.id} sent character choice to room: ${roomId} which is not active`
+                );
             }
+
+            const players = roomState.players;
+            const cardIdsToGuess = roomState.cardIdsToGuess;
+
+            //Fail: player not in room
+            if (!players.includes(socket.id)) {
+                const playerNotInRoom = `Player: ${socket.id} choosing character was not found in room: ${roomId} `;
+                io.to(roomId).emit("errorMessage", {
+                    message: playerNotInRoom,
+                });
+                return void console.warn(playerNotInRoom);
+            }
+
+            //Success
+            if (indexNum > 0 && indexNum < roomState.numOfChars) {
+                cardIdsToGuess[socket.id] = indexNum;
+            } else {
+                cardIdsToGuess[socket.id] = Math.floor(Math.random() * roomState.numOfChars);
+            }
+            io.to(roomId).emit("updateRoomState", roomState);
         });
 
         /**
-         * Sends other player notice that it is their turn
+         * Sends other player signal that it is their turn
          */
         socket.on("passTurn", (roomId) => {
-            if (validateRoomId(roomId, socket.id)) {
-                const gameState = ActiveRoomIdsMap.get(roomId);
+            //Validate room id, that it is active, and player is in it
+            if (!validateRoomId(roomId, socket.id)) return;
+            const roomState = ActiveRoomIdsMap.get(roomId);
+            if (!roomState) return;
+            if (!roomState.players.includes(socket.id)) return;
 
-                if (gameState) {
-                    const playerIndex = gameState.players.indexOf(socket.id);
+            //Get other player's id, update room state, and respond
+            const otherPlayer = roomState.players.find((id) => id !== socket.id);
+            if (!otherPlayer) return;
 
-                    if (playerIndex !== -1) {
-                        socket.to(roomId).emit("yourTurn");
-                    }
-                }
-            }
+            roomState.curTurn = otherPlayer;
+            socket.to(roomId).emit("updateTurnOnly", {
+                curTurn: otherPlayer,
+            });
         });
 
         /**
          * Recieves guess from player and updates endState accordingly
          */
         socket.on("guess", (roomId, guessCorrectness) => {
-            //validate room exists
-            if (validateRoomId(roomId, socket.id)) {
-                const gameState = ActiveRoomIdsMap.get(roomId);
-
-                if (gameState) {
-                    const playerIndex = gameState.players.indexOf(socket.id);
-                    //validate socket is part of room
-                    if (playerIndex !== -1) {
-                        console.log(
-                            `Recieved correctness of guess by player: ${socket.id} in game: ${roomId}, ${guessCorrectness.toString()}`
-                        );
-                        gameState.endState[playerIndex] = guessCorrectness;
-                        io.to(roomId).emit("updateRoomState", gameState);
-                        //Error and invalid request handling ↓
-                    } else {
-                        const playerNotInRoom = `Player ${socket.id} making guess was not found in game ${roomId} .`;
-                        console.warn(playerNotInRoom);
-                        io.to(roomId).emit("errorMessage", {
-                            message: playerNotInRoom,
-                        });
-                    }
-                } else {
-                    const roomDoesNotExist = `Player: ${socket.id} sent guess to room: ${roomId} which does not exist.`;
-                    console.warn(roomDoesNotExist);
-                }
+            //Validate room id and that it is active
+            if (!validateRoomId(roomId, socket.id)) return;
+            const roomState = ActiveRoomIdsMap.get(roomId);
+            if (!roomState) {
+                return void console.warn(
+                    `Player: ${socket.id} sent guess to room: ${roomId} which does not exist.`
+                );
             }
+
+            //Fail: player not in room
+            if (!roomState.players.includes(socket.id)) {
+                io.to(roomId).emit("errorMessage", { message: "Player not in room." });
+                return void console.warn(
+                    `Player ${socket.id} making guess was not found in game ${roomId}.`
+                );
+            }
+            //Success
+            console.log(`Received guess from ${socket.id} in ${roomId}: ${guessCorrectness}`);
+            roomState.endState[socket.id] = guessCorrectness;
+            io.to(roomId).emit("updateRoomState", roomState);
         });
 
         /**
@@ -203,26 +204,27 @@ export function setupSocketEventHandlers(io: Server<ClientToServerEvents, Server
          * @event disconnecting
          */
         socket.on("disconnecting", () => {
-            //For each room this player socket is in (usually only one room)
+            //Loop through rooms this socket is in (should be 1)
             for (const roomId of socket.rooms) {
-                const gameState = ActiveRoomIdsMap.get(roomId);
+                const roomState = ActiveRoomIdsMap.get(roomId);
+                if (!roomState) continue; //this shouldn't happen
 
-                if (gameState) {
-                    // Remove player from room and reset game state
-                    const players = gameState.players;
-                    players[players.indexOf(socket.id)] = "";
-                    gameState.playAgainReqs = [false, false];
-                    gameState.endState = [null, null];
-                    gameState.cardIdsToGuess = [-1, -1];
-                    console.log([players]);
-                    // Delete room if empty
-                    if (players.every((p) => p === "")) {
-                        ActiveRoomIdsMap.delete(roomId);
-                        console.log("Deleted room:", roomId);
-                    } else {
-                        console.log(`Player ${socket.id} disconnected from ${roomId}.`);
-                        socket.to(roomId).emit("opponentDisconnected", gameState);
-                    }
+                roomState.players = roomState.players.filter((id) => id !== socket.id);
+
+                //Delete room if no players left
+                if (roomState.players.length === 0) {
+                    ActiveRoomIdsMap.delete(roomId);
+                    console.log("Deleted room:", roomId);
+                }
+                //Update room if another player is in it
+                else {
+                    delete roomState.playAgainReqs[socket.id];
+                    delete roomState.cardIdsToGuess[socket.id];
+                    delete roomState.endState[socket.id];
+                    roomState.curTurn = "";
+
+                    console.log(`Player ${socket.id} disconnected from ${roomId}.`);
+                    socket.to(roomId).emit("opponentDisconnected", roomState);
                 }
             }
             console.log("User disconnected:", socket.id);
@@ -233,35 +235,38 @@ export function setupSocketEventHandlers(io: Server<ClientToServerEvents, Server
          * @event playAgain
          */
         socket.on("playAgain", (roomId) => {
-            if (validateRoomId(roomId, socket.id)) {
-                const gameState = ActiveRoomIdsMap.get(roomId);
+            //Validate room id and that it is active
+            if (!validateRoomId(roomId, socket.id)) return;
+            const roomState = ActiveRoomIdsMap.get(roomId);
+            if (!roomState) {
+                const roomDoesNotExist = `Player: ${socket.id} sent play again request to room: ${roomId} which does not exist.`;
+                io.to(socket.id).emit("errorMessage", {
+                    message: roomDoesNotExist,
+                });
+                return void console.warn(roomDoesNotExist);
+            }
 
-                if (gameState) {
-                    const playerIndex = gameState.players.indexOf(socket.id);
-                    // Verify player is in the room
-                    if (playerIndex !== -1) {
-                        gameState.playAgainReqs[playerIndex] = true;
-                        // Reset game when both players agree
-                        if (gameState.playAgainReqs.every(Boolean)) {
-                            gameState.cardIdsToGuess = [-1, -1];
-                            gameState.playAgainReqs = [false, false];
-                            gameState.endState = [null, null];
-                            io.to(roomId).emit("updateRoomState", gameState);
-                        }
-                        //Error and invalid request handling ↓
-                    } else {
-                        const playerNotInRoom = `Player ${socket.id} requesting to play again was not found in game ${roomId} .`;
-                        io.to(roomId).emit("errorMessage", {
-                            message: playerNotInRoom,
-                        });
-                    }
-                } else {
-                    const roomDoesNotExist = `Player: ${socket.id} sent play again request to room: ${roomId} which does not exist.`;
-                    console.error(roomDoesNotExist);
-                    io.to(socket.id).emit("errorMessage", {
-                        message: roomDoesNotExist,
-                    });
-                }
+            const players = roomState.players;
+            const playAgainReqs = roomState.playAgainReqs;
+
+            //Fail: player not in room
+            if (!players.includes(socket.id)) {
+                const playerNotInRoom = `Player ${socket.id} requesting to play again was not found in game ${roomId} .`;
+                io.to(roomId).emit("errorMessage", {
+                    message: playerNotInRoom,
+                });
+                return void console.warn(playerNotInRoom);
+            }
+
+            //Success: if both players request to play again, reset room state
+            playAgainReqs[socket.id] = true;
+            if (Object.values(playAgainReqs).every(Boolean)) {
+                players.forEach((id) => {
+                    roomState.cardIdsToGuess[id] = -1;
+                    roomState.playAgainReqs[id] = false;
+                    roomState.endState[id] = null;
+                });
+                io.to(roomId).emit("updateRoomState", roomState);
             }
         });
     });

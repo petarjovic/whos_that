@@ -4,6 +4,7 @@ import { z } from "zod/v4";
 
 export const nanoId21Schema = z.string().regex(/^[\w-]{21}$/i);
 export const roomIdSchema = z.string().regex(/^[\w-]{6}$/i);
+export const socketIdSchema = z.string().regex(/^[\w-]{20}$/);
 
 export const searchQuerySchema = z.object({
     q: z.string().max(100).optional(),
@@ -18,35 +19,48 @@ export const responseTypeSchema = z.object({
     msg: z.string(),
 });
 
-//used to signal player win/loss and reason
-export const endStateSchema = z.tuple([z.boolean().nullable(), z.boolean().nullable()]);
+export const EndStateSchema = z.record(socketIdSchema, z.boolean().nullable());
 
-export const roomStateSchema = z.object({
-    id: roomIdSchema,
-    players: z.tuple([z.string(), z.string()]),
-    cardIdsToGuess: z.tuple([z.number(), z.number()]),
-    playAgainReqs: z.tuple([z.boolean(), z.boolean()]),
-    preset: nanoId21Schema,
-    numOfChars: z.number(),
-    endState: endStateSchema,
-});
+export const roomStateSchema = z
+    .object({
+        id: z.union([socketIdSchema, z.literal("")]),
+        gameId: z.union([socketIdSchema, z.literal("")]),
+        numOfChars: z.number(),
+        players: z.array(socketIdSchema).max(2),
+        curTurn: z.union([socketIdSchema, z.literal("")]),
+        playAgainReqs: z.record(socketIdSchema, z.boolean()),
+        cardIdsToGuess: z.record(socketIdSchema, z.number()),
+        endState: EndStateSchema,
+    })
+    //Ensures all player/socket ids are in players array
+    .refine((rs) => {
+        const keys = [
+            ...Object.keys(rs.playAgainReqs),
+            ...Object.keys(rs.cardIdsToGuess),
+            ...Object.keys(rs.endState),
+        ];
+        return (
+            keys.every((k) => rs.players.includes(k)) &&
+            (rs.players.includes(rs.curTurn) || rs.curTurn === "")
+        );
+    });
 
 const cardDataTypeSchema = z.object({
     name: z.string(),
     orderIndex: z.number().int(),
 });
 
-export const cardDataIdTypeSchema = cardDataTypeSchema.extend({
+export const cardDataIdSchema = cardDataTypeSchema.extend({
     gameItemId: nanoId21Schema,
 });
 
-export const cardDataUrlTypeSchema = cardDataTypeSchema.extend({
+export const cardDataUrlSchema = cardDataTypeSchema.extend({
     imageUrl: z.url(),
 });
 
-export const gameDataTypeSchema = z.object({
+export const gameDataSchema = z.object({
     title: z.string(),
-    cardData: z.array(cardDataUrlTypeSchema),
+    cardData: z.array(cardDataUrlSchema),
 });
 
 export const createGameRequestSchema = z.object({
@@ -75,9 +89,11 @@ export const createGameResponseSchema = z.object({
 });
 
 export const createRoomParamsSchema = z.object({
-    preset: nanoId21Schema,
+    gameId: nanoId21Schema,
     numOfChars: z.number().int().min(6).max(50),
 });
+
+export const userHasLikedSchema = z.boolean().nullable();
 
 const PresetInfoSchema = z.object({
     id: z.string(),
@@ -85,7 +101,7 @@ const PresetInfoSchema = z.object({
     author: z.string().nullable(),
     isPublic: z.boolean(),
     numLikes: z.number(),
-    userHasLiked: z.boolean().nullable(),
+    userHasLiked: userHasLikedSchema,
 });
 
 export const IdPresetInfoSchema = PresetInfoSchema.extend({
@@ -108,8 +124,4 @@ export const PaginationInfoSchema = z.object({
 export const SearchResponseSchema = z.object({
     games: UrlPresetInfoListSchema,
     pagination: PaginationInfoSchema,
-});
-
-export const userHasLikedSchema = z.object({
-    userHasLiked: z.boolean().nullable(),
 });

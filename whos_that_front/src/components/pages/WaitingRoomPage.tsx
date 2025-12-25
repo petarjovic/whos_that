@@ -1,5 +1,5 @@
 import loadingSpinner from "../../assets/BeanEaterLoadingSpinner.svg";
-import type { CardDataUrlType } from "@server/types";
+import type { CardDataUrl } from "@server/types";
 import { CardLayout } from "../misc/Cards.tsx";
 import LoadingSpinner from "../misc/LoadingSpinner.tsx";
 
@@ -7,7 +7,7 @@ import LoadingSpinner from "../misc/LoadingSpinner.tsx";
  * Waiting page displayed while waiting for second player to join
  * Shows room code for opponent to use
  */
-const WaitingRoom = ({ gameId, cardData }: { gameId: string; cardData: CardDataUrlType[] }) => {
+const WaitingRoom = ({ gameId, cardData }: { gameId: string; cardData: CardDataUrl[] }) => {
     const cardList = cardData.map(({ imageUrl, name, orderIndex }) => (
         <CardLayout name={name} imgSrc={imageUrl} key={orderIndex} size={"S"}></CardLayout>
     ));

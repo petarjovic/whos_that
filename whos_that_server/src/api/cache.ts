@@ -1,6 +1,6 @@
-import type { GameDataType, IdPresetInfo } from "../config/types.ts";
+import type { GameData, IdPresetInfo } from "../config/types.ts";
 
-const GAMEDATA_CACHE = new Map<string, { data: GameDataType; timestamp: number }>();
+const GAMEDATA_CACHE = new Map<string, { data: GameData; timestamp: number }>();
 let TOP3MOSTLIKED_CACHE: { data: IdPresetInfo[]; timestamp: number } | null = null;
 let TOP3MOSTRECENT_CACHE: { data: IdPresetInfo[]; timestamp: number } | null = null;
 
@@ -32,7 +32,7 @@ setInterval(() => {
 }, 21600000);
 
 //GAMEDATA_CACHE helpers
-export function getCachedGameData(gameId: string): GameDataType | null {
+export function getCachedGameData(gameId: string): GameData | null {
     const cached = GAMEDATA_CACHE.get(gameId);
     if (cached && Date.now() - cached.timestamp < GAMEDATA_CACHE_DUR) {
         return cached.data;
@@ -40,7 +40,7 @@ export function getCachedGameData(gameId: string): GameDataType | null {
     return null;
 }
 
-export function setGameDataCache(gameId: string, data: GameDataType): void {
+export function setGameDataCache(gameId: string, data: GameData): void {
     // Delete and re-add to move to end (most recent)
     GAMEDATA_CACHE.delete(gameId);
     GAMEDATA_CACHE.set(gameId, { data, timestamp: Date.now() });

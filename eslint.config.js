@@ -23,6 +23,11 @@ export default defineConfig([
         ],
         rules: {
             "@typescript-eslint/consistent-indexed-object-style": ["error", "index-signature"],
+            "@typescript-eslint/no-confusing-void-expression": [
+                "error",
+                { ignoreArrowShorthand: true },
+                { ignoreVoidReturningFunctions: true },
+            ],
         },
         languageOptions: {
             ecmaVersion: 2020,
@@ -38,10 +43,15 @@ export default defineConfig([
         extends: [
             pluginReact.configs.flat.recommended,
             pluginReact.configs.flat["jsx-runtime"],
-            reactHooks.configs["recommended-latest"],
             reactCompiler.configs.recommended,
             reactRefresh.configs.vite,
         ],
+        plugins: {
+            "react-hooks": reactHooks,
+        },
+        rules: {
+            ...reactHooks.configs.recommended.rules,
+        },
         languageOptions: {
             globals: globals.browser,
         },

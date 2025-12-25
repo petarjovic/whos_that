@@ -73,7 +73,7 @@ export const Card = ({
 
     // Reset card visibility when new game starts
     useEffect(() => {
-        if (resetOnNewGame.every((e) => e === null)) setFlipped(false);
+        if (Object.values(resetOnNewGame).every((e) => e === null)) setFlipped(false);
     }, [resetOnNewGame]);
 
     return (

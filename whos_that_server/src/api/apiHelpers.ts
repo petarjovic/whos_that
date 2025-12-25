@@ -2,7 +2,7 @@ import { DeleteObjectsCommand, CopyObjectCommand } from "@aws-sdk/client-s3";
 import { CreateInvalidationCommand } from "@aws-sdk/client-cloudfront";
 import { sql, eq, not } from "drizzle-orm";
 import { db, s3, S3_BUCKET_NAME, USE_CLOUDFRONT, cloudFront } from "../config/connections.ts";
-import type { CardDataIdType, CardDataUrlType } from "../config/types.ts";
+import type { CardDataId, CardDataUrl } from "../config/types.ts";
 import * as schema from "../db/schema.ts";
 import { nanoid } from "nanoid";
 import env from "../config/zod/zodEnvSchema.ts";
@@ -55,8 +55,8 @@ export const constructImageUrl = (
 export const cardDataIdToUrl = (
     gameId: string,
     isPublic: boolean,
-    cardDataIdList: CardDataIdType[]
-): CardDataUrlType[] => {
+    cardDataIdList: CardDataId[]
+): CardDataUrl[] => {
     return cardDataIdList.map(({ name, orderIndex, gameItemId }) => {
         return {
             name,
