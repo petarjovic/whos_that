@@ -16,10 +16,7 @@ export interface ClientToServerEvents {
         numOfChars: number,
         ack: (id: string, response: SocketResponse) => void
     ) => void;
-    joinRoom: (
-        roomId: string,
-        ack: (gameData: RoomState, response: SocketResponse) => void
-    ) => void;
+    joinRoom: (roomId: string) => void;
     passTurn: (roomId: string) => void;
     guess: (roomId: string, guessCorrectness: boolean) => void;
     chooseCharacter: (roomId: string, indexNum: number) => void;

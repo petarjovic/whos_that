@@ -1,7 +1,9 @@
+/* eslint-disable @typescript-eslint/no-dynamic-delete */
 import { nanoid } from "nanoid";
 import type { RoomState, ClientToServerEvents, ServerToClientEvents } from "../config/types.ts";
 import type { Server } from "socket.io";
 import { roomIdSchema, createRoomParamsSchema } from "../config/zod/zodSchema.ts";
+import { logger } from "../config/logger.ts";
 
 const ActiveRoomIdsMap = new Map<string, RoomState>();
 
@@ -21,19 +23,32 @@ const createEmptyRoomState = (): RoomState => ({
  * @param io - Socket.IO server instance
  */
 export function setupSocketEventHandlers(io: Server<ClientToServerEvents, ServerToClientEvents>) {
-    // Validates room ID format and emits error if invalid
-    const validateRoomId = (roomId: string, socketId: string): boolean => {
+    /**
+     * Gets room state from ActiveRoomIdsMap
+     * Emits error to socket if roomId is invalid or not in map
+     */
+    const getRoomState = (roomId: string, socketId: string): RoomState | undefined => {
         const roomIdValid = roomIdSchema.safeParse(roomId);
         if (!roomIdValid.success) {
+            logger.warn(`Warning: socket ${socketId} sent event with invalid roomId ${roomId} .`);
             io.to(socketId).emit("errorMessage", {
                 message: "Invalid room id.",
             });
-            return false;
-        } else return true;
+            return undefined;
+        }
+        const roomState = ActiveRoomIdsMap.get(roomId);
+        if (!roomState) {
+            logger.warn(`Warning: socket ${socketId} sent event to an inactive roomId ${roomId} .`);
+            io.to(socketId).emit("errorMessage", {
+                message: `Room ${roomId} is not active.`,
+            });
+            return undefined;
+        }
+        return roomState;
     };
 
     io.on("connection", (socket) => {
-        console.log("User connected:", socket.id);
+        logger.debug(`User connected: ${socket.id}`);
 
         /**
          * Creates a new game room with specified preset and character count
@@ -45,7 +60,7 @@ export function setupSocketEventHandlers(io: Server<ClientToServerEvents, Server
                 numOfChars,
             });
             if (!validateCreateRoomParams.success) {
-                console.warn(`Socket ${socket.id} tried to create room with invalid parameters.`);
+                logger.warn(`Socket ${socket.id} tried to create room with invalid parameters.`);
                 ack("", { success: false, msg: `Invalid parameters for creating a room.` });
                 return;
             }
@@ -60,42 +75,26 @@ export function setupSocketEventHandlers(io: Server<ClientToServerEvents, Server
                 numOfChars,
             });
 
-            ack(roomId, { success: true, msg: `Created room: ${roomId} successfully.` });
-            console.log(`Player ${socket.id} created room: ${roomId}`);
+            logger.debug(`Player ${socket.id} created room: ${roomId}`);
+            return ack(roomId, { success: true, msg: `Created room: ${roomId} successfully.` });
         });
 
         /**
          * Player joins an existing game room
          */
-        socket.on("joinRoom", (roomId, ack) => {
-            //Validate room id format
-            if (!validateRoomId(roomId, socket.id)) {
-                console.error(`${socket.id} requested to join an invalid roomId.`);
-                return ack(createEmptyRoomState(), {
-                    success: false,
-                    msg: `Invalid roomId provided.`,
-                });
-            }
-            //Check room is active
-            const roomState = ActiveRoomIdsMap.get(roomId);
-            if (!roomState) {
-                console.error(`Room ${roomId} not found!`);
-                return ack(createEmptyRoomState(), {
-                    success: false,
-                    msg: `Room ${roomId} not found!`,
-                });
-            }
+        socket.on("joinRoom", (roomId) => {
+            const roomState = getRoomState(roomId, socket.id);
+            if (!roomState) return;
 
-            //Player already in room (still success = true)
-            if (Object.values(roomState.players).includes(socket.id)) {
-                console.log(`Player ${socket.id} is already in ${roomId}.`);
-                return ack(roomState, { success: true, msg: `Already in game: ${roomId}` });
-            }
+            //Player already in room (do nothing)
+            if (Object.values(roomState.players).includes(socket.id)) return;
 
             //Fail: room is full
             if (roomState.players.length >= 2) {
-                console.log(`Room ${roomId} is full!`);
-                return ack(roomState, { success: false, msg: `Room ${roomId} is full!` });
+                io.to(roomId).emit("errorMessage", {
+                    message: `Cannot join room ${roomId}: it is full!`,
+                });
+                return;
             }
 
             //Sucess: room has space
@@ -105,49 +104,38 @@ export function setupSocketEventHandlers(io: Server<ClientToServerEvents, Server
             roomState.endState[socket.id] = null;
             void socket.join(roomId);
 
-            //If there is now two players in the room, randomly set one to have it be their turn
+            //If there is now two players in the room, randomly set curTurn
             if (roomState.players.length === 2) {
                 const randI = Math.floor(Math.random() * 2);
                 roomState.curTurn = roomState.players[randI];
             }
 
-            socket.to(roomId).emit("updateRoomState", roomState);
-            return ack(roomState, {
-                //Maybe doesn't need to be ack ?
-                success: true,
-                msg: `Joined room ${roomId} successfuly.`,
-            });
+            io.to(roomId).emit("updateRoomState", roomState);
         });
 
         /**
          * Sets player's character choice
          */
         socket.on("chooseCharacter", (roomId, indexNum) => {
-            //Validate room id and that it is active
-            if (!validateRoomId(roomId, socket.id)) return;
-            const roomState = ActiveRoomIdsMap.get(roomId);
-            if (!roomState) {
-                return void console.warn(
-                    `Player: ${socket.id} sent character choice to room: ${roomId} which is not active`
-                );
-            }
+            const roomState = getRoomState(roomId, socket.id);
+            if (!roomState) return;
 
             const players = roomState.players;
             const cardIdsToGuess = roomState.cardIdsToGuess;
 
-            //Fail: player not in room
+            //Fail: player not in room, should not be possible
             if (!players.includes(socket.id)) {
-                const playerNotInRoom = `Player: ${socket.id} choosing character was not found in room: ${roomId} `;
-                io.to(roomId).emit("errorMessage", {
-                    message: playerNotInRoom,
-                });
-                return void console.warn(playerNotInRoom);
+                logger.warn(
+                    `Error: player ${socket.id} sending chooseCharacter evemt was not found in room: ${roomId} .`
+                );
+                return;
             }
 
             //Success
             if (indexNum > 0 && indexNum < roomState.numOfChars) {
                 cardIdsToGuess[socket.id] = indexNum;
             } else {
+                //Player chose "random"
                 cardIdsToGuess[socket.id] = Math.floor(Math.random() * roomState.numOfChars);
             }
             io.to(roomId).emit("updateRoomState", roomState);
@@ -157,15 +145,23 @@ export function setupSocketEventHandlers(io: Server<ClientToServerEvents, Server
          * Sends other player signal that it is their turn
          */
         socket.on("passTurn", (roomId) => {
-            //Validate room id, that it is active, and player is in it
-            if (!validateRoomId(roomId, socket.id)) return;
-            const roomState = ActiveRoomIdsMap.get(roomId);
+            const roomState = getRoomState(roomId, socket.id);
             if (!roomState) return;
-            if (!roomState.players.includes(socket.id)) return;
+            if (!roomState.players.includes(socket.id)) {
+                logger.warn(
+                    `Warning: socket ${socket.id} sent passTurn event to ${roomId} where it's not a player.`
+                );
+                return;
+            }
 
             //Get other player's id, update room state, and respond
             const otherPlayer = roomState.players.find((id) => id !== socket.id);
-            if (!otherPlayer) return;
+            if (!otherPlayer) {
+                logger.warn(
+                    `Warning: socket ${socket.id} sent passTurn event to ${roomId} which has no other player.`
+                );
+                return;
+            }
 
             roomState.curTurn = otherPlayer;
             socket.to(roomId).emit("updateTurnOnly", {
@@ -177,24 +173,18 @@ export function setupSocketEventHandlers(io: Server<ClientToServerEvents, Server
          * Recieves guess from player and updates endState accordingly
          */
         socket.on("guess", (roomId, guessCorrectness) => {
-            //Validate room id and that it is active
-            if (!validateRoomId(roomId, socket.id)) return;
-            const roomState = ActiveRoomIdsMap.get(roomId);
-            if (!roomState) {
-                return void console.warn(
-                    `Player: ${socket.id} sent guess to room: ${roomId} which does not exist.`
-                );
-            }
+            const roomState = getRoomState(roomId, socket.id);
+            if (!roomState) return;
 
-            //Fail: player not in room
+            //Fail: player not in room, shouldn't be possible
             if (!roomState.players.includes(socket.id)) {
-                io.to(roomId).emit("errorMessage", { message: "Player not in room." });
-                return void console.warn(
-                    `Player ${socket.id} making guess was not found in game ${roomId}.`
+                logger.warn(
+                    `Warning: socket ${socket.id} sent guess event to ${roomId} which it is not a player in.`
                 );
+                return;
             }
             //Success
-            console.log(`Received guess from ${socket.id} in ${roomId}: ${guessCorrectness}`);
+            logger.debug(`Guess from ${socket.id} in ${roomId}: ${guessCorrectness.toString()}.`);
             roomState.endState[socket.id] = guessCorrectness;
             io.to(roomId).emit("updateRoomState", roomState);
         });
@@ -204,17 +194,23 @@ export function setupSocketEventHandlers(io: Server<ClientToServerEvents, Server
          * @event disconnecting
          */
         socket.on("disconnecting", () => {
-            //Loop through rooms this socket is in (should be 1)
+            logger.debug(`Socket disconnected: ${socket.id}`);
+            //Loop through rooms this socket is in (should be only 1)
             for (const roomId of socket.rooms) {
                 const roomState = ActiveRoomIdsMap.get(roomId);
-                if (!roomState) continue; //this shouldn't happen
+                if (!roomState) {
+                    logger.warn(
+                        `Warning: scoket ${socket.id} was somehow in an inactive room ${roomId} .`
+                    );
+                    continue; //this shouldn't happen
+                }
 
                 roomState.players = roomState.players.filter((id) => id !== socket.id);
 
                 //Delete room if no players left
                 if (roomState.players.length === 0) {
                     ActiveRoomIdsMap.delete(roomId);
-                    console.log("Deleted room:", roomId);
+                    logger.debug(`Deleted room: ${roomId}`);
                 }
                 //Update room if another player is in it
                 else {
@@ -223,11 +219,10 @@ export function setupSocketEventHandlers(io: Server<ClientToServerEvents, Server
                     delete roomState.endState[socket.id];
                     roomState.curTurn = "";
 
-                    console.log(`Player ${socket.id} disconnected from ${roomId}.`);
+                    logger.debug(`Player ${socket.id} disconnected from ${roomId} .`);
                     socket.to(roomId).emit("opponentDisconnected", roomState);
                 }
             }
-            console.log("User disconnected:", socket.id);
         });
 
         /**
@@ -235,27 +230,18 @@ export function setupSocketEventHandlers(io: Server<ClientToServerEvents, Server
          * @event playAgain
          */
         socket.on("playAgain", (roomId) => {
-            //Validate room id and that it is active
-            if (!validateRoomId(roomId, socket.id)) return;
-            const roomState = ActiveRoomIdsMap.get(roomId);
-            if (!roomState) {
-                const roomDoesNotExist = `Player: ${socket.id} sent play again request to room: ${roomId} which does not exist.`;
-                io.to(socket.id).emit("errorMessage", {
-                    message: roomDoesNotExist,
-                });
-                return void console.warn(roomDoesNotExist);
-            }
+            const roomState = getRoomState(roomId, socket.id);
+            if (!roomState) return;
 
             const players = roomState.players;
             const playAgainReqs = roomState.playAgainReqs;
 
-            //Fail: player not in room
+            //Fail: player not in room, should not be possible
             if (!players.includes(socket.id)) {
-                const playerNotInRoom = `Player ${socket.id} requesting to play again was not found in game ${roomId} .`;
-                io.to(roomId).emit("errorMessage", {
-                    message: playerNotInRoom,
-                });
-                return void console.warn(playerNotInRoom);
+                logger.warn(
+                    `Warning: socket ${socket.id} sent playAgain event to ${roomId} which it is not a player in.`
+                );
+                return;
             }
 
             //Success: if both players request to play again, reset room state

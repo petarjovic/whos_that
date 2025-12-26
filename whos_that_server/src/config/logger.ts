@@ -2,24 +2,26 @@ import pino from "pino";
 import { createStream } from "rotating-file-stream";
 import { join } from "path";
 
-const errorStream = createStream("error.log", {
-    path: join(process.cwd(), "logs"),
-    interval: "1d",
-    maxFiles: 30,
-});
+const streams = [];
 
-const combinedStream = createStream("combined.log", {
-    path: join(process.cwd(), "logs"),
-    interval: "1d",
-    maxFiles: 15,
-});
+if (process.env.NODE_ENV === "production") {
+    const errorStream = createStream("error.log", {
+        path: join(process.cwd(), "logs"),
+        interval: "1d",
+        maxFiles: 30,
+    });
 
-const streams = [
-    { level: "error", stream: errorStream },
-    { level: "info", stream: combinedStream },
-];
+    const combinedStream = createStream("combined.log", {
+        path: join(process.cwd(), "logs"),
+        interval: "1d",
+        maxFiles: 15,
+    });
 
-if (process.env.NODE_ENV !== "production") {
+    streams.push(
+        { level: "error", stream: errorStream },
+        { level: "info", stream: combinedStream }
+    );
+} else {
     streams.push({
         level: "debug",
         // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment

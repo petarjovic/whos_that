@@ -2,9 +2,11 @@ import { betterAuth } from "better-auth";
 import { drizzleAdapter } from "better-auth/adapters/drizzle";
 import { username, admin } from "better-auth/plugins";
 import { db } from "./connections.ts";
+import { createAuthMiddleware } from "better-auth/api";
 import * as authSchema from "../db/auth-schema.ts";
 import * as appSchema from "../db/schema.ts";
 import env from "./zod/zodEnvSchema.ts";
+import { logger } from "./logger.ts";
 
 //Composite schema file representing whole db
 const schema = {
@@ -58,5 +60,22 @@ export const auth = betterAuth({
         }),
         admin(),
     ],
+    hooks: {
+        // eslint-disable-next-line @typescript-eslint/require-await
+        after: createAuthMiddleware(async (ctx) => {
+            if (ctx.path.startsWith("/sign-up")) {
+                const newSession = ctx.context.newSession;
+                if (newSession) {
+                    logger.info(
+                        {
+                            userId: newSession.user.id,
+                        },
+                        "New user signed up."
+                    );
+                }
+            }
+        }),
+    },
+
     baseURL: env.NODE_ENV === "production" ? env.PROD_BETTER_AUTH_URL : env.DEV_BETTER_AUTH_URL,
 });

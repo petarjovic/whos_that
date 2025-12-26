@@ -9,6 +9,7 @@ import { setupSocketEventHandlers } from "./api/socketIO.ts";
 import { setupApiRoutes } from "./api/api.ts";
 import env from "./config/zod/zodEnvSchema.ts";
 import { setupAdminRoutes } from "./api/apiAdmin.ts";
+import { logger } from "./config/logger.ts";
 
 //Set up express app + CORs
 const app = express();
@@ -42,5 +43,5 @@ setupAdminRoutes(app);
 
 //Start server
 server.listen(env.PORT, () => {
-    console.log(`WHOS-THAT-SERVER LISTENING ON PORT: ${env.PORT.toString()}`);
+    logger.info(`STARTED WHOS-THAT-SERVER. LISTENING ON PORT: ${env.PORT.toString()}.`);
 });

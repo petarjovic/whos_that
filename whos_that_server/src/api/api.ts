@@ -144,8 +144,18 @@ export function setupApiRoutes(app: Express) {
                 insertTop3MostRecentCache(newGameInfo);
             }
 
+            logger.info(
+                {
+                    title: body.title,
+                    author: session.user.displayUsername,
+                    gameId,
+                    authorId: session.user.id,
+                    isPublic: body.privacy,
+                    numChars: response.gameItems.length,
+                },
+                "Created new game."
+            );
             return res.status(200).json(response);
-
             //Error handling ↓
         } catch (error) {
             logger.error(
@@ -423,6 +433,7 @@ export function setupApiRoutes(app: Express) {
                 .json({ message: "Internal Server Error. Failed to fetch user's games." });
         }
     });
+
     /**
      * Retrieves all games liked by the authenticated user
      * @returns List of user's games with signed URLs for cover images
@@ -576,8 +587,9 @@ export function setupApiRoutes(app: Express) {
                 const resData = { title: title, cardData: cardDataUrlList };
                 setGameDataCache(gameId, resData);
                 return res.status(200).send(resData);
-                //cache and send presigned image urls for private games
-            } else {
+            }
+            //cache and send presigned image urls for private games
+            else {
                 const cardDataPresignedUrlList: CardDataUrl[] = cardDataIdList.map((cardData) => {
                     const signedUrlParams = {
                         url: constructImageUrl(false, gameId, cardData.gameItemId),
@@ -724,11 +736,19 @@ export function setupApiRoutes(app: Express) {
                 }
                 invalidateInAllCaches(gameId); //metadata changed so invalidate cache
 
+                logger.info(
+                    {
+                        gameId,
+                        author: session.user.displayUsername,
+                        authorId: session.user.id,
+                    },
+                    `Privacy of game changed to ${newIsPublic ? "public" : "private"}.`
+                );
                 return res.status(200).send();
             } else {
                 //if user doesn't own game, shouldn't be possible
                 logger.error(
-                    `api/switchPrivacy: Error, user ${session.user.username ?? "(no username)"} (id: ${session.user.id}) is not an admin and attempted to switch privacy setting of game ${gameId} which they don't own.`
+                    `api/switchPrivacy: Error, user ${session.user.displayUsername ?? "(no username)"} (id: ${session.user.id}) is not an admin and attempted to switch privacy setting of game ${gameId} which they don't own.`
                 );
                 return res.status(403).json({ message: "Forbidden." });
             }
@@ -780,6 +800,14 @@ export function setupApiRoutes(app: Express) {
                 //invalidate any cache data that has this game
                 invalidateInAllCaches(gameId);
 
+                logger.info(
+                    {
+                        gameId,
+                        author: session.user.displayUsername,
+                        authorId: session.user.id,
+                    },
+                    "Deleted game."
+                );
                 //response
                 const resMsg = `Deleted game: ${gameId} .`;
                 return res.status(200).json({
@@ -788,7 +816,7 @@ export function setupApiRoutes(app: Express) {
             } else {
                 //if user doesn't own game
                 logger.error(
-                    `api/deleteGame: Error, user: ${session.user.username ?? "(no username)"} (id: ${session.user.id}) requested to delete game: ${gameId} but is not the owner of that game.`
+                    `api/deleteGame: Error, user: ${session.user.displayUsername ?? "(no username)"} (id: ${session.user.id}) requested to delete game: ${gameId} but is not the owner of that game.`
                 );
                 return res.status(403).json({
                     message: "Forbidden.",
