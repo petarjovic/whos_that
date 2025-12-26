@@ -164,7 +164,19 @@ export async function switchPrivacySettings(
         const copyResults = await Promise.allSettled(s3ImageCopyingPromises);
 
         // Attempt rollback if any copy operation failed
-        if (copyResults.some((p) => p.status === "rejected")) {
+        const failures = copyResults.filter((r) => r.status === "rejected");
+        if (failures.length > 0) {
+            failures.forEach((failure, index) => {
+                logger.error(
+                    {
+                        error: failure.reason,
+                        gameId,
+                        imageId: imageIds[index],
+                        failedCopyIndex: index,
+                    },
+                    `S3 copy operation failed for image ${(index + 1).toString()}/${imageIds.length.toString()}`
+                );
+            });
             await s3.send(
                 new DeleteObjectsCommand({
                     Bucket: S3_BUCKET_NAME,
