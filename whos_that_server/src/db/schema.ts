@@ -40,7 +40,5 @@ export const gameLikes = pgTable(
             .references(() => user.id, { onDelete: "cascade" }),
         createdAt: timestamp("created_at").defaultNow().notNull(),
     },
-    (table) => ({
-        uniqueGameUser: unique().on(table.gameId, table.userId),
-    })
+    (table) => [unique("uniqueGameUser").on(table.gameId, table.userId)]
 );
