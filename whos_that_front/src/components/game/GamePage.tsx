@@ -29,7 +29,7 @@ const Game = ({ roomState, cardData, title }: GameProps) => {
     //At start of game shows player if they're going first or second, lasts 4.5s
     const [showTurnModal, setShowTurnModal] = useState(true);
     useEffect(() => {
-        const timer = setTimeout(() => setShowTurnModal(false), 4500);
+        const timer = setTimeout(() => setShowTurnModal(false), 99000);
         return () => clearTimeout(timer);
     }, []);
 
@@ -73,7 +73,11 @@ const Game = ({ roomState, cardData, title }: GameProps) => {
         throw new Error("Cannot find opponent's card data."); //sanity check 2
     }
     const oppTargetCard = (
-        <OpponentTargetCard name={oppTargetCardData.name} imgSrc={oppTargetCardData.imageUrl} />
+        <OpponentTargetCard
+            key={cardData.length + 1}
+            name={oppTargetCardData.name}
+            imgSrc={oppTargetCardData.imageUrl}
+        />
     );
 
     const passTurnButton =
@@ -108,8 +112,9 @@ const Game = ({ roomState, cardData, title }: GameProps) => {
             <GameBoard title={title} cardList={cardList} targetCard={oppTargetCard} />
             {/* Modals */}
             <div>
-                <GameEndModal roomState={roomState} />
+                <GameEndModal key="game-end-modal" roomState={roomState} />
                 <ConfirmGuessModal
+                    key="confirm-guess-modal"
                     isOpen={
                         confirmGuessModal.isOpen &&
                         !Object.values(roomState.endState).some((e) => e !== null)
@@ -117,7 +122,8 @@ const Game = ({ roomState, cardData, title }: GameProps) => {
                     confirmGuess={handleConfirmGuessModalResult}
                     name={confirmGuessModal.isOpen ? confirmGuessModal.name : ""}
                 />
-                <TurnOrderModal
+                <FirstTurnModal
+                    key="first-turn-modal"
                     isOpen={showTurnModal}
                     goingFirst={socketId === roomState.curTurn}
                 />
@@ -129,16 +135,16 @@ const Game = ({ roomState, cardData, title }: GameProps) => {
 /*
  * Pops up for 5 seconds at start of game to tell player if they're first or second
  */
-const TurnOrderModal = ({ isOpen, goingFirst }: { isOpen: boolean; goingFirst: boolean }) => (
+const FirstTurnModal = ({ isOpen, goingFirst }: { isOpen: boolean; goingFirst: boolean }) => (
     <ReactModal
         isOpen={isOpen}
-        className="absolute top-1/2 left-1/2 mx-auto flex h-fit w-9/10 -translate-x-1/2 -translate-y-1/2 flex-col gap-4 border-2 border-neutral-800 bg-neutral-200 px-2 text-center max-lg:max-w-2xl max-md:py-5 md:max-lg:py-8 lg:max-w-3xl lg:py-8 2xl:pt-12 2xl:pb-10"
+        className="absolute top-1/2 left-1/2 mx-auto flex h-fit w-9/10 -translate-x-1/2 -translate-y-1/2 flex-col gap-4 border-2 border-neutral-800 bg-neutral-200 px-2 text-center max-lg:max-w-2xl max-md:py-5 md:max-lg:py-8 lg:max-w-3xl lg:py-8 lg:max-2xl:px-5 2xl:px-10 2xl:pt-12 2xl:pb-10"
         overlayClassName="fixed inset-0 bg-zinc-700/70"
     >
-        <p className="text-4xl font-bold text-amber-600 text-shadow-xs/50">
-            {goingFirst ? "It's your turn to ask a question first!" : "You're going second!"}
+        <p className="font-bold text-amber-500 text-shadow-xs/70 max-2xl:text-4xl 2xl:mb-2 2xl:text-5xl">
+            {goingFirst ? "You're going First!" : "You're going Second!"}
         </p>
-        <p className="text-xl font-medium">
+        <p className="font-medium max-2xl:max-w-19/20 max-2xl:text-xl 2xl:mx-auto 2xl:max-w-3/4 2xl:text-2xl">
             Remember: you can only guess on your own turn,{" "}
             <span className="italic">instead of asking a question!</span>
         </p>
@@ -205,6 +211,7 @@ const GameEndModal = ({ roomState }: GameEndModalProps) => {
     const [playAgainSent, setPlayAgainSent] = useState(false);
     useEffect(() => {
         if (Object.values(roomState.endState).every((e) => e === null)) {
+            // eslint-disable-next-line react-hooks/set-state-in-effect
             setPlayAgainSent(false);
         }
     }, [roomState.endState]);

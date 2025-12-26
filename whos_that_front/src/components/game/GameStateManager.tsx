@@ -121,15 +121,7 @@ const GameStateManager = ({ isNewGame }: { isNewGame: boolean }) => {
 
     // Join existing game using room ID from URL
     useEffect(() => {
-        if (!isNewGame) {
-            socket.emit("joinRoom", roomState.id, (joinedRoomState, response) => {
-                if (!response.success) {
-                    void nav("/"); //flesh this out, pop-up upon returning to home page?
-                }
-                setRoomState(joinedRoomState);
-                log(response.msg);
-            });
-        }
+        if (!isNewGame) socket.emit("joinRoom", roomState.id);
     }, [roomState.id, isNewGame, nav]);
 
     if (errorMsg) throw new Error(errorMsg);

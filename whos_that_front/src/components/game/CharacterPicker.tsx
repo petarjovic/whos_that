@@ -32,6 +32,7 @@ const CharacterPicker = ({ cardData, roomId }: { cardData: CardDataUrl[]; roomId
 
     const randomCharacterCard = (
         <button
+            key={cardData.length + 1}
             onClick={(e) => {
                 e.preventDefault();
                 e.stopPropagation();
