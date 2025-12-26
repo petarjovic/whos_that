@@ -10,6 +10,7 @@ import {
 } from "./apiHelpers.ts";
 import { checkGameExists, validateGameId } from "../middleware/validatorMw.ts";
 import { invalidateInAllCaches } from "./cache.ts";
+import { logger } from "../config/logger.ts";
 
 /**
  * Sets up admin-only API routes for the Express application
@@ -48,16 +49,16 @@ export function setupAdminRoutes(app: Express) {
                 //del cache
                 invalidateInAllCaches(gameId);
 
-                console.log(`Admin switched privacy setting of game:`, gameId);
+                logger.info(`Admin switched privacy setting of game: ${gameId} .`);
                 return res.status(200).send();
                 //Error handling ↓
             } catch (error) {
-                console.error(
-                    `Error when admin attempted to switch privacy setting of game: ${gameId}:\n`,
-                    error
+                logger.error(
+                    { error },
+                    `Error when admin attempted to switch privacy setting of game: ${gameId} .`
                 );
                 return res.status(500).json({
-                    message: `Internal Server Error while attempting to switch privacy setting of game: ${gameId}.`,
+                    message: `Internal Server Error while attempting to switch privacy setting of game.`,
                 });
             }
         }
@@ -87,13 +88,13 @@ export function setupAdminRoutes(app: Express) {
                 //del cache
                 invalidateInAllCaches(gameId);
 
-                console.log(`Admin deleted game:`, gameId);
-                res.status(200).json({ message: `Deleted game: ${gameId}` });
+                logger.info(`Admin deleted game: ${gameId} .`);
+                res.status(200).json({ message: `Deleted game.` });
                 //Error handling ↓
             } catch (error) {
-                console.error(`Error when admin attemped to delete game: ${gameId}:\n`, error);
+                logger.error({ error }, `Error when admin attemped to delete game: ${gameId} .`);
                 return res.status(500).json({
-                    message: `Internal Server Error while attempting to delete game: ${gameId}.`,
+                    message: `Internal Server Error while attempting to delete game.`,
                 });
             }
         }

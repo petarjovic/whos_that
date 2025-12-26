@@ -6,6 +6,7 @@ import type { CardDataId, CardDataUrl } from "../config/types.ts";
 import * as schema from "../db/schema.ts";
 import { nanoid } from "nanoid";
 import env from "../config/zod/zodEnvSchema.ts";
+import { logger } from "../config/logger.ts";
 
 /**
  * Constructs the S3 object key for a game image
@@ -106,9 +107,9 @@ export async function deleteImagesFromBucketAndCF(
         });
         const s3DeleteResult = await s3.send(delS3ObjsCommand);
         if (s3DeleteResult.Errors) {
-            console.error(
-                "S3 batch delete had errors! There are likely orphaned items in S3 bucket:\n",
-                s3DeleteResult.Errors
+            logger.error(
+                { error: s3DeleteResult.Errors },
+                "Error: S3 batch delete had errors, there are likely orphaned items in S3 bucket."
             );
         }
 
@@ -126,8 +127,8 @@ export async function deleteImagesFromBucketAndCF(
             });
             try {
                 await cloudFront.send(cFCacheInvalidationCommand);
-            } catch (cfError) {
-                console.error("CloudFront cache invalidation failed:", cfError);
+            } catch (error) {
+                logger.error({ error }, "Error: CloudFront cache invalidation failed.");
             }
         }
     }

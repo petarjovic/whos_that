@@ -1,6 +1,7 @@
 import type { Request, Response, NextFunction } from "express";
 import { auth } from "../config/auth.ts";
 import { fromNodeHeaders } from "better-auth/node";
+import { logger } from "../config/logger.ts";
 
 /**
  * Middleware to verify user is authenticated and has admin role
@@ -32,31 +33,8 @@ export const requireAdmin = async (
         next();
         //Error handling ↓
     } catch (error) {
-        console.error("Admin verification middleware error:\n", error);
+        logger.error({ error }, "Error: admin verification middleware error.");
         res.status(500).json({ message: "Internal server error." });
         return;
     }
 };
-
-// export const requireSession = async (
-//     req: Request,
-//     res: Response,
-//     next: NextFunction
-// ): Promise<void> => {
-//     try {
-//         const session = await auth.api.getSession({
-//             headers: fromNodeHeaders(req.headers),
-//         });
-
-//         if (!session) {
-//             res.status(401).json({ message: "Unauthorized." });
-//             return;
-//         }
-
-//         next();
-//     } catch (error) {
-//         console.error("Session verification middleware error:\n", error);
-//         res.status(500).json({ message: "Internal server error." });
-//         return;
-//     }
-// };
