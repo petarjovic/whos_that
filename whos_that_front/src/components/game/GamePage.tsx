@@ -29,7 +29,7 @@ const Game = ({ roomState, cardData, title }: GameProps) => {
     //At start of game shows player if they're going first or second, lasts 4.5s
     const [showTurnModal, setShowTurnModal] = useState(true);
     useEffect(() => {
-        const timer = setTimeout(() => setShowTurnModal(false), 99000);
+        const timer = setTimeout(() => setShowTurnModal(false), 5500);
         return () => clearTimeout(timer);
     }, []);
 
@@ -138,7 +138,7 @@ const Game = ({ roomState, cardData, title }: GameProps) => {
 const FirstTurnModal = ({ isOpen, goingFirst }: { isOpen: boolean; goingFirst: boolean }) => (
     <ReactModal
         isOpen={isOpen}
-        className="absolute top-1/2 left-1/2 mx-auto flex h-fit w-9/10 -translate-x-1/2 -translate-y-1/2 flex-col gap-4 border-2 border-neutral-800 bg-neutral-200 px-2 text-center max-lg:max-w-2xl max-md:py-5 md:max-lg:py-8 lg:max-w-3xl lg:py-8 lg:max-2xl:px-5 2xl:px-10 2xl:pt-12 2xl:pb-10"
+        className="3xl:py-15 absolute top-1/2 left-1/2 mx-auto flex h-fit w-9/10 -translate-x-1/2 -translate-y-1/2 flex-col gap-4 border-2 border-neutral-800 bg-neutral-200 px-2 text-center max-lg:max-w-2xl max-md:py-5 md:max-lg:py-8 lg:max-w-3xl lg:py-8 lg:max-2xl:px-5 2xl:px-10 2xl:pt-12 2xl:pb-10"
         overlayClassName="fixed inset-0 bg-zinc-700/70"
     >
         <p className="font-bold text-amber-500 text-shadow-xs/70 max-2xl:text-4xl 2xl:mb-2 2xl:text-5xl">

@@ -7,7 +7,7 @@
         font-family: "Libre Franklin", Arial, sans-serif;
     }
     body {
-        background: url("./assets/BulletinBoard.jpg") repeat;
+        background: url("./assets/BulletinBoard.jpg") fixed;
         background-size: 100dvw 100dvh;
     }
 }

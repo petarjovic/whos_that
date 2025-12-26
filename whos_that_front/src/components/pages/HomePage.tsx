@@ -54,7 +54,7 @@ const HomePage = () => {
                         }
                     } else {
                         const errorData = (await response.json()) as ServerResponse;
-                        setErrorMsg(errorData.message ?? "Error: Failed to get user's games.");
+                        setErrorMsg(errorData.message);
                     }
                 } catch (error) {
                     console.error(error);
@@ -142,7 +142,7 @@ const HomePage = () => {
                             to={"/search/?sort=newest"}
                             className="p-px text-lg font-semibold hover:text-blue-400 xl:text-xl"
                         >
-                            Who's That Most Recent
+                            Who&apos;s That Most Recent
                         </Link>
                     </div>
                     <div className="h-0 w-full self-center border-b border-neutral-950 max-xl:hidden"></div>
@@ -193,7 +193,7 @@ const HomePage = () => {
                             to={"/search/?sort=likes"}
                             className="p-px text-lg font-semibold hover:text-blue-400 xl:text-xl"
                         >
-                            Who's That Most Wanted
+                            Who&apos;s That Most Wanted
                         </Link>
                     </div>
                 </div>

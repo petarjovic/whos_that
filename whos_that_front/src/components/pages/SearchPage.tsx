@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import env from "../../lib/zodEnvSchema.ts";
 import { SearchResponseSchema } from "@server/zodSchema";
-import type { ServerResponse } from "src/lib/types";
+import { serverResponseSchema } from "../../lib/zodSchema.ts";
 import type { UrlPresetInfo, PaginationInfo } from "@server/types";
 import LoadingSpinner from "../misc/LoadingSpinner";
 import { Link } from "react-router";
@@ -10,6 +10,7 @@ import { logError } from "../../lib/logger.ts";
 import { useSearchParams } from "react-router";
 import { IoMdSearch } from "react-icons/io";
 import LikeButton from "../misc/LikeButton.tsx";
+import { MdFirstPage, MdLastPage, MdArrowBackIosNew, MdArrowForwardIos } from "react-icons/md";
 
 const SearchPage = () => {
     const [searchParams, setSearchParams] = useSearchParams();
@@ -37,12 +38,12 @@ const SearchPage = () => {
             setIsLoading(true);
             try {
                 const page = parseInt(searchParams.get("page") ?? "1");
-                const limit = parseInt(searchParams.get("limit") ?? "30");
+                const limit = parseInt(searchParams.get("limit") ?? "50");
 
                 const url = new URL(`${env.VITE_SERVER_URL}/api/search`);
                 url.searchParams.set("q", searchParams.get("q") ?? "");
                 url.searchParams.set("page", Number.isNaN(page) ? "1" : page.toString());
-                url.searchParams.set("limit", Number.isNaN(limit) ? "30" : limit.toString());
+                url.searchParams.set("limit", Number.isNaN(limit) ? "50" : limit.toString());
                 url.searchParams.set(
                     "sort",
                     searchParams.get("sort") === "newest" ? "newest" : "likes"
@@ -65,8 +66,8 @@ const SearchPage = () => {
                         );
                     }
                 } else {
-                    const errorData = (await response.json()) as ServerResponse;
-                    setErrorMsg(errorData.message ?? "Error: Failed to search for games.");
+                    const errorData = serverResponseSchema.safeParse(await response.json());
+                    setErrorMsg(errorData.data?.message ?? "Error: Failed to search for games.");
                 }
             } catch (error) {
                 if (error instanceof Error && error.name === "AbortError") return;
@@ -159,14 +160,15 @@ const SearchPage = () => {
             {/* Page Controls */}
             {pageInfo && pageInfo.totalPages > 1 && (
                 <div className="mt-4 mb-2 flex items-center gap-1 text-lg text-neutral-600">
+                    <span className="text-sm">Page: </span>
                     <button
                         onClick={() =>
                             setSearchParams({ ...Object.fromEntries(searchParams), page: "1" })
                         }
                         disabled={pageInfo.page === 1}
-                        className="tracking-tightest mr-1 scale-130 cursor-pointer py-1 hover:text-blue-500 disabled:cursor-default disabled:text-gray-300"
+                        className="relative left-2 mr-1 cursor-pointer py-1 hover:text-blue-500 disabled:cursor-default disabled:text-gray-300"
                     >
-                        &lt;&lt;
+                        <MdFirstPage size="2.2em" />
                     </button>
                     <button
                         onClick={() =>
@@ -176,11 +178,11 @@ const SearchPage = () => {
                             })
                         }
                         disabled={pageInfo.page === 1}
-                        className="scale-120 cursor-pointer px-2 py-1 text-lg hover:text-blue-500 disabled:cursor-default disabled:text-gray-300"
+                        className="cursor-pointer px-2 py-1 text-lg hover:text-blue-500 disabled:cursor-default disabled:text-gray-300"
                     >
-                        &lt;
+                        <MdArrowBackIosNew size="1.2em" />
                     </button>
-                    {pageInfo.page > 2 && <span>...</span>}
+                    {pageInfo.page > 2 && <span className="text-neutral-400">...</span>}
                     {[pageInfo.page - 1, pageInfo.page, pageInfo.page + 1]
                         .filter((p) => p > 0 && p <= pageInfo.totalPages)
                         .map((p) => (
@@ -192,12 +194,14 @@ const SearchPage = () => {
                                         page: p.toString(),
                                     })
                                 }
-                                className={`cursor-pointer px-2 py-1 font-medium ${p === pageInfo.page ? "text-red-400" : "hover:text-blue-500"}`}
+                                className={`cursor-pointer px-2 py-1 font-medium ${p === pageInfo.page ? "text-red-400" : "text-neutral-500 hover:text-blue-500"}`}
                             >
                                 {p}
                             </button>
                         ))}
-                    {pageInfo.page < pageInfo.totalPages - 1 && <span>...</span>}
+                    {pageInfo.page < pageInfo.totalPages - 1 && (
+                        <span className="text-neutral-400">...</span>
+                    )}
                     <button
                         onClick={() =>
                             setSearchParams({
@@ -206,9 +210,9 @@ const SearchPage = () => {
                             })
                         }
                         disabled={pageInfo.page === pageInfo.totalPages}
-                        className="scale-120 cursor-pointer px-1 py-1 text-lg hover:text-blue-500 disabled:cursor-default disabled:text-gray-300"
+                        className="ml-1 cursor-pointer px-1 py-1 text-lg hover:text-blue-500 disabled:cursor-default disabled:text-gray-300"
                     >
-                        &gt;
+                        <MdArrowForwardIos size="1.2em" />
                     </button>
                     <button
                         onClick={() =>
@@ -218,12 +222,12 @@ const SearchPage = () => {
                             })
                         }
                         disabled={pageInfo.page === pageInfo.totalPages}
-                        className="tracking-tightest ml-1 scale-130 cursor-pointer py-1 text-lg hover:text-blue-500 disabled:cursor-default disabled:text-gray-300"
+                        className="relative right-2 cursor-pointer py-1 text-lg hover:text-blue-500 disabled:cursor-default disabled:text-gray-300"
                     >
-                        &gt;&gt;
+                        <MdLastPage size="2.2em" />
                     </button>
                     <div className="ml-2 flex items-center gap-2 text-sm">
-                        <label htmlFor="limit-select"># of Results:</label>
+                        <label htmlFor="limit-select">Results:</label>
                         <select
                             id="limit-select"
                             value={pageInfo.limit}
@@ -234,22 +238,16 @@ const SearchPage = () => {
                                     page: "1",
                                 })
                             }
-                            className="content-center rounded border border-gray-500 bg-white py-1 hover:cursor-pointer"
+                            className="content-center rounded border border-neutral-600 bg-white py-1 hover:cursor-pointer"
                         >
-                            <option value="10" className="cursor-pointer">
-                                10
-                            </option>
-                            <option value="20" className="cursor-pointer">
-                                20
-                            </option>
                             <option value="30" className="cursor-pointer">
                                 30
                             </option>
-                            <option value="40" className="cursor-pointer">
-                                40
-                            </option>
                             <option value="50" className="cursor-pointer">
                                 50
+                            </option>
+                            <option value="100" className="cursor-pointer">
+                                100
                             </option>
                         </select>
                     </div>

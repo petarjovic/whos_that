@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router";
 import { CardLayout } from "../misc/Cards.tsx";
-import type { ServerResponse } from "../../lib/types.ts";
 import { useBetterAuthSession } from "../../lib/hooks.ts";
 import { serverResponseSchema } from "../../lib/zodSchema.ts";
 import { UrlPresetInfoListSchema } from "@server/zodSchema";
@@ -98,8 +97,8 @@ const MyGamesPage = () => {
                             );
                         }
                     } else {
-                        const errorData = (await response.json()) as ServerResponse;
-                        setErrorMsg(errorData.message ?? "Failed to get user's games.");
+                        const errorData = serverResponseSchema.safeParse(await response.json());
+                        setErrorMsg(errorData.data?.message ?? "Failed to get user's games.");
                     }
                 } catch (error) {
                     logError(error);
@@ -131,8 +130,8 @@ const MyGamesPage = () => {
                             );
                         }
                     } else {
-                        const errorData = (await response.json()) as ServerResponse;
-                        setErrorMsg(errorData.message ?? "Failed to get user's liked games.");
+                        const errorData = serverResponseSchema.safeParse(await response.json());
+                        setErrorMsg(errorData.data?.message ?? "Failed to get user's liked games.");
                     }
                 } catch (error) {
                     logError(error);
@@ -151,10 +150,9 @@ const MyGamesPage = () => {
     /**
      * Opens share modal with game link (only used on user's own games)
      */
-    const handleShareGame = async (e: React.MouseEvent<HTMLButtonElement>, gameId: string) => {
+    const handleShareGame = (e: React.MouseEvent<HTMLButtonElement>, gameId: string) => {
         e.preventDefault();
         e.stopPropagation();
-
         setShareModalGameId(gameId);
     };
 

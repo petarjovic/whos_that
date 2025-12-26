@@ -1,7 +1,6 @@
 import { useEffect, useState } from "react";
 import { Link, useNavigate, useSearchParams } from "react-router";
 import { CardLayout } from "../misc/Cards.tsx";
-import type { ServerResponse } from "../../lib/types.ts";
 import { useBetterAuthSession } from "../../lib/hooks.ts";
 import { serverResponseSchema } from "../../lib/zodSchema.ts";
 import { SearchResponseSchema } from "@server/zodSchema";
@@ -26,7 +25,7 @@ const AdminPage = () => {
     const { isPending, session } = useBetterAuthSession();
 
     useEffect(() => {
-        if (!isPending && (!session || session.user.role !== "admin")) void nav("/404");
+        if (!isPending && session?.user.role !== "admin") void nav("/404");
     }, [session, isPending, nav]);
 
     useEffect(() => {
@@ -72,8 +71,8 @@ const AdminPage = () => {
                         );
                     }
                 } else {
-                    const errorData = (await response.json()) as ServerResponse;
-                    setErrorMsg(errorData.message ?? "Error: Failed to search for games.");
+                    const errorData = serverResponseSchema.safeParse(await response.json());
+                    setErrorMsg(errorData.data?.message ?? "Error: Failed to search for games.");
                 }
             } catch (error) {
                 if (error instanceof Error && error.name === "AbortError") return;

@@ -560,7 +560,7 @@ const CreateCustomGamePage = () => {
                                             minLength={3}
                                             maxLength={20}
                                             className="max-w-9/10 rounded border-2 border-neutral-400 bg-neutral-100 px-1 py-px text-center font-medium placeholder:text-zinc-400"
-                                            placeholder={`[Insert #${index + 1}'s Name]`}
+                                            placeholder={`[Insert #${(index + 1).toString()}'s Name]`}
                                             required
                                         />
                                     </div>
@@ -622,7 +622,8 @@ const CreateCustomGamePage = () => {
                             No violence, nudity, controlled substances, hate speech, etc.{" "}
                         </span>
                         <span className="text-base font-medium italic 2xl:text-lg">
-                            Your preset can be removed for any reason at moderator's discrection.
+                            Your preset can be removed for any reason at moderator&apos;s
+                            discrection.
                         </span>
                     </li>
                     {/* <li>
@@ -652,7 +653,8 @@ const CreateCustomGamePage = () => {
                     I Agree
                 </button>
                 <p className="mx-auto w-9/10 text-base text-neutral-700 italic">
-                    Tip: images will look best when they feature the "character" near the center.
+                    Tip: images will look best when they feature the &quot;character&quot; near the
+                    center.
                 </p>
             </ReactModal>
         </>

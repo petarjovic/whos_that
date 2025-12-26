@@ -9,7 +9,7 @@ export const socketIdSchema = z.string().regex(/^[\w-]{20}$/);
 export const searchQuerySchema = z.object({
     q: z.string().max(100).optional(),
     page: z.coerce.number().int().min(1).default(1),
-    limit: z.coerce.number().int().min(1).max(50).default(20),
+    limit: z.coerce.number().int().min(1).max(100).default(30),
     sort: z.enum(["likes", "newest"]),
 });
 
