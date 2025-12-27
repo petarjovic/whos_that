@@ -332,7 +332,7 @@ const CreateCustomGamePage = () => {
             >
                 <div className="flex flex-col gap-4 max-2xl:w-full lg:col-start-1 2xl:w-9/10">
                     {/* Step 1: Title */}
-                    <div className="flex h-fit w-full flex-col items-center justify-around rounded-xs border border-neutral-800 bg-neutral-300 px-2 py-1 text-center">
+                    <div className="flex h-fit w-full flex-col items-center justify-around rounded-xs border border-neutral-800 bg-neutral-300 px-2 pt-1 pb-2 text-center">
                         <label
                             htmlFor="title"
                             className="flex items-center p-px text-center text-lg font-semibold xl:p-1.25 xl:text-xl 2xl:text-2xl"
@@ -392,12 +392,29 @@ const CreateCustomGamePage = () => {
                         </div>
                     </div>
                     {/* Step 2: Image Uploads */}
-                    <div className="flex h-fit w-full flex-col items-center justify-around rounded-xs border border-neutral-800 bg-neutral-300 py-1 text-center max-lg:px-2 lg:px-4">
+                    <div className="flex h-fit w-full flex-col items-center justify-around rounded-xs border border-neutral-800 bg-neutral-300 pt-1 pb-3 text-center max-lg:px-2 lg:px-4">
                         <label className="flex p-px text-lg font-semibold xl:p-2 xl:text-xl 2xl:text-2xl">
                             <FaCameraRetro size="1.18em" className="relative top-px mr-1" />
                             <div>Upload Custom Images</div>
                             <FaCameraRetro size="1.18em" className="relative top-px ml-1" />
                         </label>
+                        {/* Character names as file names toggle */}
+                        <div className="mb-1.25 flex items-baseline-last justify-between gap-1">
+                            <input
+                                type="checkbox"
+                                id="image-names"
+                                name="image-names"
+                                className="border-groove relative h-4 w-4 cursor-pointer appearance-auto rounded border accent-red-500 inset-shadow-xs max-2xl:top-0.5 xl:h-4.5 xl:w-4.5 2xl:top-0.75 2xl:h-5 2xl:w-5"
+                                checked={useFileNames}
+                                onChange={handleUseImageFilenames}
+                            ></input>
+                            <label
+                                htmlFor="image-names"
+                                className="text-sm font-medium text-neutral-600 2xl:text-base"
+                            >
+                                Use File Names as Character Names
+                            </label>
+                        </div>
                         <Dropzone
                             fileHandler={(files) => {
                                 void handleFiles(files);
@@ -420,23 +437,6 @@ const CreateCustomGamePage = () => {
                                 ))}
                             </div>
                         )}
-                        {/* Character names as file names toggle */}
-                        <div className="mt-2.25 mb-1.25 flex items-baseline-last justify-between gap-1">
-                            <input
-                                type="checkbox"
-                                id="image-names"
-                                name="image-names"
-                                className="border-groove relative h-4 w-4 cursor-pointer appearance-auto rounded border accent-red-500 inset-shadow-xs max-2xl:top-0.5 xl:h-4.5 xl:w-4.5 2xl:top-0.75 2xl:h-5 2xl:w-5"
-                                checked={useFileNames}
-                                onChange={handleUseImageFilenames}
-                            ></input>
-                            <label
-                                htmlFor="image-names"
-                                className="text-sm font-medium text-neutral-600 2xl:text-base"
-                            >
-                                Use File Names as Character Names
-                            </label>
-                        </div>
                     </div>
                 </div>
 

@@ -1,9 +1,10 @@
 import { useBetterAuthSession } from "../../lib/hooks.ts";
 import env from "../../lib/zodEnvSchema";
-import type { ServerResponse } from "../../lib/types";
 import { logError } from "../../lib/logger";
 import { useState } from "react";
 import { FaHeart } from "react-icons/fa6";
+import { serverResponseSchema } from "../../lib/zodSchema.ts";
+import { useNavigate } from "react-router";
 
 const LikeButton = ({
     id,
@@ -16,6 +17,7 @@ const LikeButton = ({
     numLikes: number;
     size?: "S" | "L";
 }) => {
+    const nav = useNavigate();
     const { session, isPending } = useBetterAuthSession();
     const [liked, setLiked] = useState(userHasLiked);
     const [likeNumber, setLikeNumber] = useState(numLikes);
@@ -33,8 +35,8 @@ const LikeButton = ({
                 });
                 if (!response.ok) {
                     //REDO THIS
-                    const errorData = (await response.json()) as ServerResponse;
-                    throw new Error(errorData.message ?? "Failed to like game.");
+                    const errorData = serverResponseSchema.safeParse(await response.json());
+                    setErrorMsg(errorData.data?.message ?? "Failed to like game.");
                 }
                 if (liked && likeNumber > 0) setLikeNumber((prev) => prev - 1);
                 else if (likeNumber >= 0) setLikeNumber((prev) => prev + 1);
@@ -44,26 +46,28 @@ const LikeButton = ({
                 logError(error);
                 setErrorMsg(error instanceof Error ? error.message : "Failed to like game.");
             }
+        } else {
+            void nav("/login");
         }
     };
 
     if (errorMsg) throw new Error(errorMsg);
     return (
         <button
-            className="flex cursor-pointer items-center align-sub whitespace-pre-wrap"
+            className="flex cursor-pointer items-center align-sub text-sm font-medium whitespace-pre-wrap"
             onClick={(e) => {
                 e.preventDefault();
                 e.stopPropagation();
-                handleLikeGame(id);
+                void handleLikeGame(id);
             }}
             title={liked ? "Unlike Game" : "Like Game"}
         >
-            {likeNumber !== -1 ? likeNumber : ""}
+            {likeNumber >= 0 ? likeNumber : ""}
             <FaHeart
-                size={size === "S" ? "1.35em" : "2em"}
+                size={size === "S" ? "1.5em" : "2em"}
                 className={`${
-                    liked ? "text-red-500" : "text-zinc-500"
-                } mb-px ${numLikes !== null ? "ml-0.5" : ""} align-middle leading-none transition-transform hover:text-red-300 max-md:text-xl`}
+                    liked ? "text-red-600" : "text-zinc-500"
+                } mb-px ${likeNumber >= 0 ? "ml-1" : ""} align-middle leading-none transition-transform hover:scale-120 hover:text-red-400 active:scale-90 max-md:text-xl`}
             />
         </button>
     );

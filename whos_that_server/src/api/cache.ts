@@ -4,12 +4,12 @@ const GAMEDATA_CACHE = new Map<string, { data: GameData; timestamp: number }>();
 let TOP3TRENDING_CACHE: { data: IdPresetInfo[]; timestamp: number } | null = null;
 let TOP3NEWEST_CACHE: { data: IdPresetInfo[]; timestamp: number } | null = null;
 
-const GAMEDATA_CACHE_DUR = 86400 * 1000; // 24 hours
-const MAX_GAMEDATA_CACHE_SIZE = 500; //500 game cache limit
-const TOP3TRENDING_CACHE_DUR = 86400 * 1000 * 2; // 48 hours
-const TOP3NEWEST_CACHE_DUR = 43200 * 1000; // 12 hours
+const GAMEDATA_CACHE_DUR = 86400 * 1000 * 5; // 5 Days
+const MAX_GAMEDATA_CACHE_SIZE = 500;
+const TOP3TRENDING_CACHE_DUR = 86400 * 1000; // 24 hours
+const TOP3NEWEST_CACHE_DUR = 86400 * 1000; // 24 hours
 
-// clean up caches every six hours
+// clean up caches every twelve hours
 setInterval(() => {
     const now = Date.now();
 
@@ -29,7 +29,7 @@ setInterval(() => {
     if (TOP3NEWEST_CACHE && now - TOP3NEWEST_CACHE.timestamp > TOP3NEWEST_CACHE_DUR) {
         TOP3NEWEST_CACHE = null;
     }
-}, 21600000);
+}, 43200 * 1000);
 
 //GAMEDATA_CACHE helpers
 export function getCachedGameData(gameId: string): GameData | null {
@@ -56,7 +56,7 @@ export function delGameDataCache(gameId: string): void {
     GAMEDATA_CACHE.delete(gameId);
 }
 
-// TOP3MOSTLIKED_CACHE helpers
+// TOP3TRENDING_CACHE helpers
 export function getCachedTop3Trending(): IdPresetInfo[] | null {
     if (TOP3TRENDING_CACHE && Date.now() - TOP3TRENDING_CACHE.timestamp < TOP3TRENDING_CACHE_DUR) {
         return TOP3TRENDING_CACHE.data;
@@ -112,5 +112,40 @@ export function invalidateInAllCaches(gameId: string): void {
     const top3MostRecent: IdPresetInfo[] | null = getCachedTop3Newest();
     if (top3MostRecent?.some((game) => game.id === gameId)) {
         delTop3NewestCache();
+    }
+}
+
+export function updateLikeCountInCaches(gameId: string, increment: boolean): void {
+    // Update in trending cache
+    const top3Trending = getCachedTop3Trending();
+    if (top3Trending) {
+        let delCache = false; //del cache if removing like causes 0 likes
+
+        for (const game of top3Trending) {
+            if (game.id !== gameId) continue;
+
+            if (!increment && game.numLikes - 1 <= 0) {
+                delCache = true;
+            } else {
+                game.numLikes = increment ? game.numLikes + 1 : game.numLikes - 1;
+            }
+        }
+
+        if (delCache) delTop3TrendingCache();
+        else setTop3TrendingCache(top3Trending);
+    }
+
+    // Update in newest cache
+    const top3Newest = getCachedTop3Newest();
+    if (top3Newest) {
+        const updated = top3Newest.map((game) =>
+            game.id === gameId
+                ? {
+                      ...game,
+                      numLikes: increment ? game.numLikes + 1 : Math.max(0, game.numLikes - 1),
+                  }
+                : game
+        );
+        setTop3NewestCache(updated);
     }
 }

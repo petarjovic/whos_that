@@ -37,9 +37,12 @@ import {
     setTop3NewestCache,
     invalidateInAllCaches,
     insertTop3NewestCache,
-    delTop3TrendingCache,
+    updateLikeCountInCaches,
 } from "./cache.ts";
 import { logger } from "../config/logger.ts";
+
+// set url duration to just over 5 days since cache is 5 days
+const PRESIGNED_IMAGE_URL_DUR = 86400 * 1000 * 5.1;
 
 /**
  * Sets up all API routes for the Express application
@@ -168,7 +171,7 @@ export function setupApiRoutes(app: Express) {
         }
     });
 
-    app.get("/api/featuredGames", async (_req, res) => {
+    app.get("/api/featuredGames", async (req, res) => {
         try {
             //get top 3 trending games, check cache first
             let top3TrendingGames: IdPresetInfo[] | null = getCachedTop3Trending();
@@ -198,7 +201,7 @@ export function setupApiRoutes(app: Express) {
                     .orderBy(
                         //Current time decay is 2 weeks (lower later)
                         desc(
-                            sql`ln(greatest(count(${schema.gameLikes.id}) + 1, 1)) - (extract(epoch from (now() - ${schema.games.createdAt})) / 1209600.0)`
+                            sql`ln(greatest(count(${schema.gameLikes.id}) + 1, 0.7)) - (extract(epoch from (now() - ${schema.games.createdAt})) / 1209600.0)`
                         )
                     )
                     .limit(3);
@@ -237,13 +240,28 @@ export function setupApiRoutes(app: Express) {
                 setTop3NewestCache(top3MostRecentGames);
             }
 
-            //Merge top3s into one obj and convert image ids to image URLs
+            const session = await auth.api.getSession({
+                headers: fromNodeHeaders(req.headers),
+            });
+
+            let likedGameIds: Set<string>;
+            if (session) {
+                const likedGameIdsQ = await db
+                    .select({ gameId: schema.gameLikes.gameId })
+                    .from(schema.gameLikes)
+                    .where(eq(schema.gameLikes.userId, session.user.id));
+
+                likedGameIds = new Set(likedGameIdsQ.map((l) => l.gameId));
+            }
+
+            //Merge top3s, + likeStatus, and convert image ids to image URLs
             const featuredGamesInfoUrl: UrlPresetInfo[] = [
                 ...top3TrendingGames,
                 ...top3MostRecentGames,
             ].map(({ imageId, ...presetInfo }) => {
                 return {
                     ...presetInfo,
+                    userHasLiked: session ? likedGameIds.has(presetInfo.id) : null,
                     imageUrl: constructImageUrl(true, presetInfo.id, imageId),
                 };
             });
@@ -321,7 +339,7 @@ export function setupApiRoutes(app: Express) {
                             [
                                 //Current time decay is 2 weeks (lower later)
                                 desc(
-                                    sql`ln(greatest(count(${schema.gameLikes.id}) + 1, 1)) - (extract(epoch from (now() - ${schema.games.createdAt})) / 1209600.0)`
+                                    sql`ln(greatest(count(${schema.gameLikes.id}) + 1, 0.7)) - (extract(epoch from (now() - ${schema.games.createdAt})) / 1209600.0)`
                                 ),
                             ])
                 )
@@ -423,7 +441,7 @@ export function setupApiRoutes(app: Express) {
                     if (!presetInfo.isPublic && USE_CLOUDFRONT) {
                         imageUrl = getSignedCFUrl({
                             url: imageUrl,
-                            dateLessThan: new Date(Date.now() + 1000 * 60 * 60 * 25),
+                            dateLessThan: new Date(Date.now() + PRESIGNED_IMAGE_URL_DUR),
                             privateKey: env.AWS_CF_PRIV_KEY,
                             keyPairId: env.AWS_CF_KEY_PAIR_ID,
                         });
@@ -501,7 +519,7 @@ export function setupApiRoutes(app: Express) {
                     if (!presetInfo.isPublic && USE_CLOUDFRONT) {
                         imageUrl = getSignedCFUrl({
                             url: imageUrl,
-                            dateLessThan: new Date(Date.now() + 1000 * 60 * 60 * 25),
+                            dateLessThan: new Date(Date.now() + PRESIGNED_IMAGE_URL_DUR),
                             privateKey: env.AWS_CF_PRIV_KEY,
                             keyPairId: env.AWS_CF_KEY_PAIR_ID,
                         });
@@ -606,7 +624,7 @@ export function setupApiRoutes(app: Express) {
                 const cardDataPresignedUrlList: CardDataUrl[] = cardDataIdList.map((cardData) => {
                     const signedUrlParams = {
                         url: constructImageUrl(false, gameId, cardData.gameItemId),
-                        dateLessThan: new Date(Date.now() + 1000 * 60 * 60 * 25),
+                        dateLessThan: new Date(Date.now() + PRESIGNED_IMAGE_URL_DUR),
                         privateKey: env.AWS_CF_PRIV_KEY,
                         keyPairId: env.AWS_CF_KEY_PAIR_ID,
                     };
@@ -667,19 +685,17 @@ export function setupApiRoutes(app: Express) {
                 )
                 .where(eq(schema.games.id, gameId));
 
-            //invalidate top3mostlikedgames cache if game in cache
-            //this maybe needs to be redone later if scaling becomes issue
-            const top3MostLiked: IdPresetInfo[] | null = getCachedTop3Trending();
-            if (top3MostLiked?.some((game) => game.id === gameId)) {
-                delTop3TrendingCache();
-            }
-
+            updateLikeCountInCaches(gameId, gameAuthorandLikeStatus.likeId === null);
             if (gameAuthorandLikeStatus.likeId === null) {
                 //insert like in gameLikes table if not liked
                 await db.insert(schema.gameLikes).values({
                     gameId: req.params.gameId,
                     userId: session.user.id,
                 });
+
+                logger.debug(
+                    `User ${session.user.displayUsername ?? session.user.id} liked game ${gameId} .`
+                );
 
                 return res.status(200).json({ message: "Liked game." });
             } else {
@@ -693,8 +709,13 @@ export function setupApiRoutes(app: Express) {
                         )
                     );
 
+                logger.debug(
+                    `User ${session.user.displayUsername ?? session.user.id} unliked game ${gameId} .`
+                );
+
                 return res.status(200).json({ message: "Unliked game." });
             }
+
             //Error handling ↓
         } catch (error) {
             logger.error(

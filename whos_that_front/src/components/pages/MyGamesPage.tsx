@@ -240,13 +240,13 @@ const MyGamesPage = () => {
     return (
         <>
             <h2 className="mt-3 mb-2 flex items-center gap-1 text-center text-[2rem] leading-none font-semibold">
-                <RiSafe3Fill size={"0.9em"} className="scale-x-[-1]" /> Your Presets{" "}
+                <RiSafe3Fill size={"0.9em"} className="scale-x-[-1]" /> Your Games{" "}
                 <RiSafe3Fill size={"0.9em"} />
             </h2>
             <div className="flex w-fit flex-wrap items-center justify-center gap-4 border border-black bg-neutral-300 px-2 py-2.5 text-center max-xl:mx-auto xl:mx-8">
                 {gamesList.length === 0 ? (
                     <p className="text-center text-xl font-medium max-sm:m-auto sm:m-5 2xl:m-10">
-                        No presets made yet.{" "}
+                        No games made yet.{" "}
                         <Link
                             to={"/create-game"}
                             className="text-blue-500 underline hover:text-red-300 hover:italic"
