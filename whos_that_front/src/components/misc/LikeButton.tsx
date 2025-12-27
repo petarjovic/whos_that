@@ -64,10 +64,10 @@ const LikeButton = ({
         >
             {likeNumber >= 0 ? likeNumber : ""}
             <FaHeart
-                size={size === "S" ? "1.5em" : "2em"}
+                size={size === "S" ? "1.4em" : "2em"}
                 className={`${
                     liked ? "text-red-600" : "text-zinc-500"
-                } mb-px ${likeNumber >= 0 ? "ml-1" : ""} align-middle leading-none transition-transform hover:scale-120 hover:text-red-400 active:scale-90 max-md:text-xl`}
+                } mb-px ${likeNumber >= 0 ? "ml-0.5" : ""} align-middle leading-none transition-transform hover:scale-120 hover:text-red-400 active:scale-90 max-md:text-xl`}
             />
         </button>
     );

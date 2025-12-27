@@ -412,7 +412,7 @@ const CreateCustomGamePage = () => {
                                 htmlFor="image-names"
                                 className="text-sm font-medium text-neutral-600 2xl:text-base"
                             >
-                                Use File Names as Character Names
+                                Use File Names as Character Names{useFileNames ? "" : "?"}
                             </label>
                         </div>
                         <Dropzone
