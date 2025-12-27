@@ -31,13 +31,13 @@ import { checkGameExists, validateGameId } from "../middleware/validatorMw.ts";
 import {
     getCachedGameData,
     setGameDataCache,
-    getCachedTop3MostLiked,
-    setTop3MostLikedCache,
-    getCachedTop3MostRecent,
-    setTop3MostRecentCache,
+    getCachedTop3Trending,
+    setTop3TrendingCache,
+    getCachedTop3Newest,
+    setTop3NewestCache,
     invalidateInAllCaches,
-    insertTop3MostRecentCache,
-    delTop3MostLikedCache,
+    insertTop3NewestCache,
+    delTop3TrendingCache,
 } from "./cache.ts";
 import { logger } from "../config/logger.ts";
 
@@ -141,7 +141,7 @@ export function setupApiRoutes(app: Express) {
                     numLikes: 0,
                     userHasLiked: null,
                 };
-                insertTop3MostRecentCache(newGameInfo);
+                insertTop3NewestCache(newGameInfo);
             }
 
             logger.info(
@@ -170,10 +170,10 @@ export function setupApiRoutes(app: Express) {
 
     app.get("/api/featuredGames", async (_req, res) => {
         try {
-            //get top 3 most liked games, check cache first
-            let top3MostLikedGames: IdPresetInfo[] | null = getCachedTop3MostLiked();
-            if (!top3MostLikedGames) {
-                top3MostLikedGames = await db
+            //get top 3 trending games, check cache first
+            let top3TrendingGames: IdPresetInfo[] | null = getCachedTop3Trending();
+            if (!top3TrendingGames) {
+                top3TrendingGames = await db
                     .select({
                         id: schema.games.id,
                         title: schema.games.title,
@@ -195,14 +195,18 @@ export function setupApiRoutes(app: Express) {
                     .leftJoin(schema.gameLikes, eq(schema.gameLikes.gameId, schema.games.id))
                     .where(eq(schema.games.isPublic, true))
                     .groupBy(schema.games.id, authSchema.user.displayUsername, schema.gameItems.id)
-                    .orderBy(desc(count(schema.gameLikes.id)), desc(schema.games.createdAt))
+                    .orderBy(
+                        desc(
+                            sql`ln(greatest(count(${schema.gameLikes.id}) + 1, 1)) - (extract(epoch from (now() - ${schema.games.createdAt})) / 1209600.0)`
+                        )
+                    )
                     .limit(3);
 
-                setTop3MostLikedCache(top3MostLikedGames);
+                setTop3TrendingCache(top3TrendingGames);
             }
 
             //get the top 3 newest games, check cache first
-            let top3MostRecentGames: IdPresetInfo[] | null = getCachedTop3MostRecent();
+            let top3MostRecentGames: IdPresetInfo[] | null = getCachedTop3Newest();
             if (!top3MostRecentGames) {
                 top3MostRecentGames = await db
                     .select({
@@ -229,12 +233,12 @@ export function setupApiRoutes(app: Express) {
                     .orderBy(desc(schema.games.createdAt))
                     .limit(3);
 
-                setTop3MostRecentCache(top3MostRecentGames);
+                setTop3NewestCache(top3MostRecentGames);
             }
 
             //Merge top3s into one obj and convert image ids to image URLs
             const featuredGamesInfoUrl: UrlPresetInfo[] = [
-                ...top3MostLikedGames,
+                ...top3TrendingGames,
                 ...top3MostRecentGames,
             ].map(({ imageId, ...presetInfo }) => {
                 return {
@@ -310,7 +314,14 @@ export function setupApiRoutes(app: Express) {
                 .orderBy(
                     ...(sort === "likes"
                         ? [desc(count(schema.gameLikes.id)), desc(schema.games.createdAt)]
-                        : [desc(schema.games.createdAt)])
+                        : sort === "newest"
+                          ? [desc(schema.games.createdAt)]
+                          : //sort === "trending"
+                            [
+                                desc(
+                                    sql`ln(greatest(count(${schema.gameLikes.id}) + 1, 1)) - (extract(epoch from (now() - ${schema.games.createdAt})) / 1209600.0)`
+                                ),
+                            ])
                 )
                 .limit(limit)
                 .offset((page - 1) * limit);
@@ -656,9 +667,9 @@ export function setupApiRoutes(app: Express) {
 
             //invalidate top3mostlikedgames cache if game in cache
             //this maybe needs to be redone later if scaling becomes issue
-            const top3MostLiked: IdPresetInfo[] | null = getCachedTop3MostLiked();
+            const top3MostLiked: IdPresetInfo[] | null = getCachedTop3Trending();
             if (top3MostLiked?.some((game) => game.id === gameId)) {
-                delTop3MostLikedCache();
+                delTop3TrendingCache();
             }
 
             if (gameAuthorandLikeStatus.likeId === null) {

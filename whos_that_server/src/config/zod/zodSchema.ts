@@ -7,10 +7,10 @@ export const roomIdSchema = z.string().regex(/^[\w-]{6}$/i);
 export const socketIdSchema = z.string().regex(/^[\w-]{20}$/);
 
 export const searchQuerySchema = z.object({
-    q: z.string().max(100).optional(),
-    page: z.coerce.number().int().min(1).default(1),
-    limit: z.coerce.number().int().min(1).max(100).default(30),
-    sort: z.enum(["likes", "newest"]),
+    page: z.coerce.number().int().positive().default(1),
+    limit: z.coerce.number().int().positive().max(100).default(50),
+    q: z.string().optional(),
+    sort: z.enum(["likes", "newest", "trending"]).default("trending"),
 });
 
 //Socket response not htttp
@@ -70,7 +70,7 @@ export const createGameRequestSchema = z.object({
         .array(
             z.object({
                 type: z.enum(["image/jpeg", "image/png", "image/webp"]),
-                name: z.string().max(50),
+                name: z.string().min(3).max(25),
             })
         )
         .min(6)

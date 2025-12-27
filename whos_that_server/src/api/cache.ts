@@ -1,13 +1,13 @@
 import type { GameData, IdPresetInfo } from "../config/types.ts";
 
 const GAMEDATA_CACHE = new Map<string, { data: GameData; timestamp: number }>();
-let TOP3MOSTLIKED_CACHE: { data: IdPresetInfo[]; timestamp: number } | null = null;
-let TOP3MOSTRECENT_CACHE: { data: IdPresetInfo[]; timestamp: number } | null = null;
+let TOP3TRENDING_CACHE: { data: IdPresetInfo[]; timestamp: number } | null = null;
+let TOP3NEWEST_CACHE: { data: IdPresetInfo[]; timestamp: number } | null = null;
 
 const GAMEDATA_CACHE_DUR = 86400 * 1000; // 24 hours
 const MAX_GAMEDATA_CACHE_SIZE = 500; //500 game cache limit
-const TOP3MOSTLIKED_CACHE_DUR = 86400 * 1000 * 2; // 48 hours
-const TOP3MOSTRECENT_CACHE_DUR = 43200 * 1000; // 12 hours
+const TOP3TRENDING_CACHE_DUR = 86400 * 1000 * 2; // 48 hours
+const TOP3NEWEST_CACHE_DUR = 43200 * 1000; // 12 hours
 
 // clean up caches every six hours
 setInterval(() => {
@@ -21,13 +21,13 @@ setInterval(() => {
     }
 
     //TOP3MOSTLIKED cleaning
-    if (TOP3MOSTLIKED_CACHE && now - TOP3MOSTLIKED_CACHE.timestamp > TOP3MOSTLIKED_CACHE_DUR) {
-        TOP3MOSTLIKED_CACHE = null;
+    if (TOP3TRENDING_CACHE && now - TOP3TRENDING_CACHE.timestamp > TOP3TRENDING_CACHE_DUR) {
+        TOP3TRENDING_CACHE = null;
     }
 
     //TOP3MOSTRECENT cleaning
-    if (TOP3MOSTRECENT_CACHE && now - TOP3MOSTRECENT_CACHE.timestamp > TOP3MOSTRECENT_CACHE_DUR) {
-        TOP3MOSTRECENT_CACHE = null;
+    if (TOP3NEWEST_CACHE && now - TOP3NEWEST_CACHE.timestamp > TOP3NEWEST_CACHE_DUR) {
+        TOP3NEWEST_CACHE = null;
     }
 }, 21600000);
 
@@ -57,48 +57,42 @@ export function delGameDataCache(gameId: string): void {
 }
 
 // TOP3MOSTLIKED_CACHE helpers
-export function getCachedTop3MostLiked(): IdPresetInfo[] | null {
-    if (
-        TOP3MOSTLIKED_CACHE &&
-        Date.now() - TOP3MOSTLIKED_CACHE.timestamp < TOP3MOSTLIKED_CACHE_DUR
-    ) {
-        return TOP3MOSTLIKED_CACHE.data;
+export function getCachedTop3Trending(): IdPresetInfo[] | null {
+    if (TOP3TRENDING_CACHE && Date.now() - TOP3TRENDING_CACHE.timestamp < TOP3TRENDING_CACHE_DUR) {
+        return TOP3TRENDING_CACHE.data;
     }
     return null;
 }
 
-export function insertTop3MostRecentCache(newGame: IdPresetInfo): void {
-    if (!TOP3MOSTRECENT_CACHE) return;
+export function insertTop3NewestCache(newGame: IdPresetInfo): void {
+    if (!TOP3NEWEST_CACHE) return;
 
-    const updatedData = [newGame, ...TOP3MOSTRECENT_CACHE.data.slice(0, 2)];
-    TOP3MOSTRECENT_CACHE = { data: updatedData, timestamp: Date.now() };
+    const updatedData = [newGame, ...TOP3NEWEST_CACHE.data.slice(0, 2)];
+    TOP3NEWEST_CACHE = { data: updatedData, timestamp: Date.now() };
 }
 
-export function setTop3MostLikedCache(data: IdPresetInfo[]): void {
-    TOP3MOSTLIKED_CACHE = { data, timestamp: Date.now() };
+export function setTop3TrendingCache(data: IdPresetInfo[]): void {
+    TOP3TRENDING_CACHE = { data, timestamp: Date.now() };
 }
 
-export function delTop3MostLikedCache(): void {
-    TOP3MOSTLIKED_CACHE = null;
+export function delTop3TrendingCache(): void {
+    TOP3TRENDING_CACHE = null;
 }
 
-// TOP3MOSTRECENT_CACHE helpers
-export function getCachedTop3MostRecent(): IdPresetInfo[] | null {
-    if (
-        TOP3MOSTRECENT_CACHE &&
-        Date.now() - TOP3MOSTRECENT_CACHE.timestamp < TOP3MOSTRECENT_CACHE_DUR
-    ) {
-        return TOP3MOSTRECENT_CACHE.data;
+// TOP3NEWEST_CACHE helpers
+export function getCachedTop3Newest(): IdPresetInfo[] | null {
+    if (TOP3NEWEST_CACHE && Date.now() - TOP3NEWEST_CACHE.timestamp < TOP3NEWEST_CACHE_DUR) {
+        return TOP3NEWEST_CACHE.data;
     }
     return null;
 }
 
-export function setTop3MostRecentCache(data: IdPresetInfo[]): void {
-    TOP3MOSTRECENT_CACHE = { data, timestamp: Date.now() };
+export function setTop3NewestCache(data: IdPresetInfo[]): void {
+    TOP3NEWEST_CACHE = { data, timestamp: Date.now() };
 }
 
-export function delTop3MostRecentCache(): void {
-    TOP3MOSTRECENT_CACHE = null;
+export function delTop3NewestCache(): void {
+    TOP3NEWEST_CACHE = null;
 }
 
 /*
@@ -108,15 +102,15 @@ export function invalidateInAllCaches(gameId: string): void {
     //invalidate gameData cache
     delGameDataCache(gameId);
 
-    //if game in most liked cache, invalidate cache
-    const top3MostLiked: IdPresetInfo[] | null = getCachedTop3MostLiked();
-    if (top3MostLiked?.some((game) => game.id === gameId)) {
-        delTop3MostLikedCache();
+    //if game in trending cache, invalidate cache
+    const top3Trending: IdPresetInfo[] | null = getCachedTop3Trending();
+    if (top3Trending?.some((game) => game.id === gameId)) {
+        delTop3TrendingCache();
     }
 
     //if game in most recent cache, invalidate cache
-    const top3MostRecent: IdPresetInfo[] | null = getCachedTop3MostRecent();
+    const top3MostRecent: IdPresetInfo[] | null = getCachedTop3Newest();
     if (top3MostRecent?.some((game) => game.id === gameId)) {
-        delTop3MostRecentCache();
+        delTop3NewestCache();
     }
 }

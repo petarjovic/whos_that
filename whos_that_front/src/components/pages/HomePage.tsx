@@ -102,14 +102,14 @@ const HomePage = () => {
                             />
                             <div className="flex max-h-8/10 max-sm:mt-0.5 max-sm:gap-5 sm:gap-2">
                                 <button
-                                    className="flex cursor-pointer items-center bg-red-400 px-1.5 text-white hover:scale-102 hover:bg-red-500 max-sm:py-0.5 sm:py-0.75"
+                                    className="flex cursor-pointer items-center bg-red-400 px-1.5 font-medium text-white hover:scale-102 hover:bg-red-500 max-sm:py-0.5 sm:py-0.75"
                                     type="submit"
                                 >
                                     <IoMdSearch className="mr-px" size="1.5em" /> Search
                                 </button>
                                 <button
-                                    className="flex cursor-pointer items-center bg-blue-400 px-1.5 text-white hover:scale-102 hover:bg-blue-500 max-sm:py-0.5 sm:py-0.75"
-                                    onClick={() => handleSearch()}
+                                    className="flex cursor-pointer items-center bg-blue-400 px-1.5 font-medium text-white hover:scale-102 hover:bg-blue-500 max-sm:py-0.5 sm:py-0.75"
+                                    onClick={() => void nav("/search/?sort=trending")}
                                     type="button"
                                 >
                                     Browse All
@@ -121,32 +121,7 @@ const HomePage = () => {
                         </div>
                     </div>
                     <div className="h-0 w-full self-center border-b border-neutral-950"></div>
-                    {/* Newest Games */}
-                    <div className="col-start-1 cursor-pointer pt-2 text-center max-xl:hidden">
-                        <div className="flex items-center justify-center gap-3 border-neutral-700 bg-neutral-400 px-3 py-2 max-xl:w-full xl:w-fit">
-                            {isLoading ? (
-                                <LoadingSpinner />
-                            ) : (
-                                mostRecentGames.map(({ id, title, imageUrl, author }, i) => (
-                                    <Link key={i} to={`/play-game?preset=${id}`}>
-                                        <CardLayout name={title} imgSrc={imageUrl} key={i}>
-                                            <p className="mb-0.5 text-sm font-medium text-neutral-600 italic max-xl:text-xs">
-                                                {author ?? ""}
-                                            </p>
-                                        </CardLayout>
-                                    </Link>
-                                ))
-                            )}
-                        </div>
-                        <Link
-                            to={"/search/?sort=newest"}
-                            className="p-px text-lg font-semibold hover:text-blue-400 xl:text-xl"
-                        >
-                            Who&apos;s That Most Recent
-                        </Link>
-                    </div>
-                    <div className="h-0 w-full self-center border-b border-neutral-950 max-xl:hidden"></div>
-                    {/* Most Liked Games */}
+                    {/* Trending Games */}
                     <div className="col-start-1 cursor-pointer pt-2 text-center max-xl:hidden">
                         <div className="flex items-center justify-center gap-3 border-neutral-700 bg-neutral-400 px-3 py-2 max-xl:w-full xl:w-fit">
                             {isLoading ? (
@@ -190,10 +165,35 @@ const HomePage = () => {
                             )}
                         </div>
                         <Link
-                            to={"/search/?sort=likes"}
+                            to={"/search/?sort=trending"}
                             className="p-px text-lg font-semibold hover:text-blue-400 xl:text-xl"
                         >
-                            Who&apos;s That Most Wanted
+                            Whos-That&apos;s Most Wanted
+                        </Link>
+                    </div>
+                    <div className="h-0 w-full self-center border-b border-neutral-950 max-xl:hidden"></div>
+                    {/* Newest Games */}
+                    <div className="col-start-1 cursor-pointer pt-2 text-center max-xl:hidden">
+                        <div className="flex items-center justify-center gap-3 border-neutral-700 bg-neutral-400 px-3 py-2 max-xl:w-full xl:w-fit">
+                            {isLoading ? (
+                                <LoadingSpinner />
+                            ) : (
+                                mostRecentGames.map(({ id, title, imageUrl, author }, i) => (
+                                    <Link key={i} to={`/play-game?preset=${id}`}>
+                                        <CardLayout name={title} imgSrc={imageUrl} key={i}>
+                                            <p className="mb-0.5 text-sm font-medium text-neutral-600 italic max-xl:text-xs">
+                                                {author ?? ""}
+                                            </p>
+                                        </CardLayout>
+                                    </Link>
+                                ))
+                            )}
+                        </div>
+                        <Link
+                            to={"/search/?sort=newest"}
+                            className="p-px text-lg font-semibold hover:text-blue-400 xl:text-xl"
+                        >
+                            Whos-That&apos;s Newest
                         </Link>
                     </div>
                 </div>
@@ -222,9 +222,7 @@ const HomePage = () => {
                         <>
                             <button
                                 className="col-start-2 cursor-pointer text-center text-lg font-semibold hover:scale-102"
-                                onClick={() => {
-                                    void nav("/my-games");
-                                }}
+                                onClick={() => void nav("/my-games")}
                             >
                                 <div className="border border-neutral-400 bg-neutral-300 py-1">
                                     <img

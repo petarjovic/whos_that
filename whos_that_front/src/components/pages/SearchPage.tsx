@@ -44,9 +44,12 @@ const SearchPage = () => {
                 url.searchParams.set("q", searchParams.get("q") ?? "");
                 url.searchParams.set("page", Number.isNaN(page) ? "1" : page.toString());
                 url.searchParams.set("limit", Number.isNaN(limit) ? "50" : limit.toString());
+                const sortParam = searchParams.get("sort");
                 url.searchParams.set(
                     "sort",
-                    searchParams.get("sort") === "newest" ? "newest" : "likes"
+                    sortParam === "newest" || sortParam === "likes" || sortParam === "trending"
+                        ? sortParam
+                        : "trending"
                 );
 
                 const response = await fetch(url, {
@@ -87,7 +90,7 @@ const SearchPage = () => {
         <>
             {/* Search Bar */}
             <form
-                className="flex items-center justify-around gap-2 rounded-xs border border-neutral-500 bg-neutral-300 px-1.5 py-1.75 max-xl:mt-4 max-xl:mb-1 max-sm:w-9/10 sm:w-7/10 md:w-6/10 lg:w-1/3 xl:mt-5 xl:mb-2"
+                className="flex items-center justify-around gap-2 rounded-xs border border-neutral-500 bg-neutral-300 py-1.75 pr-1.75 pl-1.5 font-medium max-xl:mt-4 max-xl:mb-1 max-sm:w-9/10 sm:w-7/10 md:w-6/10 lg:w-1/3 xl:mt-5 xl:mb-2"
                 onSubmit={(e) => e.preventDefault()}
             >
                 <input
@@ -106,8 +109,8 @@ const SearchPage = () => {
                     <IoMdSearch size="1.5em" />
                 </button>
                 <select
-                    className="flex cursor-pointer items-center rounded-xs bg-blue-400 px-px text-center text-white 2xl:py-0.5"
-                    value={searchParams.get("sort") ?? "likes"}
+                    className="flex cursor-pointer items-center justify-center rounded-xs bg-blue-400 p-0.75 text-center text-white"
+                    value={searchParams.get("sort") ?? "trending"}
                     onChange={(e) =>
                         setSearchParams({
                             ...Object.fromEntries(searchParams),
@@ -116,8 +119,15 @@ const SearchPage = () => {
                         })
                     }
                 >
-                    <option value="likes">Most Liked</option>
-                    <option value="newest">Newest</option>
+                    <option className="font-medium" value="trending">
+                        Trending
+                    </option>
+                    <option className="font-medium" value="likes">
+                        Likes
+                    </option>
+                    <option className="font-medium" value="newest">
+                        Newest
+                    </option>
                 </select>
             </form>
             {/* Search Results */}
@@ -246,8 +256,8 @@ const SearchPage = () => {
                             <option value="50" className="cursor-pointer">
                                 50
                             </option>
-                            <option value="100" className="cursor-pointer">
-                                100
+                            <option value="80" className="cursor-pointer">
+                                80
                             </option>
                         </select>
                     </div>
