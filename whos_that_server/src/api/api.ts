@@ -196,6 +196,7 @@ export function setupApiRoutes(app: Express) {
                     .where(eq(schema.games.isPublic, true))
                     .groupBy(schema.games.id, authSchema.user.displayUsername, schema.gameItems.id)
                     .orderBy(
+                        //Current time decay is 2 weeks (lower later)
                         desc(
                             sql`ln(greatest(count(${schema.gameLikes.id}) + 1, 1)) - (extract(epoch from (now() - ${schema.games.createdAt})) / 1209600.0)`
                         )
@@ -318,6 +319,7 @@ export function setupApiRoutes(app: Express) {
                           ? [desc(schema.games.createdAt)]
                           : //sort === "trending"
                             [
+                                //Current time decay is 2 weeks (lower later)
                                 desc(
                                     sql`ln(greatest(count(${schema.gameLikes.id}) + 1, 1)) - (extract(epoch from (now() - ${schema.games.createdAt})) / 1209600.0)`
                                 ),

@@ -197,6 +197,9 @@ export function setupSocketEventHandlers(io: Server<ClientToServerEvents, Server
             logger.debug(`Socket disconnected: ${socket.id}`);
             //Loop through rooms this socket is in (should be only 1)
             for (const roomId of socket.rooms) {
+                //Skip the socket's own room ID
+                if (roomId === socket.id) continue;
+
                 const roomState = ActiveRoomIdsMap.get(roomId);
                 if (!roomState) {
                     logger.warn(
