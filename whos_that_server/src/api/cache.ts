@@ -6,10 +6,10 @@ let TOP3NEWEST_CACHE: { data: IdPresetInfo[]; timestamp: number } | null = null;
 
 const GAMEDATA_CACHE_DUR = 86400 * 1000 * 5; // 5 Days
 const MAX_GAMEDATA_CACHE_SIZE = 500;
-const TOP3TRENDING_CACHE_DUR = 86400 * 1000; // 24 hours
-const TOP3NEWEST_CACHE_DUR = 86400 * 1000; // 24 hours
+const TOP3TRENDING_CACHE_DUR = 64800 * 1000; // 18 hours
+const TOP3NEWEST_CACHE_DUR = 43200 * 1000; // 12 hours
 
-// clean up caches every twelve hours
+// clean up caches every twelve-ish hours
 setInterval(() => {
     const now = Date.now();
 
@@ -20,16 +20,16 @@ setInterval(() => {
         }
     }
 
-    //TOP3MOSTLIKED cleaning
+    //TOP3TRENDING cleaning
     if (TOP3TRENDING_CACHE && now - TOP3TRENDING_CACHE.timestamp > TOP3TRENDING_CACHE_DUR) {
         TOP3TRENDING_CACHE = null;
     }
 
-    //TOP3MOSTRECENT cleaning
+    //TOP3NEWEST cleaning
     if (TOP3NEWEST_CACHE && now - TOP3NEWEST_CACHE.timestamp > TOP3NEWEST_CACHE_DUR) {
         TOP3NEWEST_CACHE = null;
     }
-}, 43200 * 1000);
+}, 43200 * 1001);
 
 //GAMEDATA_CACHE helpers
 export function getCachedGameData(gameId: string): GameData | null {
