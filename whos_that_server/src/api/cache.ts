@@ -260,7 +260,7 @@ export function updateLikeCountInCaches(gameId: string, increment: boolean): voi
         else setSearchTrendingCache(searchTrending);
     }
 
-    //updated in most liked search cache
+    // Update in most liked search cache
     const searchMostLiked = getCachedSearchMostLiked();
     if (searchMostLiked) {
         const updated = searchMostLiked.map((game) =>
