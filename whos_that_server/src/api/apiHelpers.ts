@@ -200,3 +200,17 @@ export async function switchPrivacySettings(
         }
     }
 }
+
+/**
+ * Retrieves set of game IDs that the user has liked
+ * @param userId - The user's ID
+ * @returns Set of game IDs the user has liked
+ */
+export async function getUserLikedGameIds(userId: string): Promise<Set<string>> {
+    const likedGamesQuery = await db
+        .select({ gameId: schema.gameLikes.gameId })
+        .from(schema.gameLikes)
+        .where(eq(schema.gameLikes.userId, userId));
+
+    return new Set(likedGamesQuery.map((l) => l.gameId));
+}

@@ -28,3 +28,5 @@ dist-ssr
 private
 PrivacyPolicyPage.tsx
 drizzle/
+soundeffects.ts
+*.mp3

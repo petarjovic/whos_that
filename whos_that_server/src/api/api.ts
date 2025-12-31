@@ -26,6 +26,7 @@ import {
     switchPrivacySettings,
     deleteImagesFromBucketAndCF,
     getPrivacySettingAndImageIds,
+    getUserLikedGameIds,
 } from "./apiHelpers.ts";
 import { checkGameExists, validateGameId } from "../middleware/validatorMw.ts";
 import {
@@ -38,6 +39,10 @@ import {
     invalidateInAllCaches,
     insertTop3NewestCache,
     updateLikeCountInCaches,
+    getCachedSearchTrending,
+    setSearchTrendingCache,
+    getCachedSearchMostLiked,
+    setSearchMostLikedCache,
 } from "./cache.ts";
 import { logger } from "../config/logger.ts";
 
@@ -244,14 +249,10 @@ export function setupApiRoutes(app: Express) {
                 headers: fromNodeHeaders(req.headers),
             });
 
-            let likedGameIds: Set<string>;
+            //If user is logged in get like info for these games
+            let likedGameIds = new Set<string>();
             if (session) {
-                const likedGameIdsQ = await db
-                    .select({ gameId: schema.gameLikes.gameId })
-                    .from(schema.gameLikes)
-                    .where(eq(schema.gameLikes.userId, session.user.id));
-
-                likedGameIds = new Set(likedGameIdsQ.map((l) => l.gameId));
+                likedGameIds = await getUserLikedGameIds(session.user.id);
             }
 
             //Merge top3s, + likeStatus, and convert image ids to image URLs
@@ -293,6 +294,23 @@ export function setupApiRoutes(app: Express) {
             }
             const { page, limit, q, sort } = validQuery.data;
 
+            let premadeGamesInfo: IdPresetInfo[] = [];
+
+            // Only cache first page with no search query and default limit
+            const cachable: boolean = page === 1 && !q && limit === 54;
+            // Check cache for trending/likes sorts
+            if (cachable && sort === "trending") {
+                const cached = getCachedSearchTrending();
+                if (cached) {
+                    premadeGamesInfo = cached;
+                }
+            } else if (cachable && sort === "likes") {
+                const cached = getCachedSearchMostLiked();
+                if (cached) {
+                    premadeGamesInfo = cached;
+                }
+            }
+
             // Check if user is logged in to determine "liked" statuses
             const session = await auth.api.getSession({
                 headers: fromNodeHeaders(req.headers),
@@ -305,47 +323,60 @@ export function setupApiRoutes(app: Express) {
                 q ? ilike(schema.games.title, `%${q}%`) : undefined
             );
 
-            // Query public games with author, cover image, and like data according to search params
-            const premadeGamesInfo: IdPresetInfo[] = await db
-                .select({
-                    id: schema.games.id,
-                    title: schema.games.title,
-                    author: authSchema.user.displayUsername,
-                    isPublic: schema.games.isPublic, //true
-                    imageId: schema.gameItems.id,
-                    numLikes: count(schema.gameLikes.id),
-                    userHasLiked: session
-                        ? sql<boolean>`BOOL_OR(${schema.gameLikes.userId} = ${session.user.id})`
-                        : sql<boolean>`FALSE`,
-                })
-                .from(schema.games)
-                .leftJoin(authSchema.user, eq(authSchema.user.id, schema.games.userId))
-                .innerJoin(
-                    schema.gameItems,
-                    and(
-                        eq(schema.gameItems.gameId, schema.games.id),
-                        eq(schema.gameItems.orderIndex, 0)
+            if (premadeGamesInfo.length === 0) {
+                premadeGamesInfo = await db
+                    .select({
+                        id: schema.games.id,
+                        title: schema.games.title,
+                        author: authSchema.user.displayUsername,
+                        isPublic: schema.games.isPublic,
+                        imageId: schema.gameItems.id,
+                        numLikes: count(schema.gameLikes.id),
+                        userHasLiked: sql<null>`NULL`, // Set to null, merge later
+                    })
+                    .from(schema.games)
+                    .leftJoin(authSchema.user, eq(authSchema.user.id, schema.games.userId))
+                    .innerJoin(
+                        schema.gameItems,
+                        and(
+                            eq(schema.gameItems.gameId, schema.games.id),
+                            eq(schema.gameItems.orderIndex, 0)
+                        )
                     )
-                )
-                .leftJoin(schema.gameLikes, eq(schema.gameLikes.gameId, schema.games.id))
-                .where(whereConditions)
-                .groupBy(schema.games.id, authSchema.user.displayUsername, schema.gameItems.id)
-                .orderBy(
-                    ...(sort === "likes"
-                        ? [desc(count(schema.gameLikes.id)), desc(schema.games.createdAt)]
-                        : sort === "newest"
-                          ? [desc(schema.games.createdAt)]
-                          : //sort === "trending"
-                            [
-                                //Current time decay is 2 weeks (lower later)
-                                desc(
-                                    sql`ln(greatest(count(${schema.gameLikes.id}) + 1, 0.7)) - (extract(epoch from (now() - ${schema.games.createdAt})) / 1209600.0)`
-                                ),
-                            ])
-                )
-                .limit(limit)
-                .offset((page - 1) * limit);
+                    .leftJoin(schema.gameLikes, eq(schema.gameLikes.gameId, schema.games.id))
+                    .where(whereConditions)
+                    .groupBy(schema.games.id, authSchema.user.displayUsername, schema.gameItems.id)
+                    .orderBy(
+                        ...(sort === "likes"
+                            ? [desc(count(schema.gameLikes.id)), desc(schema.games.createdAt)]
+                            : sort === "newest"
+                              ? [desc(schema.games.createdAt)]
+                              : [
+                                    desc(
+                                        sql`ln(greatest(count(${schema.gameLikes.id}) + 1, 0.7)) - (extract(epoch from (now() - ${schema.games.createdAt})) / 1209600.0)`
+                                    ),
+                                ])
+                    )
+                    .limit(limit)
+                    .offset((page - 1) * limit);
 
+                // Cache first page results
+                if (cachable) {
+                    if (sort === "trending") {
+                        setSearchTrendingCache(premadeGamesInfo);
+                    } else if (sort === "likes") {
+                        setSearchMostLikedCache(premadeGamesInfo);
+                    }
+                }
+            }
+
+            // Get user's liked games if logged in
+            let likedGameIds = new Set<string>();
+            if (session) {
+                likedGameIds = await getUserLikedGameIds(session.user.id);
+            }
+
+            // Get total count for pagination
             const totalCountResult = await db
                 .select({ count: count() })
                 .from(schema.games)
@@ -354,7 +385,7 @@ export function setupApiRoutes(app: Express) {
             const totalCount = totalCountResult[0].count;
             const totalPages = Math.ceil(totalCount / limit);
 
-            // Convert image id to image url
+            // Convert to URL format and merge with user's liked status
             const premadeGamesInfoUrl: UrlPresetInfo[] = premadeGamesInfo.map(
                 ({ imageId, ...presetInfo }) => {
                     let imageUrl = constructImageUrl(presetInfo.isPublic, presetInfo.id, imageId);
@@ -369,6 +400,7 @@ export function setupApiRoutes(app: Express) {
                     }
                     return {
                         ...presetInfo,
+                        userHasLiked: session ? likedGameIds.has(presetInfo.id) : null,
                         imageUrl,
                     };
                 }
