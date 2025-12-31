@@ -260,3 +260,21 @@ export function setupSocketEventHandlers(io: Server<ClientToServerEvents, Server
         });
     });
 }
+
+export function cleanupSocketRooms(io: Server<ClientToServerEvents, ServerToClientEvents>) {
+    logger.info(`Broadcasting shutdown to ${ActiveRoomIdsMap.size.toString()} active rooms.`);
+
+    // Notify all connected clients
+    io.emit("errorMessage", {
+        message: "Server shutting down for update. We should be back up quickly!",
+    });
+    ActiveRoomIdsMap.clear(); //why not
+
+    // Disconnect all sockets with a delay to allow message delivery
+    return new Promise<void>((resolve) => {
+        setTimeout(() => {
+            io.disconnectSockets(true);
+            resolve();
+        }, 1000);
+    });
+}
