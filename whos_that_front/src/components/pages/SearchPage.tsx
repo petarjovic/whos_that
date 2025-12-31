@@ -38,12 +38,12 @@ const SearchPage = () => {
             setIsLoading(true);
             try {
                 const page = parseInt(searchParams.get("page") ?? "1");
-                const limit = parseInt(searchParams.get("limit") ?? "54");
+                const limit = parseInt(searchParams.get("limit") ?? "50");
 
                 const url = new URL(`${env.VITE_SERVER_URL}/api/search`);
                 url.searchParams.set("q", searchParams.get("q") ?? "");
                 url.searchParams.set("page", Number.isNaN(page) ? "1" : page.toString());
-                url.searchParams.set("limit", Number.isNaN(limit) ? "54" : limit.toString());
+                url.searchParams.set("limit", Number.isNaN(limit) ? "50" : limit.toString());
                 const sortParam = searchParams.get("sort");
                 url.searchParams.set(
                     "sort",

@@ -297,7 +297,7 @@ export function setupApiRoutes(app: Express) {
             let premadeGamesInfo: IdPresetInfo[] = [];
 
             // Only cache first page with no search query and default limit
-            const cachable: boolean = page === 1 && !q && limit === 54;
+            const cachable: boolean = page === 1 && !q && limit === 50;
             // Check cache for trending/likes sorts
             if (cachable && sort === "trending") {
                 const cached = getCachedSearchTrending();
