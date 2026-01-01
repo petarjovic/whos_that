@@ -19,7 +19,7 @@ import { BsIncognito } from "react-icons/bs";
 
 const MAX_FILESIZE_BYTES = 5 * 1024 * 1024;
 const MIN_NUM_IMGS = 6;
-const MAX_NUM_IMGS = 24;
+const MAX_NUM_IMGS = 36;
 
 /**
  * Game/preset creation page: handles image uploads, character naming, and privacy setting
@@ -32,6 +32,7 @@ const CreateCustomGamePage = () => {
 
     const [selectedFiles, setSelectedFiles] = useState<File[]>([]); //List of image files to upload
     const [charNames, setCharNames] = useState<string[]>([]); //Parallel list of character names
+    const [charErrors, setCharErrors] = useState<string[]>([]); //List of char Errors
 
     const [imageUrls, setImageUrls] = useState<string[]>([]); //List of image urls for preview
     const [imageErrors, setImageErrors] = useState<string[]>([]); //Error msgs for invalid files
@@ -84,8 +85,13 @@ const CreateCustomGamePage = () => {
     };
 
     // Handles dismissing image error messages
-    const handleRemoveError = (index: number) => {
+    const handleRemoveImageError = (index: number) => {
         setImageErrors(imageErrors.filter((_, i) => i !== index));
+    };
+
+    // Handles dismissing image error messages
+    const handleRemoveCharError = (index: number) => {
+        setCharErrors(charErrors.filter((_, i) => i !== index));
     };
 
     /**
@@ -206,6 +212,14 @@ const CreateCustomGamePage = () => {
         const formData = new FormData(e.currentTarget);
 
         if (selectedFiles.length < MIN_NUM_IMGS || selectedFiles.length > MAX_NUM_IMGS) {
+            setIsLoading(false);
+            return;
+        }
+
+        // Check for duplicate character names
+        const uniqueNames = new Set(charNames.map((name) => name.toLowerCase().trim()));
+        if (uniqueNames.size !== charNames.length) {
+            setCharErrors(["All character names must be unique!"]);
             setIsLoading(false);
             return;
         }
@@ -351,7 +365,7 @@ const CreateCustomGamePage = () => {
                             placeholder="(E.g. Superheros, Famous Actors)"
                             className="border-groove rounded border border-neutral-400 bg-neutral-50 p-1 text-center font-medium placeholder:text-gray-400 max-lg:w-full lg:w-9/10 xl:text-lg 2xl:text-xl"
                             required
-                            minLength={5}
+                            minLength={3}
                             maxLength={18}
                         ></input>
                     </div>
@@ -428,7 +442,7 @@ const CreateCustomGamePage = () => {
                                         <span className="sm:pl-1">{"Error: " + error}</span>
                                         <button
                                             type="button"
-                                            onClick={() => handleRemoveError(index)}
+                                            onClick={() => handleRemoveImageError(index)}
                                             className="float-right ml-2 cursor-pointer text-black hover:text-red-800"
                                         >
                                             ✕
@@ -501,9 +515,9 @@ const CreateCustomGamePage = () => {
                                         draggedIndex === index ? "opacity-50" : ""
                                     } ${
                                         index % 4 === 0 || index % 4 === 3
-                                            ? "bg-zinc-200"
-                                            : "bg-zinc-50"
-                                    } ${index % 2 === 0 ? "border-r" : ""} cursor-grab`}
+                                            ? "xl:bg-zinc-200"
+                                            : "xl:bg-zinc-50"
+                                    } ${index % 2 === 0 ? "border-r max-xl:bg-zinc-200" : "max-xl:bg-zinc-50"} cursor-grab`}
                                 >
                                     <div className="mx-1 flex flex-col items-center justify-between">
                                         <PiEraserFill
@@ -579,6 +593,25 @@ const CreateCustomGamePage = () => {
                         </p>
                     ) : (
                         <></>
+                    )}
+                    {charErrors.length > 0 && (
+                        <div className="mx-auto mt-2 mb-0.5 min-w-9/10 rounded-md border border-red-200 bg-red-100 py-1 text-gray-500">
+                            {charErrors.map((error, index) => (
+                                <p
+                                    key={index}
+                                    className="px-3 text-sm font-medium text-red-600 xl:text-base"
+                                >
+                                    <span className="sm:pl-1">{"Error: " + error}</span>
+                                    <button
+                                        type="button"
+                                        onClick={() => handleRemoveCharError(index)}
+                                        className="float-right ml-2 cursor-pointer text-black hover:text-red-800"
+                                    >
+                                        ✕
+                                    </button>
+                                </p>
+                            ))}
+                        </div>
                     )}
                     {selectedFiles.length < MIN_NUM_IMGS ? (
                         <p className="mx-auto mt-2 mb-0.5 min-w-9/10 rounded-md border border-amber-200 bg-amber-100 py-0.75 text-neutral-500">

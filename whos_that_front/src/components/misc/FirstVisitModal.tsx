@@ -12,6 +12,7 @@ const FirstVisitModal = () => {
         const hasVisited = localStorage.getItem(VISITED_BEFORE);
 
         if (!hasVisited) {
+            // eslint-disable-next-line react-hooks/set-state-in-effect
             setIsOpen(true);
         }
     }, []);
@@ -31,26 +32,27 @@ const FirstVisitModal = () => {
             overlayClassName="fixed inset-0 bg-zinc-800/75"
         >
             <div className="text-center">
-                <h1 className="font-digitag mb-4 text-9xl font-bold tracking-wider whitespace-pre-wrap text-orange-300 text-shadow-sm/80 max-sm:text-7xl">
-                    Welcome
+                <h1 className="font-digitag mb-4 text-9xl font-bold tracking-wider whitespace-pre-wrap text-orange-300 text-shadow-sm/100 max-sm:text-7xl">
+                    <span className="font-digitag">W</span>e
+                    <span className="font-digitag relative left-2">l</span>come
                 </h1>
 
                 <div className="mb-7 space-y-3 text-2xl max-sm:text-xl">
                     <p className="text-3xl max-sm:text-2xl">
-                        <span className="font-bold text-orange-300 text-shadow-sm/50">
-                            Who's That<span className="text-red-500">?</span>
+                        <span className="font-bold text-orange-300 text-shadow-xs/100">
+                            Who&apos;s That<span className="text-red-500">?</span>
                         </span>{" "}
                         is a character elimination game inspired by classic board games!
                     </p>
 
                     <div className="mt-4">
-                        <h3 className="mb-2 text-4xl font-bold text-orange-300 text-shadow-xs/100 max-sm:text-3xl">
+                        <h3 className="mb-2 text-4xl font-bold text-orange-400 text-shadow-xs/100 max-sm:text-3xl">
                             How to Get Started:
                         </h3>
                         <ul className="space-y-2 pl-4">
                             <li>
-                                From the homepage you can either browse and play exisiting presets,
-                                or create your own custom preset.
+                                From the homepage you can either browse and play exisiting games, or
+                                create your own custom game.
                             </li>
                             <li>
                                 <strong className="text-2xl text-red-400 italic">
@@ -70,13 +72,13 @@ const FirstVisitModal = () => {
                         </button>
                         {showGameplay && (
                             <p className="mx-auto mt-2 w-9/10">
-                                Who's That is a customizable version of the two person game where
-                                players take turns asking yes-or-no questions to narrow down the
-                                other's secret character! You'll see which character your opponent
-                                is trying to guess, and they'll know which you need to guess. Ask
-                                clever questions to eliminate possibilities and make your best guess
-                                before your opponent... but watch out - if you guess wrong: you
-                                lose!
+                                Who&apos;s That is a customizable version of the two person game
+                                where players take turns asking yes-or-no questions to narrow down
+                                the other&apos;s secret character! You&apos;ll see which character
+                                your opponent is trying to guess, and they&apos;ll know which you
+                                need to guess. Ask clever questions to eliminate possibilities and
+                                make your best guess before your opponent... but watch out - if you
+                                guess wrong: you lose!
                             </p>
                         )}
                     </div>

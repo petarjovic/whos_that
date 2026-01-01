@@ -74,7 +74,14 @@ export const createGameRequestSchema = z.object({
             })
         )
         .min(6)
-        .max(50),
+        .max(36)
+        .refine(
+            (items) =>
+                new Set(items.map((item) => item.name.toLowerCase().trim())).size === items.length,
+            {
+                message: "All character names must be unique.",
+            }
+        ),
 });
 
 export const createGameResponseSchema = z.object({

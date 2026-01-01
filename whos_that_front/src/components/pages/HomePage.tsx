@@ -1,6 +1,7 @@
 import { useNavigate } from "react-router";
 import { useEffect, useState } from "react";
 import FirstVisitModal from "../misc/FirstVisitModal.tsx";
+import UpdateModal from "../misc/UpdateModal.tsx";
 import { useBetterAuthSession } from "../../lib/hooks.ts";
 import CustomGameImg from "@client/assets/CustomGame.svg";
 import UsersPresetsImage from "@client/assets/safe.png";
@@ -286,6 +287,7 @@ const HomePage = () => {
                 </div>
 
                 <FirstVisitModal />
+                <UpdateModal />
             </div>
         </>
     );
