@@ -296,8 +296,15 @@ export function setupApiRoutes(app: Express) {
 
             let premadeGamesInfo: IdPresetInfo[] = [];
 
+            // Check if user is logged in to determine "liked" statuses
+            const session = await auth.api.getSession({
+                headers: fromNodeHeaders(req.headers),
+            });
+
+            const isAdmin = session?.user.role === "admin";
+
             // Only cache first page with no search query and default limit
-            const cachable: boolean = page === 1 && !q && limit === 50;
+            const cachable: boolean = page === 1 && !q && limit === 50 && !isAdmin;
             // Check cache for trending/likes sorts
             if (cachable && sort === "trending") {
                 const cached = getCachedSearchTrending();
@@ -311,13 +318,7 @@ export function setupApiRoutes(app: Express) {
                 }
             }
 
-            // Check if user is logged in to determine "liked" statuses
-            const session = await auth.api.getSession({
-                headers: fromNodeHeaders(req.headers),
-            });
-
             //includes private games if user is an admin, otherwise only public
-            const isAdmin = session?.user.role === "admin";
             const whereConditions = and(
                 isAdmin ? undefined : eq(schema.games.isPublic, true),
                 q ? ilike(schema.games.title, `%${q}%`) : undefined
