@@ -29,7 +29,7 @@ const SearchPage = () => {
             setSearchParams((prev) => ({ ...Object.fromEntries(prev), q: searchInput, page: "1" }));
         }, 500);
         return () => clearTimeout(timer);
-    }, [searchInput, setSearchParams]);
+    }, [searchInput, searchParams, setSearchParams]);
 
     //Fetch games being searched for
     useEffect(() => {
@@ -91,7 +91,9 @@ const SearchPage = () => {
             {/* Search Bar */}
             <form
                 className="flex items-center justify-around gap-2 rounded-xs border border-neutral-500 bg-neutral-300 py-1.75 pr-1.75 pl-1.5 font-medium max-xl:mt-4 max-xl:mb-1 max-sm:w-9/10 sm:w-7/10 md:w-6/10 lg:w-1/3 xl:mt-5 xl:mb-2"
-                onSubmit={(e) => e.preventDefault()}
+                onSubmit={(e) => {
+                    e.preventDefault();
+                }}
             >
                 <input
                     id="searchBar"

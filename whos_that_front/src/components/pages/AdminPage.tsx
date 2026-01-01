@@ -29,6 +29,7 @@ const AdminPage = () => {
         if (!isPending && session?.user.role !== "admin") void nav("/404");
     }, [session, isPending, nav]);
 
+    // Debounce search input
     useEffect(() => {
         const currentQuery = searchParams.get("q") ?? "";
         const timer = setTimeout(() => {
@@ -36,7 +37,7 @@ const AdminPage = () => {
             setSearchParams((prev) => ({ ...Object.fromEntries(prev), q: searchInput, page: "1" }));
         }, 500);
         return () => clearTimeout(timer);
-    }, [searchInput, setSearchParams]);
+    }, [searchInput, searchParams, setSearchParams]);
 
     useEffect(() => {
         const abortController = new AbortController();
