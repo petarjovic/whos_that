@@ -164,7 +164,7 @@ export function setupSocketEventHandlers(io: Server<ClientToServerEvents, Server
             }
 
             roomState.curTurn = otherPlayer;
-            socket.to(roomId).emit("updateTurnOnly", {
+            io.to(roomId).emit("updateTurnOnly", {
                 curTurn: otherPlayer,
             });
         });
