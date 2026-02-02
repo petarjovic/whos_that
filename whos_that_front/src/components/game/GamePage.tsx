@@ -51,8 +51,8 @@ const Game = ({ roomState, cardData, title }: GameProps) => {
 
     // Extract winning keys from room state
     const opponentSocketId = roomState.players.find((id) => id !== socketId) ?? ""; //should never actually be ""
-    const winningKey = roomState.cardIdsToGuess[socketId];
-    const oppWinningKey = roomState.cardIdsToGuess[opponentSocketId];
+    const oppWinningKey = roomState.cardIdsToGuess[socketId];
+    const winningKey = roomState.cardIdsToGuess[opponentSocketId];
 
     // Create list of character card components
     const cardList = cardData.map(({ imageUrl, name, orderIndex }) => (
