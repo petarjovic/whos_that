@@ -14,7 +14,7 @@ const UpdateModal = () => {
 
         if (!hasSeenUpdate && hasVisited) {
             // eslint-disable-next-line react-hooks/set-state-in-effect
-            setIsOpen(true);
+            setIsOpen(false); //CURRENTLY OFF SO SET TO FALSE
         }
     }, []);
 
