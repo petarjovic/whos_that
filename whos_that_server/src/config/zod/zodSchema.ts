@@ -11,6 +11,7 @@ export const searchQuerySchema = z.object({
     limit: z.coerce.number().int().positive().max(100).default(50),
     q: z.string().optional(),
     sort: z.enum(["likes", "newest", "trending"]).default("trending"),
+    priv: z.enum(["public", "private", "both"]).default("public"),
 });
 
 //Socket response not htttp

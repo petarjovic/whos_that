@@ -45,16 +45,21 @@ const AdminPage = () => {
             setIsLoading(true);
             try {
                 const page = parseInt(searchParams.get("page") ?? "1");
-                const limit = parseInt(searchParams.get("limit") ?? "30");
+                const limit = parseInt(searchParams.get("limit") ?? "60");
+                const privParam = searchParams.get("priv") ?? "public";
 
                 const url = new URL(`${env.VITE_SERVER_URL}/api/search`);
                 url.searchParams.set("q", searchParams.get("q") ?? "");
                 url.searchParams.set("page", Number.isNaN(page) ? "1" : page.toString());
-                url.searchParams.set("limit", Number.isNaN(limit) ? "30" : limit.toString());
+                url.searchParams.set("limit", Number.isNaN(limit) ? "60" : limit.toString());
+                const sortParam = searchParams.get("sort");
                 url.searchParams.set(
                     "sort",
-                    searchParams.get("sort") === "newest" ? "newest" : "likes"
+                    sortParam === "newest" || sortParam === "likes" || sortParam === "trending"
+                        ? sortParam
+                        : "trending"
                 );
+                url.searchParams.set("priv", privParam);
 
                 const response = await fetch(url, {
                     credentials: "include",
@@ -167,8 +172,8 @@ const AdminPage = () => {
                     <IoMdSearch size="1.5em" />
                 </button>
                 <select
-                    className="flex cursor-pointer items-center rounded-xs bg-blue-400 px-px text-center text-white 2xl:py-0.5"
-                    value={searchParams.get("sort") ?? "likes"}
+                    className="flex cursor-pointer items-center justify-center rounded-xs bg-blue-400 p-0.75 text-center text-white"
+                    value={searchParams.get("sort") ?? "newest"}
                     onChange={(e) =>
                         setSearchParams({
                             ...Object.fromEntries(searchParams),
@@ -177,8 +182,36 @@ const AdminPage = () => {
                         })
                     }
                 >
-                    <option value="likes">Most Liked</option>
-                    <option value="newest">Newest</option>
+                    <option className="font-medium" value="trending">
+                        Trending
+                    </option>
+                    <option className="font-medium" value="likes">
+                        Likes
+                    </option>
+                    <option className="font-medium" value="newest">
+                        Newest
+                    </option>
+                </select>
+                <select
+                    className="flex cursor-pointer items-center justify-center rounded-xs bg-orange-400 p-0.75 text-center text-white"
+                    value={searchParams.get("priv") ?? "public"}
+                    onChange={(e) =>
+                        setSearchParams({
+                            ...Object.fromEntries(searchParams),
+                            priv: e.target.value,
+                            page: "1",
+                        })
+                    }
+                >
+                    <option className="font-medium" value="public">
+                        Public
+                    </option>
+                    <option className="font-medium" value="private">
+                        Private
+                    </option>
+                    <option className="font-medium" value="both">
+                        Both
+                    </option>
                 </select>
             </form>
             {isLoading ? (
@@ -340,31 +373,6 @@ const AdminPage = () => {
                     >
                         <MdLastPage size="2.2em" />
                     </button>
-                    <div className="ml-2 flex items-center gap-2 text-sm">
-                        <label htmlFor="limit-select">Results:</label>
-                        <select
-                            id="limit-select"
-                            value={pageInfo.limit}
-                            onChange={(e) =>
-                                setSearchParams({
-                                    ...Object.fromEntries(searchParams),
-                                    limit: e.target.value,
-                                    page: "1",
-                                })
-                            }
-                            className="content-center rounded border border-neutral-600 bg-white py-1 hover:cursor-pointer"
-                        >
-                            <option value="30" className="cursor-pointer">
-                                30
-                            </option>
-                            <option value="50" className="cursor-pointer">
-                                50
-                            </option>
-                            <option value="100" className="cursor-pointer">
-                                100
-                            </option>
-                        </select>
-                    </div>
                 </div>
             )}
         </>

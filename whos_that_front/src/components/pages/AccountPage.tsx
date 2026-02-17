@@ -100,15 +100,16 @@ const AccountPage = () => {
                         )}
                     </div> */}
                 </div>
-
-                <Link to={"/my-games"} className="text-center">
-                    <button
-                        className="mx-4 w-fit cursor-pointer rounded-md border-x border-b-9 border-amber-600 bg-amber-500 px-4 py-3 text-2xl font-bold tracking-normal text-slate-50 shadow-sm transition-all duration-15 text-shadow-xs/50 hover:border-amber-700 hover:bg-amber-600 hover:text-slate-200 hover:shadow-xs active:-translate-y-px active:border-b active:shadow-2xs max-2xl:px-3 max-2xl:py-2 max-2xl:text-xl"
-                        type="button"
-                    >
-                        My Games
-                    </button>
-                </Link>
+                <div>
+                    <Link to={"/my-games"} className="text-center">
+                        <button
+                            className="mx-4 w-fit cursor-pointer rounded-md border-x border-b-9 border-amber-600 bg-amber-500 px-4 py-3 text-2xl font-bold tracking-normal text-slate-50 shadow-sm transition-all duration-15 text-shadow-xs/50 hover:border-amber-700 hover:bg-amber-600 hover:text-slate-200 hover:shadow-xs active:translate-y-1 active:border-b active:shadow-2xs max-2xl:px-3 max-2xl:py-2 max-2xl:text-xl"
+                            type="button"
+                        >
+                            My Games
+                        </button>
+                    </Link>
+                </div>
             </div>
         );
 };

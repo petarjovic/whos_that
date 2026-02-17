@@ -292,7 +292,7 @@ export function setupApiRoutes(app: Express) {
                 logger.error({ error: validQuery.error }, "api/search: Invalid query paramters.");
                 return res.status(400).json({ message: "Invalid query parameters." });
             }
-            const { page, limit, q, sort } = validQuery.data;
+            const { page, limit, q, sort, priv } = validQuery.data;
 
             let premadeGamesInfo: IdPresetInfo[] = [];
 
@@ -301,10 +301,10 @@ export function setupApiRoutes(app: Express) {
                 headers: fromNodeHeaders(req.headers),
             });
 
-            const isAdmin = session?.user.role === "admin";
+            const adminSearch = session?.user.role === "admin" && limit >= 51;
 
             // Only cache first page with no search query and default limit
-            const cachable: boolean = page === 1 && !q && limit === 50 && !isAdmin;
+            const cachable: boolean = page === 1 && !q && limit === 50 && !adminSearch;
             // Check cache for trending/likes sorts
             if (cachable && sort === "trending") {
                 const cached = getCachedSearchTrending();
@@ -318,9 +318,14 @@ export function setupApiRoutes(app: Express) {
                 }
             }
 
-            //includes private games if user is an admin, otherwise only public
             const whereConditions = and(
-                isAdmin ? undefined : eq(schema.games.isPublic, true),
+                //can return private games for admins, otherwise only public
+                adminSearch && priv === "both"
+                    ? undefined
+                    : adminSearch && priv === "private"
+                      ? eq(schema.games.isPublic, false)
+                      : eq(schema.games.isPublic, true),
+                //user's search query
                 q ? ilike(schema.games.title, `%${q}%`) : undefined
             );
 

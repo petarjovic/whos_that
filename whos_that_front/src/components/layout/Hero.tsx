@@ -73,12 +73,28 @@ const Hero = ({ session, isPending, showUserInfo = true }: HeroProps) => {
                 </div>
                 {showUserInfo ? (
                     <div className="relative top-1 flex items-center justify-end gap-2 xl:absolute xl:top-15 xl:right-2/10">
+                        {session?.user.role === "admin" ? (
+                            <Link to={"/admin"} className="text-center">
+                                <button
+                                    type="button"
+                                    className={`mr-0.5 cursor-pointer rounded bg-purple-400 px-2 py-0.5 text-sm font-normal text-white grayscale-10 hover:scale-101 hover:bg-purple-600 active:scale-99 lg:px-1.75 lg:py-1.25 lg:text-base`}
+                                    onClick={() => {
+                                        void navigate("/admin");
+                                    }}
+                                >
+                                    Admin
+                                </button>
+                            </Link>
+                        ) : (
+                            <></>
+                        )}
                         <Link
                             to={session ? "/account" : "/login"}
                             className="cursor-pointer text-lg leading-none font-medium text-zinc-800 italic hover:underline"
                         >
                             {session?.user.displayUsername ?? ""}
                         </Link>
+
                         <button
                             type="button"
                             className={`bg-red-400 ${session ? "rounded px-1 py-0.5 text-sm font-normal grayscale-10 lg:px-1.75 lg:py-1" : "px-2 py-1.25 lg:px-2.5 lg:py-1.5 lg:text-base"} cursor-pointer font-medium text-white hover:scale-101 hover:bg-red-600 active:scale-99 xl:text-base`}
