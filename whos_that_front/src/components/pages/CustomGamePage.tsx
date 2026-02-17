@@ -571,7 +571,7 @@ const CreateCustomGamePage = () => {
                                                 names[index] = e.target.value;
                                                 setCharNames(names);
                                             }}
-                                            minLength={3}
+                                            minLength={1}
                                             maxLength={20}
                                             className="max-w-9/10 rounded border-2 border-neutral-400 bg-neutral-100 px-1 py-px text-center font-medium placeholder:text-zinc-400"
                                             placeholder={`[Insert #${(index + 1).toString()}'s Name]`}

@@ -71,7 +71,7 @@ export const createGameRequestSchema = z.object({
         .array(
             z.object({
                 type: z.enum(["image/jpeg", "image/png", "image/webp"]),
-                name: z.string().min(3).max(25),
+                name: z.string().trim().min(1).max(25),
             })
         )
         .min(6)
