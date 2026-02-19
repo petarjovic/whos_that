@@ -40,5 +40,17 @@ export const gameLikes = pgTable(
             .references(() => user.id, { onDelete: "cascade" }),
         createdAt: timestamp("created_at").defaultNow().notNull(),
     },
-    (table) => [unique("uniqueGameUser").on(table.gameId, table.userId)]
+    (table) => ({
+        uniqueGameUser: unique().on(table.gameId, table.userId),
+    })
 );
+
+export const feedback = pgTable("feedback", {
+    id: integer("id").primaryKey().generatedAlwaysAsIdentity(),
+    type: text("type", { enum: ["Bug", "FeatureReq", "Other"] }).notNull(),
+    message: text("message").notNull(),
+    userId: text("user_id").references(() => user.id, { onDelete: "set null" }),
+    url: text("url"),
+    userAgent: text("user_agent"),
+    createdAt: timestamp("created_at").defaultNow().notNull(),
+});

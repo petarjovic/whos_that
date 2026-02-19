@@ -38,10 +38,12 @@ export const checkGameExists = async (
     res: Response,
     next: NextFunction
 ): Promise<void> => {
+    const gameId = Array.isArray(req.params.gameId) ? req.params.gameId[0] : req.params.gameId; //idk whats up with this check something happened and now TS thinks gameId could be string[] ? This is fine for now
+
     const selectId = await db
         .select({ id: schema.games.id })
         .from(schema.games)
-        .where(eq(schema.games.id, req.params.gameId));
+        .where(eq(schema.games.id, gameId));
 
     if (selectId.length < 1) {
         res.status(400).json({ message: "Game id does not exist." });

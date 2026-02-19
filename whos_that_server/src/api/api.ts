@@ -16,7 +16,11 @@ import { nanoid } from "nanoid";
 import { getSignedUrl as getSignedS3Url } from "@aws-sdk/s3-request-presigner";
 import { getSignedUrl as getSignedCFUrl } from "@aws-sdk/cloudfront-signer";
 import env from "../config/zod/zodEnvSchema.ts";
-import { createGameRequestSchema, searchQuerySchema } from "../config/zod/zodSchema.ts";
+import {
+    createGameRequestSchema,
+    searchQuerySchema,
+    feedbackSchema,
+} from "../config/zod/zodSchema.ts";
 import { auth } from "../config/auth.ts";
 import { fromNodeHeaders } from "better-auth/node";
 import {
@@ -45,6 +49,7 @@ import {
     setSearchMostLikedCache,
 } from "./cache.ts";
 import { logger } from "../config/logger.ts";
+import rateLimit, { ipKeyGenerator } from "express-rate-limit";
 
 // set url duration to just over 5 days since cache is 5 days
 const PRESIGNED_IMAGE_URL_DUR = 86400 * 1000 * 5.1;
@@ -588,7 +593,8 @@ export function setupApiRoutes(app: Express) {
      * @returns { userHasLiked: boolean }
      */
     app.get("/api/userHasLiked/:gameId", validateGameId, checkGameExists, async (req, res) => {
-        const gameId = req.params.gameId;
+        const gameId = Array.isArray(req.params.gameId) ? req.params.gameId[0] : req.params.gameId; //idk whats up with this check something happened and now TS thinks gameId could be string[] ? This is fine for now
+
         try {
             const session = await auth.api.getSession({
                 headers: fromNodeHeaders(req.headers),
@@ -622,7 +628,7 @@ export function setupApiRoutes(app: Express) {
      * @returns GameDataType Game title + array of character data including image URLs
      */
     app.get("/api/gameData/:gameId", validateGameId, checkGameExists, async (req, res) => {
-        const gameId = req.params.gameId;
+        const gameId = Array.isArray(req.params.gameId) ? req.params.gameId[0] : req.params.gameId; //idk whats up with this check something happened and now TS thinks gameId could be string[] ? This is fine for now
 
         //check if game is cached
         const cached = getCachedGameData(gameId);
@@ -691,10 +697,8 @@ export function setupApiRoutes(app: Express) {
      * @returns Success message
      */
     app.put("/api/likeGame/:gameId", validateGameId, checkGameExists, async (req, res) => {
-        const {
-            params: { gameId },
-            headers,
-        } = req;
+        const headers = req.headers;
+        const gameId = Array.isArray(req.params.gameId) ? req.params.gameId[0] : req.params.gameId; //idk whats up with this check something happened and now TS thinks gameId could be string[] ? This is fine for now
         try {
             // Verify user is logged in
             const session = await auth.api.getSession({
@@ -727,7 +731,7 @@ export function setupApiRoutes(app: Express) {
             if (gameAuthorandLikeStatus.likeId === null) {
                 //insert like in gameLikes table if not liked
                 await db.insert(schema.gameLikes).values({
-                    gameId: req.params.gameId,
+                    gameId: gameId,
                     userId: session.user.id,
                 });
 
@@ -771,10 +775,8 @@ export function setupApiRoutes(app: Express) {
      * @returns Success status
      */
     app.put("/api/switchPrivacy/:gameId", validateGameId, checkGameExists, async (req, res) => {
-        const {
-            params: { gameId },
-            headers,
-        } = req;
+        const headers = req.headers;
+        const gameId = Array.isArray(req.params.gameId) ? req.params.gameId[0] : req.params.gameId; //idk whats up with this check something happened and now TS thinks gameId could be string[] ? This is fine for now
 
         try {
             // Verify a user is logged in
@@ -839,10 +841,8 @@ export function setupApiRoutes(app: Express) {
      * @returns Success message
      */
     app.delete("/api/deleteGame/:gameId", validateGameId, checkGameExists, async (req, res) => {
-        const {
-            params: { gameId },
-            headers,
-        } = req;
+        const headers = req.headers;
+        const gameId = Array.isArray(req.params.gameId) ? req.params.gameId[0] : req.params.gameId; //idk whats up with this check something happened and now TS thinks gameId could be string[] ? It cant due to the validator if nothing else so this is fine for now
 
         try {
             // Verify a user is logged in
@@ -901,6 +901,61 @@ export function setupApiRoutes(app: Express) {
                 `api/deleteGame: Error while attempting to delete game: ${gameId} .`
             );
             return res.status(500).json({ message: "Internal Server Error" });
+        }
+    });
+
+    const feedbackLimiter = rateLimit({
+        windowMs: 15 * 60 * 1000, // 15 minutes
+        max: 2, // 2 requests per 15 minutes per user
+        keyGenerator: async (req) => {
+            // Rate limit by user ID
+            const session = await auth.api.getSession({
+                headers: fromNodeHeaders(req.headers),
+            });
+            return session?.user.id ?? ipKeyGenerator(req.ip ?? "unknown"); // Fallback to IP if no session
+        },
+        message: { message: "Too many feedback submissions. Please try again later." },
+        standardHeaders: true,
+        legacyHeaders: false,
+    });
+
+    app.post("/api/feedback", feedbackLimiter, async (req, res) => {
+        const validFeedback = feedbackSchema.safeParse(req.body);
+        if (!validFeedback.success) {
+            logger.error(
+                { error: validFeedback.error },
+                `api/feedback: Error while attempting to submit feedback.`
+            );
+            return res.status(422).json({
+                message: "Invalid feedback request.",
+            });
+        }
+
+        try {
+            const feedback = validFeedback.data;
+            const session = await auth.api.getSession({
+                headers: fromNodeHeaders(req.headers),
+            });
+            if (!session) {
+                logger.error(
+                    `api/feedback: Error, user without an account attempted to submit feedback.`
+                );
+                return res.status(401).json({ message: "Unauthorized." });
+            }
+
+            console.log({ ...feedback, userId: session.user.id });
+            const test = await db
+                .insert(schema.feedback)
+                .values({ ...feedback, userId: session.user.id });
+            console.log(test);
+            logger.info(
+                `api/feedback: Feedback recieved from ${session.user.displayUsername ?? ""}`
+            );
+            return res.status(200).json({
+                message: "Feedback submitted successfully!",
+            });
+        } catch (error) {
+            logger.error({ error }, `api/feedback: Error while attempting to submit feedback.`);
         }
     });
 }

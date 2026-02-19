@@ -133,3 +133,10 @@ export const SearchResponseSchema = z.object({
     games: UrlPresetInfoListSchema,
     pagination: PaginationInfoSchema,
 });
+
+export const feedbackSchema = z.object({
+    type: z.enum(["Bug", "FeatureReq", "Other"]),
+    message: z.string().min(1).max(2000),
+    url: z.url().optional(),
+    userAgent: z.string().max(500).optional(),
+});

@@ -15,6 +15,8 @@ import env from "../../lib/zodEnvSchema.ts";
 import type { ServerResponse } from "../../lib/types.ts";
 import LoadingSpinner from "../misc/LoadingSpinner.tsx";
 import LikeButton from "../misc/LikeButton.tsx";
+import FeedbackModal from "../misc/FeedbackModal.tsx";
+import { MdFeedback } from "react-icons/md";
 
 /**
  * Landing page with option to "create new game" or "join existing game" via room code
@@ -30,6 +32,8 @@ const HomePage = () => {
     const [inputQuery, setInputQuery] = useState("");
     const [gameIdToJoin, setGameIdToJoin] = useState("");
     const { session, isPending } = useBetterAuthSession();
+
+    const [openFeedbackModal, setOpenFeedbackModal] = useState(false);
 
     //Fetch featured games
     useEffect(() => {
@@ -67,14 +71,14 @@ const HomePage = () => {
         }
     }, [isPending]);
 
-    const handleSearch = (e?: React.FormEvent) => {
+    const handleSearch = (e?: React.SubmitEvent) => {
         if (e) {
             e.preventDefault();
             void nav(`/search/?q=${inputQuery}`);
         } else void nav(`/search/?q=`);
     };
 
-    const handleJoinExistingGame = (e: React.FormEvent<HTMLFormElement>) => {
+    const handleJoinExistingGame = (e: React.SubmitEvent<HTMLFormElement>) => {
         e.preventDefault();
         void nav(`/play-game/${gameIdToJoin}`);
     };
@@ -202,6 +206,7 @@ const HomePage = () => {
                         </Link>
                     </div>
                 </div>
+
                 {/* Vertical Space on XL Screens */}
                 <div className="flex flex-col gap-3 max-xl:justify-start xl:ml-4 xl:justify-center">
                     {/* Create New Preset */}
@@ -282,10 +287,30 @@ const HomePage = () => {
                 </div>
 
                 {/* Creator Signature */}
-                <div className="text-neutral-500 xl:absolute xl:bottom-3 xl:left-[62%]">
-                    <p className="text-sm"> By Petar Jovic</p>
+                <div className="mx-auto flex text-neutral-500 xl:absolute xl:bottom-3 xl:left-[62%]">
+                    <p className="mr-2 text-sm"> By Petar Jovic </p>
+                    {/* Feedback */}
+                    {session ? (
+                        <div className="text-neutral-500 hover:cursor-pointer hover:text-blue-400 hover:italic hover:underline">
+                            <div
+                                onClick={() => {
+                                    setOpenFeedbackModal(true);
+                                }}
+                                className="flex-center flex text-center text-sm xl:relative xl:left-28"
+                            >
+                                <MdFeedback className="relative top-px" size={"1.3em"} /> Have
+                                Feedback?
+                            </div>
+                        </div>
+                    ) : (
+                        <></>
+                    )}
                 </div>
 
+                <FeedbackModal
+                    isOpen={openFeedbackModal}
+                    onClose={() => setOpenFeedbackModal(false)}
+                />
                 <FirstVisitModal />
                 <UpdateModal />
             </div>

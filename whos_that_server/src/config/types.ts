@@ -36,3 +36,4 @@ export type IdPresetInfo = z.infer<typeof zod.IdPresetInfoSchema>;
 export type UrlPresetInfo = z.infer<typeof zod.UrlPresetInfoSchema>;
 export type PaginationInfo = z.infer<typeof zod.PaginationInfoSchema>;
 export type SearchQuery = z.infer<typeof zod.searchQuerySchema>;
+export type Feedback = z.infer<typeof zod.feedbackSchema>;
