@@ -1,6 +1,6 @@
 // Drizzle schema for non-auth related parts of database
 // Source of truth for database
-import { pgTable, text, timestamp, boolean, integer, unique } from "drizzle-orm/pg-core";
+import { pgTable, text, timestamp, boolean, integer, unique, date } from "drizzle-orm/pg-core";
 import { user } from "./auth-schema.ts";
 
 export const games = pgTable("games", {
@@ -51,4 +51,16 @@ export const feedback = pgTable("feedback", {
     url: text("url"),
     userAgent: text("user_agent"),
     createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
+export const dailies = pgTable("dailies", {
+    id: integer("id").primaryKey().generatedAlwaysAsIdentity(),
+    gameId: text("game_id")
+        .notNull()
+        .references(() => games.id, { onDelete: "restrict" }),
+    gameItemId: text("game_item_id")
+        .notNull()
+        .references(() => gameItems.id, { onDelete: "restrict" }),
+    characterContext: text("context").notNull(),
+    scheduledDate: date("scheduled_date").notNull().unique(),
 });

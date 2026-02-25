@@ -28,6 +28,7 @@ const envSchema = z.object({
     NODE_ENV: z.enum(["development", "production"]),
     DEV_CLIENT_URL: z.url(),
     PROD_CLIENT_URL: z.url(),
+    OPENROUTER_API_KEY: z.string(),
 });
 
 const env = envSchema.parse(process.env);

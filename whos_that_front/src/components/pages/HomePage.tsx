@@ -287,8 +287,15 @@ const HomePage = () => {
                 </div>
 
                 {/* Creator Signature */}
-                <div className="mx-auto flex text-neutral-500 xl:absolute xl:bottom-3 xl:left-[62%]">
-                    <p className="mr-2 text-sm"> By Petar Jovic </p>
+                <div className="mx-auto flex items-center gap-3 text-neutral-500 xl:absolute xl:bottom-3 xl:left-[62%]">
+                    <p className="text-sm"> By Petar Jovic </p>
+                    {/* AI Mode */}
+                    <Link
+                        to={"/daily"}
+                        className="flex items-center text-center text-sm hover:cursor-pointer hover:text-blue-400 hover:italic hover:underline xl:relative xl:left-20"
+                    >
+                        AI Mode
+                    </Link>
                     {/* Feedback */}
                     {session ? (
                         <div className="text-neutral-500 hover:cursor-pointer hover:text-blue-400 hover:italic hover:underline">

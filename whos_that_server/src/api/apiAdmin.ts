@@ -27,7 +27,9 @@ export function setupAdminRoutes(app: Express) {
         validateGameId,
         checkGameExists,
         async (req, res) => {
-            const gameId = req.params.gameId;
+            const gameId = Array.isArray(req.params.gameId)
+                ? req.params.gameId[0]
+                : req.params.gameId; //idk whats up with this check something happened and now TS thinks gameId could be string[] ? This is fine for now
 
             try {
                 const gameWithItems = await getPrivacySettingAndImageIds(gameId);
@@ -44,7 +46,7 @@ export function setupAdminRoutes(app: Express) {
                 const [{ isPublic, imageIds }] = gameWithItems;
                 const newIsPublic = !isPublic;
 
-                void switchPrivacySettings(gameId, isPublic, newIsPublic, imageIds);
+                await switchPrivacySettings(gameId, isPublic, newIsPublic, imageIds);
 
                 //del cache
                 invalidateInAllCaches(gameId);
@@ -74,7 +76,9 @@ export function setupAdminRoutes(app: Express) {
         validateGameId,
         checkGameExists,
         async (req, res) => {
-            const gameId = req.params.gameId;
+            const gameId = Array.isArray(req.params.gameId)
+                ? req.params.gameId[0]
+                : req.params.gameId; //idk whats up with this check something happened and now TS thinks gameId could be string[] ? This is fine for now
             try {
                 const gameWithItems = await getPrivacySettingAndImageIds(gameId);
 

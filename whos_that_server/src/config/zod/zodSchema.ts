@@ -2,7 +2,7 @@
 //Types are determined by inferring from this schema (except for Socket.IO event types)
 import { z } from "zod/v4";
 
-export const nanoId21Schema = z.string().regex(/^[\w-]{21}$/i);
+export const nanoId21Schema = z.nanoid();
 export const roomIdSchema = z.string().regex(/^[\w-]{6}$/i);
 export const socketIdSchema = z.string().regex(/^[\w-]{20}$/);
 
@@ -24,7 +24,7 @@ export const EndStateSchema = z.record(socketIdSchema, z.boolean().nullable());
 
 export const roomStateSchema = z
     .object({
-        id: z.union([socketIdSchema, z.literal("")]),
+        id: z.union([roomIdSchema, z.literal("")]),
         gameId: z.union([socketIdSchema, z.literal("")]),
         numOfChars: z.number(),
         players: z.array(socketIdSchema).max(2),
@@ -52,7 +52,7 @@ const cardDataTypeSchema = z.object({
 });
 
 export const cardDataIdSchema = cardDataTypeSchema.extend({
-    gameItemId: nanoId21Schema,
+    gameItemId: z.nanoid(),
 });
 
 export const cardDataUrlSchema = cardDataTypeSchema.extend({
@@ -86,18 +86,18 @@ export const createGameRequestSchema = z.object({
 });
 
 export const createGameResponseSchema = z.object({
-    gameId: nanoId21Schema,
+    gameId: z.nanoid(),
     gameItems: z.record(
         z.string(),
         z.object({
             signedUrl: z.string(),
-            itemId: nanoId21Schema,
+            itemId: z.nanoid(),
         })
     ),
 });
 
 export const createRoomParamsSchema = z.object({
-    gameId: nanoId21Schema,
+    gameId: z.nanoid(),
     numOfChars: z.number().int().min(6).max(50),
 });
 
@@ -113,7 +113,7 @@ const PresetInfoSchema = z.object({
 });
 
 export const IdPresetInfoSchema = PresetInfoSchema.extend({
-    imageId: nanoId21Schema,
+    imageId: z.nanoid(),
 });
 
 export const UrlPresetInfoSchema = PresetInfoSchema.extend({
@@ -139,4 +139,43 @@ export const feedbackSchema = z.object({
     message: z.string().min(1).max(2000),
     url: z.url().optional(),
     userAgent: z.string().max(500).optional(),
+});
+
+// ── Daily-related schemas ────────────────────────────────────────────────────────────
+export const dailyGameInfoSchema = z.object({
+    gameId: z.nanoid(),
+    orderIndex: z.number().int(),
+});
+
+export const dailyQuestionSchema = z.object({
+    question: z.string().min(5).max(200),
+});
+
+export const aiGuessRequestSchema = z.object({
+    sessionId: z.nanoid(),
+    guess: z.string().min(1).max(100),
+});
+
+export const aiScheduleDailyRequestSchema = z.object({
+    name: z.string().min(1).max(100),
+    wikiText: z.string().min(1).max(100000),
+    gameId: z.nanoid(),
+    scheduledDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, "Must be YYYY-MM-DD"),
+});
+
+export const aiDailyResponseSchema = z.object({
+    sessionId: z.nanoid(),
+    gameId: z.nanoid(),
+    date: z.string(),
+});
+
+export const aiAskResponseSchema = z.object({
+    answer: z.string(),
+    questionsRemaining: z.number().int(),
+});
+
+export const aiGuessResponseSchema = z.object({
+    correct: z.boolean(),
+    characterName: z.string(),
+    questionsUsed: z.number().int(),
 });

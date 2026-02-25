@@ -1,11 +1,13 @@
 import { logger } from "../config/logger.ts";
-import type { GameData, IdPresetInfo } from "../config/types.ts";
+import type { GameData, IdPresetInfo, DailyGame } from "../config/types.ts";
 
 const GAMEDATA_CACHE = new Map<string, { data: GameData; timestamp: number }>();
 let TOP3TRENDING_CACHE: { data: IdPresetInfo[]; timestamp: number } | null = null;
 let TOP3NEWEST_CACHE: { data: IdPresetInfo[]; timestamp: number } | null = null;
 let SEARCH_TRENDING_CACHE: { data: IdPresetInfo[]; timestamp: number } | null = null;
 let SEARCH_MOST_LIKED_CACHE: { data: IdPresetInfo[]; timestamp: number } | null = null;
+let DAILY_GAME_CACHE: { data: DailyGame; timestamp: number } | null = null;
+let DAILY_CHARACTER_CONTEXT_CACHE: { data: string; timestamp: number } | null = null;
 
 const GAMEDATA_CACHE_DUR = 86400 * 1000 * 5; // 5 Days
 const MAX_GAMEDATA_CACHE_SIZE = 500;
@@ -13,6 +15,8 @@ const TOP3TRENDING_CACHE_DUR = 64800 * 1000; // 18 hours
 const TOP3NEWEST_CACHE_DUR = 43200 * 1000; // 12 hours
 const SEARCH_TRENDING_CACHE_DUR = 900 * 1000; // 15 mins
 const SEARCH_MOST_LIKED_CACHE_DUR = 1800 * 1000; // 30 mins
+const DAILY_GAME_CACHE_DUR = 86340 * 1000; // 23 hours 55 mins
+const DAILY_CHARACTER_CONTEXT_CACHE_DUR = 86340 * 1000; // 23 hours 55 mins
 
 // clean up caches every twelve-ish hours
 setInterval(() => {
@@ -49,6 +53,11 @@ setInterval(() => {
         now - SEARCH_MOST_LIKED_CACHE.timestamp > SEARCH_MOST_LIKED_CACHE_DUR
     ) {
         SEARCH_MOST_LIKED_CACHE = null;
+    }
+
+    // DAILY_GAME cleaning
+    if (DAILY_GAME_CACHE && now - DAILY_GAME_CACHE.timestamp > DAILY_GAME_CACHE_DUR) {
+        DAILY_GAME_CACHE = null;
     }
 }, 43200 * 1001);
 
@@ -273,4 +282,33 @@ export function updateLikeCountInCaches(gameId: string, increment: boolean): voi
         );
         setSearchMostLikedCache(updated);
     }
+}
+
+export function getCachedDailyGame(): DailyGame | null {
+    if (DAILY_GAME_CACHE && Date.now() - DAILY_GAME_CACHE.timestamp < DAILY_GAME_CACHE_DUR) {
+        logger.debug("Got: daily-game cache");
+        return DAILY_GAME_CACHE.data;
+    }
+    return null;
+}
+
+export function setDailyGameCache(data: DailyGame): void {
+    DAILY_GAME_CACHE = { data, timestamp: Date.now() };
+    logger.debug("Set: daily-game cache");
+}
+
+export function getCachedDailyCharacterContext(): string | null {
+    if (
+        DAILY_CHARACTER_CONTEXT_CACHE &&
+        Date.now() - DAILY_CHARACTER_CONTEXT_CACHE.timestamp < DAILY_CHARACTER_CONTEXT_CACHE_DUR
+    ) {
+        logger.debug("Got: daily-character-context cache");
+        return DAILY_CHARACTER_CONTEXT_CACHE.data;
+    }
+    return null;
+}
+
+export function setDailyCharacterContextCache(data: string): void {
+    DAILY_CHARACTER_CONTEXT_CACHE = { data, timestamp: Date.now() };
+    logger.debug("Set: daily-character-context cache");
 }

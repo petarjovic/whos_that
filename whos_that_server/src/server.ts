@@ -10,6 +10,7 @@ import { setupApiRoutes } from "./api/api.ts";
 import env from "./config/zod/zodEnvSchema.ts";
 import { setupAdminRoutes } from "./api/apiAdmin.ts";
 import { logger } from "./config/logger.ts";
+import { setupAiRoutes } from "./api/apiAI.ts";
 
 //Set up express app + CORs
 const app = express();
@@ -39,6 +40,7 @@ const io = new Server<ClientToServerEvents, ServerToClientEvents>(server, {
 //Set up all api routes and event handlers
 setupApiRoutes(app);
 setupSocketEventHandlers(io);
+setupAiRoutes(app);
 setupAdminRoutes(app);
 
 //Start server

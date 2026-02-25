@@ -7,7 +7,7 @@ const GameBoard = ({
 }: {
     title: string;
     cardList: JSX.Element[];
-    targetCard: JSX.Element;
+    targetCard?: JSX.Element;
 }) => {
     return (
         <>

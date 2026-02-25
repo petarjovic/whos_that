@@ -9,7 +9,9 @@ import { emitPlayAgain, emitGuess, getSocketId, emitPassTurn } from "../../lib/s
 import GameBoard from "./GameBoard.tsx";
 import { fetchLikeInfo, useBetterAuthSession } from "../../lib/hooks.ts";
 
-type ConfirmGuessModal = { isOpen: false } | { isOpen: true; isWinner: boolean; name: string };
+export type ConfirmGuessModalState =
+    | { isOpen: false }
+    | { isOpen: true; isWinner: boolean; name: string };
 
 interface GameProps {
     roomState: RoomState;
@@ -22,7 +24,7 @@ interface GameProps {
  * Handles guess confirmation and play again requests
  */
 const Game = ({ roomState, cardData, title }: GameProps) => {
-    const [confirmGuessModal, setConfirmGuessModal] = useState<ConfirmGuessModal>({
+    const [confirmGuessModal, setConfirmGuessModal] = useState<ConfirmGuessModalState>({
         isOpen: false,
     });
 
@@ -39,16 +41,6 @@ const Game = ({ roomState, cardData, title }: GameProps) => {
         throw new Error("This client has no socket id... panic!");
     }
 
-    const handleConfirmGuessModalResult = (cofirmGuess: boolean) => {
-        if (cofirmGuess && confirmGuessModal.isOpen)
-            emitGuess(roomState.id, confirmGuessModal.isWinner);
-        setConfirmGuessModal({ isOpen: false });
-    };
-
-    const handleOpenConfirmModal = (winner: boolean, name: string) => {
-        setConfirmGuessModal({ isOpen: true, isWinner: winner, name: name });
-    };
-
     // Extract winning keys from room state
     const opponentSocketId = roomState.players.find((id) => id !== socketId) ?? ""; //should never actually be ""
     const oppWinningKey = roomState.cardIdsToGuess[socketId];
@@ -61,7 +53,10 @@ const Game = ({ roomState, cardData, title }: GameProps) => {
             imgSrc={imageUrl}
             winner={winningKey === orderIndex}
             key={orderIndex}
-            openConfirmModal={handleOpenConfirmModal}
+            //handleOpenConfirmGuessModal
+            openConfirmModal={(winner: boolean, name: string) => {
+                setConfirmGuessModal({ isOpen: true, isWinner: winner, name: name });
+            }}
             resetOnNewGame={roomState.endState}
             guessingDisabled={socketId !== roomState.curTurn}
         />
@@ -119,7 +114,12 @@ const Game = ({ roomState, cardData, title }: GameProps) => {
                         confirmGuessModal.isOpen &&
                         !Object.values(roomState.endState).some((e) => e !== null)
                     }
-                    confirmGuess={handleConfirmGuessModalResult}
+                    //handleConfirmGuessModalResult
+                    confirmGuess={(cofirmGuess: boolean) => {
+                        if (cofirmGuess && confirmGuessModal.isOpen)
+                            emitGuess(roomState.id, confirmGuessModal.isWinner);
+                        setConfirmGuessModal({ isOpen: false });
+                    }}
                     name={confirmGuessModal.isOpen ? confirmGuessModal.name : ""}
                 />
                 <FirstTurnModal
@@ -161,7 +161,7 @@ interface ConfirmGuessModalProps {
  * Confirmation modal before submitting a guess
  * Prevents accidental wrong guesses that end the game
  */
-const ConfirmGuessModal = ({ isOpen, confirmGuess, name }: ConfirmGuessModalProps) => {
+export const ConfirmGuessModal = ({ isOpen, confirmGuess, name }: ConfirmGuessModalProps) => {
     return (
         <ReactModal
             isOpen={isOpen}
@@ -288,7 +288,7 @@ const GameEndModal = ({ roomState }: GameEndModalProps) => {
                     playerHasLiked ? (
                         <div className="flex items-center justify-center">
                             <span className="mr-2 text-xl font-medium italic">
-                                Thank you for your support!
+                                Thanks for playing!
                             </span>
                             <FaHeart
                                 size={"1.75em"}

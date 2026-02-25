@@ -15,6 +15,7 @@ import AccountPage from "./components/pages/AccountPage.tsx";
 import SetUsernamePage from "./components/pages/SetUsernamePage.tsx";
 import LogInPage from "./components/auth/LogInPage.tsx";
 import AdminPage from "./components/pages/AdminPage.tsx";
+import DailyGamePage from "./components/game/DailyGamePage.tsx";
 
 ReactModal.setAppElement("#root");
 
@@ -44,6 +45,8 @@ const router = createBrowserRouter([
                 path: "/play-game/:joinRoomId",
                 element: <GameStateManager isNewGame={false} />,
             },
+            { path: "/daily", element: <DailyGamePage /> },
+
             {
                 path: "/search",
                 element: <SearchPage />,
