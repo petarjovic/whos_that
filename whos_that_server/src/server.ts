@@ -10,7 +10,7 @@ import { setupApiRoutes } from "./api/api.ts";
 import env from "./config/zod/zodEnvSchema.ts";
 import { setupAdminRoutes } from "./api/apiAdmin.ts";
 import { logger } from "./config/logger.ts";
-import { setupAiRoutes } from "./api/apiAI.ts";
+import { setupAiRoutes } from "./api/apiDaily.ts";
 
 //Set up express app + CORs
 const app = express();

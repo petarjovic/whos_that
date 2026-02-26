@@ -2,8 +2,8 @@ import ReactModal from "react-modal";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router";
 import { Card } from "../misc/Cards.tsx";
-import type { CardDataUrl, UserHasLiked } from "@server/types";
-import { gameDataSchema } from "@server/zodSchema";
+import type { DailyGame, UserHasLiked } from "@server/types";
+import { dailyGameInfoSchema } from "@server/zodSchema";
 import { serverResponseSchema } from "../../lib/zodSchema.ts";
 import env from "../../lib/zodEnvSchema.ts";
 import { logError } from "../../lib/logger.ts";
@@ -27,20 +27,19 @@ const MAX_NUM_OF_QUESTIONS = 6;
  * renders the board with the AI chat panel for asking yes/no questions.
  */
 const DailyGamePage = () => {
-    const [cardData, setCardData] = useState<CardDataUrl[]>([]);
-    const [title, setTitle] = useState("");
-    const [targetOrderIndex, setTargetOrderIndex] = useState<number | null>(null);
+    const [dailyGameInfo, setDailyGameInfo] = useState<DailyGame>();
+    const [numQuestionsLeft, setNumQuestionsLeft] = useState(MAX_NUM_OF_QUESTIONS);
+    const [isAsking, setIsAsking] = useState(false);
+    const [guessState, setGuessState] = useState<ConfirmGuessModalState>({ isOpen: false });
+    const [errorMsg, setErrorMsg] = useState("");
+
+    //initialize chatbox with first message
     const [messages, setMessages] = useState<ChatMessage[]>([
         {
             isUser: false,
             msg: "Hello, I'm Whos-That-Bot-300! I'm here to help you guess todays mystery character, I can answer any yes/no question about them, at the cost of 1 question token. Make sure you have enough information about the character to make a guess by the time you run out! ",
         },
     ]);
-    const [numQuestionsLeft, setNumQuestionsLeft] = useState(MAX_NUM_OF_QUESTIONS);
-    const [gameId, setGameId] = useState("");
-    const [isAsking, setIsAsking] = useState(false);
-    const [guessState, setGuessState] = useState<ConfirmGuessModalState>({ isOpen: false });
-    const [errorMsg, setErrorMsg] = useState("");
 
     const { session, isPending } = useBetterAuthSession();
 
@@ -48,12 +47,12 @@ const DailyGamePage = () => {
     const [playerHasLiked, setPlayerHasLiked] = useState<UserHasLiked>(null);
     useEffect(() => {
         const getPlayerLikeInfo = async () => {
-            if (session && !isPending && gameId) {
-                setPlayerHasLiked(await fetchLikeInfo(gameId));
+            if (session && !isPending && dailyGameInfo?.ogGameId) {
+                setPlayerHasLiked(Boolean(await fetchLikeInfo(dailyGameInfo.ogGameId))); //wrap in bool to elegantly handle case where ogGameId has been deleted
             }
         };
         void getPlayerLikeInfo();
-    }, [session, isPending, gameId]);
+    }, [session, isPending, dailyGameInfo?.ogGameId]);
 
     useEffect(() => {
         const fetchDaily = async () => {
@@ -62,22 +61,9 @@ const DailyGamePage = () => {
                 const errorData = serverResponseSchema.parse(await dailyRes.json());
                 throw new Error(errorData.message || "No daily game scheduled.");
             }
-            const { gameId, orderIndex } = (await dailyRes.json()) as {
-                gameId: string;
-                orderIndex: number;
-            };
 
-            const gameRes = await fetch(`${env.VITE_SERVER_URL}/api/gameData/${gameId}`);
-            if (!gameRes.ok) {
-                const errorData = serverResponseSchema.parse(await gameRes.json());
-                throw new Error(errorData.message || "Failed to load game data.");
-            }
-            const { title, cardData } = gameDataSchema.parse(await gameRes.json());
-
-            setGameId(gameId);
-            setTargetOrderIndex(orderIndex);
-            setTitle(title);
-            setCardData(cardData);
+            const dailyGameInfoDb = dailyGameInfoSchema.parse(await dailyRes.json());
+            setDailyGameInfo(dailyGameInfoDb);
         };
 
         fetchDaily().catch((error: unknown) => {
@@ -124,16 +110,18 @@ const DailyGamePage = () => {
     const gameOver = !guessState.isOpen && "isWinner" in guessState;
 
     if (errorMsg) throw new Error(errorMsg);
-    if (!cardData.length || targetOrderIndex === null) return <LoadingSpinner />;
-    const targetCharacterName =
-        cardData.find((card) => card.orderIndex === targetOrderIndex)?.name ?? "";
+    if (!dailyGameInfo?.cardData.length || dailyGameInfo.winningIndex) return <LoadingSpinner />;
+    const cardData = dailyGameInfo.cardData;
+    const wIndex = dailyGameInfo.winningIndex;
+
+    const targetCharacterName = cardData.find((card) => card.orderIndex === wIndex)?.name ?? "";
 
     const cardList = cardData.map(({ imageUrl, name, orderIndex }) => (
         <Card
             key={orderIndex}
             name={name}
             imgSrc={imageUrl}
-            winner={orderIndex === targetOrderIndex}
+            winner={orderIndex === wIndex}
             openConfirmModal={(isWinner, name) => setGuessState({ isOpen: true, isWinner, name })}
             resetOnNewGame={DAILY_END_STATE}
             guessingDisabled={gameOver}
@@ -164,7 +152,7 @@ const DailyGamePage = () => {
                     />
                 </div>
                 <div className="h-full min-w-0 flex-1">
-                    <GameBoard title={title} cardList={cardList} />
+                    <GameBoard title={dailyGameInfo.title} cardList={cardList} />
                 </div>
             </div>
 
@@ -181,7 +169,7 @@ const DailyGamePage = () => {
                 target={targetCharacterName}
                 win={"isWinner" in guessState ? guessState.isWinner : false}
                 numQuestionsLeft={numQuestionsLeft}
-                gameId={gameId}
+                gameId={dailyGameInfo.ogGameId}
             />
         </>
     );

@@ -132,8 +132,7 @@ const CreateCustomGamePage = () => {
                     logError(error);
                     if (error instanceof Error) {
                         throw error;
-                    }
-                    throw new Error(`${file.name} had validation error.`);
+                    } else throw new Error(`${file.name} had validation error.`);
                 }
             })
         );
@@ -205,7 +204,7 @@ const CreateCustomGamePage = () => {
      * 3. Upload images directly to S3
      * 4. Rollback on failure
      */
-    const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    const handleSubmit = async (e: React.SubmitEvent<HTMLFormElement>) => {
         e.preventDefault();
         e.stopPropagation();
         setIsLoading(true);
@@ -248,21 +247,22 @@ const CreateCustomGamePage = () => {
             return;
         }
 
-        const requestBody = {
-            title: formData.get("title") as string,
-            privacy: formData.get("privacy") as string,
+        const title = formData.get("title") as string;
+        const privacyStr = formData.get("privacy") as string;
+        const S3PresignedUrlReqBody = {
+            privacy: privacyStr,
             namesAndFileTypes: compressedFiles.map((f, i) => ({
                 type: f.type,
                 name: charNames[i],
             })),
         };
 
-        let response;
+        let response: Response;
         try {
             // Request presigned S3 URLs + game metadata
-            response = await fetch(`${env.VITE_SERVER_URL}/api/createNewGame`, {
+            response = await fetch(`${env.VITE_SERVER_URL}/api/createGameS3Upload`, {
                 method: "POST",
-                body: JSON.stringify(requestBody),
+                body: JSON.stringify(S3PresignedUrlReqBody),
                 credentials: "include",
                 headers: {
                     "Content-Type": "application/json",
@@ -272,6 +272,7 @@ const CreateCustomGamePage = () => {
             logError(error);
             if (error instanceof Error) setErrorMsg(error.message);
             else setErrorMsg("Fetch request to server failed.");
+            setIsLoading(false);
             return;
         }
 
@@ -288,12 +289,14 @@ const CreateCustomGamePage = () => {
         // Response contains the generated gameId and "gameItems": a list of objects with
         // character names as key + obj containing upload url & generated imageIds (used in S3 key) as values
         if (validateCreateGameRes.success) {
-            const createGameResData = validateCreateGameRes.data;
+            const S3PresignedUrlResData = validateCreateGameRes.data;
+            log(S3PresignedUrlResData);
+            const gameItems = S3PresignedUrlResData.gameItems;
 
             //Upload to S3
             const uploadPromises = compressedFiles.map((file, i) =>
-                charNames[i] in createGameResData.gameItems
-                    ? fetch(createGameResData.gameItems[charNames[i]].signedUrl, {
+                charNames[i] in gameItems
+                    ? fetch(gameItems[charNames[i]].signedUrl, {
                           method: "PUT",
                           body: file,
                           headers: {
@@ -313,18 +316,36 @@ const CreateCustomGamePage = () => {
             log(uploadResponses);
 
             // Verify upload responses, attempt rollback if any uplaods failed
-            for (const response of uploadResponses) {
-                if (response.status !== "fulfilled" || !response.value.ok) {
-                    await fetch(
-                        `${env.VITE_SERVER_URL}/api/deleteGame/${createGameResData.gameId}`,
-                        {
-                            credentials: "include",
-                            method: "DELETE",
-                        }
-                    );
+            for (const r of uploadResponses) {
+                if (r.status !== "fulfilled" || !r.value.ok) {
                     setErrorMsg("Image uploads failed, please try again later.");
+                    setIsLoading(false);
                     return;
                 }
+            }
+
+            const DbUpdateReqBody = {
+                gameId: S3PresignedUrlResData.gameId,
+                title: title,
+                privacy: privacyStr,
+                gameItems: compressedFiles.map((_file, i) => ({
+                    name: charNames[i],
+                    itemId: gameItems[charNames[i]].itemId,
+                })),
+            };
+            log(DbUpdateReqBody);
+
+            const DbUpdateRes = await fetch(`${env.VITE_SERVER_URL}/api/createGameDbUpload`, {
+                method: "POST",
+                body: JSON.stringify(DbUpdateReqBody),
+                credentials: "include",
+                headers: { "Content-Type": "application/json" },
+            });
+
+            if (!DbUpdateRes.ok) {
+                setErrorMsg("Failed to save game, please try again.");
+                setIsLoading(false);
+                return;
             }
 
             setIsLoading(false);

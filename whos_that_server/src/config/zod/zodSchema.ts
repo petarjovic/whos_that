@@ -64,8 +64,7 @@ export const gameDataSchema = z.object({
     cardData: z.array(cardDataUrlSchema),
 });
 
-export const createGameRequestSchema = z.object({
-    title: z.string().max(50),
+export const createGameS3UploadReqSchema = z.object({
     privacy: z.union([z.literal("public"), z.literal("private")]),
     namesAndFileTypes: z
         .array(
@@ -83,6 +82,21 @@ export const createGameRequestSchema = z.object({
                 message: "All character names must be unique.",
             }
         ),
+});
+
+export const createGameDbUploadReqSchema = z.object({
+    privacy: z.union([z.literal("public"), z.literal("private")]),
+    title: z.string().max(50),
+    gameId: z.nanoid(),
+    gameItems: z
+        .array(
+            z.object({
+                name: z.string().trim().min(1).max(25),
+                itemId: z.nanoid(),
+            })
+        )
+        .min(6)
+        .max(36),
 });
 
 export const createGameResponseSchema = z.object({
@@ -143,39 +157,21 @@ export const feedbackSchema = z.object({
 
 // ── Daily-related schemas ────────────────────────────────────────────────────────────
 export const dailyGameInfoSchema = z.object({
-    gameId: z.nanoid(),
-    orderIndex: z.number().int(),
+    ogGameId: z.nanoid(),
+    authorUsername: z.string(),
+    title: z.string(),
+    winningIndex: z.int(),
+    characterContext: z.string(),
+    cardData: z.array(cardDataUrlSchema),
 });
 
 export const dailyQuestionSchema = z.object({
     question: z.string().min(5).max(200),
 });
 
-export const aiGuessRequestSchema = z.object({
-    sessionId: z.nanoid(),
-    guess: z.string().min(1).max(100),
-});
-
-export const aiScheduleDailyRequestSchema = z.object({
-    name: z.string().min(1).max(100),
-    wikiText: z.string().min(1).max(100000),
+export const scheduleDailySchema = z.object({
     gameId: z.nanoid(),
-    scheduledDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, "Must be YYYY-MM-DD"),
-});
-
-export const aiDailyResponseSchema = z.object({
-    sessionId: z.nanoid(),
-    gameId: z.nanoid(),
-    date: z.string(),
-});
-
-export const aiAskResponseSchema = z.object({
-    answer: z.string(),
-    questionsRemaining: z.number().int(),
-});
-
-export const aiGuessResponseSchema = z.object({
-    correct: z.boolean(),
-    characterName: z.string(),
-    questionsUsed: z.number().int(),
+    scheduledDate: z.iso.date(),
+    winningIndex: z.number().int().min(0),
+    characterContext: z.string().min(1).max(150000),
 });

@@ -7,7 +7,7 @@ import { eq, and, not, count, desc, ilike, sql } from "drizzle-orm";
 import type {
     CardDataId,
     CardDataUrl,
-    CreateGameRequest,
+    CreateS3UploadReq,
     CreateGameResponse,
     IdPresetInfo,
     UrlPresetInfo,
@@ -17,7 +17,8 @@ import { getSignedUrl as getSignedS3Url } from "@aws-sdk/s3-request-presigner";
 import { getSignedUrl as getSignedCFUrl } from "@aws-sdk/cloudfront-signer";
 import env from "../config/zod/zodEnvSchema.ts";
 import {
-    createGameRequestSchema,
+    createGameS3UploadReqSchema,
+    createGameDbUploadReqSchema,
     searchQuerySchema,
     feedbackSchema,
 } from "../config/zod/zodSchema.ts";
@@ -60,16 +61,16 @@ const PRESIGNED_IMAGE_URL_DUR = 86400 * 1000 * 5.1;
  */
 export function setupApiRoutes(app: Express) {
     /**
-     * Generates game in database and sends clients presigned URLS for uploading images
-     * @returns Game ID and presigned URLs for each image upload
+     * Sends clients presigned URLS for uploading images
+     *
      */
-    app.post("/api/createNewGame", async (req: Request, res: Response) => {
-        const validRequest = createGameRequestSchema.safeParse(req.body);
-
+    app.post("/api/createGameS3Upload", async (req: Request, res: Response) => {
+        const validRequest = createGameS3UploadReqSchema.safeParse(req.body);
+        //validate request
         if (!validRequest.success) {
             logger.error(
                 { error: validRequest.error },
-                "api/createNewGame: Invalid request paramters."
+                "api/createGameS3Upload: Invalid request paramters."
             );
             return res.status(422).json({
                 message: "Invalid create game request.",
@@ -77,10 +78,22 @@ export function setupApiRoutes(app: Express) {
         }
 
         const gameId = nanoid();
-        const body: CreateGameRequest = validRequest.data;
+        const body: CreateS3UploadReq = validRequest.data;
         const response: CreateGameResponse = { gameId: gameId, gameItems: {} };
 
         try {
+            // Verify user is authenticated
+            const session = await auth.api.getSession({
+                headers: fromNodeHeaders(req.headers),
+            });
+
+            if (!session) {
+                logger.error(
+                    "api/createGameS3Upload: Error, unauthenticated user attempted to create a game."
+                );
+                return res.status(401).json({ message: "Unauthorized." });
+            }
+
             // Generate short-lived presigned upload URLS
             const S3PresignedUrlPromises = body.namesAndFileTypes.map(async ({ type, name }) => {
                 const itemId = nanoid();
@@ -90,7 +103,7 @@ export function setupApiRoutes(app: Express) {
                     ContentType: type,
                 });
 
-                const signedUrl = await getSignedS3Url(s3, command, { expiresIn: 120 });
+                const signedUrl = await getSignedS3Url(s3, command, { expiresIn: 240 });
                 return { name, itemId, signedUrl };
             });
 
@@ -100,13 +113,33 @@ export function setupApiRoutes(app: Express) {
             for (const { name, itemId, signedUrl } of S3PresignedUrls) {
                 response.gameItems[name] = { signedUrl, itemId };
             }
+
+            return res.status(200).json(response);
         } catch (error) {
             logger.error(
                 { error },
-                "api/createNewGame: Error attempting to generate S3 upload urls."
+                "api/createGameS3Upload: Error while attempting to generate S3 upload urls."
             );
             return res.status(500).json({
                 message: "Internal Server Error while creating new game, please try again later.",
+            });
+        }
+    });
+
+    /**
+     * Generates game in database
+     * @returns http status code
+     */
+    app.post("/api/createGameDbUpload", async (req: Request, res: Response) => {
+        const validRequest = createGameDbUploadReqSchema.safeParse(req.body);
+
+        if (!validRequest.success) {
+            logger.error(
+                { error: validRequest.error },
+                "api/createGameDbUpload: Invalid request paramters."
+            );
+            return res.status(422).json({
+                message: "Invalid create game request.",
             });
         }
 
@@ -118,23 +151,25 @@ export function setupApiRoutes(app: Express) {
 
             if (!session) {
                 logger.error(
-                    "api/createNewGame: Error, unauthenticated user attempted to create a game."
+                    "api/createGameDbUpload: Error, unauthenticated user attempted to create a game."
                 );
                 return res.status(401).json({ message: "Unauthorized." });
             }
+
+            const { gameId, title, privacy, gameItems } = validRequest.data;
 
             // Insert game data in database then send response
             await db.batch([
                 db.insert(schema.games).values({
                     id: gameId,
-                    title: body.title,
+                    title: title,
                     description: "",
-                    isPublic: body.privacy === "public",
+                    isPublic: privacy === "public",
                     userId: session.user.id,
                 }),
 
                 db.insert(schema.gameItems).values(
-                    Object.entries(response.gameItems).map(([name, { itemId }], i) => ({
+                    gameItems.map(({ name, itemId }, i) => ({
                         id: itemId,
                         gameId: gameId,
                         name: name,
@@ -144,13 +179,13 @@ export function setupApiRoutes(app: Express) {
             ]);
 
             //if the new game is public, add it to the recent games cache
-            if (body.privacy === "public") {
+            if (privacy === "public") {
                 const newGameInfo: IdPresetInfo = {
                     id: gameId,
-                    title: body.title,
+                    title: title,
                     author: session.user.displayUsername ?? "",
                     isPublic: true,
-                    imageId: Object.values(response.gameItems)[0].itemId,
+                    imageId: gameItems[0].itemId,
                     numLikes: 0,
                     userHasLiked: null,
                 };
@@ -159,21 +194,21 @@ export function setupApiRoutes(app: Express) {
 
             logger.info(
                 {
-                    title: body.title,
+                    title: title,
                     author: session.user.displayUsername,
                     gameId,
                     authorId: session.user.id,
-                    isPublic: body.privacy,
-                    numChars: response.gameItems.length,
+                    isPublic: privacy,
+                    numChars: gameItems.length,
                 },
                 "Created new game."
             );
-            return res.status(200).json(response);
+            return res.status(200).send();
             //Error handling ↓
         } catch (error) {
             logger.error(
                 { error },
-                "api/createNewGame: Error with session verificiation, database, or recent games cache."
+                "api/createGameDbUpload: Error with session verificiation, database, or recent games cache."
             );
             return res.status(500).json({
                 message: "Internal Server Error while creating new game, please try again later.",

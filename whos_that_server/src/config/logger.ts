@@ -24,7 +24,6 @@ if (process.env.NODE_ENV === "production") {
 } else {
     streams.push({
         level: "debug",
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
         stream: pino.transport({
             target: "pino-pretty",
             options: { colorize: true },

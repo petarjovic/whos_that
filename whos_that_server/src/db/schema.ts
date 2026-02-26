@@ -1,7 +1,17 @@
 // Drizzle schema for non-auth related parts of database
 // Source of truth for database
-import { pgTable, text, timestamp, boolean, integer, unique, date } from "drizzle-orm/pg-core";
+import {
+    pgTable,
+    text,
+    timestamp,
+    boolean,
+    integer,
+    unique,
+    date,
+    uniqueIndex,
+} from "drizzle-orm/pg-core";
 import { user } from "./auth-schema.ts";
+import { sql } from "drizzle-orm";
 
 export const games = pgTable("games", {
     id: text("id").primaryKey(),
@@ -18,15 +28,19 @@ export const games = pgTable("games", {
         .notNull(),
 });
 
-export const gameItems = pgTable("game_items", {
-    id: text("id").primaryKey(),
-    gameId: text("game_id")
-        .notNull()
-        .references(() => games.id, { onDelete: "cascade" }),
-    name: text("name").notNull(),
-    orderIndex: integer("order_index").notNull(),
-    createdAt: timestamp("created_at").defaultNow().notNull(),
-});
+export const gameItems = pgTable(
+    "game_items",
+    {
+        id: text("id").primaryKey(),
+        gameId: text("game_id")
+            .notNull()
+            .references(() => games.id, { onDelete: "cascade" }),
+        name: text("name").notNull(),
+        orderIndex: integer("order_index").notNull(),
+        createdAt: timestamp("created_at").defaultNow().notNull(),
+    },
+    (table) => [unique().on(table.gameId, table.orderIndex)]
+);
 
 export const gameLikes = pgTable(
     "game_likes",
@@ -40,7 +54,7 @@ export const gameLikes = pgTable(
             .references(() => user.id, { onDelete: "cascade" }),
         createdAt: timestamp("created_at").defaultNow().notNull(),
     },
-    (table) => [unique("uniqueGameUser").on(table.gameId, table.userId)]
+    (table) => [unique().on(table.gameId, table.userId)]
 );
 
 export const feedback = pgTable("feedback", {
@@ -54,13 +68,36 @@ export const feedback = pgTable("feedback", {
 });
 
 export const dailies = pgTable("dailies", {
-    id: integer("id").primaryKey().generatedAlwaysAsIdentity(),
-    gameId: text("game_id")
-        .notNull()
-        .references(() => games.id, { onDelete: "restrict" }),
-    gameItemId: text("game_item_id")
-        .notNull()
-        .references(() => gameItems.id, { onDelete: "restrict" }),
-    characterContext: text("context").notNull(),
+    id: text("id").primaryKey(),
+    ogGameId: text("og_game_id").references(() => games.id, { onDelete: "set null" }),
+    title: text("title").notNull(),
+    description: text("description"),
+    characterContext: text("character_context").notNull(),
     scheduledDate: date("scheduled_date").notNull().unique(),
+    createdAt: timestamp("created_at").defaultNow().notNull(),
+    updatedAt: timestamp("updated_at")
+        .defaultNow()
+        .$onUpdate(() => new Date())
+        .notNull(),
 });
+
+export const dailyGameItems = pgTable(
+    "daily_game_items",
+    {
+        id: text("id").primaryKey(),
+        dailyId: text("daily_id")
+            .notNull()
+            .references(() => dailies.id, { onDelete: "cascade" }),
+        name: text("name").notNull(),
+        orderIndex: integer("order_index").notNull(),
+        isWinner: boolean("is_winner").notNull().default(false),
+        createdAt: timestamp("created_at").defaultNow().notNull(),
+    },
+    (table) => [
+        unique().on(table.dailyId, table.orderIndex),
+        // Partial unique index: only one winner per daily
+        uniqueIndex()
+            .on(table.dailyId)
+            .where(sql`${table.isWinner} = true`),
+    ]
+);
