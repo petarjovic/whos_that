@@ -24,6 +24,15 @@
             box-shadow: 0 0 25px 8px oklch(64.6% 0.222 41.116);
         }
     }
+    @keyframes scroll {
+        to {
+            transform: translateX(var(--scroll-distance));
+        }
+    }
+
+    .animate-scroll {
+        animation: scroll 60s linear infinite;
+    }
 }
 
 @utility letter {

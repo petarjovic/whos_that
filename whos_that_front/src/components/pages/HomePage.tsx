@@ -17,6 +17,7 @@ import LoadingSpinner from "../misc/LoadingSpinner.tsx";
 import LikeButton from "../misc/LikeButton.tsx";
 import FeedbackModal from "../misc/FeedbackModal.tsx";
 import { MdFeedback } from "react-icons/md";
+import { DailyGamePreview } from "../misc/DailyGamePreview";
 
 /**
  * Landing page with option to "create new game" or "join existing game" via room code
@@ -24,6 +25,7 @@ import { MdFeedback } from "react-icons/md";
 const HomePage = () => {
     const nav = useNavigate();
 
+    const [dailyGameScheduled, setDailyGameScheduled] = useState(false);
     const [errorMsg, setErrorMsg] = useState("");
     const [isLoading, setIsLoading] = useState(true);
 
@@ -86,7 +88,7 @@ const HomePage = () => {
     if (errorMsg) throw new Error(errorMsg);
     return (
         <>
-            <div className="mx-auto mb-3 h-full text-center text-neutral-800 max-2xl:mt-4 max-xl:mt-20 max-xl:flex max-xl:flex-col max-xl:gap-6 max-md:justify-end max-sm:px-3 md:max-xl:justify-around xl:grid xl:grid-cols-2 xl:grid-rows-1 xl:gap-0 2xl:mt-3">
+            <div className="mx-auto mb-3 h-full text-center text-neutral-800 max-2xl:mt-4 max-xl:mt-15 max-xl:flex max-xl:flex-col max-xl:gap-6 max-md:justify-end max-sm:px-3 md:max-xl:justify-around xl:grid xl:grid-cols-2 xl:grid-rows-1 xl:gap-0 2xl:mt-3">
                 <div className="flex h-full flex-col gap-2 max-xl:justify-end xl:border-r xl:border-neutral-950 xl:pr-4">
                     {/* Search Bar */}
                     <div className="px-1 pt-1 text-center">
@@ -209,46 +211,66 @@ const HomePage = () => {
 
                 {/* Vertical Space on XL Screens */}
                 <div className="flex flex-col gap-3 max-xl:justify-start xl:ml-4 xl:justify-center">
-                    {/* Create New Preset */}
-                    <button
-                        className="col-start-2 cursor-pointer text-center text-lg font-semibold hover:scale-102"
-                        onClick={() => {
-                            void nav(isPending ? "" : session ? "/create-game" : "/login");
-                        }}
-                    >
-                        <div className="border border-neutral-400 bg-neutral-300 py-1">
-                            <img
-                                className="neutralscale-25 mx-auto h-51 object-fill text-center max-xl:h-30 2xl:h-55"
-                                src={CustomGameImg}
-                            ></img>
-                        </div>
-                        <div className="font-semib p-px text-lg hover:text-blue-400 xl:text-xl">
-                            {session ? "Create New Game" : "Create New Custom Game"}
-                        </div>
-                    </button>
+                    {/* Daily Game */}
+                    <div>
+                        <button
+                            className="col-start-2 cursor-pointer text-center text-lg font-semibold hover:scale-102 xl:mb-3"
+                            onClick={() => {
+                                if (dailyGameScheduled) void nav("/daily");
+                            }}
+                        >
+                            <div className="min-w-38.5 border border-neutral-400 bg-neutral-300 py-1 max-xl:max-w-85 xl:max-w-130">
+                                <DailyGamePreview setIsDailyToday={setDailyGameScheduled} />
+                            </div>
+                            <div className="p-px text-lg font-semibold hover:text-blue-400 xl:text-xl">
+                                Play Today&apos;s Daily Game
+                            </div>
+                        </button>
+                        <div className="h-0 w-full self-center border-b border-neutral-950"></div>
+                    </div>
+                    {/* New Preset + User's Presets */}
+                    <div className="flex w-full justify-around pt-2 pb-1">
+                        {/* Create New Preset */}
+                        <button
+                            className="col-start-2 w-full cursor-pointer text-center text-lg font-semibold hover:scale-102"
+                            onClick={() => {
+                                void nav(isPending ? "" : session ? "/create-game" : "/login");
+                            }}
+                        >
+                            <div className="w-full min-w-38.5 border border-neutral-400 bg-neutral-300 py-1 xl:min-w-60">
+                                <img
+                                    className="mx-auto h-51 object-fill text-center max-xl:h-30 2xl:h-55"
+                                    src={CustomGameImg}
+                                ></img>
+                            </div>
+                            <div className="font-semib p-px text-lg hover:text-blue-400 xl:text-xl">
+                                {session ? "Create New Game" : "Create New Custom Game"}
+                            </div>
+                        </button>
+                        {/* User's Games (if logged in) */}
+                        {session ? (
+                            <>
+                                <div className="relative bottom-1.5 mx-2 self-center border-l border-neutral-500 max-xl:h-40 xl:h-60"></div>
+                                <button
+                                    className="col-start-2 w-full cursor-pointer text-center text-lg font-semibold hover:scale-102"
+                                    onClick={() => void nav("/my-games")}
+                                >
+                                    <div className="w-full min-w-38.5 border border-neutral-400 bg-neutral-300 py-1 xl:min-w-60">
+                                        <img
+                                            className="mx-auto h-51 object-fill p-1 text-center max-xl:h-30 2xl:h-55"
+                                            src={UsersPresetsImage}
+                                        ></img>
+                                    </div>
+                                    <div className="font-semib p-px text-lg hover:text-blue-400 xl:text-xl">
+                                        Your Games
+                                    </div>
+                                </button>
+                            </>
+                        ) : (
+                            <></>
+                        )}
+                    </div>
                     <div className="h-0 w-full self-center border-b border-neutral-950"></div>
-                    {/* User's Games (if logged in) */}
-                    {session ? (
-                        <>
-                            <button
-                                className="col-start-2 cursor-pointer text-center text-lg font-semibold hover:scale-102"
-                                onClick={() => void nav("/my-games")}
-                            >
-                                <div className="border border-neutral-400 bg-neutral-300 py-1">
-                                    <img
-                                        className="neutralscale-25 mx-auto h-51 object-fill text-center max-xl:h-30 2xl:h-55"
-                                        src={UsersPresetsImage}
-                                    ></img>
-                                </div>
-                                <div className="font-semib p-px text-lg hover:text-blue-400 xl:text-xl">
-                                    Your Games
-                                </div>
-                            </button>
-                            <div className="h-0 w-full self-center border-b border-neutral-950"></div>
-                        </>
-                    ) : (
-                        <></>
-                    )}
                     {/* Join Room */}
                     <div className="p-1 text-center xl:col-start-2">
                         <form
@@ -287,15 +309,8 @@ const HomePage = () => {
                 </div>
 
                 {/* Creator Signature */}
-                <div className="mx-auto flex items-center gap-3 text-neutral-500 xl:absolute xl:bottom-3 xl:left-[62%]">
+                <div className="mx-auto flex items-center gap-5 text-neutral-500 xl:absolute xl:bottom-3 xl:left-[62%]">
                     <p className="text-sm"> By Petar Jovic </p>
-                    {/* AI Mode */}
-                    <Link
-                        to={"/daily"}
-                        className="flex items-center text-center text-sm hover:cursor-pointer hover:text-blue-400 hover:italic hover:underline xl:relative xl:left-20"
-                    >
-                        AI Mode
-                    </Link>
                     {/* Feedback */}
                     {session ? (
                         <div className="text-neutral-500 hover:cursor-pointer hover:text-blue-400 hover:italic hover:underline">

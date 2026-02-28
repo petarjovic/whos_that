@@ -6,7 +6,7 @@ import type { DailyGame, UserHasLiked } from "@server/types";
 import { dailyGameInfoSchema } from "@server/zodSchema";
 import { serverResponseSchema } from "../../lib/zodSchema.ts";
 import env from "../../lib/zodEnvSchema.ts";
-import { logError } from "../../lib/logger.ts";
+import { log, logError } from "../../lib/logger.ts";
 import GameBoard from "./GameBoard.tsx";
 import LoadingSpinner from "../misc/LoadingSpinner.tsx";
 import ChatPanel, { type ChatMessage } from "./ChatPanel.tsx";
@@ -63,6 +63,7 @@ const DailyGamePage = () => {
             }
 
             const dailyGameInfoDb = dailyGameInfoSchema.parse(await dailyRes.json());
+            log(dailyGameInfoDb);
             setDailyGameInfo(dailyGameInfoDb);
         };
 
@@ -151,7 +152,7 @@ const DailyGamePage = () => {
                         opponentLabel="Whos-That-Bot-3000"
                     />
                 </div>
-                <div className="h-full min-w-0 flex-1">
+                <div className="h-full min-w-8/10 flex-1">
                     <GameBoard title={dailyGameInfo.title} cardList={cardList} />
                 </div>
             </div>

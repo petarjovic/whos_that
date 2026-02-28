@@ -7,14 +7,15 @@ interface CardLayoutProps {
     name: string;
     imgSrc: string | undefined;
     isOppCard?: boolean;
-    size?: "S" | "M" | "L";
+    size?: "XS" | "S" | "M" | "L";
 }
 
 type sizeTailwind = {
-    [key in "S" | "M" | "L"]: string;
+    [key in "XS" | "S" | "M" | "L"]: string;
 };
 
 const sizeMap: sizeTailwind = {
+    XS: "w-13.5 h-21",
     S: "w-26.75 h-42",
     M: "w-40.5 h-63.75",
     L: "max-xl:h-66.75 max-xl:w-39 w-45.75 h-72.5 ",
@@ -36,12 +37,12 @@ export const CardLayout = ({
             className={`border ${sizeMap[size]} flex flex-col justify-between rounded-xs hover:scale-106 ${isOppCard ? "animate-[flash-attention_2s_ease-in-out_1] border-orange-300 bg-orange-300" : "border-neutral-600 bg-neutral-50"} text-center`}
         >
             <img
-                className={`mx-1 mt-1 h-8/10 max-h-8/10 border border-neutral-400 bg-gray-300 object-fill ${isOppCard ? "grayscale-100" : ""}`}
+                className={`${size === "XS" ? "mx-0.5 mt-0.5" : "mx-1 mt-1"} h-8/10 max-h-8/10 border border-neutral-400 bg-gray-300 object-fill ${isOppCard ? "grayscale-100" : ""}`}
                 src={imgSrc}
                 alt={name}
             />
             <figcaption
-                className={`${size === "L" ? "cursor-default items-center text-lg max-md:text-base" : "items-center text-base"} ${size === "M" ? "hover:text-blue-500" : ""} m-auto flex max-h-1/10 text-center leading-none font-semibold text-black`}
+                className={`${size === "L" ? "cursor-default items-center text-lg max-md:text-base" : "items-center"} ${size === "M" ? "hover:text-blue-500" : ""} m-auto flex max-h-1/10 text-center leading-none font-semibold text-black ${size === "XS" ? "text-[0.6rem]" : "text-base"}`}
             >
                 {name}
             </figcaption>

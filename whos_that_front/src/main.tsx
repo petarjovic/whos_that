@@ -29,10 +29,6 @@ const router = createBrowserRouter([
                 path: "/",
                 element: <HomePage />,
             },
-            // {
-            //     path: "/create-game",
-            //     element: <GameTypePage />,
-            // },
             {
                 path: "/create-game",
                 element: <CreateCustomGamePage />,
@@ -46,7 +42,6 @@ const router = createBrowserRouter([
                 element: <GameStateManager isNewGame={false} />,
             },
             { path: "/daily", element: <DailyGamePage /> },
-
             {
                 path: "/search",
                 element: <SearchPage />,
@@ -63,10 +58,6 @@ const router = createBrowserRouter([
                 path: "/login",
                 element: <LogInPage />,
             },
-            // {
-            //     path: "/sign-up",
-            //     element: <SignUpPage />,
-            // },
             {
                 path: "/set-username",
                 element: <SetUsernamePage />,

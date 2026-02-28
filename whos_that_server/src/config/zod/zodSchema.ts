@@ -157,7 +157,7 @@ export const feedbackSchema = z.object({
 
 // ── Daily-related schemas ────────────────────────────────────────────────────────────
 export const dailyGameInfoSchema = z.object({
-    ogGameId: z.nanoid(),
+    ogGameId: z.union([z.nanoid(), z.literal("")]),
     authorUsername: z.string(),
     title: z.string(),
     winningIndex: z.int(),
