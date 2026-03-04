@@ -16,6 +16,7 @@ import { fetchLikeInfo, useBetterAuthSession } from "../../lib/hooks.ts";
 import { FaHeart } from "react-icons/fa6";
 import LikeButton from "../misc/LikeButton.tsx";
 import { AiFillQuestionCircle } from "react-icons/ai";
+import InGameNavBar from "./InGameNavBar.tsx";
 
 // Stable empty EndState — passed to Card only to satisfy the resetOnNewGame prop.
 // The daily has no play-again, so this never changes and card flips never auto-reset.
@@ -131,6 +132,7 @@ const DailyGamePage = () => {
 
     return (
         <>
+            <InGameNavBar title={dailyGameInfo.title} />
             <div className="flex h-full w-full gap-2 px-2">
                 <div className="flex flex-col items-center lg:mt-9 lg:w-1/5 lg:min-w-[19.5dvw] lg:shrink-0">
                     <div className="mb-3 flex justify-self-center">
@@ -152,8 +154,8 @@ const DailyGamePage = () => {
                         opponentLabel="Whos-That-Bot-3000"
                     />
                 </div>
-                <div className="h-full min-w-8/10 flex-1">
-                    <GameBoard title={dailyGameInfo.title} cardList={cardList} />
+                <div className="h-full min-w-8/10 flex-1 mb-4">
+                    <GameBoard cardList={cardList} />
                 </div>
             </div>
 

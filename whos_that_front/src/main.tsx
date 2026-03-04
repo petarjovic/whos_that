@@ -30,7 +30,6 @@ const router = createBrowserRouter([
                 element: <NewspaperLayout />,
                 children: [
                     { path: "/", element: <HomePage /> },
-                    { path: "/daily", element: <DailyGamePage /> },
                     { path: "/create-game", element: <CreateCustomGamePage /> },
                     { path: "/search", element: <SearchPage /> },
                     { path: "/my-games", element: <MyGamesPage /> },
@@ -46,6 +45,7 @@ const router = createBrowserRouter([
                 path: "/play-game/:joinRoomId",
                 element: <GameStateManager isNewGame={false} />,
             },
+            { path: "/daily", element: <DailyGamePage /> },
         ],
     },
     {

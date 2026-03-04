@@ -52,7 +52,6 @@ export const DailyGamePreview = ({
                 <LoadingSpinner />
             ) : imageUrls.length > 0 ? (
                 <>
-                    <div className="leading-none text-red-700 xl:my-1">{title}</div>
                     <div className="relative w-full overflow-hidden py-0.75">
                         <div ref={scrollRef} className="animate-scroll flex gap-2">
                             {[...imageUrls, ...imageUrls, ...imageUrls].map((url, i) => (
@@ -61,6 +60,9 @@ export const DailyGamePreview = ({
                                 </div>
                             ))}
                         </div>
+                    </div>
+                    <div className="leading-none font-semibold text-xl xl:my-1 text-blue-500 hover:scale-102">
+                        {title}
                     </div>
                 </>
             ) : (
