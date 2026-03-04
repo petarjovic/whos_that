@@ -9,6 +9,9 @@ import { serverResponseSchema } from "../../lib/zodSchema.ts";
 import env from "../../lib/zodEnvSchema.ts";
 import { logError, log } from "../../lib/logger.ts";
 import CharacterPicker from "./CharacterPicker.tsx";
+import NewspaperLayout from "../layout/MainUILayout.tsx";
+import Hero from "../layout/Hero.tsx";
+import { useBetterAuthSession } from "../../lib/hooks.ts";
 
 /**
  * Manages game state and Socket.IO connection lifecycle
@@ -30,8 +33,11 @@ const GameStateManager = ({ isNewGame }: { isNewGame: boolean }) => {
     });
     const [title, setTitle] = useState("");
     const [cardData, setCardData] = useState<CardDataUrl[]>([]);
+    const [characterName, setCharacterName] = useState("");
 
     const [errorMsg, setErrorMsg] = useState("");
+
+    const { session, isPending } = useBetterAuthSession();
 
     // Fetch game data (images and metadata) when preset id is available
     useEffect(() => {
@@ -127,15 +133,44 @@ const GameStateManager = ({ isNewGame }: { isNewGame: boolean }) => {
     if (errorMsg) throw new Error(errorMsg);
     //Show waiting room until both players connected and data loaded
     else if (roomState.players.length !== 2 || cardData.length === 0)
-        return <WaitingRoom gameId={roomState.id} cardData={cardData} />;
+        return (
+            <NewspaperLayout>
+                <WaitingRoom gameId={roomState.id} cardData={cardData} />
+            </NewspaperLayout>
+        );
     //Show character picker until both players have selected a character
     else if (Object.values(roomState.cardIdsToGuess).some((index) => index < 0))
-        return <CharacterPicker roomId={roomState.id} cardData={cardData} />;
+        return (
+            <div className="mb-3">
+                <div className="letter 3xl:mt-10 relative z-10 w-[92dvw] bg-linear-to-b from-neutral-100 to-neutral-200 p-1 text-center shadow-[0_10px_8px_10px_rgba(0,0,0,0.35)]">
+                    <Hero session={session} isPending={isPending} />
+                    <p className="my-2.5 text-4xl font-bold text-neutral-900">
+                        {characterName
+                            ? `Chosen Character: ${characterName}`
+                            : "Choose a character for your opponent to guess! "}
+                    </p>
+                </div>
+                <CharacterPicker
+                    roomId={roomState.id}
+                    cardData={cardData}
+                    setCharName={setCharacterName}
+                />
+            </div>
+        );
     //Make sure that player socket is in player list (if it's not it might be due to server restart, this is mostly so an error is thrown when a change messes something up in dev)
     else if (socket.id && !roomState.players.includes(socket.id))
         throw new Error("Socket not connected or this player is somehow not in this room.");
     //Show game
-    else return <Game roomState={roomState} cardData={cardData} title={title} />;
+    else
+        return (
+            <>
+                <div className="letter 3xl:mt-10 relative z-10 w-[92dvw] bg-linear-to-b from-neutral-100 to-neutral-200 p-1 text-center shadow-[0_10px_8px_10px_rgba(0,0,0,0.4),0_10px_8px_10px_rgba(0,0,0,0.35)]">
+                    <Hero session={session} isPending={isPending} />
+                    <p className="my-2.5 text-4xl font-bold text-neutral-700">{title}</p>
+                </div>
+                <Game roomState={roomState} cardData={cardData} title={title} />;
+            </>
+        );
 };
 
 export default GameStateManager;

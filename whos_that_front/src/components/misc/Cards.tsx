@@ -34,7 +34,7 @@ export const CardLayout = ({
 }: PropsWithChildren<CardLayoutProps>) => {
     return (
         <figure
-            className={`border ${sizeMap[size]} flex flex-col justify-between rounded-xs hover:scale-106 ${isOppCard ? "animate-[flash-attention_2s_ease-in-out_1] border-orange-300 bg-orange-300" : "border-neutral-600 bg-neutral-50"} text-center`}
+            className={`border ${sizeMap[size]} flex flex-col justify-between rounded-xs hover:scale-106 ${isOppCard ? "animate-[flash-attention_2s_ease-in-out_1] border-orange-300 bg-orange-300" : "bg-linear-to-b from-neutral-50 to-neutral-100"} text-center shadow-md/30 hover:shadow-xl/30`}
         >
             <img
                 className={`${size === "XS" ? "mx-0.5 mt-0.5" : "mx-1 mt-1"} h-8/10 max-h-8/10 border border-neutral-400 bg-gray-300 object-fill ${isOppCard ? "grayscale-100" : ""}`}

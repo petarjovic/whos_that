@@ -7,7 +7,7 @@
         font-family: "Libre Franklin", Arial, sans-serif;
     }
     body {
-        background: url("./assets/BulletinBoard.jpg") fixed;
+        background: url("./assets/Bricks.jpeg");
         background-size: 100dvw 100dvh;
     }
 }
@@ -36,10 +36,7 @@
 }
 
 @utility letter {
-    box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
     margin: 26px auto 0;
-    max-width: 550px;
-    min-height: 300px;
 
     position: relative;
     width: 80%;

@@ -7,7 +7,8 @@ import ReactModal from "react-modal";
 import "./index.css";
 import HomePage from "./components/pages/HomePage.tsx";
 import NotFoundPage from "./components/pages/error/NotFoundPage.tsx";
-import Layout from "./components/layout/Layout.tsx";
+import BaseLayout from "./components/layout/BaseLayout.tsx";
+import NewspaperLayout from "./components/layout/MainUILayout.tsx";
 import ErrorPage from "./components/pages/error/ErrorPage.tsx";
 import SearchPage from "./components/pages/SearchPage.tsx";
 import CreateCustomGamePage from "./components/pages/CustomGamePage.tsx";
@@ -22,48 +23,29 @@ ReactModal.setAppElement("#root");
 const router = createBrowserRouter([
     {
         path: "/",
-        element: <Layout />,
+        element: <BaseLayout />,
         errorElement: <ErrorPage />,
         children: [
             {
-                path: "/",
-                element: <HomePage />,
+                element: <NewspaperLayout />,
+                children: [
+                    { path: "/", element: <HomePage /> },
+                    { path: "/daily", element: <DailyGamePage /> },
+                    { path: "/create-game", element: <CreateCustomGamePage /> },
+                    { path: "/search", element: <SearchPage /> },
+                    { path: "/my-games", element: <MyGamesPage /> },
+                    { path: "/account", element: <AccountPage /> },
+                    { path: "/login", element: <LogInPage /> },
+                    { path: "/set-username", element: <SetUsernamePage /> },
+                    { path: "/admin", element: <AdminPage /> },
+                    { path: "*", element: <NotFoundPage /> },
+                ],
             },
-            {
-                path: "/create-game",
-                element: <CreateCustomGamePage />,
-            },
-            {
-                path: "/play-game",
-                element: <GameStateManager isNewGame={true} />,
-            },
+            { path: "/play-game", element: <GameStateManager isNewGame={true} /> },
             {
                 path: "/play-game/:joinRoomId",
                 element: <GameStateManager isNewGame={false} />,
             },
-            { path: "/daily", element: <DailyGamePage /> },
-            {
-                path: "/search",
-                element: <SearchPage />,
-            },
-            {
-                path: "/my-games",
-                element: <MyGamesPage />,
-            },
-            {
-                path: "/account",
-                element: <AccountPage />,
-            },
-            {
-                path: "/login",
-                element: <LogInPage />,
-            },
-            {
-                path: "/set-username",
-                element: <SetUsernamePage />,
-            },
-            { path: "/admin", element: <AdminPage /> },
-            { path: "*", element: <NotFoundPage /> },
         ],
     },
     {

@@ -1,14 +1,20 @@
 import type { CardDataUrl } from "@server/types";
 import { CardLayout, OpponentTargetCard } from "../misc/Cards";
-import { useState, type JSX } from "react";
+import { type JSX } from "react";
 import { emitChooseCharacter } from "../../lib/socket";
 import GameBoard from "./GameBoard";
 import dice from "../../assets/dice.jpg";
 
 //component which allows players to choose character for the opponent to guess
-const CharacterPicker = ({ cardData, roomId }: { cardData: CardDataUrl[]; roomId: string }) => {
-    const [title, setTitle] = useState("Select a character for your opponent to guess:");
-
+const CharacterPicker = ({
+    cardData,
+    roomId,
+    setCharName,
+}: {
+    cardData: CardDataUrl[];
+    roomId: string;
+    setCharName: (name: string) => void;
+}) => {
     const cardSelectorList: JSX.Element[] = [];
 
     for (const char of cardData) {
@@ -18,7 +24,7 @@ const CharacterPicker = ({ cardData, roomId }: { cardData: CardDataUrl[]; roomId
                 onClick={(e) => {
                     e.preventDefault();
                     e.stopPropagation();
-                    setTitle(`Selected: ${char.name}`);
+                    setCharName(char.name);
                     emitChooseCharacter(roomId, char.orderIndex);
                 }}
                 className="cursor-pointer"
@@ -36,7 +42,6 @@ const CharacterPicker = ({ cardData, roomId }: { cardData: CardDataUrl[]; roomId
             onClick={(e) => {
                 e.preventDefault();
                 e.stopPropagation();
-                setTitle("Selected: Random");
                 emitChooseCharacter(roomId, -1);
             }}
             className="cursor-pointer"
@@ -45,6 +50,6 @@ const CharacterPicker = ({ cardData, roomId }: { cardData: CardDataUrl[]; roomId
         </button>
     );
 
-    return <GameBoard title={title} cardList={cardSelectorList} targetCard={randomCharacterCard} />;
+    return <GameBoard cardList={cardSelectorList} targetCard={randomCharacterCard} />;
 };
 export default CharacterPicker;

@@ -23,7 +23,7 @@ interface GameProps {
  * Main game component displaying character grid and opponent's target
  * Handles guess confirmation and play again requests
  */
-const Game = ({ roomState, cardData, title }: GameProps) => {
+const Game = ({ roomState, cardData }: GameProps) => {
     const [confirmGuessModal, setConfirmGuessModal] = useState<ConfirmGuessModalState>({
         isOpen: false,
     });
@@ -104,30 +104,28 @@ const Game = ({ roomState, cardData, title }: GameProps) => {
 
     return (
         <>
-            <GameBoard title={title} cardList={cardList} targetCard={oppTargetCard} />
+            <GameBoard cardList={cardList} targetCard={oppTargetCard} />
             {/* Modals */}
-            <div>
-                <GameEndModal key="game-end-modal" roomState={roomState} />
-                <ConfirmGuessModal
-                    key="confirm-guess-modal"
-                    isOpen={
-                        confirmGuessModal.isOpen &&
-                        !Object.values(roomState.endState).some((e) => e !== null)
-                    }
-                    //handleConfirmGuessModalResult
-                    confirmGuess={(cofirmGuess: boolean) => {
-                        if (cofirmGuess && confirmGuessModal.isOpen)
-                            emitGuess(roomState.id, confirmGuessModal.isWinner);
-                        setConfirmGuessModal({ isOpen: false });
-                    }}
-                    name={confirmGuessModal.isOpen ? confirmGuessModal.name : ""}
-                />
-                <FirstTurnModal
-                    key="first-turn-modal"
-                    isOpen={showTurnModal}
-                    goingFirst={socketId === roomState.curTurn}
-                />
-            </div>
+            <GameEndModal key="game-end-modal" roomState={roomState} />
+            <ConfirmGuessModal
+                key="confirm-guess-modal"
+                isOpen={
+                    confirmGuessModal.isOpen &&
+                    !Object.values(roomState.endState).some((e) => e !== null)
+                }
+                //handleConfirmGuessModalResult
+                confirmGuess={(cofirmGuess: boolean) => {
+                    if (cofirmGuess && confirmGuessModal.isOpen)
+                        emitGuess(roomState.id, confirmGuessModal.isWinner);
+                    setConfirmGuessModal({ isOpen: false });
+                }}
+                name={confirmGuessModal.isOpen ? confirmGuessModal.name : ""}
+            />
+            <FirstTurnModal
+                key="first-turn-modal"
+                isOpen={showTurnModal}
+                goingFirst={socketId === roomState.curTurn}
+            />
         </>
     );
 };
