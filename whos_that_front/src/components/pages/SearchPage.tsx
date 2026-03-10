@@ -98,7 +98,7 @@ const SearchPage = () => {
                 <input
                     id="searchBar"
                     type="search"
-                    className="rounded-xs border border-neutral-500 bg-gray-50 px-1 text-left font-medium placeholder:text-zinc-400 max-2xl:py-px max-xl:w-8/10 xl:w-9/10 xl:text-lg 2xl:p-px 2xl:py-0.5 2xl:pl-3"
+                    className="rounded-xs border border-neutral-400 bg-gray-50 px-1 text-left font-medium placeholder:text-zinc-400 max-2xl:py-px max-xl:w-8/10 xl:w-9/10 xl:text-lg 2xl:p-px 2xl:py-0.5 2xl:pl-3"
                     maxLength={20}
                     placeholder="Search Presets"
                     value={searchInput}
@@ -106,12 +106,12 @@ const SearchPage = () => {
                 />
                 <button
                     type="submit"
-                    className="flex cursor-pointer items-center rounded-xs bg-red-400 px-1 py-px text-white 2xl:py-0.5"
+                    className="flex cursor-pointer items-center rounded-xs bg-red-400 px-1 py-px text-white 2xl:py-0.5 inset-shadow-red-50 inset-shadow-sm/15 shadow-sm active:shadow-none"
                 >
                     <IoMdSearch size="1.5em" />
                 </button>
                 <select
-                    className="flex cursor-pointer items-center justify-center rounded-xs bg-blue-400 p-0.75 text-center text-white"
+                    className="flex cursor-pointer items-center justify-center rounded-xs bg-blue-400 p-0.75 text-center text-white inset-shadow-blue-50 inset-shadow-sm/15 shadow-sm active:shadow-none "
                     value={searchParams.get("sort") ?? "trending"}
                     onChange={(e) =>
                         setSearchParams({
@@ -121,7 +121,7 @@ const SearchPage = () => {
                         })
                     }
                 >
-                    <option className="font-medium" value="trending">
+                    <option className="font-medium " value="trending">
                         Trending
                     </option>
                     <option className="font-medium" value="likes">
@@ -136,7 +136,7 @@ const SearchPage = () => {
             {isLoading ? (
                 <LoadingSpinner />
             ) : (
-                <div className="mt-3 flex flex-wrap items-center justify-evenly gap-4 border border-black bg-neutral-300 px-2 py-3 xl:mx-5">
+                <div className="mt-3 flex flex-wrap items-center justify-evenly gap-4 border border-stone-800 bg-stone-400 inset-shadow-xs/15 shadow-sm/15 px-2 py-3 xl:mx-5">
                     {gamesList.length === 0 && (
                         <p className="mx-auto mt-[40%] text-center text-xl font-medium">
                             Sorry, no presets match your search!{" "}
@@ -171,8 +171,8 @@ const SearchPage = () => {
             )}
             {/* Page Controls */}
             {pageInfo && pageInfo.totalPages > 1 && (
-                <div className="mt-4 mb-2 flex items-center gap-1 text-lg text-neutral-600">
-                    <span className="text-sm">Page: </span>
+                <div className="mt-4 mb-2 flex items-center gap-1 text-lg text-neutral-700">
+                    <span className="text-base">Page: </span>
                     <button
                         onClick={() =>
                             setSearchParams({ ...Object.fromEntries(searchParams), page: "1" })

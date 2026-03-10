@@ -15,7 +15,7 @@ const WaitingRoom = ({ gameId, cardData }: { gameId: string; cardData: CardDataU
     return (
         <>
             <img className="max-h-40 text-center" src={loadingSpinner} alt="loading icon" />
-            <p className="mx-auto mt-5 mb-px text-center text-4xl font-medium text-zinc-800 max-2xl:text-3xl">
+            <p className="mx-auto mt-5 mb-px text-center text-4xl font-medium text-neutral-800 max-2xl:text-3xl">
                 Waiting in room:{" "}
                 <span className="align-sub text-6xl font-bold tracking-tight text-amber-500 text-shadow-2xs/100 max-2xl:text-5xl">
                     {gameId || "..."}

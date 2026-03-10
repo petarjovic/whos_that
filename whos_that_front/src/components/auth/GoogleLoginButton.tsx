@@ -28,9 +28,9 @@ const GoogleLoginButton = ({
     };
 
     return (
-        <div className="flex items-center justify-center dark:bg-gray-800">
+        <div className="flex items-center justify-center dark:bg-gray-800 ">
             <button
-                className="flex h-11.5 cursor-pointer items-center rounded-lg border border-zinc-700 bg-white px-3 py-1 text-base font-bold text-zinc-600 shadow-xs transition-colors duration-25 hover:border-zinc-800 hover:bg-slate-300 hover:text-zinc-700 hover:shadow-md max-2xl:h-10 max-2xl:px-2 max-2xl:text-sm"
+                className="flex h-11.5 cursor-pointer items-center rounded-lg border border-zinc-700 bg-white px-3 py-1 text-base font-bold text-zinc-600 shadow-sm/25 transition-colors duration-25 hover:border-zinc-800 hover:bg-slate-300 hover:text-zinc-700 hover:shadow-md active:shadow-none max-2xl:h-10 max-2xl:px-2 max-2xl:text-sm "
                 disabled={disable}
                 onClick={handleGoogleButtonClick}
             >

@@ -144,10 +144,12 @@ const GameStateManager = ({ isNewGame }: { isNewGame: boolean }) => {
             <div className="mb-3">
                 <div className="letter 3xl:mt-10 relative z-10 w-[92dvw] bg-linear-to-b from-neutral-100 to-neutral-200 p-1 text-center shadow-[0_10px_8px_10px_rgba(0,0,0,0.35)]">
                     <Hero session={session} isPending={isPending} />
-                    <p className="my-2.5 text-4xl font-bold text-neutral-900">
-                        {characterName
-                            ? `Chosen Character: ${characterName}`
-                            : "Choose a character for your opponent to guess! "}
+                    <p className="my-2.5 text-4xl font-bold text-neutral-800">
+                        {characterName ? (
+                            <span className="text-blue-500">{characterName}</span>
+                        ) : (
+                            "Choose a character for your opponent to guess!"
+                        )}
                     </p>
                 </div>
                 <CharacterPicker

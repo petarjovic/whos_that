@@ -8,12 +8,12 @@ import type { UrlPresetInfo } from "@server/types";
 import env from "../../lib/zodEnvSchema.ts";
 import { logError } from "../../lib/logger.ts";
 import LoadingSpinner from "../misc/LoadingSpinner.tsx";
-import { FaArrowUpRightFromSquare } from "react-icons/fa6";
 import { FcSettings } from "react-icons/fc";
 import ReactModal from "react-modal";
 import { FaHeart } from "react-icons/fa";
 import { RiSafe3Fill } from "react-icons/ri";
 import LikeButton from "../misc/LikeButton.tsx";
+import { TfiSharethis } from "react-icons/tfi";
 
 /**
  * Modal for displaying shareable link for a game/preset
@@ -243,7 +243,7 @@ const MyGamesPage = () => {
                 <RiSafe3Fill size={"0.9em"} className="scale-x-[-1]" /> Your Games{" "}
                 <RiSafe3Fill size={"0.9em"} />
             </h2>
-            <div className="flex w-fit flex-wrap items-center justify-center gap-4 border border-black bg-neutral-300 px-2 py-2.5 text-center max-xl:mx-auto xl:mx-8">
+            <div className="flex w-fit flex-wrap items-center justify-center gap-4 border-stone-600 border bg-stone-400 inset-shadow-xs/15 shadow-xs/15 px-2 py-2.5 text-center max-xl:mx-auto xl:mx-8">
                 {gamesList.length === 0 ? (
                     <p className="text-center text-xl font-medium max-sm:m-auto sm:m-5 2xl:m-10">
                         No games made yet.{" "}
@@ -268,7 +268,7 @@ const MyGamesPage = () => {
                                         className="relative bottom-1.5 ml-2 cursor-pointer text-xl text-gray-700 hover:scale-105 hover:text-blue-500 active:scale-125 max-lg:text-lg"
                                         title="Share Link"
                                     >
-                                        <FaArrowUpRightFromSquare />
+                                        <TfiSharethis />
                                     </button>
                                     <p
                                         className={`relative bottom-1 text-center text-base font-semibold whitespace-pre max-sm:font-medium ${isPublic ? "text-green-700" : "text-red-700"}`}
@@ -348,7 +348,7 @@ const MyGamesPage = () => {
                     <h3 className="mt-5 flex items-center gap-2 text-center text-3xl font-semibold">
                         <FaHeart size={"0.9em"} /> Liked Games <FaHeart size={"0.9em"} />
                     </h3>
-                    <div className="mt-2 mb-4 flex flex-wrap items-center justify-evenly gap-4 border border-black bg-neutral-300 px-2 py-3 xl:mx-5">
+                    <div className="mt-2 mb-4 flex flex-wrap items-center justify-evenly gap-4 border-stone-600 border bg-stone-400 inset-shadow-xs/15 shadow-xs/15 px-2 py-3 xl:mx-5">
                         {likedGamesList.map(
                             ({ id, title, imageUrl, numLikes, author, userHasLiked }, i) => (
                                 <Link key={i} to={`/play-game?preset=${id}`}>

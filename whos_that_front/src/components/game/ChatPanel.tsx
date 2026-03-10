@@ -18,7 +18,6 @@ const ChatPanel = ({ messages, onSend, isLoading, opponentLabel = "Opponent" }: 
     const [draft, setDraft] = useState("");
     const bottomRef = useRef<HTMLDivElement>(null);
 
-    // Auto-scroll to latest message
     useEffect(() => {
         bottomRef.current?.scrollIntoView({ behavior: "smooth" });
     }, [messages]);
@@ -31,62 +30,62 @@ const ChatPanel = ({ messages, onSend, isLoading, opponentLabel = "Opponent" }: 
     };
 
     const panel = (
-        <div className="flex h-full min-h-1/3 flex-col">
-            {/* Header */}
-            <div className="flex items-center justify-between border-b border-neutral-700 bg-gray-300 px-3 py-2 text-center font-semibold text-neutral-800">
-                <span className="mx-auto flex items-center">
-                    <GiVintageRobot size={"2.25em"} color={"black"} /> {opponentLabel}
+        <div className="flex h-full min-h-1/3 flex-col   bg-slate-900 shadow-[0_10px_100px_30px_rgba(0,0,0,0.5)]min-w-75">
+            <div className="flex items-center justify-between border-[#374151] border-2 bg-linear-to-b from-[#6b7280] to-[#4b5563] px-3 py-2 text-center font-mono font-bold uppercase tracking-wider text-gray-300 shadow-[inset_0_1px_2px_rgba(156,163,175,0.4),inset_0_-2px_4px_rgba(0,0,0,0.5),0_3px_8px_rgba(0,0,0,0.4)] relative before:content-[''] before:absolute before:inset-0 before:bg-[repeating-linear-gradient(90deg,rgba(0,0,0,0.03)_0px,rgba(0,0,0,0.03)_2px,transparent_2px,transparent_4px)] before:pointer-events-none">
+                <span className="mx-auto flex items-center gap-2">
+                    <GiVintageRobot size={"2.25em"} className="text-gray-300" />
+                    {opponentLabel}
                 </span>
-                {/* Minimize button — mobile only */}
                 <button
                     onClick={() => setIsOpen(false)}
-                    className="cursor-pointer text-neutral-500 hover:text-neutral-800 lg:hidden"
+                    className="cursor-pointer font-bold text-[#d1d5db] hover:text-[#e5e7eb] lg:hidden"
                     aria-label="Minimize chat"
                 >
-                    ✕
+                    [X]
                 </button>
             </div>
 
-            {/* Message list */}
-            <div className="flex flex-1 flex-col gap-2 overflow-y-auto px-3 py-2">
+            <div className="flex flex-1 flex-col gap-3 overflow-y-auto bg-black/40 px-3 py-3 font-mono text-sm relative before:content-[''] before:absolute before:inset-0 before:bg-[repeating-linear-gradient(0deg,rgba(0,0,0,0.15)_0px,rgba(0,0,0,0.15)_1px,transparent_1px,transparent_2px)] before:pointer-events-none before:z-10 after:content-[''] after:absolute after:inset-0 after:bg-[radial-gradient(ellipse_at_center,transparent_0%,rgba(0,0,0,0.3)_100%)] after:pointer-events-none after:z-10 border-x-3 border-gray-800">
                 {messages.map((msg, i) => (
                     <div
                         key={i}
-                        className={`w-fit max-w-[85%] rounded px-2 py-1 text-base ${
-                            msg.isUser ? "self-end bg-orange-300" : "self-start bg-neutral-300"
+                        className={`w-fit max-w-[85%] border-2 px-3 py-2 font-mono ${
+                            msg.isUser
+                                ? "self-end border-blue-400 bg-blue-950/80 text-blue-20 text-shadow-[0_0_2px_rgba(96,165,250,0.5)] shadow-[0_0_11px_rgba(96,165,250,0.5)]"
+                                : "self-start border-cyan-400 bg-cyan-950/80 text-cyan-200 text-shadow-[0_0_2px_rgba(34,211,238,0.5)] shadow-[0_0_11px_rgba(34,211,238,0.5)]"
                         }`}
                     >
                         {msg.msg}
                     </div>
                 ))}
                 {isLoading && (
-                    <div className="self-start text-sm text-neutral-500 italic">
-                        {opponentLabel} is thinking...
+                    <div className="self-start animate-pulse font-mono text-sm italic text-cyan-400">
+                        &gt; {opponentLabel} is processing...
                     </div>
                 )}
                 <div ref={bottomRef} />
             </div>
 
-            {/* Input row */}
             <form
-                className="flex gap-1 border-t border-neutral-700 bg-gray-300 p-2"
+                className="flex gap-2 border-2 border-[#374151] bg-[#4b5563] p-2 shadow-[inset_0_2px_3px_rgba(255,255,255,0.2),0_-1px_0_rgba(255,255,255,0.1)] min-h-16 relative before:content-[''] before:absolute before:inset-0 before:bg-[repeating-linear-gradient(90deg,rgba(0,0,0,0.03)_0px,rgba(0,0,0,0.03)_2px,transparent_2px,transparent_4px)] before:pointer-events-none  "
                 onSubmit={handleSubmit}
             >
                 <input
                     type="text"
+                    id="message-text"
                     value={draft}
                     onChange={(e) => setDraft(e.target.value)}
                     disabled={isLoading}
-                    placeholder={`Ask a yes/no question...`}
-                    className="flex-1 rounded-xs border border-neutral-400 bg-neutral-50 px-2 py-1 text-sm text-neutral-800 disabled:opacity-50"
+                    placeholder="ENTER QUERY..."
+                    className="border-2 border-slate-700 bg-slate-950 px-3 py-1 font-mono text-sm uppercase text-cyan-500 placeholder-cyan-700 shadow-[inset_0_0_10px_rgba(0,0,0,0.8)] focus:border-slate-600  focus:placeholder-cyan-600 focus:outline-none disabled:opacity-50 w-full relative before:content-['']  before:absolute before:inset-0 before:bg-[repeating-linear-gradient(0deg,rgba(0,0,0,0.0.05)_0px,rgba(0,0,0,0.05)_1px,transparent_1px,transparent_2px)] before:pointer-events-none flex-0 min-w-70 3xl:min-w-73"
                 />
                 <button
                     // eslint-disable-next-line @typescript-eslint/prefer-nullish-coalescing
                     disabled={isLoading || draft.trim().length < 5}
-                    className="cursor-pointer rounded-xs bg-orange-300 px-3 py-1 text-sm font-semibold text-neutral-700 hover:bg-orange-400 disabled:opacity-50"
+                    className="mx-auto  w-fit cursor-pointer max-w-20  border-x border-t border-b-9 border-cyan-800 bg-cyan-700 px-2 text-semibold text-gray-200  font-semibold hover:text-gray-300 shadow-sm/20 transition-all active:mt-px active:mr-px flex-1 hover:border-cyan-900 hover:bg-cyan-800 active:bg-cyan-700 active:borcer-cyan-800 duration-22 text-shadow-xs/50 py-1 hover:shadow-xs active:-translate-y-px active:border-b active:shadow-2xs relative z-1"
                     type="submit"
                 >
-                    Ask
+                    [ASK]
                 </button>
             </form>
         </div>
@@ -94,25 +93,23 @@ const ChatPanel = ({ messages, onSend, isLoading, opponentLabel = "Opponent" }: 
 
     return (
         <>
-            {/* ── Desktop: static sidebar in the flex row ── */}
-            <div className="hidden min-h-1/2 w-1/5 min-w-[19.5dvw] shrink-0 rounded-xs border border-neutral-700 bg-neutral-100 lg:flex lg:flex-col">
+            {/* Desktop: static sidebar */}
+            <div className="hidden min-h-1/2 w-1/5 min-w-[19.5dvw] shrink-0 lg:flex lg:flex-col relative z-1  shadow-[-5px_10px_10px_8px_rgba(0,0,0,0.35)]">
                 {panel}
             </div>
 
-            {/* ── Mobile: FAB + fixed overlay ── */}
+            {/* Mobile: FAB + overlay */}
             <div className="lg:hidden">
-                {/* Backdrop — closes panel when tapping outside */}
                 {isOpen && (
                     <div
-                        className="fixed inset-0 z-40"
+                        className="fixed inset-0 z-40 bg-black/60"
                         onClick={() => setIsOpen(false)}
                         aria-hidden="true"
                     />
                 )}
 
-                {/* Sliding panel */}
                 <div
-                    className={`fixed inset-x-0 bottom-0 z-50 rounded-t-md border border-neutral-700 bg-neutral-100 transition-transform duration-300 ${
+                    className={`fixed inset-x-0 bottom-0 z-50 transition-transform duration-300 ${
                         isOpen ? "translate-y-0" : "translate-y-full"
                     }`}
                     style={{ maxHeight: "50dvh" }}
@@ -120,11 +117,10 @@ const ChatPanel = ({ messages, onSend, isLoading, opponentLabel = "Opponent" }: 
                     {panel}
                 </div>
 
-                {/* FAB — hidden when panel is open */}
                 {!isOpen && (
                     <button
                         onClick={() => setIsOpen(true)}
-                        className="fixed right-4 bottom-4 z-50 flex h-14 w-14 cursor-pointer items-center justify-center rounded-full border border-neutral-700 bg-orange-300 text-2xl shadow-md hover:bg-orange-400 active:scale-95"
+                        className="fixed right-4 bottom-4 z-50 flex h-14 w-14 cursor-pointer items-center justify-center border-4 border-cyan-400 bg-slate-900 text-2xl shadow-[0_0_20px_rgba(34,211,238,0.6)] hover:bg-slate-800 hover:shadow-[0_0_30px_rgba(34,211,238,0.8)] active:scale-95"
                         aria-label="Open chat"
                     >
                         💬

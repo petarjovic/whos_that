@@ -97,7 +97,7 @@ const Hero = ({ session, isPending, showUserInfo = true }: HeroProps) => {
 
                         <button
                             type="button"
-                            className={`bg-red-400 ${session ? "rounded px-1 py-0.5 text-sm font-normal grayscale-10 lg:px-1.75 lg:py-1" : "px-2 py-1.25 lg:px-2.5 lg:py-1.5 lg:text-base"} cursor-pointer font-medium text-white hover:scale-101 hover:bg-red-600 active:scale-99 xl:text-base`}
+                            className={`bg-red-400 ${session ? "rounded px-1 py-0.5 text-sm font-normal grayscale-10 lg:px-1.75 lg:py-1" : "px-2 py-1.25 lg:px-2.5 lg:py-1.5 lg:text-base"} cursor-pointer font-medium text-white hover:scale-101 hover:bg-red-600 active:scale-99 xl:text-base inset-shadow-red-50 inset-shadow-xs/15 shadow-xs`}
                             onClick={() => {
                                 if (!isPending && session) void handleLogOut();
                                 else if (!isPending) void navigate("/login");

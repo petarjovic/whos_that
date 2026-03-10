@@ -367,7 +367,7 @@ const CreateCustomGamePage = () => {
             >
                 <div className="flex flex-col gap-4 max-2xl:w-full lg:col-start-1 2xl:w-9/10">
                     {/* Step 1: Title */}
-                    <div className="flex h-fit w-full flex-col items-center justify-around rounded-xs border border-neutral-800 bg-neutral-300 px-2 pt-1 pb-2 text-center">
+                    <div className="flex h-fit w-full flex-col items-center justify-around rounded-xs border border-neutral-600 inset-shadow-sm/15 inset-shadow-neutral-200 shadow-xs/15 bg-neutral-300 px-2 pt-1 pb-2 text-center">
                         <label
                             htmlFor="title"
                             className="flex items-center p-px text-center text-lg font-semibold xl:p-1.25 xl:text-xl 2xl:text-2xl"
@@ -391,7 +391,7 @@ const CreateCustomGamePage = () => {
                         ></input>
                     </div>
                     {/* Step 4: Privacy Settings */}
-                    <div className="flex h-fit w-full flex-col items-center justify-around rounded-xs border border-neutral-800 bg-neutral-300 px-2 py-1 text-center">
+                    <div className="flex h-fit w-full flex-col items-center justify-around rounded-xs border border-neutral-600 inset-shadow-sm/15 inset-shadow-neutral-200 shadow-xs/15 bg-neutral-300 px-2 py-1 text-center">
                         <div className="flex p-px text-lg font-semibold xl:text-xl 2xl:text-2xl">
                             <FaGears size="1.5em" className="mr-1 scale-y-[-1]" />
                             <div>Game Options</div>
@@ -427,7 +427,7 @@ const CreateCustomGamePage = () => {
                         </div>
                     </div>
                     {/* Step 2: Image Uploads */}
-                    <div className="flex h-fit w-full flex-col items-center justify-around rounded-xs border border-neutral-800 bg-neutral-300 pt-1 pb-3 text-center max-lg:px-2 lg:px-4">
+                    <div className="flex h-fit w-full flex-col items-center justify-around rounded-xs border border-neutral-600 inset-shadow-sm/15 inset-shadow-neutral-200 shadow-xs/15 bg-neutral-300 pt-1 pb-3 text-center max-lg:px-2 lg:px-4">
                         <label className="flex p-px text-lg font-semibold xl:p-2 xl:text-xl 2xl:text-2xl">
                             <FaCameraRetro size="1.18em" className="relative top-px mr-1" />
                             <div>Upload Custom Images</div>
@@ -476,7 +476,7 @@ const CreateCustomGamePage = () => {
                 </div>
 
                 {/* Step 3: Character Names */}
-                <div className="flex h-fit flex-col justify-around rounded-xs border border-neutral-800 bg-neutral-300 px-2 py-1 text-center max-2xl:w-full lg:col-start-2 2xl:w-9/10">
+                <div className="flex h-fit flex-col justify-around rounded-xs border border-neutral-600 inset-shadow-sm/15 inset-shadow-neutral-200 shadow-xs/15 bg-neutral-300 px-2 py-1 text-center max-2xl:w-full lg:col-start-2 2xl:w-9/10">
                     <h3 className="mb-0.5 flex items-center justify-end py-1">
                         <div className="mx-auto flex p-px text-lg font-semibold xl:text-xl 2xl:text-2xl">
                             <BsIncognito size="1.33em" className="relative top-px mr-1" />
@@ -645,7 +645,7 @@ const CreateCustomGamePage = () => {
 
                 {/* Submit Button */}
                 <button
-                    className={`rounded-xs-xs mx-auto w-1/2 p-1 text-center text-lg font-medium text-white ${isLoading ? "border-gray-800 bg-gray-700" : "bg-red-400 hover:bg-red-500"} h-fit cursor-pointer lg:col-start-2`}
+                    className={`rounded-xs-xs mx-auto w-1/2 p-1 text-center text-lg font-medium text-white ${isLoading ? "border-gray-800 bg-gray-700" : "bg-red-400 hover:bg-red-500 inset-shadow-sm/15  inset-shadow-red-50 "} active:shadow-none active:scale-99 hover:scale-101 transition-all duration-25 shadow-sm/15 h-fit cursor-pointer lg:col-start-2`}
                     type="submit"
                     disabled={isLoading}
                 >

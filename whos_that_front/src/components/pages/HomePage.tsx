@@ -88,18 +88,18 @@ const HomePage = () => {
     if (errorMsg) throw new Error(errorMsg);
     return (
         <>
-            <div className="mx-auto mb-3 h-full text-center text-neutral-800 max-2xl:mt-4 max-xl:mt-15 max-xl:flex max-xl:flex-col max-xl:gap-6 max-md:justify-end max-sm:px-3 md:max-xl:justify-around xl:grid xl:grid-cols-2 xl:grid-rows-1 xl:gap-0 2xl:mt-3">
+            <div className="mx-auto mb-3 h-full text-center text-neutral-900  max-2xl:mt-4 max-xl:mt-15 max-xl:flex max-xl:flex-col max-xl:gap-6 max-md:justify-end max-sm:px-3 md:max-xl:justify-around xl:grid xl:grid-cols-2 xl:grid-rows-1 xl:gap-0 2xl:mt-3">
                 <div className="flex h-full flex-col gap-2 max-xl:justify-end xl:border-r xl:border-neutral-950 xl:pr-4">
                     {/* Search Bar */}
                     <div className="px-1 pt-1 text-center">
                         <form
-                            className="flex items-center border border-neutral-400 bg-neutral-300 py-1.5 max-xl:justify-around max-sm:flex-col md:px-2 xl:justify-between"
+                            className="flex items-center border border-neutral-500 bg-neutral-300 py-1.5  shadow-xs/15 max-xl:justify-around max-sm:flex-col md:px-2 xl:justify-between"
                             onSubmit={handleSearch}
                         >
                             <input
                                 id="searchBar"
                                 type="search"
-                                className="border border-neutral-400 bg-neutral-50 px-1 text-left text-lg font-medium placeholder:text-zinc-400 max-2xl:py-0.75 max-md:w-4/10 max-sm:mt-px max-sm:mb-1.5 max-sm:w-19/20 md:max-xl:w-5/10 xl:w-6/10 2xl:p-0.75 2xl:pl-3"
+                                className="border border-neutral-400 shadow-2xs bg-neutral-50 px-1 text-left text-lg font-medium placeholder:text-zinc-400 max-2xl:py-0.75 max-md:w-4/10 max-sm:mt-px max-sm:mb-1.5 max-sm:w-19/20 md:max-xl:w-5/10 xl:w-6/10 2xl:p-0.75 2xl:pl-3"
                                 maxLength={20}
                                 placeholder="Search by Game Title/Theme"
                                 value={inputQuery}
@@ -109,13 +109,13 @@ const HomePage = () => {
                             />
                             <div className="flex max-h-8/10 max-sm:mt-0.5 max-sm:gap-5 sm:gap-2">
                                 <button
-                                    className="flex cursor-pointer items-center bg-red-400 px-1.5 font-medium text-white hover:scale-102 hover:bg-red-500 active:scale-98 max-sm:py-0.5 sm:py-0.75"
+                                    className="flex cursor-pointer items-center bg-red-400 px-1.5 font-medium text-white hover:scale-102 hover:bg-red-500 active:scale-98 max-sm:py-0.5 sm:py-0.75  inset-shadow-red-50 inset-shadow-sm/15 shadow-sm active:shadow-none"
                                     type="submit"
                                 >
                                     <IoMdSearch className="mr-px" size="1.5em" /> Search
                                 </button>
                                 <button
-                                    className="flex cursor-pointer items-center bg-blue-400 px-1.5 font-medium text-white hover:scale-102 hover:bg-blue-500 active:scale-98 max-sm:py-0.5 sm:py-0.75"
+                                    className="flex cursor-pointer items-center bg-blue-400 px-1.5 font-medium text-white hover:scale-102 hover:bg-blue-500 active:scale-98 max-sm:py-0.5 sm:py-0.75 inset-shadow-blue-50 inset-shadow-sm/15 shadow-sm active:shadow-none "
                                     onClick={() => void nav("/search/?sort=trending")}
                                     type="button"
                                 >
@@ -123,14 +123,14 @@ const HomePage = () => {
                                 </button>
                             </div>
                         </form>
-                        <div className="cursor-default p-px text-lg font-semibold xl:text-xl">
+                        <div className="cursor-default p-px text-lg font-semibold xl:text-xl ">
                             Search Games
                         </div>
                     </div>
                     <div className="h-0 w-full self-center border-b border-neutral-950"></div>
                     {/* Trending Games */}
                     <div className="col-start-1 cursor-pointer pt-2 text-center max-xl:hidden">
-                        <div className="flex items-center justify-center gap-3 border-neutral-700 bg-neutral-400 px-3 py-2 max-xl:w-full xl:w-fit">
+                        <div className="flex items-center justify-center gap-3 border-stone-600 border bg-stone-400 inset-shadow-xs/15 shadow-xs/15 px-3 py-2 max-xl:w-full xl:w-fit">
                             {isLoading ? (
                                 <LoadingSpinner />
                             ) : (
@@ -170,7 +170,7 @@ const HomePage = () => {
                     <div className="h-0 w-full self-center border-b border-neutral-950 max-xl:hidden"></div>
                     {/* Newest Games */}
                     <div className="col-start-1 cursor-pointer pt-2 text-center max-xl:hidden">
-                        <div className="flex items-center justify-center gap-3 border-neutral-700 bg-neutral-400 px-3 py-2 max-xl:w-full xl:w-fit">
+                        <div className="flex items-center justify-center gap-3 border-stone-600 border bg-stone-400 inset-shadow-xs/15 shadow-xs/15 px-3 py-2  max-xl:w-full xl:w-fit">
                             {isLoading ? (
                                 <LoadingSpinner />
                             ) : (
@@ -214,12 +214,12 @@ const HomePage = () => {
                     {/* Daily Game */}
                     <div>
                         <button
-                            className="col-start-2 cursor-pointer text-center text-lg font-semibold hover:scale-102 xl:mb-3"
+                            className="col-start-2 cursor-pointer text-center text-lg font-semibold hover:scale-102 xl:mb-3 "
                             onClick={() => {
                                 if (dailyGameScheduled) void nav("/daily");
                             }}
                         >
-                            <div className="min-w-38.5 border border-neutral-400 bg-neutral-300 py-1 max-xl:max-w-85 xl:max-w-130">
+                            <div className="min-w-38.5 border border-neutral-500 bg-neutral-300 py-1 inset-shadow-sm shadow-xs inset-shadow-neutral-300 max-xl:max-w-85 xl:max-w-130">
                                 <DailyGamePreview setIsDailyToday={setDailyGameScheduled} />
                             </div>
                             <div className="p-px text-lg font-semibold hover:text-blue-400 xl:text-xl">
@@ -237,7 +237,7 @@ const HomePage = () => {
                                 void nav(isPending ? "" : session ? "/create-game" : "/login");
                             }}
                         >
-                            <div className="w-full min-w-38.5 border border-neutral-400 bg-neutral-300 py-1 xl:min-w-60">
+                            <div className="w-full min-w-38.5 border border-neutral-500 bg-neutral-300 py-1 shadow-xs   xl:min-w-60">
                                 <img
                                     className="mx-auto h-51 object-fill text-center max-xl:h-30 2xl:h-55"
                                     src={CustomGameImg}
@@ -255,7 +255,7 @@ const HomePage = () => {
                                     className="col-start-2 w-full cursor-pointer text-center text-lg font-semibold hover:scale-102"
                                     onClick={() => void nav("/my-games")}
                                 >
-                                    <div className="w-full min-w-38.5 border border-neutral-400 bg-neutral-300 py-1 xl:min-w-60">
+                                    <div className="w-full min-w-38.5 border border-neutral-500 bg-neutral-300 py-1  shadow-xs  xl:min-w-60">
                                         <img
                                             className="mx-auto h-51 object-fill p-1 text-center max-xl:h-30 2xl:h-55"
                                             src={UsersPresetsImage}
@@ -274,14 +274,14 @@ const HomePage = () => {
                     {/* Join Room */}
                     <div className="p-1 text-center xl:col-start-2">
                         <form
-                            className="flex items-center justify-around border border-neutral-400 bg-neutral-300 py-1.5 2xl:py-1.5"
+                            className="flex items-center justify-around border border-neutral-500 bg-neutral-300 py-1.5  shadow-xs/15 2xl:py-1.5"
                             onSubmit={handleJoinExistingGame}
                         >
                             <input
                                 id="gameIdInput"
                                 name="gameIdInput"
                                 type="text"
-                                className="w-1/2 border border-neutral-400 bg-neutral-50 px-1 py-0.5 text-center font-medium placeholder:text-zinc-400 xl:text-lg"
+                                className="w-1/2 border border-neutral-400 shadow-2xs bg-neutral-50 px-1 py-0.5 text-center font-medium placeholder:text-zinc-400 xl:text-lg"
                                 required
                                 minLength={6}
                                 maxLength={6}
@@ -292,7 +292,7 @@ const HomePage = () => {
                                 }}
                             />
                             <button
-                                className="ml-5 flex cursor-pointer items-center bg-red-400 px-1.5 py-0.75 font-medium text-white hover:scale-102 hover:bg-red-500 active:scale-98 2xl:py-1"
+                                className="ml-5 flex cursor-pointer items-center bg-red-400 px-1.5 py-0.75 font-medium text-white hover:scale-102 hover:bg-red-500 active:scale-98 2xl:py-1  shadow-sm active:shadow-none "
                                 type="submit"
                             >
                                 <GiExitDoor

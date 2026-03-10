@@ -134,15 +134,29 @@ const DailyGamePage = () => {
         <>
             <InGameNavBar title={dailyGameInfo.title} />
             <div className="flex h-full w-full gap-2 px-2">
-                <div className="flex flex-col items-center lg:mt-9 lg:w-1/5 lg:min-w-[19.5dvw] lg:shrink-0">
-                    <div className="mb-3 flex justify-self-center">
+                <div className="flex flex-col items-center lg:mt-9 lg:w-1/5 lg:min-w-[19.5dvw] ">
+                    <div className="mb-3 flex gap-1.5 justify-self-center">
+                        {/* Message Tokens */}
                         {Array.from({ length: numQuestionsLeft }, (_, i) => (
-                            <AiFillQuestionCircle
-                                key={i}
-                                size={"3em"}
-                                color={"orange"}
-                                className="font-bold"
-                            />
+                            <div key={i} className="relative">
+                                <AiFillQuestionCircle
+                                    size="3em"
+                                    className="drop-shadow-[0_4px_6px_rgba(0,0,0,0.5)] [filter:drop-shadow(0_4px_6px_rgba(0,0,0,0.5))_drop-shadow(inset_0_2px_4px_rgba(255,255,255,0.3))]"
+                                    style={{
+                                        color: "#d97706",
+                                        filter: "drop-shadow(0 4px 6px rgba(0,0,0,0.5)) drop-shadow(0 -1px 2px rgba(255,200,100,0.6))",
+                                    }}
+                                />
+                                <span
+                                    className="absolute inset-0 flex items-center justify-center text-2xl font-black text-slate-300 drop-shadow-[0_1px_2px_rgba(0,0,0,0.8)] pointer-events-none"
+                                    style={{
+                                        textShadow:
+                                            "0 1px 3px rgba(0,0,0,0.9), 0 0 8px rgba(200,200,255,0.3)",
+                                    }}
+                                >
+                                    ?
+                                </span>
+                            </div>
                         ))}
                     </div>
                     <ChatPanel

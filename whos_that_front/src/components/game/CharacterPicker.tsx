@@ -42,6 +42,7 @@ const CharacterPicker = ({
             onClick={(e) => {
                 e.preventDefault();
                 e.stopPropagation();
+                setCharName("Random🎲");
                 emitChooseCharacter(roomId, -1);
             }}
             className="cursor-pointer"
