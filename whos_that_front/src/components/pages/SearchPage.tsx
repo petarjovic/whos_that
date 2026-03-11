@@ -25,7 +25,8 @@ const SearchPage = () => {
     useEffect(() => {
         const currentQuery = searchParams.get("q") ?? "";
         const timer = setTimeout(() => {
-            if (searchInput.length < 3 || searchInput === currentQuery) return;
+            if ((searchInput.length > 0 && searchInput.length < 3) || searchInput === currentQuery)
+                return;
             setSearchParams((prev) => ({ ...Object.fromEntries(prev), q: searchInput, page: "1" }));
         }, 500);
         return () => clearTimeout(timer);
@@ -138,7 +139,7 @@ const SearchPage = () => {
             ) : (
                 <div className="mt-3 flex flex-wrap items-center justify-evenly gap-4 border border-stone-800 bg-stone-400 inset-shadow-xs/15 shadow-sm/15 px-2 py-3 xl:mx-5">
                     {gamesList.length === 0 && (
-                        <p className="mx-auto mt-[40%] text-center text-xl font-medium">
+                        <p className="m-auto text-center text-xl font-medium">
                             Sorry, no presets match your search!{" "}
                             <Link
                                 to={"/create-game"}

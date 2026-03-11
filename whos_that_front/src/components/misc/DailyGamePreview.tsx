@@ -52,7 +52,7 @@ export const DailyGamePreview = ({
                 <LoadingSpinner />
             ) : imageUrls.length > 0 ? (
                 <>
-                    <div className="relative w-full overflow-hidden py-2 ">
+                    <div className="relative w-full overflow-hidden py-2">
                         <div ref={scrollRef} className="animate-scroll flex gap-2 ">
                             {[...imageUrls, ...imageUrls, ...imageUrls].map((url, i) => (
                                 <div key={i} className="shrink-0">
@@ -61,8 +61,10 @@ export const DailyGamePreview = ({
                             ))}
                         </div>
                     </div>
-                    <div className="leading-none font-semibold text-xl xl:my-1 text-neutral-900">
-                        {"{ " + title + " }"}
+                    <div className="leading-none font-medium text-[1.3rem] xl:my-1 text-white text-shadow-xs/75">
+                        <span className="text-red-500/50 text-2xl text-shadow-xs/50"> {"{"}</span>
+                        {title}
+                        <span className="text-red-500/50 text-2xl text-shadow-xs/50">{"}"}</span>
                     </div>
                 </>
             ) : (

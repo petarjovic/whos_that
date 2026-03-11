@@ -82,7 +82,7 @@ const ChatPanel = ({ messages, onSend, isLoading, opponentLabel = "Opponent" }: 
                 <button
                     // eslint-disable-next-line @typescript-eslint/prefer-nullish-coalescing
                     disabled={isLoading || draft.trim().length < 5}
-                    className="mx-auto  w-fit cursor-pointer max-w-20  border-x border-t border-b-9 border-cyan-800 bg-cyan-700 px-2 text-semibold text-gray-200  font-semibold hover:text-gray-300 shadow-sm/20 transition-all active:mt-px active:mr-px flex-1 hover:border-cyan-900 hover:bg-cyan-800 active:bg-cyan-700 active:borcer-cyan-800 duration-22 text-shadow-xs/50 py-1 hover:shadow-xs active:-translate-y-px active:border-b active:shadow-2xs relative z-1"
+                    className="mx-auto w-fit cursor-pointer max-w-20  border-x border-t border-b-9 border-cyan-800 bg-cyan-700 px-2 text-semibold text-gray-200  font-semibold hover:text-gray-300 shadow-sm/20 transition-all active:mt-px active:mr-px flex-1 hover:border-cyan-900 hover:bg-cyan-800 active:bg-cyan-700 active:borcer-cyan-800 duration-22 text-shadow-xs/50 py-1 hover:shadow-xs active:-translate-y-px active:border-b active:shadow-2xs relative z-1"
                     type="submit"
                 >
                     [ASK]

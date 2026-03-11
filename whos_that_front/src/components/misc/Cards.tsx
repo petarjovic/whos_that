@@ -8,6 +8,7 @@ interface CardLayoutProps {
     imgSrc: string | undefined;
     isOppCard?: boolean;
     size?: "XS" | "S" | "M" | "L";
+    highlightOnHover?: boolean;
 }
 
 type sizeTailwind = {
@@ -31,10 +32,11 @@ export const CardLayout = ({
     imgSrc,
     isOppCard = false,
     size = "M",
+    highlightOnHover = false,
 }: PropsWithChildren<CardLayoutProps>) => {
     return (
         <figure
-            className={`border border-black ${sizeMap[size]} flex flex-col justify-between rounded-xs hover:scale-106 ${isOppCard ? "animate-[flash-attention_2s_ease-in-out_1] border-orange-300 bg-orange-300" : "bg-linear-to-b from-neutral-50 to-neutral-100"} text-center shadow-md/25 hover:shadow-xl/25`}
+            className={`border border-black ${sizeMap[size]} flex flex-col justify-between rounded-xs hover:scale-106 ${isOppCard ? "animate-[flash-attention_2s_ease-in-out_1] border-orange-300 bg-orange-300" : "bg-linear-to-b from-neutral-50 to-neutral-100"} text-center shadow-md/25 hover:shadow-xl/25 ${highlightOnHover ? "hover:from-blue-400 hover:to-blue-400 active:from-neutral-50 active:to-neutral-100 active:scale-100" : ""}`}
         >
             <img
                 className={`${size === "XS" ? "mx-0.5 mt-0.5" : "mx-1 mt-1"} h-8/10 max-h-8/10 border border-neutral-500 bg-gray-300 object-fill ${isOppCard ? "grayscale-100" : ""}`}

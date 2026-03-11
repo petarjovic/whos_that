@@ -27,7 +27,7 @@ const Hero = ({ session, isPending, showUserInfo = true }: HeroProps) => {
         <div className="w-[92dvw]">
             <header className="relative flex flex-col items-center justify-center border-b border-zinc-900 py-2.25 sm:pt-1 sm:pb-5 lg:pt-2">
                 {/* Site title */}
-                <p className="z-1 text-sm leading-none text-neutral-700 sm:text-base">
+                <p className="z-0 relative text-sm leading-none text-neutral-700 sm:text-base">
                     The Classic Character Elimination Game
                 </p>
                 <div className="z-1 h-0 w-9/10 border-t border-zinc-900"></div>
@@ -38,7 +38,7 @@ const Hero = ({ session, isPending, showUserInfo = true }: HeroProps) => {
                             to={"/"}
                             id="title"
                             reloadDocument={true} //forces reload just in case
-                            className="font-digitag text-wide cursor-pointer leading-0 font-bold text-orange-300 text-shadow-sm/50 hover:text-orange-400 max-sm:text-[4rem] sm:relative sm:top-1.25 sm:text-8xl sm:tracking-wide lg:top-1.5"
+                            className="font-digitag text-wide cursor-pointer leading-0 font-bold text-orange-300 text-shadow-sm/75 hover:text-orange-400 max-sm:text-[4rem] sm:relative sm:top-1.25 sm:text-8xl sm:tracking-wide lg:top-1.5"
                         >
                             <>
                                 {/* Spans are for improved spacing + styling */}
@@ -66,7 +66,7 @@ const Hero = ({ session, isPending, showUserInfo = true }: HeroProps) => {
             <div
                 className={`flex w-full ${session ? "justify-around" : "justify-center"} text-sm text-neutral-600`}
             >
-                <div className="z-1 sm:text-base">
+                <div className="z-0 relative sm:text-base">
                     {new Date().toLocaleString("en-US", {
                         dateStyle: "long",
                     })}

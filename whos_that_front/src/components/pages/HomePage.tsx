@@ -109,13 +109,13 @@ const HomePage = () => {
                             />
                             <div className="flex max-h-8/10 max-sm:mt-0.5 max-sm:gap-5 sm:gap-2">
                                 <button
-                                    className="flex cursor-pointer items-center bg-red-400 px-1.5 font-medium text-white hover:scale-102 hover:bg-red-500 active:scale-98 max-sm:py-0.5 sm:py-0.75  inset-shadow-red-50 inset-shadow-sm/15 shadow-sm active:shadow-none"
+                                    className="flex cursor-pointer items-center bg-red-400 px-1.5 font-medium text-white hover:scale-102 rounded-xs hover:bg-red-500 active:scale-98 max-sm:py-0.5 sm:py-0.75  inset-shadow-red-50 inset-shadow-sm/15 shadow-xs/20 active:shadow-none"
                                     type="submit"
                                 >
                                     <IoMdSearch className="mr-px" size="1.5em" /> Search
                                 </button>
                                 <button
-                                    className="flex cursor-pointer items-center bg-blue-400 px-1.5 font-medium text-white hover:scale-102 hover:bg-blue-500 active:scale-98 max-sm:py-0.5 sm:py-0.75 inset-shadow-blue-50 inset-shadow-sm/15 shadow-sm active:shadow-none "
+                                    className="flex cursor-pointer items-center bg-blue-400 px-1.5 font-medium text-white hover:scale-102 rounded-xs hover:bg-blue-500 active:scale-98 max-sm:py-0.5 sm:py-0.75 inset-shadow-blue-50 inset-shadow-sm/15 shadow-xs/20 active:shadow-none "
                                     onClick={() => void nav("/search/?sort=trending")}
                                     type="button"
                                 >
@@ -219,11 +219,11 @@ const HomePage = () => {
                                 if (dailyGameScheduled) void nav("/daily");
                             }}
                         >
-                            <div className="min-w-38.5 border border-neutral-500 bg-neutral-300 py-1 inset-shadow-sm shadow-xs inset-shadow-neutral-300 max-xl:max-w-85 xl:max-w-130">
+                            <div className="min-w-38.5 md:min-w-105 border-gray-500 border bg-gray-400 inset-shadow-sm/15 shadow-xs/15 py-1 max-xl:max-w-85 xl:max-w-130">
                                 <DailyGamePreview setIsDailyToday={setDailyGameScheduled} />
                             </div>
                             <div className="p-px text-lg font-semibold hover:text-blue-400 xl:text-xl">
-                                Play Today&apos;s Daily Game
+                                Play Today&apos;s Daily!
                             </div>
                         </button>
                         <div className="h-0 w-full self-center border-b border-neutral-950"></div>
@@ -292,7 +292,7 @@ const HomePage = () => {
                                 }}
                             />
                             <button
-                                className="ml-5 flex cursor-pointer items-center bg-red-400 px-1.5 py-0.75 font-medium text-white hover:scale-102 hover:bg-red-500 active:scale-98 2xl:py-1  shadow-sm active:shadow-none "
+                                className="ml-5 flex cursor-pointer items-center bg-red-400 px-1.5 py-0.75 font-medium text-white hover:scale-102 hover:bg-red-500 active:scale-98 2xl:py-1  shadow-xs/20 active:shadow-none rounded-xs"
                                 type="submit"
                             >
                                 <GiExitDoor

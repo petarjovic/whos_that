@@ -26,7 +26,7 @@ const FirstVisitModal = () => {
         <ReactModal
             isOpen={isOpen}
             onRequestClose={handleClose}
-            className="absolute top-1/2 left-1/2 mx-auto max-h-[90vh] max-w-6xl -translate-x-1/2 -translate-y-1/2 overflow-y-auto border-2 bg-neutral-200 text-center shadow max-sm:w-9/10 max-sm:px-2 max-sm:py-6 sm:p-8"
+            className="absolute top-1/2 left-1/2 mx-auto max-h-[90vh] max-w-6xl -translate-x-1/2 -translate-y-1/2 overflow-y-auto border-2 bg-neutral-200 text-center shadow max-sm:w-9/10 max-sm:px-2 max-sm:py-6 sm:p-8 inset-shadow-sm/15 inset-shadow-white border-neutral-300 rounded z-50 "
             shouldCloseOnOverlayClick={false}
             shouldCloseOnEsc={false}
             overlayClassName="fixed inset-0 bg-zinc-800/75"

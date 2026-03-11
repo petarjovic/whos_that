@@ -64,8 +64,8 @@ const FeedbackModal = ({ isOpen, onClose }: { isOpen: boolean; onClose: () => vo
                     <span className="font-semibold text-amber-500 text-shadow-2xs/100">
                         Who&apos;s That<span className="text-red-500">?</span>
                     </span>{" "}
-                    a better experience! If you&apos;ve found a bug, have an idea, question, or good
-                    recipe, send us a message here! All feedback is read by a real person.
+                    a better experience! If you&apos;ve found a bug, have an idea, question, or a
+                    good recipe, send us a message here! All feedback is read by a real person.
                 </p>
 
                 {submitted ? (

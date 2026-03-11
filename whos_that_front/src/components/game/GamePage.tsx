@@ -77,23 +77,22 @@ const Game = ({ roomState, cardData }: GameProps) => {
 
     const passTurnButton =
         socketId === roomState.curTurn ? (
-            <div className="my-auto border border-neutral-700 hover:scale-105">
+            <div key="pass-turn-button" className="my-auto border-5 border-neutral-200 ">
                 <button
                     type="button"
-                    className="flex h-40 w-40 cursor-pointer flex-col items-center justify-center border-5 border-neutral-100 bg-red-400 text-neutral-50 text-shadow-xs/50 hover:bg-red-500"
+                    className="flex h-40 w-40 cursor-pointer flex-col items-center justify-center border-5 border-red-700 b bg-red-600 text-neutral-50 text-shadow-sm/25 hover:bg-red-700 hover:border-red-800 border-b-18 border-x-2 border-t-2 active:border-b shadow-md/20 transition-all duration-20"
                     onClick={(e) => {
                         e.preventDefault();
                         e.stopPropagation();
                         emitPassTurn(roomState.id);
                     }}
                 >
-                    <span className="text-xl font-medium">End Turn</span>
-                    <span>Without Guessing</span>
+                    <span className="text-xl font-medium">End Turn Without Guessing</span>
                 </button>
             </div>
         ) : (
-            <div className="my-auto border border-neutral-700">
-                <div className="flex h-40 w-40 flex-col items-center justify-center border-5 border-neutral-100 bg-slate-500 text-neutral-50 text-shadow-xs/50 text-center">
+            <div key="pass-turn-button" className="my-auto border-5 border-neutral-200">
+                <div className="flex h-40 w-40 px-0.5 flex-col items-center justify-center bg-slate-500 border-b-18 border-x-2 border-t-2 border-slate-600 text-neutral-50 text-shadow-sm/25 text-center cursor-pointer">
                     <span className="text-xl font-medium">
                         Opponent&apos;s Turn To Ask A Question
                     </span>
@@ -136,10 +135,10 @@ const Game = ({ roomState, cardData }: GameProps) => {
 const FirstTurnModal = ({ isOpen, goingFirst }: { isOpen: boolean; goingFirst: boolean }) => (
     <ReactModal
         isOpen={isOpen}
-        className="3xl:py-15 absolute top-1/2 left-1/2 mx-auto flex h-fit w-9/10 -translate-x-1/2 -translate-y-1/2 flex-col gap-4 border-2 border-neutral-800 bg-neutral-200 px-2 text-center max-lg:max-w-2xl max-md:py-5 md:max-lg:py-8 lg:max-w-3xl lg:py-8 lg:max-2xl:px-5 2xl:px-10 2xl:pt-12 2xl:pb-10"
+        className="3xl:py-15 absolute top-1/2 left-1/2 mx-auto flex h-fit w-9/10 -translate-x-1/2 -translate-y-1/2 flex-col gap-4 border-2 border-neutral-500 bg-neutral-200 px-2 text-center max-lg:max-w-2xl max-md:py-5 md:max-lg:py-8 lg:max-w-3xl lg:py-8 lg:max-2xl:px-5 2xl:px-10 2xl:pt-12 2xl:pb-10 inset-shadow-sm/15 inset-shadow-white rounded"
         overlayClassName="fixed inset-0 bg-zinc-700/70"
     >
-        <p className="font-bold text-amber-500 text-shadow-xs/70 max-2xl:text-4xl 2xl:mb-2 2xl:text-5xl">
+        <p className="font-bold text-amber-500 text-shadow-sm/50 max-2xl:text-4xl 2xl:mb-2 2xl:text-5xl">
             {goingFirst ? "You're going First!" : "You're going Second!"}
         </p>
         <p className="font-medium max-2xl:max-w-19/20 max-2xl:text-xl 2xl:mx-auto 2xl:max-w-3/4 2xl:text-2xl">
@@ -163,7 +162,7 @@ export const ConfirmGuessModal = ({ isOpen, confirmGuess, name }: ConfirmGuessMo
     return (
         <ReactModal
             isOpen={isOpen}
-            className="absolute top-1/2 left-1/2 mx-auto flex h-fit w-9/10 -translate-x-1/2 -translate-y-1/2 flex-col gap-4 border-2 border-neutral-800 bg-neutral-200 px-2 text-center max-lg:max-w-2xl max-md:py-5 md:max-lg:py-8 lg:max-w-3xl lg:py-8 2xl:pt-12 2xl:pb-10"
+            className="absolute top-1/2 left-1/2 mx-auto flex h-fit w-9/10 -translate-x-1/2 -translate-y-1/2 flex-col gap-4 border-2 border-neutral-800 bg-neutral-200 px-2 text-center max-lg:max-w-2xl max-md:py-5 md:max-lg:py-8 lg:max-w-3xl lg:py-8 2xl:pt-12 2xl:pb-10 inset-shadow-sm/15 inset-shadow-white rounded shadow-md/15"
             overlayClassName="fixed inset-0 bg-zinc-900/70"
         >
             <p className="mx-auto mb-1 leading-none font-medium whitespace-pre-wrap text-neutral-800 max-lg:text-3xl lg:text-4xl 2xl:text-[42px]">
@@ -171,7 +170,7 @@ export const ConfirmGuessModal = ({ isOpen, confirmGuess, name }: ConfirmGuessMo
             </p>
             <div className="mx-auto flex max-lg:gap-5 lg:mt-5 lg:gap-10 2xl:gap-20">
                 <button
-                    className="cursor-pointer rounded-xs bg-green-600 text-center font-medium text-neutral-50 hover:bg-green-700 max-lg:text-xl max-md:px-3.5 max-md:py-1.5 md:max-lg:px-4.5 md:max-lg:py-2 lg:px-5 lg:py-3 lg:text-2xl"
+                    className="cursor-pointer rounded-xs bg-green-600 text-center font-medium text-neutral-50 border border-green-700 hover:border-green-800 hover:bg-green-700 max-lg:text-xl max-md:px-3.5 max-md:py-1.5 md:max-lg:px-4.5 md:max-lg:py-2 lg:px-5 lg:py-3 lg:text-2xl shadow-xs/15 inset-shadow-sm/15 inset-shadow-amber-50 hover:scale-102 active:scale-100 active:shadow-none"
                     onClick={() => {
                         confirmGuess(true);
                     }}
@@ -179,7 +178,7 @@ export const ConfirmGuessModal = ({ isOpen, confirmGuess, name }: ConfirmGuessMo
                     Yes I&apos;m sure
                 </button>
                 <button
-                    className="cursor-pointer rounded-xs bg-amber-500 text-center font-medium text-neutral-50 grayscale-10 hover:bg-amber-600 max-lg:text-xl max-md:px-3.5 max-md:py-1.5 md:max-lg:px-4.5 md:max-lg:py-2 lg:px-5 lg:py-3 lg:text-2xl"
+                    className="cursor-pointer rounded-xs bg-amber-500 text-center font-medium text-neutral-50 grayscale-10 hover:bg-amber-600 border border-amber-600 hover:border-amber-700 max-lg:text-xl max-md:px-3.5 max-md:py-1.5 md:max-lg:px-4.5 md:max-lg:py-2 lg:px-5 lg:py-3 lg:text-2xl shadow-xs/15 inset-shadow-sm/15 inset-shadow-amber-50 hover:scale-102 active:scale-100 active:shadow-none"
                     onClick={() => {
                         confirmGuess(false);
                     }}
@@ -251,20 +250,20 @@ const GameEndModal = ({ roomState }: GameEndModalProps) => {
     return (
         <ReactModal
             isOpen={Object.values(roomState.endState).some((e) => e !== null)}
-            className="absolute top-1/2 left-1/2 mx-auto flex h-fit w-9/10 -translate-x-1/2 -translate-y-1/2 flex-col gap-4 border-2 border-neutral-800 bg-neutral-200 px-2 text-center max-lg:max-w-2xl max-md:py-5 md:max-lg:py-8 lg:max-w-3xl lg:py-8 2xl:pt-12 2xl:pb-8"
+            className="absolute top-1/2 left-1/2 mx-auto flex h-fit w-9/10 -translate-x-1/2 -translate-y-1/2 flex-col gap-4 border-2 border-neutral-400 bg-radial to-neutral-100 from-neutral-300 px-2 text-center max-lg:max-w-2xl max-md:py-5 shadow-md/15  md:max-lg:py-8 lg:max-w-3xl lg:py-8 2xl:pt-12 2xl:pb-8 inset-shadow-sm/15 shadow-md inset-shadow-neutral-100 rounded"
             overlayClassName="fixed inset-0 bg-zinc-900/70"
         >
             <h2
-                className={`font-digitag mx-auto text-shadow-2xs/100 max-lg:leading-none max-md:text-[6rem] md:leading-27 md:max-xl:text-[7.5rem] xl:text-[9.5rem] ${headingText === "You Win!" ? "text-green-600" : "text-red-600"} max-2xl:mb-4 max-lg:mb-0 2xl:mb-5`}
+                className={`font-digitag mx-auto text-shadow-sm/50 max-lg:leading-none max-md:text-[6rem] md:leading-27 md:max-xl:text-[7.5rem] xl:text-[9.5rem] ${headingText === "You Win!" ? "text-green-600" : "text-orange-600"} max-2xl:mb-4 max-lg:mb-0 2xl:mb-5`}
             >
                 {headingText}
             </h2>
             <p className="mx-auto text-4xl font-medium whitespace-pre-wrap text-neutral-800 max-2xl:mb-1 max-sm:text-2xl 2xl:mb-2.5">
                 {paraText}
             </p>
-            <div className="mx-auto mt-2.5 flex flex-row max-sm:gap-4 sm:max-lg:gap-13 lg:gap-20">
+            <div className="mx-auto my-2.5 flex flex-row max-sm:gap-4 sm:max-lg:gap-13 lg:gap-20">
                 <button
-                    className={`cursor-pointer rounded-xs text-center font-medium text-neutral-50 max-lg:text-xl max-md:px-3.5 max-md:py-1.5 md:max-lg:px-4.5 md:max-lg:py-2 lg:px-5 lg:py-3 lg:text-2xl ${playAgainSent ? "bg-gray-700" : "bg-green-600 hover:bg-green-700"}`}
+                    className={`cursor-pointer rounded-xs text-center font-medium text-neutral-50 max-lg:text-xl max-md:px-3.5 max-md:py-1.5 md:max-lg:px-4.5 md:max-lg:py-2 lg:px-5 lg:py-3 lg:text-2xl ${playAgainSent ? "bg-gray-700" : "bg-green-600 hover:bg-green-700 shadow-xs active:shadow-none hover:scale-102 active:scale-100 border-green-700 border hover:border-green-800"}`}
                     onClick={() => {
                         handlePlayAgain();
                     }}
@@ -276,7 +275,7 @@ const GameEndModal = ({ roomState }: GameEndModalProps) => {
                     onClick={() => {
                         void navigate("/");
                     }}
-                    className="scale-95 cursor-pointer rounded-xs bg-amber-600 text-center font-medium text-neutral-50 hover:bg-amber-700 max-lg:px-3 max-lg:py-1.25 max-lg:text-xl lg:px-5 lg:py-3 lg:text-2xl"
+                    className="scale-95 cursor-pointer rounded-xs bg-amber-500 text-center font-medium text-neutral-50 hover:bg-amber-600 max-lg:px-3 max-lg:py-1.25 max-lg:text-xl lg:px-5 lg:py-3 lg:text-2xl shadow-xs active:shadow-none hover:scale-102 active:scale-100 border-amber-600 border hover:border-amber-700"
                 >
                     Home Page
                 </button>
@@ -314,7 +313,7 @@ const GameEndModal = ({ roomState }: GameEndModalProps) => {
                         <p className="text-2xl font-semibold">Did you enjoy this preset?</p>
                         <button
                             type="button"
-                            className="mt-1 cursor-pointer bg-red-400 px-2 py-1.25 font-medium text-white hover:bg-red-600 lg:px-2.5 lg:py-1.5 lg:text-base xl:text-base"
+                            className="mt-1 cursor-pointer bg-red-400 shadow-xs/15 inset-shadow-sm/15 inset-shadow-red-50 px-2 py-1.25 font-medium text-white hover:bg-red-600 lg:px-2.5 lg:py-1.5 lg:text-base xl:text-base"
                             onClick={() => {
                                 void navigate("/login");
                             }}

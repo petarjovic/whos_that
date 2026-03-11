@@ -1,5 +1,5 @@
 import type { CardDataUrl } from "@server/types";
-import { CardLayout, OpponentTargetCard } from "../misc/Cards";
+import { CardLayout } from "../misc/Cards";
 import { type JSX } from "react";
 import { emitChooseCharacter } from "../../lib/socket";
 import GameBoard from "./GameBoard";
@@ -29,7 +29,12 @@ const CharacterPicker = ({
                 }}
                 className="cursor-pointer"
             >
-                <CardLayout name={char.name} imgSrc={char.imageUrl} size={"L"}>
+                <CardLayout
+                    name={char.name}
+                    imgSrc={char.imageUrl}
+                    size={"L"}
+                    highlightOnHover={true}
+                >
                     <></>
                 </CardLayout>
             </button>
@@ -47,10 +52,10 @@ const CharacterPicker = ({
             }}
             className="cursor-pointer"
         >
-            <OpponentTargetCard name={"Random"} imgSrc={dice} />
+            <CardLayout name={"Random"} imgSrc={dice} size={"L"} highlightOnHover={true} />
         </button>
     );
 
-    return <GameBoard cardList={cardSelectorList} targetCard={randomCharacterCard} />;
+    return <GameBoard cardList={[...cardSelectorList, randomCharacterCard]} />;
 };
 export default CharacterPicker;
