@@ -61,10 +61,10 @@ export const DailyGamePreview = ({
                             ))}
                         </div>
                     </div>
-                    <div className="leading-none font-medium text-[1.3rem] xl:my-1 text-white text-shadow-xs/75">
-                        <span className="text-red-500/50 text-2xl text-shadow-xs/50"> {"{"}</span>
+                    <div className="leading-none font-medium text-2xl mt-1.25 text-white text-shadow-xs/75">
+                        <span className="text-red-500/50 text-3xl text-shadow-xs/50"> {"{"}</span>
                         {title}
-                        <span className="text-red-500/50 text-2xl text-shadow-xs/50">{"}"}</span>
+                        <span className="text-red-500/50 text-3xl text-shadow-xs/50">{"}"}</span>
                     </div>
                 </>
             ) : (

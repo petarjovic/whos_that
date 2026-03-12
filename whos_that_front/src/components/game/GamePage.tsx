@@ -8,6 +8,7 @@ import LikeButton from "../misc/LikeButton.tsx";
 import { emitPlayAgain, emitGuess, getSocketId, emitPassTurn } from "../../lib/socket.ts";
 import GameBoard from "./GameBoard.tsx";
 import { fetchLikeInfo, useBetterAuthSession } from "../../lib/hooks.ts";
+import ModalLayout from "../layout/ModalLayout.tsx";
 
 export type ConfirmGuessModalState =
     | { isOpen: false }
@@ -133,10 +134,12 @@ const Game = ({ roomState, cardData }: GameProps) => {
  * Pops up for 5 seconds at start of game to tell player if they're first or second
  */
 const FirstTurnModal = ({ isOpen, goingFirst }: { isOpen: boolean; goingFirst: boolean }) => (
-    <ReactModal
+    <ModalLayout
         isOpen={isOpen}
-        className="3xl:py-15 absolute top-1/2 left-1/2 mx-auto flex h-fit w-9/10 -translate-x-1/2 -translate-y-1/2 flex-col gap-4 border-2 border-neutral-500 bg-neutral-200 px-2 text-center max-lg:max-w-2xl max-md:py-5 md:max-lg:py-8 lg:max-w-3xl lg:py-8 lg:max-2xl:px-5 2xl:px-10 2xl:pt-12 2xl:pb-10 inset-shadow-sm/15 inset-shadow-white rounded"
-        overlayClassName="fixed inset-0 bg-zinc-700/70"
+        classNames="3xl:py-15 flex h-fit w-9/10 flex-col gap-4 px-2 text-center max-lg:max-w-2xl max-md:py-5 md:max-lg:py-8 lg:max-w-3xl lg:py-8 lg:max-2xl:px-5 2xl:px-10 2xl:pt-12 2xl:pb-10 rounded"
+        handleClose={() => {
+            /* No HandleClose func needed */
+        }}
     >
         <p className="font-bold text-amber-500 text-shadow-sm/50 max-2xl:text-4xl 2xl:mb-2 2xl:text-5xl">
             {goingFirst ? "You're going First!" : "You're going Second!"}
@@ -145,7 +148,7 @@ const FirstTurnModal = ({ isOpen, goingFirst }: { isOpen: boolean; goingFirst: b
             Remember: you can only guess on your own turn,{" "}
             <span className="italic">instead of asking a question!</span>
         </p>
-    </ReactModal>
+    </ModalLayout>
 );
 
 interface ConfirmGuessModalProps {
@@ -248,10 +251,12 @@ const GameEndModal = ({ roomState }: GameEndModalProps) => {
     }
 
     return (
-        <ReactModal
+        <ModalLayout
             isOpen={Object.values(roomState.endState).some((e) => e !== null)}
-            className="absolute top-1/2 left-1/2 mx-auto flex h-fit w-9/10 -translate-x-1/2 -translate-y-1/2 flex-col gap-4 border-2 border-neutral-400 bg-radial to-neutral-100 from-neutral-300 px-2 text-center max-lg:max-w-2xl max-md:py-5 shadow-md/15  md:max-lg:py-8 lg:max-w-3xl lg:py-8 2xl:pt-12 2xl:pb-8 inset-shadow-sm/15 shadow-md inset-shadow-neutral-100 rounded"
-            overlayClassName="fixed inset-0 bg-zinc-900/70"
+            classNames="flex h-fit w-9/10  flex-col gap-4 px-2 text-center max-lg:max-w-2xl max-md:py-5 md:max-lg:py-8 lg:max-w-3xl lg:py-8 2xl:pt-12 2xl:pb-8"
+            handleClose={() => {
+                /* No HandleClose func needed */
+            }}
         >
             <h2
                 className={`font-digitag mx-auto text-shadow-sm/50 max-lg:leading-none max-md:text-[6rem] md:leading-27 md:max-xl:text-[7.5rem] xl:text-[9.5rem] ${headingText === "You Win!" ? "text-green-600" : "text-orange-600"} max-2xl:mb-4 max-lg:mb-0 2xl:mb-5`}
@@ -327,7 +332,7 @@ const GameEndModal = ({ roomState }: GameEndModalProps) => {
                     </div>
                 )}
             </div>
-        </ReactModal>
+        </ModalLayout>
     );
 };
 

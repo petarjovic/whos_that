@@ -17,6 +17,7 @@ import { FaHeart } from "react-icons/fa6";
 import LikeButton from "../misc/LikeButton.tsx";
 import { AiFillQuestionCircle } from "react-icons/ai";
 import InGameNavBar from "./InGameNavBar.tsx";
+import DailyGameModal from "./DailyGameModal.tsx";
 
 // Stable empty EndState — passed to Card only to satisfy the resetOnNewGame prop.
 // The daily has no play-again, so this never changes and card flips never auto-reset.
@@ -38,7 +39,7 @@ const DailyGamePage = () => {
     const [messages, setMessages] = useState<ChatMessage[]>([
         {
             isUser: false,
-            msg: "Hello, I'm Whos-That-Bot-300! I'm here to help you guess todays mystery character, I can answer any yes/no question about them, at the cost of 1 question token. Make sure you have enough information about the character to make a guess by the time you run out! ",
+            msg: "Ughhh...they got me good. My circuits are messed up, I remember everything about the person but I can't piece together who it was! My power is low... after this message I'll only be able to respond with Yes or No. Detective, please find them and avenge me!",
         },
     ]);
 
@@ -141,7 +142,7 @@ const DailyGamePage = () => {
                             <div key={i} className="relative">
                                 <AiFillQuestionCircle
                                     size="3em"
-                                    className="drop-shadow-[0_4px_6px_rgba(0,0,0,0.5)] [filter:drop-shadow(0_4px_6px_rgba(0,0,0,0.5))_drop-shadow(inset_0_2px_4px_rgba(255,255,255,0.3))]"
+                                    className="drop-shadow-[0_4px_6px_rgba(0,0,0,0.5)] filter-[drop-shadow(0_4px_6px_rgba(0,0,0,0.5))_drop-shadow(inset_0_2px_4px_rgba(255,255,255,0.3))]"
                                     style={{
                                         color: "#d97706",
                                         filter: "drop-shadow(0 4px 6px rgba(0,0,0,0.5)) drop-shadow(0 -1px 2px rgba(255,200,100,0.6))",
@@ -187,6 +188,11 @@ const DailyGamePage = () => {
                 win={"isWinner" in guessState ? guessState.isWinner : false}
                 numQuestionsLeft={numQuestionsLeft}
                 gameId={dailyGameInfo.ogGameId}
+            />
+
+            <DailyGameModal
+                gangName={dailyGameInfo.title}
+                detectiveName={session?.user.displayUsername ?? "Detective"}
             />
         </>
     );

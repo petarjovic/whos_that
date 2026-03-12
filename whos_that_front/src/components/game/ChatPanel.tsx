@@ -45,14 +45,14 @@ const ChatPanel = ({ messages, onSend, isLoading, opponentLabel = "Opponent" }: 
                 </button>
             </div>
 
-            <div className="flex flex-1 flex-col gap-3 overflow-y-auto bg-black/40 px-3 py-3 font-mono text-sm relative before:content-[''] before:absolute before:inset-0 before:bg-[repeating-linear-gradient(0deg,rgba(0,0,0,0.15)_0px,rgba(0,0,0,0.15)_1px,transparent_1px,transparent_2px)] before:pointer-events-none before:z-10 after:content-[''] after:absolute after:inset-0 after:bg-[radial-gradient(ellipse_at_center,transparent_0%,rgba(0,0,0,0.3)_100%)] after:pointer-events-none after:z-10 border-x-3 border-gray-800">
+            <div className="flex flex-1 flex-col gap-3 overflow-y-auto bg-black/40 px-3 py-3 font-mono text-sm relative before:content-[''] before:absolute before:inset-0 before:bg-[repeating-linear-gradient(0deg,rgba(15,23,42,0.15)_0px,rgba(15,23,42,0.15)_1px,transparent_1px,transparent_2px)] before:pointer-events-none before:z-10 after:content-[''] after:absolute after:inset-0 after:bg-[radial-gradient(ellipse_at_center,transparent_0%,rgba(15,23,42,0.3)_100%)] after:pointer-events-none after:z-10 border-x-3 border-gray-800">
                 {messages.map((msg, i) => (
                     <div
                         key={i}
                         className={`w-fit max-w-[85%] border-2 px-3 py-2 font-mono ${
                             msg.isUser
-                                ? "self-end border-blue-400 bg-blue-950/80 text-blue-20 text-shadow-[0_0_2px_rgba(96,165,250,0.5)] shadow-[0_0_11px_rgba(96,165,250,0.5)]"
-                                : "self-start border-cyan-400 bg-cyan-950/80 text-cyan-200 text-shadow-[0_0_2px_rgba(34,211,238,0.5)] shadow-[0_0_11px_rgba(34,211,238,0.5)]"
+                                ? "self-end border-blue-400 bg-blue-950/80 text-blue-100 text-shadow-[0_0_2px_rgba(96,165,250,0.5)] shadow-[0_0_11px_rgba(96,165,250,0.5)]"
+                                : "self-start border-cyan-400 bg-cyan-950/80 text-cyan-100 text-shadow-[0_0_2px_rgba(34,211,238,0.5)] shadow-[0_0_11px_rgba(34,211,238,0.5)]"
                         }`}
                     >
                         {msg.msg}

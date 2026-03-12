@@ -219,7 +219,7 @@ const HomePage = () => {
                                 if (dailyGameScheduled) void nav("/daily");
                             }}
                         >
-                            <div className="min-w-38.5 md:min-w-105 border-gray-500 border bg-gray-400 inset-shadow-sm/15 shadow-xs/15 py-1 max-xl:max-w-85 xl:max-w-130">
+                            <div className="min-w-38.5 md:min-w-105 border-gray-500 border bg-slate-500 inset-shadow-sm/15 shadow-xs/15 pt-2 min-h-40 max-xl:max-w-85 xl:max-w-130">
                                 <DailyGamePreview setIsDailyToday={setDailyGameScheduled} />
                             </div>
                             <div className="p-px text-lg font-semibold hover:text-blue-400 xl:text-xl">
@@ -292,7 +292,7 @@ const HomePage = () => {
                                 }}
                             />
                             <button
-                                className="ml-5 flex cursor-pointer items-center bg-red-400 px-1.5 py-0.75 font-medium text-white hover:scale-102 hover:bg-red-500 active:scale-98 2xl:py-1  shadow-xs/20 active:shadow-none rounded-xs"
+                                className="ml-5 flex cursor-pointer items-center bg-red-400 px-1.5 py-0.75 font-medium text-white hover:scale-102 hover:bg-red-500 active:scale-98 2xl:py-1 shadow-xs/20 active:shadow-none rounded-xs"
                                 type="submit"
                             >
                                 <GiExitDoor
