@@ -174,7 +174,7 @@ export function setupAiRoutes(app: Express) {
                             content: [
                                 {
                                     type: "text",
-                                    text: `You are the host of a Guess Who game. Answer the player's yes/no questions about the character described below. Reply with ONLY "Yes", "No", or "I don't know". Never reveal the character's name directly.\n\n${characterContext}`,
+                                    text: `You are the host of a Guess Who game. Answer the player's yes/no questions about the character (or object) described below. If you have knowledge about the character that is not in the provided context, you may use it to inform your answer. If your knowledge contridicts the context, the provided context takes precedence. Reply to questions with ONLY "Yes", "No", or "I don't know" no matter what.\n\n${characterContext}`,
                                     cache_control: { type: "ephemeral", ttl: "1h" },
                                 },
                             ],
