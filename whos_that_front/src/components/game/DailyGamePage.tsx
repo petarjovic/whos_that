@@ -250,14 +250,14 @@ const GameEndModal = ({
             handleClose={() => {
                 /* No handling needed */
             }}
-            classNames="h-fit flex flex-col gap-4 px-2 text-center max-lg:max-w-2xl max-md:py-5 md:max-lg:py-8 lg:max-w-3xl lg:py-10 2xl:pt-12 2xl:pb-8"
+            classNames="h-fit flex flex-col gap-4 px-2 text-center max-md:w-9/10 max-lg:max-w-2xl max-md:py-5 md:py-8 lg:max-w-3xl "
         >
             <h2
-                className={`font-digitag mx-auto  text-shadow-sm/50 max-lg:leading-none max-md:text-[6rem] md:leading-27 md:max-xl:text-[7rem] xl:text-[8rem] ${headingText === "You Win!" ? "text-green-600" : "text-orange-600"} max-2xl:my-4 max-lg:mb-0 2xl:my-5`}
+                className={`font-digitag mx-auto text-shadow-sm/50 max-lg:leading-none max-md:text-[6rem] md:leading-27 md:max-xl:text-[7rem] xl:text-[7.5rem] ${headingText === "You Win!" ? "text-green-600" : "text-orange-600"} max-2xl:my-4 max-lg:mb-0 2xl:mt-5`}
             >
                 {headingText}
             </h2>
-            <p className="mx-auto text-4xl font-medium whitespace-pre-wrap text-neutral-800 max-2xl:my-1 max-sm:text-2xl 2xl:my-2.5">
+            <p className="mx-auto text-3xl font-medium whitespace-pre-wrap text-neutral-800 max-2xl:my-1 max-sm:text-2xl 2xl:my-2.5 pt-1 2xl:pt-2">
                 {paraText}
             </p>
             <div className="mx-auto mt-1 flex flex-row max-sm:gap-4 sm:max-lg:gap-13 lg:gap-20">

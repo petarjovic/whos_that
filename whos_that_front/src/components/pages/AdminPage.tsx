@@ -11,6 +11,7 @@ import LoadingSpinner from "../misc/LoadingSpinner.tsx";
 import { IoMdSearch } from "react-icons/io";
 import { FcSettings } from "react-icons/fc";
 import { MdFirstPage, MdLastPage, MdArrowBackIosNew, MdArrowForwardIos } from "react-icons/md";
+import ScheduleDailyModal from "./ScheduleDailyModal.tsx";
 
 const AdminPage = () => {
     const nav = useNavigate();
@@ -22,6 +23,7 @@ const AdminPage = () => {
     const [errorMsg, setErrorMsg] = useState("");
     const [searchInput, setSearchInput] = useState(searchParams.get("q") ?? "");
     const [openDropdownId, setOpenDropdownId] = useState<string | null>(null);
+    const [selectedGameId, setSelectedGameId] = useState("");
 
     const { isPending, session } = useBetterAuthSession();
 
@@ -193,7 +195,7 @@ const AdminPage = () => {
                     </option>
                 </select>
                 <select
-                    className="flex cursor-pointer items-center justify-center rounded-xs bg-orange-400 p-0.75 text-center text-white"
+                    className="flex cursor-pointer items-center justify-center rounded-xs bg-purple-400 p-0.75 text-center text-white"
                     value={searchParams.get("priv") ?? "public"}
                     onChange={(e) =>
                         setSearchParams({
@@ -214,6 +216,7 @@ const AdminPage = () => {
                     </option>
                 </select>
             </form>
+
             {isLoading ? (
                 <LoadingSpinner />
             ) : (
@@ -261,6 +264,18 @@ const AdminPage = () => {
                                         </button>
                                         {openDropdownId === id && (
                                             <div className="absolute top-7 right-0 z-1 min-w-32 border border-black bg-neutral-400 font-medium shadow-md/10">
+                                                <button
+                                                    type="button"
+                                                    className="flex w-full cursor-pointer items-center justify-around p-px pt-0.5 text-purple-200 hover:bg-green-400 hover:text-black"
+                                                    onClick={(e) => {
+                                                        e.preventDefault();
+                                                        e.stopPropagation();
+                                                        setSelectedGameId(id);
+                                                        setOpenDropdownId(null);
+                                                    }}
+                                                >
+                                                    Schedule Daily
+                                                </button>
                                                 <button
                                                     type="button"
                                                     className="flex w-full cursor-pointer items-center justify-around p-px pt-0.5 text-white hover:bg-slate-200 hover:text-black"
@@ -374,6 +389,9 @@ const AdminPage = () => {
                         <MdLastPage size="2.2em" />
                     </button>
                 </div>
+            )}
+            {selectedGameId && (
+                <ScheduleDailyModal gameId={selectedGameId} onClose={() => setSelectedGameId("")} />
             )}
         </>
     );

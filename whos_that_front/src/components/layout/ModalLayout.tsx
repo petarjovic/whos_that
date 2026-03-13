@@ -15,7 +15,7 @@ const ModalLayout = ({
         <ReactModal
             isOpen={isOpen}
             onRequestClose={handleClose}
-            className={`absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 mx-auto  h-fit max-h-[90vh] w-[97%] border-2 border-neutral-300 rounded bg-neutral-200 px-6 py-6 shadow-lg inset-shadow-sm/15 inset-shadow-white ${classNames}`}
+            className={`absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 mx-auto  h-fit max-h-[90vh] w-[97%] border-2 border-neutral-300 rounded bg-radial from-neutral-300 to-neutral-100 px-6 py-6 shadow-lg inset-shadow-sm/15 inset-shadow-white ${classNames}`}
             overlayClassName="fixed inset-0 z-99 bg-zinc-900/70"
             shouldCloseOnOverlayClick={false}
             shouldCloseOnEsc={false}
