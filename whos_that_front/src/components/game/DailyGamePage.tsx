@@ -3,12 +3,13 @@ import { useNavigate } from "react-router";
 import { Card } from "../misc/Cards.tsx";
 import type { DailyGame, UserHasLiked } from "@server/types";
 import { dailyGameInfoSchema } from "@server/zodSchema";
-import { serverResponseSchema } from "../../lib/zodSchema.ts";
+import { serverResponseSchema, dailyProgressSchema } from "../../lib/zodSchema.ts";
+import type { DailyProgress, ChatMessage } from "../../lib/types.ts";
 import env from "../../lib/zodEnvSchema.ts";
 import { log, logError } from "../../lib/logger.ts";
 import GameBoard from "./GameBoard.tsx";
 import LoadingSpinner from "../misc/LoadingSpinner.tsx";
-import ChatPanel, { type ChatMessage } from "./ChatPanel.tsx";
+import ChatPanel from "./ChatPanel.tsx";
 import { ConfirmGuessModal } from "./GamePage.tsx";
 import type { ConfirmGuessModalState } from "./GamePage.tsx";
 import { fetchLikeInfo, useBetterAuthSession } from "../../lib/hooks.ts";
@@ -18,15 +19,12 @@ import InGameNavBar from "./InGameNavBar.tsx";
 import DailyGameModal from "./DailyGameModal.tsx";
 import ModalLayout from "../layout/ModalLayout.tsx";
 
-// Stable empty EndState — passed to Card only to satisfy the resetOnNewGame prop.
-// The daily has no play-again, so this never changes and card flips never auto-reset.
 const DAILY_END_STATE = {};
 const MAX_NUM_OF_QUESTIONS = 6;
 
-/**
- * Daily game page. Fetches today's scheduled game, renders the
- * board with the AI chat panel for asking yes/no questions.
- */
+//Get today's date in YYYY-MM-DD format to use as a key for saving progress in localStorage
+const getTodayKey = () => new Date().toISOString().split("T")[0];
+
 const DailyGamePage = () => {
     const [dailyGameInfo, setDailyGameInfo] = useState<DailyGame>();
     const [numQuestionsLeft, setNumQuestionsLeft] = useState(MAX_NUM_OF_QUESTIONS);
@@ -34,24 +32,66 @@ const DailyGamePage = () => {
     const [guessState, setGuessState] = useState<ConfirmGuessModalState>({ isOpen: false });
     const [errorMsg, setErrorMsg] = useState("");
 
-    //initialize chatbox with first message
-    const [messages, setMessages] = useState<ChatMessage[]>([
-        {
-            isUser: false,
-            msg: 'Ughhh...they got me good, my circuits are messed up. I know everything about the intruder but I can\'t say who it was! I\'ll only have power to respond to 6 questions, and only with a  "Yes", "No" or "I don\'t know". Detective, please solve the case!',
-        },
-    ]);
+    const initialMessage: ChatMessage = {
+        isUser: false,
+        msg: 'Ughhh...they got me good, my circuits are messed up. I know everything about the intruder but I can\'t say who it was! I\'ll only have power to respond to 6 questions, and only with a  "Yes", "No" or "I don\'t know". Detective, please solve the case!',
+    };
+
+    const [messages, setMessages] = useState<ChatMessage[]>([initialMessage]);
 
     const { session, isPending } = useBetterAuthSession();
-
-    //Tracks whether not player has liked this game (changes the prompt user sees on game end)
     const [playerHasLiked, setPlayerHasLiked] = useState<UserHasLiked>(null);
+
+    // Load locally saved progress on mount
+    useEffect(() => {
+        const savedProgress = localStorage.getItem("dailyProgress");
+        if (savedProgress) {
+            try {
+                const parsed = JSON.parse(savedProgress) as DailyProgress;
+                const validationResult = dailyProgressSchema.safeParse(parsed);
+                if (validationResult.success) {
+                    const progress = validationResult.data;
+                    if (progress.date === getTodayKey()) {
+                        setMessages(progress.messages);
+                        setNumQuestionsLeft(progress.numQuestionsLeft);
+                        if (progress.guessState.isWinner !== undefined) {
+                            setGuessState({
+                                isOpen: false,
+                                isWinner: progress.guessState.isWinner,
+                                name: "",
+                            });
+                        }
+                    } else {
+                        localStorage.removeItem("dailyProgress");
+                    }
+                } else {
+                    logError(validationResult.error);
+                    localStorage.removeItem("dailyProgress");
+                }
+            } catch (error) {
+                logError(error);
+            }
+        }
+    }, []);
+
+    // Save progress whenever state changes
+    useEffect(() => {
+        if (messages.length > 1 || "isWinner" in guessState) {
+            const progress: DailyProgress = {
+                date: getTodayKey(),
+                messages,
+                numQuestionsLeft,
+                guessState: "isWinner" in guessState ? { isWinner: guessState.isWinner } : {},
+            };
+            localStorage.setItem("dailyProgress", JSON.stringify(progress));
+        }
+    }, [messages, numQuestionsLeft, guessState]);
 
     useEffect(() => {
         const getPlayerLikeInfo = async () => {
             if (session && !isPending && dailyGameInfo?.ogGameId !== undefined) {
                 if (dailyGameInfo.ogGameId.length > 0)
-                    setPlayerHasLiked(Boolean(await fetchLikeInfo(dailyGameInfo.ogGameId))); //wrap in bool just in case
+                    setPlayerHasLiked(Boolean(await fetchLikeInfo(dailyGameInfo.ogGameId)));
                 else setPlayerHasLiked(false);
             }
         };
@@ -62,8 +102,8 @@ const DailyGamePage = () => {
         const fetchDaily = async () => {
             const dailyRes = await fetch(`${env.VITE_SERVER_URL}/api/daily`);
             if (!dailyRes.ok) {
-                const errorData = serverResponseSchema.parse(await dailyRes.json());
-                throw new Error(errorData.message || "No daily game scheduled.");
+                const errorData = serverResponseSchema.safeParse(await dailyRes.json());
+                throw new Error((errorData.data?.message ?? "") || "No daily game scheduled.");
             }
 
             const dailyGameInfoDb = dailyGameInfoSchema.parse(await dailyRes.json());
@@ -160,7 +200,6 @@ const DailyGamePage = () => {
                 name={guessState.isOpen ? guessState.name : ""}
             />
 
-            {/* Game end modal */}
             <GameEndModal
                 isOpen={gameOver}
                 playerHasLiked={playerHasLiked}

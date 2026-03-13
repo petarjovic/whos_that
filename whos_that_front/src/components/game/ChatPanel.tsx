@@ -1,11 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { GiVintageRobot } from "react-icons/gi";
 import { CiMinimize1 } from "react-icons/ci";
-
-export interface ChatMessage {
-    isUser: boolean;
-    msg: string;
-}
+import type { ChatMessage } from "../../lib/types";
 
 interface ChatPanelProps {
     messages: ChatMessage[];

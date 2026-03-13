@@ -17,3 +17,17 @@ export const acceptedImageTypesSchema = z.enum([
     "image/heif",
 ]);
 
+export const chatMessageSchema = z.object({
+    isUser: z.boolean(),
+    msg: z.string(),
+});
+
+export const dailyProgressSchema = z.object({
+    date: z.string(),
+    messages: z.array(chatMessageSchema),
+    numQuestionsLeft: z.number(),
+    guessState: z.object({
+        isWinner: z.boolean().optional(),
+    }),
+});
+
