@@ -52,6 +52,9 @@ export const DailyGamePreview = ({
                 <LoadingSpinner />
             ) : imageUrls.length > 0 ? (
                 <>
+                    <div className="leading-none font-medium text-2xl my-1.25 text-white text-shadow-sm/50 underline hover:scale-102">
+                        {title}
+                    </div>
                     <div className="relative w-full overflow-hidden py-2">
                         <div ref={scrollRef} className="animate-scroll flex gap-2 ">
                             {[...imageUrls, ...imageUrls, ...imageUrls].map((url, i) => (
@@ -61,14 +64,9 @@ export const DailyGamePreview = ({
                             ))}
                         </div>
                     </div>
-                    <div className="leading-none font-medium text-2xl mt-1.25 text-white text-shadow-xs/75">
-                        <span className="text-red-500/50 text-3xl text-shadow-xs/50"> {"{"}</span>
-                        {title}
-                        <span className="text-red-500/50 text-3xl text-shadow-xs/50">{"}"}</span>
-                    </div>
                 </>
             ) : (
-                <div className="m-5 leading-none text-amber-600 xl:my-1">
+                <div className="m-auto leading-none text-amber-400 text-shadow-sm/50">
                     No daily game scheduled for today!
                 </div>
             )}

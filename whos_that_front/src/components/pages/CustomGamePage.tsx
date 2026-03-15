@@ -16,6 +16,7 @@ import { PiEraserFill, PiGavelFill, PiPenNibFill } from "react-icons/pi";
 import { FaCameraRetro } from "react-icons/fa";
 import { FaGears } from "react-icons/fa6";
 import { BsIncognito } from "react-icons/bs";
+import ModalLayout from "../layout/ModalLayout.tsx";
 
 const MAX_FILESIZE_BYTES = 5 * 1024 * 1024;
 const MIN_NUM_IMGS = 6;
@@ -653,13 +654,10 @@ const CreateCustomGamePage = () => {
                 </button>
             </form>
             {/* Rules Modal */}
-            <ReactModal
+            <ModalLayout
                 isOpen={showRulesModal}
-                onRequestClose={() => setShowRulesModal(false)}
-                className="absolute top-1/2 left-1/2 mx-auto flex h-fit w-[97%] max-w-4xl -translate-x-1/2 -translate-y-1/2 flex-col gap-4 border-2 border-neutral-800 bg-neutral-200 px-2 text-center shadow-lg max-lg:py-5 lg:py-8"
-                overlayClassName="fixed inset-0 bg-zinc-900/70"
-                shouldCloseOnOverlayClick={false}
-                shouldCloseOnEsc={false}
+                handleClose={() => setShowRulesModal(false)}
+                classNames=" flex h-fit w-[97%] max-w-4xl flex-col gap-4 px-2 text-center shadow-lg max-lg:py-5 lg:py-8"
             >
                 <div className="flex items-center justify-center gap-2 text-xl max-lg:mb-1 lg:mb-2">
                     <PiGavelFill size="2.5em" className="" />
@@ -702,7 +700,7 @@ const CreateCustomGamePage = () => {
                 </ul>
                 <button
                     onClick={() => setShowRulesModal(false)}
-                    className={`mx-auto w-1/2 rounded-xs p-1 text-center text-lg font-medium text-white md:w-1/3 lg:w-3/10 ${isLoading ? "border-gray-800 bg-gray-700" : "bg-red-400 hover:bg-red-500"} cursor-pointer`}
+                    className={`mx-auto w-1/2 rounded-xs p-1 text-center text-lg font-medium text-white md:w-1/3 lg:w-3/10 ${isLoading ? "border-gray-800 bg-gray-700" : "bg-red-400 hover:bg-red-500"} cursor-pointer font-medium text-white hover:scale-102 active:scale-99 2xl:py-1 shadow-xs/20 active:shadow-none rounded-xs`}
                 >
                     I Agree
                 </button>
@@ -710,7 +708,7 @@ const CreateCustomGamePage = () => {
                     Tip: images will look best when they feature the &quot;character&quot; near the
                     center.
                 </p>
-            </ReactModal>
+            </ModalLayout>
         </>
     );
 };

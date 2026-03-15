@@ -26,9 +26,9 @@ const WaitingRoom = ({ gameId, cardData }: { gameId: string; cardData: CardDataU
                 <br></br>
                 <span className="text-sm">(or send them the link to this page)</span>
             </p>
+            <p className="mt-8 mb-1 text-2xl font-medium text-neutral-700">Character Preview:</p>
             {/* Character Preview */}
-            <div className="mx-auto mt-5 mb-8 w-9/10 border border-black bg-neutral-300 px-3 pt-2 pb-3 max-sm:mb-5">
-                <p className="mb-1 text-2xl font-medium">Characters Preview</p>
+            <div className="mx-auto  mb-8 w-9/10 border-stone-600 border bg-stone-400 inset-shadow-xs/15 shadow-xs/15 px-3 pt-2 pb-3 max-sm:mb-5">
                 {cardData.length === 0 ? (
                     <LoadingSpinner />
                 ) : (

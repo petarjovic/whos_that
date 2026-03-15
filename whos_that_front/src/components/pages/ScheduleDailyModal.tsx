@@ -13,6 +13,11 @@ interface ScheduleDailyModalProps {
     onClose: () => void;
 }
 
+interface ConflictData {
+    dateConflict: boolean;
+    gameIdConflict: boolean;
+}
+
 const ScheduleDailyModal = ({ gameId, onClose }: ScheduleDailyModalProps) => {
     const [cardData, setCardData] = useState<CardDataUrl[]>([]);
     const [selectedIndex, setSelectedIndex] = useState<number | null>(null);
@@ -21,6 +26,10 @@ const ScheduleDailyModal = ({ gameId, onClose }: ScheduleDailyModalProps) => {
     const [submitting, setSubmitting] = useState(false);
     const [submitted, setSubmitted] = useState(false);
     const [loading, setLoading] = useState(true);
+    const [conflictData, setConflictData] = useState<ConflictData>({
+        dateConflict: false,
+        gameIdConflict: false,
+    });
 
     useEffect(() => {
         const fetchGameData = async () => {
@@ -50,12 +59,44 @@ const ScheduleDailyModal = ({ gameId, onClose }: ScheduleDailyModalProps) => {
             setCharacterContext("");
             setSubmitting(false);
             setSubmitted(false);
+            setConflictData({ dateConflict: false, gameIdConflict: false });
         }, 200);
     };
 
-    const handleSubmit = async () => {
+    const checkConflicts = async () => {
         if (selectedIndex === null || !scheduledDate || !characterContext.trim()) return;
         setSubmitting(true);
+        try {
+            const res = await fetch(`${env.VITE_SERVER_URL}/api/daily/check`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                credentials: "include",
+                body: JSON.stringify({
+                    gameId,
+                    scheduledDate,
+                    winningIndex: selectedIndex,
+                    characterContext,
+                }),
+            });
+            if (!res.ok) throw new Error("Failed to check conflicts");
+            const data = (await res.json()) as ConflictData;
+
+            if (data.dateConflict || data.gameIdConflict) {
+                setConflictData(data);
+                setSubmitting(false);
+            } else {
+                await scheduleDaily();
+            }
+        } catch (e) {
+            logError(e);
+            alert(e instanceof Error ? e.message : "Failed to check conflicts");
+            setSubmitting(false);
+        }
+    };
+
+    const scheduleDaily = async () => {
+        setSubmitting(true);
+        setConflictData({ dateConflict: false, gameIdConflict: false });
         try {
             const res = await fetch(`${env.VITE_SERVER_URL}/api/daily/schedule`, {
                 method: "POST",
@@ -208,7 +249,7 @@ const ScheduleDailyModal = ({ gameId, onClose }: ScheduleDailyModalProps) => {
                         </button>
                         <button
                             onClick={() => {
-                                void handleSubmit();
+                                void checkConflicts();
                             }}
                             disabled={
                                 submitting ||
@@ -229,6 +270,54 @@ const ScheduleDailyModal = ({ gameId, onClose }: ScheduleDailyModalProps) => {
                         </button>
                     </div>
                 </div>
+            )}
+
+            {/* Conflict Confirmation Modal */}
+            {(conflictData.dateConflict || conflictData.gameIdConflict) && (
+                <ModalLayout
+                    classNames="flex h-fit w-[90%] max-w-md flex-col gap-4 px-6 py-5"
+                    isOpen={true}
+                    handleClose={() =>
+                        setConflictData({ dateConflict: false, gameIdConflict: false })
+                    }
+                >
+                    <h3 className="text-2xl font-bold text-red-600">Warning</h3>
+                    <div className="flex flex-col gap-2 text-neutral-800">
+                        {conflictData.dateConflict && (
+                            <p>
+                                A game is already scheduled for <strong>{scheduledDate}</strong>.
+                                {conflictData.gameIdConflict
+                                    ? " It uses the same game ID."
+                                    : " It will be overwritten."}
+                            </p>
+                        )}
+                        {!conflictData.dateConflict && conflictData.gameIdConflict && (
+                            <p>
+                                This game ID (<strong>{gameId}</strong>) has already been scheduled
+                                for another date.
+                            </p>
+                        )}
+                        <p className="font-semibold mt-2">Do you want to continue?</p>
+                    </div>
+                    <div className="flex gap-3 justify-end">
+                        <button
+                            onClick={() =>
+                                setConflictData({ dateConflict: false, gameIdConflict: false })
+                            }
+                            className="px-4 py-1.5 rounded-xs bg-neutral-400 hover:bg-neutral-500 font-medium border border-neutral-500 shadow-sm"
+                        >
+                            Cancel
+                        </button>
+                        <button
+                            onClick={() => {
+                                void scheduleDaily();
+                            }}
+                            className="px-4 py-1.5 rounded-xs bg-red-500 hover:bg-red-600 text-white font-medium shadow-sm"
+                        >
+                            Overwrite
+                        </button>
+                    </div>
+                </ModalLayout>
             )}
         </ModalLayout>
     );

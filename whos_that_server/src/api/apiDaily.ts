@@ -1,5 +1,5 @@
 import type { Express } from "express";
-import { eq, and } from "drizzle-orm";
+import { eq, and, or } from "drizzle-orm";
 // import { requireAdmin } from "../middleware/authMw.ts";
 import { logger } from "../config/logger.ts";
 import { db, s3, S3_BUCKET_NAME, USE_CLOUDFRONT } from "../config/connections.ts";
@@ -214,6 +214,48 @@ export function setupAiRoutes(app: Express) {
     });
 
     /**
+     * Admin-only: checks if a date/gameId has scheduling conflicts.
+     */
+    app.post("/api/daily/check", requireAdmin, async (req, res) => {
+        const validRequest = scheduleDailySchema.safeParse(req.body);
+        if (!validRequest.success) {
+            logger.error({ error: validRequest.error }, "api/daily/check: Invalid request.");
+            return res.status(422).json({ message: "Invalid request." });
+        }
+
+        const { gameId, scheduledDate } = validRequest.data;
+
+        try {
+            const conflicts = await db
+                .select({
+                    scheduledDate: schema.dailies.scheduledDate,
+                    ogGameId: schema.dailies.ogGameId,
+                })
+                .from(schema.dailies)
+                .where(
+                    or(
+                        eq(schema.dailies.scheduledDate, scheduledDate),
+                        eq(schema.dailies.ogGameId, gameId)
+                    )
+                );
+
+            const today = new Date().toISOString().slice(0, 10);
+            const dateConflict = conflicts.some((c) => c.scheduledDate === scheduledDate);
+
+            if (dateConflict && scheduledDate === today) {
+                return res.status(400).json({ message: "Cannot overwrite today's daily game." });
+            }
+
+            const gameIdConflict = conflicts.some((c) => c.ogGameId === gameId);
+
+            return res.status(200).json({ dateConflict, gameIdConflict });
+        } catch (error) {
+            logger.error({ error }, "api/daily/check: Error checking conflicts.");
+            return res.status(500).json({ message: "Internal Server Error." });
+        }
+    });
+
+    /**
      * Admin-only: schedules a daily character for a specific date.
      */
     app.post("/api/daily/schedule", requireAdmin, async (req, res) => {
@@ -260,8 +302,27 @@ export function setupAiRoutes(app: Express) {
                 return res.status(400).json({ message: "Invalid winning index." });
             }
 
+            // Check for existing daily on this date
+            const [existingDaily] = await db
+                .select({ id: schema.dailies.id })
+                .from(schema.dailies)
+                .where(eq(schema.dailies.scheduledDate, scheduledDate));
+
+            const today = new Date().toISOString().slice(0, 10);
+            if (existingDaily && scheduledDate === today) {
+                return res.status(400).json({ message: "Cannot overwrite today's daily game." });
+            }
+
+            let dailyId: string;
+
+            if (existingDaily) {
+                // Overwrite: delete existing daily (cascade deletes items and S3 cleanup happens separately)
+                dailyId = existingDaily.id;
+                await db.delete(schema.dailies).where(eq(schema.dailies.id, dailyId));
+            }
+
             // Create daily entry
-            const dailyId = nanoid();
+            dailyId = nanoid();
             await db.insert(schema.dailies).values({
                 id: dailyId,
                 ogGameId: gameId,
