@@ -193,45 +193,45 @@ const MyGamesPage = () => {
                 } else break;
             }
 
-            case "Make Public": //cover both cases since logic is the same
-            case "Make Private": {
-                try {
-                    // Optimistically update privacy state/UI
-                    setGamesList((prev) =>
-                        prev.map((game) =>
-                            game.id === gameId
-                                ? {
-                                      ...game,
-                                      isPublic: !game.isPublic,
-                                  }
-                                : game
-                        )
-                    );
+            // case "Make Public": //cover both cases since logic is the same
+            // case "Make Private": {
+            //     try {
+            //         // Optimistically update privacy state/UI
+            //         setGamesList((prev) =>
+            //             prev.map((game) =>
+            //                 game.id === gameId
+            //                     ? {
+            //                           ...game,
+            //                           isPublic: !game.isPublic,
+            //                       }
+            //                     : game
+            //             )
+            //         );
 
-                    //Wait for privacy setting change on server (partly to prevent user spamming requests)
-                    setIsLoading(true);
-                    const response = await fetch(
-                        `${env.VITE_SERVER_URL}/api/switchPrivacy/${gameId}`,
-                        {
-                            credentials: "include",
-                            method: "PUT",
-                        }
-                    );
+            //         //Wait for privacy setting change on server (partly to prevent user spamming requests)
+            //         setIsLoading(true);
+            //         const response = await fetch(
+            //             `${env.VITE_SERVER_URL}/api/switchPrivacy/${gameId}`,
+            //             {
+            //                 credentials: "include",
+            //                 method: "PUT",
+            //             }
+            //         );
 
-                    if (!response.ok) {
-                        const errorData = serverResponseSchema.safeParse(await response.json());
-                        setErrorMsg(
-                            errorData.data?.message ??
-                                "Failed to change game privacy settings, server might be down, try again later."
-                        );
-                    }
-                    setIsLoading(false);
-                } catch (error) {
-                    logError(error);
-                    setErrorMsg("Failed to change game privacy settings.");
-                }
-                break;
-            }
+            //         if (!response.ok) {
+            //             const errorData = serverResponseSchema.safeParse(await response.json());
+            //             setErrorMsg(
+            //                 errorData.data?.message ??
+            //                     "Failed to change game privacy settings, server might be down, try again later."
+            //             );
+            //         }
+            //         setIsLoading(false);
+            //     } catch (error) {
+            //         logError(error);
+            //         setErrorMsg("Failed to change game privacy settings.");
+            //     }
+            //     break;
+            // }
             default: {
                 break;
             }
@@ -300,8 +300,8 @@ const MyGamesPage = () => {
                                             <FcSettings size={"1.75rem"} />
                                         </button>
                                         {openDropdownId === id && (
-                                            <div className="absolute top-7 right-0 z-1 min-w-32 border border-black bg-neutral-400 font-medium shadow-md/10">
-                                                <button
+                                            <div className="absolute top-7 -right-10 z-1 min-w-32 border border-slate-600 bg-slate-500 font-medium shadow-md/20 ">
+                                                {/* <button
                                                     type="button"
                                                     className="flex w-full cursor-pointer items-center justify-around p-px pt-0.5 text-white hover:bg-slate-200 hover:text-black"
                                                     onClick={(e) => {
@@ -318,7 +318,7 @@ const MyGamesPage = () => {
                                                     }}
                                                 >
                                                     {isPublic ? "Make Private" : "Make Public"}
-                                                </button>
+                                                </button> */}
                                                 <button
                                                     type="button"
                                                     className="flex w-full cursor-pointer items-center justify-around p-px pt-0.5 text-white hover:bg-slate-200 hover:text-black"
@@ -333,7 +333,7 @@ const MyGamesPage = () => {
                                                 </button>
                                                 <button
                                                     type="button"
-                                                    className="items-ceneter flex w-full cursor-pointer justify-around p-px pb-0.5 font-medium text-red-700 hover:bg-red-300 hover:text-red-950"
+                                                    className="items-ceneter flex w-full cursor-pointer justify-around p-px pb-0.5 font-medium text-red-300 hover:bg-red-300 hover:text-red-950"
                                                     onClick={(e) => {
                                                         e.preventDefault();
                                                         e.stopPropagation();
