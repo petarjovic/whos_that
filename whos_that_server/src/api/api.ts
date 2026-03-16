@@ -98,7 +98,7 @@ export function setupApiRoutes(app: Express) {
             if (body.gameId) {
                 // When updating game check if game belongs to the user
                 const gameOwnerResult = await db
-                    .select({ id: schema.gameItems.id })
+                    .select({ id: schema.games.id })
                     .from(schema.games)
                     .where(
                         and(eq(schema.games.id, gameId), eq(schema.games.userId, session.user.id))
@@ -133,6 +133,7 @@ export function setupApiRoutes(app: Express) {
 
             return res.status(200).json(response);
         } catch (error) {
+            console.log(error);
             logger.error(
                 { error },
                 "api/createGameS3Upload: Error while attempting to generate S3 upload urls."
