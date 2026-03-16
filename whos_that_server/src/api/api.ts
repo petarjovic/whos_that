@@ -51,7 +51,6 @@ import {
 } from "./cache.ts";
 import { logger } from "../config/logger.ts";
 import rateLimit, { ipKeyGenerator } from "express-rate-limit";
-import { log } from "node:console";
 
 // set url duration to just over 5 days since cache is 5 days
 const PRESIGNED_IMAGE_URL_DUR = 86400 * 1000 * 5.1;
@@ -810,10 +809,8 @@ export function setupApiRoutes(app: Express) {
                 .where(eq(schema.gameItems.gameId, gameId));
 
             //cache and send direct image urls for public games
-            logger.debug(USE_CLOUDFRONT);
-            logger.debug(isPublic);
+
             if (isPublic || !USE_CLOUDFRONT) {
-                logger.debug("WE GOT HERE!");
                 const cardDataUrlList = cardDataIdToUrl(gameId, isPublic, cardDataIdList);
                 logger.debug(cardDataUrlList);
 
