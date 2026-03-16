@@ -1,9 +1,9 @@
-import { useNavigate } from "react-router";
+import { useNavigate, useParams } from "react-router";
 import { useBetterAuthSession } from "../../lib/hooks.ts";
 import { useState, useEffect } from "react";
 import Dropzone from "../misc/Dropzone.tsx";
 import { serverResponseSchema, acceptedImageTypesSchema } from "../../lib/zodSchema.ts";
-import { createGameResponseSchema } from "@server/zodSchema";
+import { createGameResponseSchema, gameDataSchema } from "@server/zodSchema";
 import { resizeImages } from "../../lib/imageresizer.ts";
 import { isHeic } from "heic-to";
 import { heicTo } from "heic-to";
@@ -26,11 +26,13 @@ const MAX_NUM_IMGS = 36;
  * Game/preset creation page: handles image uploads, character naming, and privacy setting
  */
 const CreateCustomGamePage = () => {
+    const { editGameId = "" } = useParams();
     const navigate = useNavigate();
 
     const [showRulesModal, setShowRulesModal] = useState(true);
     const [isLoading, setIsLoading] = useState(false); //Flag for submitting and image processing
 
+    const [gameTitle, setGameTitle] = useState("");
     const [selectedFiles, setSelectedFiles] = useState<File[]>([]); //List of image files to upload
     const [charNames, setCharNames] = useState<string[]>([]); //Parallel list of character names
     const [charErrors, setCharErrors] = useState<string[]>([]); //List of char Errors
@@ -51,6 +53,57 @@ const CreateCustomGamePage = () => {
     useEffect(() => {
         if (!session) void navigate("/");
     }, [session, navigate]);
+
+    //fetchGameData if editing existing game (i.e. editGameId param is present in url)
+    useEffect(() => {
+        const fetchGameData = async () => {
+            if (editGameId.length > 0) {
+                try {
+                    setIsLoading(true);
+                    const response: Response = await fetch(
+                        `${env.VITE_SERVER_URL}/api/gameData/${editGameId}`,
+                        { method: "GET", credentials: "include" }
+                    );
+
+                    if (!response.ok) {
+                        const errorData = serverResponseSchema.parse(await response.json());
+                        throw new Error(
+                            errorData.message || "Getting game data failed for editing game."
+                        );
+                    }
+
+                    const { title, isPublic, cardData } = gameDataSchema.parse(
+                        await response.json()
+                    );
+                    setGameTitle(title);
+                    setIsPublic(isPublic);
+
+                    // Sort by orderIndex and extract character names
+                    const sortedCardData = [...cardData].sort(
+                        (a, b) => a.orderIndex - b.orderIndex
+                    );
+                    setCharNames(sortedCardData.map((card) => card.name));
+
+                    // Convert image URLs to File objects for preview
+                    const filePromises = sortedCardData.map(async (card) => {
+                        const response = await fetch(card.imageUrl);
+                        const blob = await response.blob();
+                        return new File([blob], card.name, { type: blob.type });
+                    });
+
+                    const files = await Promise.all(filePromises);
+                    setSelectedFiles(files);
+                } catch (error) {
+                    logError(error);
+                    if (error instanceof Error) setErrorMsg(error.message);
+                    else setErrorMsg("Getting images failed.");
+                } finally {
+                    setIsLoading(false);
+                }
+            }
+        };
+        void fetchGameData();
+    }, [editGameId]);
 
     // Generates image urls for previewing uploaded images
     useEffect(() => {
@@ -209,7 +262,6 @@ const CreateCustomGamePage = () => {
         e.preventDefault();
         e.stopPropagation();
         setIsLoading(true);
-        const formData = new FormData(e.currentTarget);
 
         if (selectedFiles.length < MIN_NUM_IMGS || selectedFiles.length > MAX_NUM_IMGS) {
             setIsLoading(false);
@@ -248,10 +300,10 @@ const CreateCustomGamePage = () => {
             return;
         }
 
-        const title = formData.get("title") as string;
-        const privacyStr = formData.get("privacy") as string;
+        const privacyStr = isPublic ? "public" : "private";
         const S3PresignedUrlReqBody = {
             privacy: privacyStr,
+            ...(editGameId ? { gameId: editGameId } : {}), // Include gameId if editing
             namesAndFileTypes: compressedFiles.map((f, i) => ({
                 type: f.type,
                 name: charNames[i],
@@ -327,7 +379,7 @@ const CreateCustomGamePage = () => {
 
             const DbUpdateReqBody = {
                 gameId: S3PresignedUrlResData.gameId,
-                title: title,
+                title: gameTitle,
                 privacy: privacyStr,
                 gameItems: compressedFiles.map((_file, i) => ({
                     name: charNames[i],
@@ -336,15 +388,20 @@ const CreateCustomGamePage = () => {
             };
             log(DbUpdateReqBody);
 
-            const DbUpdateRes = await fetch(`${env.VITE_SERVER_URL}/api/createGameDbUpload`, {
-                method: "POST",
+            // Use update endpoint if editing, create endpoint if new
+            const dbEndpoint = editGameId
+                ? `${env.VITE_SERVER_URL}/api/updateGame/${editGameId}`
+                : `${env.VITE_SERVER_URL}/api/createGameDbUpload`;
+
+            const DbUpdateRes = await fetch(dbEndpoint, {
+                method: editGameId ? "PUT" : "POST",
                 body: JSON.stringify(DbUpdateReqBody),
                 credentials: "include",
                 headers: { "Content-Type": "application/json" },
             });
 
             if (!DbUpdateRes.ok) {
-                setErrorMsg("Failed to save game, please try again.");
+                setErrorMsg(`Failed to ${editGameId ? "update" : "save"} game please try again.`);
                 setIsLoading(false);
                 return;
             }
@@ -384,6 +441,8 @@ const CreateCustomGamePage = () => {
                             type="text"
                             id="title"
                             name="title"
+                            value={gameTitle}
+                            onChange={(e) => setGameTitle(e.target.value)}
                             placeholder="(E.g. Superheros, Famous Actors)"
                             className="border-groove rounded border border-neutral-400 bg-neutral-50 p-1 text-center font-medium placeholder:text-gray-400 max-lg:w-full lg:w-9/10 xl:text-lg 2xl:text-xl"
                             required

@@ -61,7 +61,7 @@ const ShareGameModal = ({
  * User's own supports sharing, privacy toggling, and deletion
  */
 const MyGamesPage = () => {
-    const navigate = useNavigate();
+    const nav = useNavigate();
     const [gamesList, setGamesList] = useState<UrlPresetInfo[]>([]);
     const [likedGamesList, setLikedGamesList] = useState<UrlPresetInfo[]>([]);
     const [isLoading, setIsLoading] = useState(true);
@@ -74,7 +74,7 @@ const MyGamesPage = () => {
     // Fetch game info from appropriate endpoint based on page type
     useEffect(() => {
         // Redirect if trying to access "my games" without auth
-        if (!isPending && !session) void navigate("/");
+        if (!isPending && !session) void nav("/");
         else if (!isPending) {
             //get games user made
             const getMyGames = async () => {
@@ -145,7 +145,7 @@ const MyGamesPage = () => {
             void getMyGames();
             void getMyLikedGames();
         }
-    }, [session, isPending, navigate]);
+    }, [session, isPending, nav]);
 
     /**
      * Opens share modal with game link (only used on user's own games)
@@ -161,6 +161,9 @@ const MyGamesPage = () => {
      */
     const handleGameSettings = async (action: string, gameId: string, title: string) => {
         switch (action) {
+            case "Edit Game": {
+                break;
+            }
             case "Delete Game": {
                 // TODO: replace confirmation with custom modal
                 const confirmed = confirm(
@@ -315,6 +318,18 @@ const MyGamesPage = () => {
                                                     }}
                                                 >
                                                     {isPublic ? "Make Private" : "Make Public"}
+                                                </button>
+                                                <button
+                                                    type="button"
+                                                    className="flex w-full cursor-pointer items-center justify-around p-px pt-0.5 text-white hover:bg-slate-200 hover:text-black"
+                                                    onClick={(e) => {
+                                                        e.preventDefault();
+                                                        e.stopPropagation();
+                                                        void nav(`/edit-game/${id}`);
+                                                        setOpenDropdownId(null);
+                                                    }}
+                                                >
+                                                    Edit Game
                                                 </button>
                                                 <button
                                                     type="button"

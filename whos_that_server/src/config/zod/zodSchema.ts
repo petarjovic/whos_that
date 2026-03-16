@@ -61,11 +61,13 @@ export const cardDataUrlSchema = cardDataTypeSchema.extend({
 
 export const gameDataSchema = z.object({
     title: z.string(),
+    isPublic: z.boolean(),
     cardData: z.array(cardDataUrlSchema),
 });
 
 export const createGameS3UploadReqSchema = z.object({
     privacy: z.union([z.literal("public"), z.literal("private")]),
+    gameId: z.nanoid().optional(),
     namesAndFileTypes: z
         .array(
             z.object({

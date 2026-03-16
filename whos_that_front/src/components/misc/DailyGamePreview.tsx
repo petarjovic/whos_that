@@ -66,8 +66,8 @@ export const DailyGamePreview = ({
                     </div>
                 </>
             ) : (
-                <div className="m-auto leading-none text-amber-400 text-shadow-sm/50">
-                    No daily game scheduled for today!
+                <div className="mx-auto mt-15 leading-none text-amber-400 text-shadow-sm/50">
+                    No daily game scheduled for today :(
                 </div>
             )}
         </>

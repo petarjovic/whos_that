@@ -51,6 +51,7 @@ import {
 } from "./cache.ts";
 import { logger } from "../config/logger.ts";
 import rateLimit, { ipKeyGenerator } from "express-rate-limit";
+import { log } from "node:console";
 
 // set url duration to just over 5 days since cache is 5 days
 const PRESIGNED_IMAGE_URL_DUR = 86400 * 1000 * 5.1;
@@ -62,7 +63,6 @@ const PRESIGNED_IMAGE_URL_DUR = 86400 * 1000 * 5.1;
 export function setupApiRoutes(app: Express) {
     /**
      * Sends clients presigned URLS for uploading images
-     *
      */
     app.post("/api/createGameS3Upload", async (req: Request, res: Response) => {
         const validRequest = createGameS3UploadReqSchema.safeParse(req.body);
@@ -77,8 +77,10 @@ export function setupApiRoutes(app: Express) {
             });
         }
 
-        const gameId = nanoid();
         const body: CreateS3UploadReq = validRequest.data;
+
+        // Use provided gameId if exists (when user is editing existing game), otherwise generate new one
+        const gameId = body.gameId ?? nanoid();
         const response: CreateGameResponse = { gameId: gameId, gameItems: {} };
 
         try {
@@ -92,6 +94,22 @@ export function setupApiRoutes(app: Express) {
                     "api/createGameS3Upload: Error, unauthenticated user attempted to create a game."
                 );
                 return res.status(401).json({ message: "Unauthorized." });
+            }
+
+            if (body.gameId) {
+                // When updating game check if game belongs to the user
+                const gameOwnerResult = await db
+                    .select({ id: schema.gameItems.id })
+                    .from(schema.games)
+                    .where(
+                        and(eq(schema.games.id, gameId), eq(schema.games.userId, session.user.id))
+                    );
+                if (gameOwnerResult.length === 0) {
+                    logger.error(
+                        "api/createGameS3Upload: Error, user who doesn't own game attempted to edit it."
+                    );
+                    return res.status(401).json({ message: "Unauthorized." });
+                }
             }
 
             // Generate short-lived presigned upload URLS
@@ -213,6 +231,107 @@ export function setupApiRoutes(app: Express) {
             return res.status(500).json({
                 message: "Internal Server Error while creating new game, please try again later.",
             });
+        }
+    });
+
+    /**
+     * Updates an existing game by deleting old data and recreating with same gameId
+     * @returns Success status
+     */
+    app.put("/api/updateGame/:gameId", validateGameId, checkGameExists, async (req, res) => {
+        const gameId = Array.isArray(req.params.gameId) ? req.params.gameId[0] : req.params.gameId;
+
+        const validRequest = createGameDbUploadReqSchema.safeParse(req.body);
+
+        if (!validRequest.success) {
+            logger.error(
+                { error: validRequest.error },
+                "api/updateGame: Invalid request parameters."
+            );
+            return res.status(422).json({ message: "Invalid update game request." });
+        }
+
+        try {
+            const session = await auth.api.getSession({
+                headers: fromNodeHeaders(req.headers),
+            });
+
+            if (!session) {
+                logger.error("api/updateGame: Unauthenticated user attempted to update a game.");
+                return res.status(401).json({ message: "Unauthorized." });
+            }
+
+            const { title, privacy, gameItems } = validRequest.data;
+            const newIsPublic = privacy === "public";
+
+            // Verify user owns the game and get old data
+            const [currentGame] = await db
+                .select({ isPublic: schema.games.isPublic, userId: schema.games.userId })
+                .from(schema.games)
+                .where(eq(schema.games.id, gameId));
+
+            if (currentGame.userId !== session.user.id) {
+                logger.error(
+                    `api/updateGame: User ${session.user.id} attempted to update game ${gameId} they don't own.`
+                );
+                return res.status(403).json({ message: "Forbidden." });
+            }
+
+            // Get old image IDs to delete from S3
+            const oldImageIds = await db
+                .select({ id: schema.gameItems.id })
+                .from(schema.gameItems)
+                .where(eq(schema.gameItems.gameId, gameId));
+
+            // Delete old game items from database
+            await db.delete(schema.gameItems).where(eq(schema.gameItems.gameId, gameId));
+
+            // Delete old images from S3
+            if (oldImageIds.length > 0) {
+                await deleteImagesFromBucketAndCF(
+                    gameId,
+                    currentGame.isPublic,
+                    oldImageIds.map((item) => item.id)
+                );
+            }
+
+            // Update game in database
+            await db.batch([
+                db
+                    .update(schema.games)
+                    .set({
+                        title,
+                        isPublic: newIsPublic,
+                        updatedAt: new Date(),
+                    })
+                    .where(eq(schema.games.id, gameId)),
+
+                db.insert(schema.gameItems).values(
+                    gameItems.map(({ name, itemId }, i) => ({
+                        id: itemId,
+                        gameId: gameId,
+                        name: name,
+                        orderIndex: i,
+                    }))
+                ),
+            ]);
+
+            invalidateInAllCaches(gameId);
+
+            logger.info(
+                {
+                    gameId,
+                    author: session.user.displayUsername,
+                    authorId: session.user.id,
+                    numChars: gameItems.length,
+                },
+                "Updated game."
+            );
+
+            return res.status(200).send();
+        } catch (error) {
+            logger.error({ error }, `api/updateGame: Error updating game ${gameId}.`);
+            return res.status(500).json({ message: "Internal Server Error." });
         }
     });
 
@@ -691,10 +810,15 @@ export function setupApiRoutes(app: Express) {
                 .where(eq(schema.gameItems.gameId, gameId));
 
             //cache and send direct image urls for public games
+            logger.debug(USE_CLOUDFRONT);
+            logger.debug(isPublic);
             if (isPublic || !USE_CLOUDFRONT) {
+                logger.debug("WE GOT HERE!");
                 const cardDataUrlList = cardDataIdToUrl(gameId, isPublic, cardDataIdList);
+                logger.debug(cardDataUrlList);
 
-                const resData = { title: title, cardData: cardDataUrlList };
+                const resData = { title: title, cardData: cardDataUrlList, isPublic: isPublic };
+
                 setGameDataCache(gameId, resData);
                 return res.status(200).send(resData);
             }
@@ -714,7 +838,11 @@ export function setupApiRoutes(app: Express) {
                     };
                 });
 
-                const resData = { title: title, cardData: cardDataPresignedUrlList };
+                const resData = {
+                    title: title,
+                    cardData: cardDataPresignedUrlList,
+                    isPublic: isPublic,
+                };
                 setGameDataCache(gameId, resData);
                 return res.status(200).send(resData);
             }
@@ -902,7 +1030,7 @@ export function setupApiRoutes(app: Express) {
             if (dbDelRes.rowCount >= 1) {
                 //del image files in S3 and CloudFront
                 const [{ isPublic, imageIds }] = gameWithItems;
-                void deleteImagesFromBucketAndCF(gameId, isPublic, imageIds);
+                await deleteImagesFromBucketAndCF(gameId, isPublic, imageIds);
 
                 //invalidate any cache data that has this game
                 invalidateInAllCaches(gameId);
