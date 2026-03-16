@@ -368,17 +368,18 @@ const MyGamesPage = () => {
                             ({ id, title, imageUrl, numLikes, author, userHasLiked }, i) => (
                                 <Link key={i} to={`/play-game?preset=${id}`}>
                                     <CardLayout name={title} imgSrc={imageUrl} key={i}>
-                                        <div className="relative mb-0.75 flex items-center justify-center max-xl:mb-px">
-                                            <p className="relative right-5 text-center text-sm text-gray-600 italic max-xl:text-xs">
+                                        <div className="relative flex items-center justify-center">
+                                            <p className="p-px pb-0.5 text-sm text-neutral-700 italic max-xl:text-xs">
                                                 {author ?? ""}
                                             </p>
-                                            <p className="absolute right-2 -bottom-px text-base text-gray-700">
+                                            <div className="absolute right-1 bottom-11.75 text-xs bg-neutral-100 border-neutral-700 p-1  border-t border-l text-neutral-700 font-bold">
                                                 <LikeButton
                                                     id={id}
-                                                    userHasLiked={userHasLiked}
                                                     numLikes={numLikes}
+                                                    userHasLiked={userHasLiked}
+                                                    size={"S"}
                                                 />
-                                            </p>
+                                            </div>
                                         </div>
                                     </CardLayout>
                                 </Link>

@@ -142,10 +142,10 @@ const HomePage = () => {
                                         <Link key={i} to={`/play-game?preset=${id}`}>
                                             <CardLayout name={title} imgSrc={imageUrl} key={i}>
                                                 <div className="relative flex items-center justify-center">
-                                                    <p className="relative right-5 p-px pb-0.5 text-sm text-neutral-700 italic max-xl:text-xs">
+                                                    <p className="p-px pb-0.5 text-sm text-neutral-700 italic max-xl:text-xs">
                                                         {author ?? ""}
                                                     </p>
-                                                    <div className="absolute right-2.25 bottom-0.75 text-xs text-neutral-700">
+                                                    <div className="absolute right-1 bottom-11.75 text-xs bg-neutral-100 border-neutral-700 p-1 border-t border-l text-neutral-700">
                                                         <LikeButton
                                                             id={id}
                                                             numLikes={numLikes}
@@ -182,10 +182,10 @@ const HomePage = () => {
                                         <Link key={i} to={`/play-game?preset=${id}`}>
                                             <CardLayout name={title} imgSrc={imageUrl} key={i}>
                                                 <div className="relative flex items-center justify-center">
-                                                    <p className="relative right-5 p-px pb-0.5 text-sm text-neutral-700 italic max-xl:text-xs">
+                                                    <p className="p-px pb-0.5 text-sm text-neutral-700 italic max-xl:text-xs">
                                                         {author ?? ""}
                                                     </p>
-                                                    <div className="absolute right-2.25 bottom-0.75 text-xs text-neutral-700">
+                                                    <div className="absolute right-1 bottom-11.75 text-xs bg-neutral-100 border-neutral-700 p-1  border-t border-l text-neutral-700">
                                                         <LikeButton
                                                             id={id}
                                                             numLikes={numLikes}
