@@ -86,7 +86,7 @@ const CreateCustomGamePage = () => {
 
                     // Convert image URLs to File objects for preview
                     const filePromises = sortedCardData.map(async (card) => {
-                        const response = await fetch(card.imageUrl);
+                        const response = await fetch(card.imageUrl, { mode: "cors" });
                         const blob = await response.blob();
                         return new File([blob], card.name, { type: blob.type });
                     });
