@@ -11,7 +11,7 @@ import { fetchLikeInfo, useBetterAuthSession } from "../../lib/hooks.ts";
 import ModalLayout from "../layout/ModalLayout.tsx";
 
 export type ConfirmGuessModalState =
-    | { isOpen: false }
+    | { isOpen: false; isWinner?: boolean; name?: string }
     | { isOpen: true; isWinner: boolean; name: string };
 
 interface GameProps {
