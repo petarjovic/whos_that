@@ -143,8 +143,7 @@ export function setupAiRoutes(app: Express) {
     });
 
     /**
-     * Submits a yes/no question to the AI about today's character.
-     * Fetches today's wiki text from DB on each request — negligible cost given prompt caching.
+     * Submits user's yes/no question to the AI about today's character.
      * @returns { answer: "Yes" | "No" | "I don't know" }
      */
     app.post("/api/daily/ask", askLimiter, async (req, res) => {

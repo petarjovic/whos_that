@@ -155,7 +155,7 @@ const DailyGamePage = () => {
     const gameOver = !guessState.isOpen && "isWinner" in guessState;
 
     if (errorMsg) throw new Error(errorMsg);
-    if (!dailyGameInfo?.cardData.length || dailyGameInfo.winningIndex) return <LoadingSpinner />;
+    if (!dailyGameInfo?.cardData || dailyGameInfo.cardData.length === 0) return <LoadingSpinner />;
     const cardData = dailyGameInfo.cardData;
     const wIndex = dailyGameInfo.winningIndex;
 
