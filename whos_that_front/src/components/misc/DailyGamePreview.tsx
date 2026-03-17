@@ -52,7 +52,7 @@ export const DailyGamePreview = ({
                 <LoadingSpinner />
             ) : imageUrls.length > 0 ? (
                 <>
-                    <div className="leading-none font-medium text-2xl my-1.25 text-white text-shadow-sm/50 underline hover:scale-102">
+                    <div className="leading-none font-medium text-2xl my-1.25 text-white text-shadow-xs/25  hover:scale-102">
                         {title}
                     </div>
                     <div className="relative w-full overflow-hidden py-2">

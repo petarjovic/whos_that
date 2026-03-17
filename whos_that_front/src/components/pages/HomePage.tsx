@@ -145,7 +145,7 @@ const HomePage = () => {
                                                     <p className="p-px pb-0.5 text-sm text-neutral-700 italic max-xl:text-xs">
                                                         {author ?? ""}
                                                     </p>
-                                                    <div className="absolute right-1 bottom-11.75 text-xs bg-neutral-100 border-neutral-700 p-1 border-t border-l text-neutral-700">
+                                                    <div className="absolute right-1 bottom-11.5 text-xs bg-neutral-100 border-neutral-700 p-1 pl-1.5 border-t border-l border-b-2 border-b-neutral-100 text-neutral-700">
                                                         <LikeButton
                                                             id={id}
                                                             numLikes={numLikes}
@@ -185,7 +185,7 @@ const HomePage = () => {
                                                     <p className="p-px pb-0.5 text-sm text-neutral-700 italic max-xl:text-xs">
                                                         {author ?? ""}
                                                     </p>
-                                                    <div className="absolute right-1 bottom-11.75 text-xs bg-neutral-100 border-neutral-700 p-1  border-t border-l text-neutral-700">
+                                                    <div className="absolute right-1 bottom-11.75 text-xs bg-neutral-100 border-neutral-700 p-1 pl-1.5  border-t border-l text-neutral-700">
                                                         <LikeButton
                                                             id={id}
                                                             numLikes={numLikes}
