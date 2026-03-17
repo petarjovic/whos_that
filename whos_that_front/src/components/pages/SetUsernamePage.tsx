@@ -1,4 +1,4 @@
-import { useState, useEffect, type FormEvent } from "react";
+import { useState, useEffect, type SubmitEvent } from "react";
 import { useNavigate } from "react-router";
 import { useBetterAuthSession } from "../../lib/hooks.ts";
 import { authClient } from "../../lib/auth/auth-client.ts";
@@ -25,7 +25,7 @@ const SetUsernamePage = () => {
 
     if (isPending) return <div>Loading...</div>;
 
-    const handleSubmitUsername = async (e: FormEvent) => {
+    const handleSubmitUsername = async (e: SubmitEvent) => {
         e.preventDefault();
         setIsSubmitting(true);
 
@@ -88,8 +88,8 @@ const SetUsernamePage = () => {
                         }}
                         minLength={3}
                         maxLength={20}
-                        pattern="[a-zA-Z0-9_]+"
-                        title="Username can only contain letters, numbers, and underscores!"
+                        pattern="(?!.*(.)\1{2})[a-zA-Z0-9_]+"
+                        title="Username can only contain letters, numbers, and underscores, and cannot have 3 or more repeating characters!"
                         required
                     />
                 </div>
