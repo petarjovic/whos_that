@@ -204,7 +204,7 @@ const DailyGamePage = () => {
                 isOpen={gameOver}
                 playerHasLiked={playerHasLiked}
                 target={targetCharacterName}
-                win={"isWinner" in guessState ? guessState.isWinner : false}
+                win={"isWinner" in guessState ? (guessState.isWinner ?? false) : false}
                 numQuestionsLeft={numQuestionsLeft}
                 gameId={dailyGameInfo.ogGameId}
             />
