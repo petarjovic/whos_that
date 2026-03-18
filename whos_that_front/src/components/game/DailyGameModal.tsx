@@ -34,7 +34,7 @@ const DailyGameModal = ({
             handleClose={handleClose}
             classNames="text-center font-medium max-w-5xl max-xl:w-3/4 max-sm:w-9/10 max-sm:px-2 max-sm:py-6 sm:p-8"
         >
-            <p className="text-xl max-sm:text-base mb-7 space-y-3  italic text-blue-500">
+            <p className="text-xl max-sm:text-base mb-4 md:mb-5.5 xl:mb-7 space-y-3  italic text-blue-500">
                 Welcome to{" "}
                 <span className="font-bold text-orange-300 text-shadow-xs/70">
                     Who&apos;s That<span className="text-red-500">?</span>
@@ -44,12 +44,35 @@ const DailyGameModal = ({
                 questions about them. Good luck!
             </p>
 
-            <div className="border mb-7 px-2 2xl:px-5">
+            <div className="border mb-4 px-2 pb-2 md:hidden text-base text-neutral-700">
+                <h1 className="text-xl  font-bold whitespace-pre-wrap mt-2 mb-3 w-fit mx-auto text-center underline">
+                    Break-in at &quot;Whos That?&quot; HQ!
+                </h1>
+                <span className="font-medium">Oh no!</span> There was a break-in at{" "}
+                <span className="italic">
+                    &quot;Who&apos;s That?&quot; HQ by a member of the notorious
+                    <span className="italic font-bold text-red-600"> {gangName} </span>
+                    gang.{" "}
+                </span>{" "}
+                It is reported that the HQs AI assistant, Whos-That-Bot-3000, was damaged in the
+                attack. The exact identity of the attacker is a mystery, but{" "}
+                <span className="italic">
+                    {" "}
+                    Whos-That has enlisted the help of {session ? "the" : "a"} world-famous{" "}
+                    <span className="italic font-bold text-blue-600">
+                        {" "}
+                        Detective{session ? detectiveName : ""}
+                    </span>
+                    .
+                </span>
+            </div>
+
+            <div className="border mb-7 px-2 2xl:px-5 max-md:hidden text-neutral-700">
                 <h1 className="text-4xl text-neutral-700 font-bold whitespace-pre-wrap mt-4 mb-6 w-fit mx-auto text-center underline">
                     Break-in at &quot;Whos That?&quot; HQ!
                 </h1>
 
-                <p className="text-lg max-sm:text-base pb-3 text-neutral-700">
+                <p className="text-lg max-sm:text-base pb-3 text-neutral-700 ">
                     <span className="text-xl font-medium">Oh no!</span> There was a break-in at{" "}
                     <span className="italic">
                         &quot;Who&apos;s That?&quot; HQ by a member of the notorious

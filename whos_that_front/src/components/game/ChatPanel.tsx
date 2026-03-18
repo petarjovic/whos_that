@@ -34,7 +34,7 @@ const ChatPanel = ({
     };
 
     const panel = (
-        <div className="flex h-full min-h-1/3 flex-col bg-slate-900 shadow-[0_10px_100px_30px_rgba(0,0,0,0.5)] min-w-96 w-full relative z-2">
+        <div className="flex h-full min-h-1/3 flex-col bg-slate-900 shadow-[0_10px_100px_30px_rgba(0,0,0,0.5)] xl:min-w-96 w-full relative z-2">
             <div className="flex items-center justify-between border-[#374151] border-2 bg-linear-to-b from-[#6b7280] to-[#4b5563] p-1 text-center font-mono font-bold uppercase tracking-wider text-gray-300 shadow-[inset_0_1px_2px_rgba(156,163,175,0.4),inset_0_-2px_4px_rgba(0,0,0,0.5),0_3px_8px_rgba(0,0,0,0.4)] relative before:content-[''] before:absolute before:inset-0 before:bg-[repeating-linear-gradient(90deg,rgba(0,0,0,0.03)_0px,rgba(0,0,0,0.03)_2px,transparent_2px,transparent_4px)] before:pointer-events-none">
                 <span className="flex items-center justify-around w-full max-xl:pr-1 h-full">
                     <span className="flex items-center justify-center gap-2">
@@ -42,22 +42,23 @@ const ChatPanel = ({
                         <GiVintageRobot size={"2.25em"} className="text-gray-300" />
                         {opponentLabel}
                     </span>
-
-                    {batteryLevel >= 0 ? (
-                        <div className="flex items-center">
-                            <div className=" w-1.25 h-4.5 bg-gray-800 rounded-l-sm"></div>
-                            <div className="flex flex-row-reverse gap-1 3xl:w-28.75 w-27.5 border-2 inset-shadow-sm/15 border-gray-700 rounded-sm p-1 bg-slate-600">
-                                {Array.from({ length: batteryLevel }, (_, i) => (
-                                    <div
-                                        key={i}
-                                        className="w-3.5 h-9 rounded-xs shadow-xs/50 bg-green-500"
-                                    ></div>
-                                ))}
-                            </div>
-                        </div>
-                    ) : (
-                        <></>
-                    )}
+                    <div className="flex items-center min-h-4.75">
+                        {batteryLevel >= 0 ? (
+                            <>
+                                <div className=" w-1.25 h-4.5 bg-gray-800 rounded-l-sm"></div>
+                                <div className="flex flex-row-reverse gap-1 3xl:w-28.75 w-27.5 border-2 inset-shadow-sm/15 border-gray-700 rounded-sm p-1 bg-slate-600">
+                                    {Array.from({ length: batteryLevel }, (_, i) => (
+                                        <div
+                                            key={i}
+                                            className="w-3.5 h-9 rounded-xs shadow-xs/50 bg-green-500"
+                                        ></div>
+                                    ))}
+                                </div>
+                            </>
+                        ) : (
+                            <></>
+                        )}
+                    </div>
                 </span>
                 <button
                     onClick={() => setIsOpen(false)}
@@ -132,10 +133,9 @@ const ChatPanel = ({
                 )}
 
                 <div
-                    className={`fixed inset-x-0 bottom-0 z-50 transition-transform duration-300 ${
+                    className={`fixed inset-x-0 bottom-0 z-50 flex flex-col transition-transform duration-300 max-h-[66dvh] ${
                         isOpen ? "translate-y-0" : "translate-y-full"
                     }`}
-                    style={{ maxHeight: "50dvh" }}
                 >
                     {panel}
                 </div>
@@ -143,7 +143,7 @@ const ChatPanel = ({
                 {!isOpen && (
                     <button
                         onClick={() => setIsOpen(true)}
-                        className="fixed right-4 bottom-4 z-50 flex h-14 w-14 cursor-pointer items-center justify-center border-4 border-cyan-400 bg-slate-900 text-2xl shadow-[0_0_20px_rgba(34,211,238,0.6)] hover:bg-slate-800 hover:shadow-[0_0_30px_rgba(34,211,238,0.8)] active:scale-95"
+                        className="fixed right-4 bottom-4 z-50 flex h-14 w-14 cursor-pointer items-center justify-center border-4 border-cyan-400 bg-slate-900 text-2xl shadow-[0_0_20px_rgba(34,211,238,0.6)] hover:bg-slate-800 hover:shadow-[0_0_30px_rgba(34,211,238,0.8)] active:scale-95 animate-flash-cyan"
                         aria-label="Open chat"
                     >
                         💬

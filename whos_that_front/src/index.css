@@ -24,6 +24,17 @@
             box-shadow: 0 0 25px 8px oklch(64.6% 0.222 41.116);
         }
     }
+    @keyframes flash-attention-cyan {
+        0%,
+        100% {
+            filter: brightness(1);
+            box-shadow: 0 0 0 rgba(0, 0, 0, 0);
+        }
+        50% {
+            filter: brightness(1.4);
+            box-shadow: 0 0 12px 6px oklch(70% 0.25 200);
+        }
+    }
     @keyframes scroll {
         to {
             transform: translateX(var(--scroll-distance));
@@ -32,6 +43,10 @@
 
     .animate-scroll {
         animation: scroll 60s linear infinite;
+    }
+
+    .animate-flash-cyan {
+        animation: flash-attention-cyan 2s ease-in-out 5;
     }
 }
 
