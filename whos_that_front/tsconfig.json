@@ -6,8 +6,6 @@
         "lib": ["ES2022", "DOM", "DOM.Iterable"],
         "module": "ESNext",
         "skipLibCheck": true,
-        "baseUrl": ".",
-
         "paths": {
             "@server/types": ["../whos_that_server/src/config/types.ts"],
             "@server/zodSchema": ["../whos_that_server/src/config/zod/zodSchema.ts"],

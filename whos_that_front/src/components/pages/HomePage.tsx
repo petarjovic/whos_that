@@ -18,6 +18,7 @@ import LikeButton from "../misc/LikeButton.tsx";
 import FeedbackModal from "../misc/FeedbackModal.tsx";
 import { MdFeedback } from "react-icons/md";
 import { DailyGamePreview } from "../misc/DailyGamePreview";
+import KofiWidget from "../misc/KofiWidget.tsx";
 
 /**
  * Landing page with option to "create new game" or "join existing game" via room code
@@ -309,8 +310,9 @@ const HomePage = () => {
                 </div>
 
                 {/* Creator Signature */}
-                <div className="mx-auto flex items-center gap-5 text-neutral-500 xl:absolute xl:bottom-3 xl:left-[62%]">
+                <div className="mx-auto flex items-center max-md:scale-80 max-md:w-full gap-5 text-neutral-500 xl:absolute xl:bottom-3 xl:left-[54%]">
                     <p className="text-sm"> By Petar Jovic </p>
+                    <KofiWidget />
                     {/* Feedback */}
                     {session ? (
                         <div className="text-neutral-500 hover:cursor-pointer hover:text-blue-400 hover:italic hover:underline">
@@ -318,7 +320,7 @@ const HomePage = () => {
                                 onClick={() => {
                                     setOpenFeedbackModal(true);
                                 }}
-                                className="flex-center flex text-center text-sm xl:relative xl:left-28"
+                                className="flex-center flex text-center text-sm"
                             >
                                 <MdFeedback className="relative top-px" size={"1.3em"} /> Have
                                 Feedback?
