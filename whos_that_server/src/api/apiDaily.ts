@@ -1,5 +1,5 @@
 import type { Express } from "express";
-import { eq, and, or } from "drizzle-orm";
+import { eq, and, or, sql } from "drizzle-orm";
 // import { requireAdmin } from "../middleware/authMw.ts";
 import { logger } from "../config/logger.ts";
 import { db, s3, S3_BUCKET_NAME, USE_CLOUDFRONT } from "../config/connections.ts";
@@ -72,7 +72,7 @@ export function setupAiRoutes(app: Express) {
         }
 
         try {
-            const [dailyDb] = await db
+            let [dailyDb] = await db
                 .select({
                     dailyId: schema.dailies.id,
                     ogGameId: schema.dailies.ogGameId,
@@ -95,8 +95,46 @@ export function setupAiRoutes(app: Express) {
 
             // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
             if (!dailyDb) {
-                logger.error(`api/daily: No daily returned for ${today}.`);
-                return res.status(503).json({ message: "No daily game scheduled for today!" });
+                logger.info(
+                    `api/daily: No daily scheduled for ${today}, selecting random fallback.`
+                );
+
+                const [randomDaily] = await db
+                    .select({ id: schema.dailies.id })
+                    .from(schema.dailies)
+                    .orderBy(sql`RANDOM()`)
+                    .limit(1);
+
+                if (!randomDaily) {
+                    logger.error(`api/daily: No dailies exist in database.`);
+                    return res.status(503).json({ message: "No daily game scheduled for today!" });
+                }
+
+                await db
+                    .update(schema.dailies)
+                    .set({ scheduledDate: today })
+                    .where(eq(schema.dailies.id, randomDaily.id));
+
+                [dailyDb] = await db
+                    .select({
+                        dailyId: schema.dailies.id,
+                        ogGameId: schema.dailies.ogGameId,
+                        title: schema.dailies.title,
+                        characterContext: schema.dailies.characterContext,
+                        displayUsername: authSchema.user.displayUsername,
+                        winningIndex: schema.dailyGameItems.orderIndex,
+                    })
+                    .from(schema.dailies)
+                    .leftJoin(schema.games, eq(schema.dailies.ogGameId, schema.games.id))
+                    .leftJoin(authSchema.user, eq(schema.games.userId, authSchema.user.id))
+                    .leftJoin(
+                        schema.dailyGameItems,
+                        and(
+                            eq(schema.dailies.id, schema.dailyGameItems.dailyId),
+                            eq(schema.dailyGameItems.isWinner, true)
+                        )
+                    )
+                    .where(eq(schema.dailies.id, randomDaily.id));
             }
             if (dailyDb.winningIndex === null) {
                 logger.error(
